@@ -203,15 +203,7 @@
 
 /* Layout synchronization for the main container */
 .main, .main-content {
-    margin-left: var(--sidebar-w);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    width: calc(100% - var(--sidebar-w));
-}
-
-.sidebar.collapsed + .main,
-.sidebar.collapsed + .main-content {
-    margin-left: var(--sidebar-collapsed);
-    width: calc(100% - var(--sidebar-collapsed));
 }
 
 /* Mobile adjustments */

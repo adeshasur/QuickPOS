@@ -793,7 +793,7 @@
                     
                     const unitPriceDiv = document.createElement('div');
                     unitPriceDiv.className = 'item-unit-price';
-                    unitPriceDiv.textContent = \`\${item.unit} @ \${formatCurrency(item.price)}\`;
+                    unitPriceDiv.textContent = `${item.unit} @ ${formatCurrency(item.price)}`;
                     
                     infoDiv.appendChild(nameDiv);
                     infoDiv.appendChild(unitPriceDiv);
@@ -906,18 +906,18 @@
                 quoteItems.forEach((item, idx) => {
                     const itemTotal = item.price * item.quantity;
                     total += itemTotal;
-                    itemsHtml += \`
+                    itemsHtml += `
                         <tr>
-                            <td style="border:1px solid #ddd; padding:8px; text-align:left;">\${idx + 1}. \${escapeHtml(item.name)}</td>
-                            <td style="border:1px solid #ddd; padding:8px; text-align:center; width:60px;">\${item.quantity.toFixed(2)}</td>
-                            <td style="border:1px solid #ddd; padding:8px; text-align:center; width:50px;">\${escapeHtml(item.unit || 'pc')}</td>
-                            <td style="border:1px solid #ddd; padding:8px; text-align:right; width:90px;">\${formatCurrencyPlain(item.price)}</td>
-                            <td style="border:1px solid #ddd; padding:8px; text-align:right; width:100px; font-weight:600;">\${formatCurrencyPlain(itemTotal)}</td>
+                            <td style="border:1px solid #ddd; padding:8px; text-align:left;">${idx + 1}. ${escapeHtml(item.name)}</td>
+                            <td style="border:1px solid #ddd; padding:8px; text-align:center; width:60px;">${item.quantity.toFixed(2)}</td>
+                            <td style="border:1px solid #ddd; padding:8px; text-align:center; width:50px;">${escapeHtml(item.unit || 'pc')}</td>
+                            <td style="border:1px solid #ddd; padding:8px; text-align:right; width:90px;">${formatCurrencyPlain(item.price)}</td>
+                            <td style="border:1px solid #ddd; padding:8px; text-align:right; width:100px; font-weight:600;">${formatCurrencyPlain(itemTotal)}</td>
                         </tr>
-                    \`;
+                    `;
                 });
 
-                return \`
+                return `
                     <div class="a4-page">
                         <div class="a4-header">
                             <h1>QUICKPOS SUPERMARKET</h1>
@@ -926,12 +926,12 @@
                         
                         <div class="a4-info">
                             <div class="a4-info-left">
-                                <p><strong>Quotation No:</strong> \${escapeHtml(quoteNo)}</p>
-                                <p><strong>Date:</strong> \${today.toLocaleDateString('en-GB')}</p>
+                                <p><strong>Quotation No:</strong> ${escapeHtml(quoteNo)}</p>
+                                <p><strong>Date:</strong> ${today.toLocaleDateString('en-GB')}</p>
                             </div>
                             <div class="a4-info-right">
                                 
-                                <p><strong>Valid Until:</strong> \${new Date(validDate).toLocaleDateString('en-GB')}</p>
+                                <p><strong>Valid Until:</strong> ${new Date(validDate).toLocaleDateString('en-GB')}</p>
                             </div>
                         </div>
                         
@@ -946,7 +946,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                \${itemsHtml}
+                                ${itemsHtml}
                             </tbody>
                         </table>
                         
@@ -974,7 +974,7 @@
                             </div>
                         </div>
                     </div>
-                \`;
+                `;
             }
 
             // Generate and show PDF preview
@@ -1004,7 +1004,7 @@
                 // Configure for A4 output - USING MM FOR PERFECT A4
                 const opt = {
                     margin: 0,
-                    filename: \`Hardware_Quotation_\${quoteNo}.pdf\`,
+                    filename: `Hardware_Quotation_${quoteNo}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { 
                         scale: 2, 
@@ -1130,7 +1130,7 @@
                     if(avatarEl) avatarEl.textContent = initials.substring(0, 2);
                 }
 
-                document.getElementById('shiftTime').textContent = \`Shift: \${shift}\`;
+                document.getElementById('shiftTime').textContent = `Shift: ${shift}`;
             }
 
             // Initialize
