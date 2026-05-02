@@ -46,8 +46,10 @@
             height: 100vh;
         }
 
-        .sidebar.expanded { width: 240px; min-width: 240px; }
-        .sidebar.collapsed { width: 70px; min-width: 70px; }
+        .sidebar.expanded { width: 240px; min-width: 240px;
+            max-width: 240px; }
+        .sidebar.collapsed { width: 70px; min-width: 70px;
+            max-width: 70px; }
 
         .hamburger-menu {
             padding: 20px;
@@ -961,6 +963,7 @@
             .products-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); } 
         }
     </style>
+    <link rel="stylesheet" href="sidebar.css">
 </head>
 <body>
     <!-- Sidebar -->
@@ -1612,6 +1615,7 @@
             });
         });
     </script>
+    <script src="sidebar.js"></script>
 </body>
 </html>
 
