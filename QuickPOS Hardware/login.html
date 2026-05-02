@@ -116,8 +116,14 @@
 
             if (response.success) {
                 showToast('Login Successful! Welcome Back, ' + response.user.full_name, 'success');
-                // Here you would navigate to the dashboard
-                // window.location.href = 'dashboard.html';
+                
+                // Save user data to localStorage for the dashboard
+                localStorage.setItem('quickpos-user', JSON.stringify(response.user));
+                
+                // Navigate to dashboard
+                setTimeout(() => {
+                    window.location.href = 'owner_dashboard.html';
+                }, 1000);
             } else {
                 showToast(response.message, 'error');
             }

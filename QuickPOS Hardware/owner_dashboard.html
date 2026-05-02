@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickPOS Pro - Owner Dashboard</title>
+    <style>
+        /* All existing CSS remains the same, adding new styles below */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        :root {
+            --bg-color: #F0F4F8;
+            --sidebar-color: #FFFFFF;
+            --primary-color: #5D8AA8;
+            --success-color: #2D6A4F;
+            --cash-color: #2D6A4F;
+            --card-color: #5D8AA8;
+            --danger-color: #E53E3E;
+            --warning-color: #B45309;
+            --text-dark: #2D3748;
+            --text-light: #718096;
+            --border-color: #E2E8F0;
+            --hover-color: #EDF2F7;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.07);
+            --insight-up: #2D6A4F;
+            --insight-down: #E53E3E;
+            --insight-neutral: #718096;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Sidebar Styles (EXACT from reports.html) */
+        .sidebar {
+            background-color: var(--sidebar-color);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            height: 100vh;
+            position: relative;
+        }
+
+        .sidebar.expanded {
+            width: 240px;
+            min-width: 240px;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+            min-width: 70px;
+        }
+
+        .hamburger-menu {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            height: 70px;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hamburger-btn:hover {
+            background-color: var(--hover-color);
+        }
+
+        .logo {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 22px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .logo.collapsed {
+            opacity: 0;
+            width: 0;
+        }
+
+        .nav-items {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            color: var(--text-light);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background-color: var(--hover-color);
+            color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            background-color: rgba(93, 138, 168, 0.1);
+            color: var(--primary-color);
+            border-right: 4px solid var(--primary-color);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .nav-text {
+            margin-left: 16px;
+            font-weight: 500;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed .nav-text {
+            opacity: 0;
+            width: 0;
+            margin-left: 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .top-bar {
+            height: 70px;
+            background-color: var(--sidebar-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            box-shadow: var(--shadow);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* Data Filters Section */
+        .data-filters {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 16px;
+        }
+
+        .date-range-label {
+            font-size: 13px;
+            color: var(--text-light);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .date-range-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            max-width: 500px;
+        }
+
+        .date-range-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .date-range-btn:hover {
+            background-color: var(--hover-color);
+            border-color: var(--primary-color);
+        }
+
+        .date-range-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .custom-range-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .custom-range-btn:hover {
+            background-color: var(--hover-color);
+            border-color: var(--primary-color);
+        }
+
+        /* User Info */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Dashboard Content */
+        .dashboard-content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        /* Insight Cards Grid */
+        .insight-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .insight-card {
+            background-color: var(--sidebar-color);
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .insight-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .insight-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .insight-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .insight-icon {
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .revenue-card .insight-icon {
+            background-color: rgba(93, 138, 168, 0.1);
+            color: var(--primary-color);
+        }
+
+        .profit-card .insight-icon {
+            background-color: rgba(45, 106, 79, 0.1);
+            color: var(--success-color);
+        }
+
+        .traffic-card .insight-icon {
+            background-color: rgba(180, 83, 9, 0.1);
+            color: var(--warning-color);
+        }
+
+        .value-card .insight-icon {
+            background-color: rgba(229, 62, 62, 0.1);
+            color: var(--danger-color);
+        }
+
+        .insight-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .insight-comparison {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .trend-up {
+            color: var(--insight-up);
+        }
+
+        .trend-down {
+            color: var(--insight-down);
+        }
+
+        .trend-neutral {
+            color: var(--insight-neutral);
+        }
+
+        .trend-arrow {
+            font-size: 14px;
+        }
+
+        /* Dashboard Sections Grid */
+        .dashboard-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-sections {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dashboard-section {
+            background-color: var(--sidebar-color);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(93, 138, 168, 0.05);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-content {
+            flex: 1;
+            padding: 20px;
+            min-height: 300px;
+        }
+
+        /* Most Sold Items Table */
+        .insights-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .insights-table thead {
+            background-color: var(--bg-color);
+        }
+
+        .insights-table th {
+            text-align: left;
+            padding: 12px 16px;
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 13px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .insights-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-dark);
+            font-size: 13px;
+        }
+
+        .insights-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .insights-table tbody tr:hover {
+            background-color: var(--hover-color);
+        }
+
+        .rank-cell {
+            text-align: center;
+            font-weight: 700;
+            color: var(--primary-color);
+            width: 40px;
+        }
+
+        .product-cell {
+            font-weight: 500;
+        }
+
+        .quantity-cell {
+            text-align: right;
+            font-weight: 700;
+            color: var(--primary-color);
+            min-width: 80px;
+        }
+
+        .revenue-cell {
+            text-align: right;
+            font-weight: 700;
+            color: var(--success-color);
+            min-width: 120px;
+        }
+
+        /* Peak Hours Chart - UPDATED for 3 bars */
+        .chart-container {
+            height: 250px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .chart-bar-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            height: 100%;
+        }
+
+        .chart-bar {
+            width: 60px;
+            background: linear-gradient(to top, var(--primary-color), #7ba7c9);
+            border-radius: 6px 6px 0 0;
+            transition: height 0.5s ease;
+            position: relative;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.9;
+        }
+
+        .chart-bar-label {
+            margin-top: 8px;
+            font-size: 13px;
+            color: var(--text-dark);
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .chart-bar-value {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary-color);
+            background: white;
+            padding: 4px 8px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            white-space: nowrap;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        /* Slow Moving Items */
+        .slow-items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .slow-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .slow-item:hover {
+            border-color: var(--warning-color);
+            background-color: rgba(180, 83, 9, 0.05);
+        }
+
+        .slow-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: rgba(229, 62, 62, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: var(--danger-color);
+            font-size: 18px;
+        }
+
+        .slow-item-details {
+            flex: 1;
+        }
+
+        .slow-item-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .slow-item-meta {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .slow-item-action {
+            padding: 6px 12px;
+            background-color: rgba(93, 138, 168, 0.1);
+            color: var(--primary-color);
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .slow-item-action:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+            color: var(--border-color);
+        }
+
+        .empty-state p {
+            font-size: 13px;
+            margin: 4px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .data-filters {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .date-range-buttons {
+                max-width: 100%;
+            }
+            
+            .insight-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar.expanded {
+                position: absolute;
+                height: 100%;
+                z-index: 1000;
+            }
+            
+            .insight-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .top-bar {
+                padding: 0 16px;
+                flex-wrap: wrap;
+                height: auto;
+                min-height: 70px;
+            }
+            
+            .data-filters {
+                order: 3;
+                width: 100%;
+                padding: 10px 0;
+                border-top: 1px solid var(--border-color);
+            }
+            
+            .date-range-buttons {
+                overflow-x: auto;
+                padding-bottom: 4px;
+            }
+            
+            .chart-bar {
+                width: 50px;
+            }
+            
+            .chart-bar-value {
+                min-width: 80px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .chart-bar {
+                width: 40px;
+            }
+            
+            .chart-bar-value {
+                min-width: 70px;
+                font-size: 10px;
+                padding: 2px 6px;
+            }
+            
+            .insight-card {
+                padding: 20px;
+            }
+            
+            .insight-value {
+                font-size: 24px;
+            }
+        }
+        /* Stock Volume Card */
+        .stock-card .insight-icon {
+            background-color: rgba(93, 138, 168, 0.1);
+            color: var(--primary-color);
+        }
+
+        .items-sold-card .insight-icon {
+            background-color: rgba(45, 106, 79, 0.1);
+            color: var(--success-color);
+        }
+
+        /* Reorder List Section */
+        .reorder-section {
+            background-color: var(--sidebar-color);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .reorder-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(220, 38, 38, 0.05);
+        }
+
+        .reorder-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--danger-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reorder-content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .reorder-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .reorder-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            background-color: rgba(220, 38, 38, 0.03);
+        }
+
+        .reorder-item:hover {
+            border-color: var(--danger-color);
+            background-color: rgba(220, 38, 38, 0.05);
+        }
+
+        .reorder-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: rgba(220, 38, 38, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: var(--danger-color);
+            font-size: 18px;
+        }
+
+        .reorder-item-details {
+            flex: 1;
+        }
+
+        .reorder-item-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .reorder-item-meta {
+            font-size: 12px;
+            color: var(--danger-color);
+            font-weight: 500;
+        }
+
+        .reorder-item-action {
+            padding: 6px 12px;
+            background-color: rgba(220, 38, 38, 0.1);
+            color: var(--danger-color);
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .reorder-item-action:hover {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        /* Best Selling Category Chart */
+        .category-chart-container {
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px 0;
+            margin-top: 10px;
+        }
+
+        .category-chart-bar {
+            width: 60px;
+            background: linear-gradient(to top, var(--primary-color), #7ba7c9);
+            border-radius: 6px 6px 0 0;
+            transition: height 0.5s ease;
+            position: relative;
+        }
+
+        .category-chart-bar:hover {
+            opacity: 0.9;
+        }
+
+        .category-chart-label {
+            margin-top: 8px;
+            font-size: 13px;
+            color: var(--text-dark);
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .category-chart-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary-color);
+            background: white;
+            padding: 3px 6px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            white-space: nowrap;
+        }
+
+        /* Updated dashboard layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar (Updated to include Inventory link) -->
+    <div class="sidebar expanded" id="sidebar">
+        <div class="hamburger-menu">
+            <button class="hamburger-btn" id="hamburgerBtn">
+                <span id="hamburgerIcon">☰</span>
+            </button>
+            <div class="logo" id="logo">QuickPOS</div>
+        </div>
+        
+        <div class="nav-items">
+            <a href="owner_dashboard.html" class="nav-item owner-only active">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+            <a href="sales.html" class="nav-item">
+                <span class="nav-icon">💰</span>
+                <span class="nav-text">Make a Sale</span>
+            </a>
+            
+            <a href="categories.html" class="nav-item ">
+                <span class="nav-icon">🏷️</span>
+                <span class="nav-text">Categories</span>
+            </a>
+            <a href="products.html" class="nav-item">
+                <span class="nav-icon">📦</span>
+                <span class="nav-text">Products</span>
+            </a>
+            <a href="inventory.html" class="nav-item ">
+                <span class="nav-icon">🚚</span>
+                <span class="nav-text">Inventory</span>
+            </a>
+            <a href="customers.html" class="nav-item ">
+                <span class="nav-icon">👤</span>
+                <span class="nav-text">Customers</span>
+            </a>
+            <a href="quotations.html" class="nav-item">
+                <span class="nav-icon">📄</span>
+                <span class="nav-text">Quotations</span>
+                
+            </a>
+            <a href="ledger.html" class="nav-item">
+                <span class="nav-icon">📒</span>
+                <span class="nav-text">Credit Ledger</span>
+                
+            </a>
+            
+            <a href="reports.html" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">Shift Reports</span>
+                
+            </a>
+            
+            <a href="users.html" class="nav-item owner-only">
+                <span class="nav-icon">👥</span>
+                <span class="nav-text">User Management</span>
+            </a>
+            <a href="settings.html" class="nav-item owner-only">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-text">Settings</span>
+            </a>
+            <a href="#" class="nav-item" id="logoutBtn">
+            <span class="nav-icon">🚪</span>
+            <span class="nav-text">Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">Executive Dashboard</div>
+            
+            <!-- Data Filters (Smart Decision Making) -->
+            <div class="data-filters">
+                <span class="date-range-label">View Data For:</span>
+                <div class="date-range-buttons">
+                    <button class="date-range-btn active" data-range="today">Today</button>
+                    <button class="date-range-btn" data-range="yesterday">Yesterday</button>
+                    <button class="date-range-btn" data-range="last7">Last 7 Days</button>
+                    <button class="date-range-btn" data-range="thisMonth">This Month</button>
+                    <button class="date-range-btn" data-range="lastMonth">Last Month</button>
+                    <button class="custom-range-btn">
+                        <span>📅</span> Custom Range
+                    </button>
+                </div>
+            </div>
+            
+            <div class="user-info">
+                <span id="shiftInfo">Owner View</span>
+                <div class="user-avatar">👑</div>
+            </div>
+        </div>
+        
+        <div class="dashboard-content">
+            <!-- Insight Cards (Updated with new cards) -->
+            <div class="insight-cards">
+                <div class="insight-card revenue-card">
+                    <div class="insight-header">
+                        <div class="insight-title">Total Revenue</div>
+                        <div class="insight-icon">💰</div>
+                    </div>
+                    <div class="insight-value" id="totalRevenue">LKR 0.00</div>
+                    <div class="insight-comparison" id="revenueTrend">
+                        <span class="trend-arrow">→</span>
+                        <span class="trend-neutral">No comparison data</span>
+                    </div>
+                </div>
+                
+                <!-- New: Stock Volume Card -->
+                <div class="insight-card stock-card">
+                    <div class="insight-header">
+                        <div class="insight-title">Stock Volume</div>
+                        <div class="insight-icon">📦</div>
+                    </div>
+                    <div class="insight-value" id="stockVolume">0</div>
+                    <div class="insight-comparison" id="stockTrend">
+                        <span class="trend-arrow">→</span>
+                        <span class="trend-neutral">Total items in shop</span>
+                    </div>
+                </div>
+                
+                <!-- New: Today's Items Sold Card -->
+                <div class="insight-card items-sold-card">
+                    <div class="insight-header">
+                        <div class="insight-title">Today's Items Sold</div>
+                        <div class="insight-icon">📊</div>
+                    </div>
+                    <div class="insight-value" id="itemsSoldToday">0</div>
+                    <div class="insight-comparison" id="itemsSoldTrend">
+                        <span class="trend-arrow">→</span>
+                        <span class="trend-neutral">Total quantity sold</span>
+                    </div>
+                </div>
+                
+                <div class="insight-card value-card">
+                    <div class="insight-header">
+                        <div class="insight-title">High-Value Customer</div>
+                        <div class="insight-icon">🏆</div>
+                    </div>
+                    <div class="insight-value" id="avgBillAmount">LKR 0.00</div>
+                    <div class="insight-comparison" id="valueTrend">
+                        <span class="trend-arrow">→</span>
+                        <span class="trend-neutral">Per transaction</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- New Grid Layout -->
+            <div class="dashboard-grid">
+                <!-- Left Column: Sales Overview with Best Selling Category -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span>📈</span> Sales Overview
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div style="margin-bottom: 20px;">
+                            <div style="font-size: 13px; color: var(--text-light); margin-bottom: 10px;">
+                                Best Selling Category
+                            </div>
+                            <div class="category-chart-container" id="bestCategoryChart">
+                                <!-- Category chart will be generated by JavaScript -->
+                            </div>
+                        </div>
+                        <table class="insights-table">
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Today</th>
+                                    <th>This Week</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Transactions</td>
+                                    <td id="todayTransactions">0</td>
+                                    <td id="weekTransactions">0</td>
+                                </tr>
+                                <tr>
+                                    <td>Revenue</td>
+                                    <td id="todayRevenue">LKR 0.00</td>
+                                    <td id="weekRevenue">LKR 0.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Right Column: Reorder List -->
+                <div class="reorder-section">
+                    <div class="reorder-header">
+                        <div class="reorder-title">
+                            <span>⚠️</span> Reorder List (Low Stock Alert)
+                        </div>
+                    </div>
+                    <div class="reorder-content">
+                        <div class="reorder-list" id="reorderList">
+                            <!-- Reorder items will be generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Decision-Making Sections -->
+            <div class="dashboard-sections">
+                <!-- Section A: Most Sold Items -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span>📦</span> Most Sold Items
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <table class="insights-table" id="mostSoldItemsTable">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Product Name</th>
+                                    <th>Qty Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mostSoldItemsBody">
+                                <tr>
+                                    <td colspan="3">
+                                        <div class="empty-state">
+                                            <div class="empty-icon">📦</div>
+                                            <p>No sales data available</p>
+                                            <p>What should you buy next?</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Section B: Peak Hours Chart -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span>⏰</span> Peak Sales Hours
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="chart-container" id="peakHoursChart">
+                            <!-- Chart bars will be generated by JavaScript - 3 bars only -->
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: var(--primary-color);"></div>
+                                <span>Sales Volume</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: var(--success-color);"></div>
+                                <span>Peak Hour (Staff needed)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section C: Slow Moving Items -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span>⚠️</span> Slow Moving Items (No sales in 3+ days)
+                    </div>
+                </div>
+                <div class="section-content">
+                    <div class="slow-items-list" id="slowItemsList">
+                        <div class="slow-item">
+                            <div class="slow-item-icon">📦</div>
+                            <div class="slow-item-details">
+                                <div class="slow-item-name">No slow items detected</div>
+                                <div class="slow-item-meta">All products are selling well!</div>
+                            </div>
+                            <button class="slow-item-action">Review</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample sales data (simulating database)
+        let salesData = JSON.parse(localStorage.getItem('quickpos-dashboard-sales')) || generateSampleData();
+        
+        // DOM Elements
+        const sidebar = document.getElementById('sidebar');
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const hamburgerIcon = document.getElementById('hamburgerIcon');
+        const logo = document.getElementById('logo');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const dateRangeButtons = document.querySelectorAll('.date-range-btn');
+        
+        // NEW: Insight Cards Elements
+        const totalRevenueEl = document.getElementById('totalRevenue');
+        const revenueTrendEl = document.getElementById('revenueTrend');
+        const stockVolumeEl = document.getElementById('stockVolume');
+        const stockTrendEl = document.getElementById('stockTrend');
+        const itemsSoldTodayEl = document.getElementById('itemsSoldToday');
+        const itemsSoldTrendEl = document.getElementById('itemsSoldTrend');
+        const avgBillAmountEl = document.getElementById('avgBillAmount');
+        const valueTrendEl = document.getElementById('valueTrend');
+        
+        // NEW: Sales Overview Elements
+        const bestCategoryChart = document.getElementById('bestCategoryChart');
+        const todayTransactionsEl = document.getElementById('todayTransactions');
+        const weekTransactionsEl = document.getElementById('weekTransactions');
+        const todayRevenueEl = document.getElementById('todayRevenue');
+        const weekRevenueEl = document.getElementById('weekRevenue');
+        
+        // NEW: Reorder List Element
+        const reorderList = document.getElementById('reorderList');
+        
+        // Existing Elements
+        const mostSoldItemsBody = document.getElementById('mostSoldItemsBody');
+        const peakHoursChart = document.getElementById('peakHoursChart');
+        const slowItemsList = document.getElementById('slowItemsList');
+
+        // Generate sample data for demo
+        function generateSampleData() {
+            const now = new Date();
+            const data = [];
+            const products = [
+                { id: 1, name: "Premium Coffee", price: 650, category: "drinks" },
+                { id: 2, name: "Chocolate Cake", price: 850, category: "bakery" },
+                { id: 3, name: "Chicken Sandwich", price: 950, category: "food" },
+                { id: 4, name: "Fruit Juice", price: 450, category: "drinks" },
+                { id: 5, name: "Cheese Pizza", price: 1250, category: "food" },
+                { id: 6, name: "Iced Tea", price: 350, category: "drinks" },
+                { id: 7, name: "French Fries", price: 550, category: "snacks" },
+                { id: 8, name: "Mineral Water", price: 200, category: "drinks" }
+            ];
+            
+            // Generate sales for last 30 days
+            for (let i = 0; i < 120; i++) {
+                const saleDate = new Date(now);
+                saleDate.setDate(saleDate.getDate() - Math.floor(Math.random() * 30));
+                saleDate.setHours(Math.floor(Math.random() * 14) + 8); // 8 AM to 10 PM
+                saleDate.setMinutes(Math.floor(Math.random() * 60));
+                
+                const productCount = Math.floor(Math.random() * 3) + 1;
+                const items = [];
+                let total = 0;
+                
+                for (let j = 0; j < productCount; j++) {
+                    const product = products[Math.floor(Math.random() * products.length)];
+                    const quantity = Math.floor(Math.random() * 3) + 1;
+                    items.push({
+                        productId: product.id,
+                        name: product.name,
+                        quantity: quantity,
+                        price: product.price,
+                        category: product.category
+                    });
+                    total += product.price * quantity;
+                }
+                
+                data.push({
+                    id: i + 1,
+                    timestamp: saleDate.getTime(),
+                    items: items,
+                    total: total,
+                    paymentMethod: Math.random() > 0.5 ? "Cash" : "Card",
+                    customerCount: Math.floor(Math.random() * 4) + 1
+                });
+            }
+            
+            localStorage.setItem('quickpos-dashboard-sales', JSON.stringify(data));
+            return data;
+        }
+
+        // Format currency as LKR
+        function formatCurrency(amount) {
+            return `LKR ${amount.toLocaleString('en-US', { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2 
+            })}`;
+        }
+
+        // Calculate comparison trend
+        function calculateTrend(current, previous) {
+            if (previous === 0) return { arrow: '→', text: 'New', class: 'trend-neutral' };
+            
+            const change = ((current - previous) / previous) * 100;
+            const absChange = Math.abs(change).toFixed(1);
+            
+            if (change > 5) return { arrow: '↑', text: `${absChange}% vs last period`, class: 'trend-up' };
+            if (change < -5) return { arrow: '↓', text: `${absChange}% vs last period`, class: 'trend-down' };
+            return { arrow: '→', text: `${absChange}% vs last period`, class: 'trend-neutral' };
+        }
+
+        // Filter data by date range
+        function filterDataByRange(range) {
+            const now = new Date();
+            const start = new Date();
+            
+            switch(range) {
+                case 'today':
+                    start.setHours(0, 0, 0, 0);
+                    break;
+                case 'yesterday':
+                    start.setDate(start.getDate() - 1);
+                    start.setHours(0, 0, 0, 0);
+                    now.setDate(now.getDate() - 1);
+                    now.setHours(23, 59, 59, 999);
+                    break;
+                case 'last7':
+                    start.setDate(start.getDate() - 7);
+                    break;
+                case 'thisMonth':
+                    start.setDate(1);
+                    start.setHours(0, 0, 0, 0);
+                    break;
+                case 'lastMonth':
+                    start.setMonth(start.getMonth() - 1, 1);
+                    start.setHours(0, 0, 0, 0);
+                    now.setDate(0); // Last day of previous month
+                    now.setHours(23, 59, 59, 999);
+                    break;
+                default:
+                    return salesData;
+            }
+            
+            return salesData.filter(sale => {
+                const saleDate = new Date(sale.timestamp);
+                return saleDate >= start && saleDate <= now;
+            });
+        }
+
+        // Calculate metrics for filtered data
+        function calculateMetrics(filteredData, range) {
+            const metrics = {
+                totalRevenue: 0,
+                totalItemsSold: 0,
+                transactionCount: filteredData.length,
+                customerCount: 0,
+                // UPDATED: Track sales for 3 time periods (4am-12pm, 12pm-8pm, 8pm-4am)
+                timePeriodSales: [0, 0, 0],
+                categorySales: {} // NEW: Track sales by category
+            };
+            
+            filteredData.forEach(sale => {
+                metrics.totalRevenue += sale.total;
+                metrics.customerCount += sale.customerCount || 1;
+                
+                // Calculate total items sold
+                sale.items.forEach(item => {
+                    metrics.totalItemsSold += item.quantity;
+                    
+                    // Track category sales
+                    if (item.category) {
+                        metrics.categorySales[item.category] = 
+                            (metrics.categorySales[item.category] || 0) + (item.price * item.quantity);
+                    }
+                });
+                
+                // Track sales by time period (UPDATED for 3 periods)
+                const saleHour = new Date(sale.timestamp).getHours();
+                if (saleHour >= 4 && saleHour < 12) {
+                    // Morning: 4am-12pm
+                    metrics.timePeriodSales[0] += sale.total;
+                } else if (saleHour >= 12 && saleHour < 20) {
+                    // Afternoon/Evening: 12pm-8pm
+                    metrics.timePeriodSales[1] += sale.total;
+                } else {
+                    // Night: 8pm-4am
+                    metrics.timePeriodSales[2] += sale.total;
+                }
+            });
+            
+            metrics.avgBillAmount = metrics.transactionCount > 0 ? 
+                metrics.totalRevenue / metrics.transactionCount : 0;
+            metrics.avgCustomersPerDay = range === 'today' ? metrics.customerCount : 
+                metrics.customerCount / (range === 'last7' ? 7 : range === 'lastMonth' ? 30 : 1);
+            
+            return metrics;
+        }
+
+        // NEW: Calculate stock volume from products data
+        function calculateStockVolume() {
+            const products = JSON.parse(localStorage.getItem('quickpos-products')) || [];
+            let totalStock = 0;
+            
+            products.forEach(product => {
+                totalStock += product.stock || 0;
+            });
+            
+            return totalStock;
+        }
+
+        // NEW: Get low stock products (<5 units)
+        function getLowStockProducts() {
+            const products = JSON.parse(localStorage.getItem('quickpos-products')) || [];
+            return products.filter(product => {
+                const stock = product.stock || 0;
+                return stock > 0 && stock < 5;
+            });
+        }
+
+        // NEW: Update Best Selling Category chart
+        function updateBestCategoryChart(categorySales) {
+            bestCategoryChart.innerHTML = '';
+            
+            // Convert to array and sort by sales
+            const categories = Object.entries(categorySales)
+                .map(([name, sales]) => ({ name, sales }))
+                .sort((a, b) => b.sales - a.sales);
+            
+            const topCategories = categories.slice(0, 4); // Show top 4 categories
+            const maxSales = Math.max(...topCategories.map(c => c.sales), 1);
+            
+            if (topCategories.length === 0) {
+                bestCategoryChart.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-light);">
+                        <div style="font-size: 36px; margin-bottom: 10px;">📊</div>
+                        <p>No category data available</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            topCategories.forEach(category => {
+                const barHeight = (category.sales / maxSales) * 120;
+                const bar = document.createElement('div');
+                bar.className = 'category-chart-bar';
+                bar.style.height = `${barHeight}px`;
+                
+                const valueSpan = document.createElement('span');
+                valueSpan.className = 'category-chart-value';
+                valueSpan.textContent = formatCurrency(category.sales);
+                bar.appendChild(valueSpan);
+                
+                const label = document.createElement('div');
+                label.className = 'category-chart-label';
+                label.textContent = category.name;
+                
+                const barGroup = document.createElement('div');
+                barGroup.style.display = 'flex';
+                barGroup.style.flexDirection = 'column';
+                barGroup.style.alignItems = 'center';
+                
+                barGroup.appendChild(bar);
+                barGroup.appendChild(label);
+                bestCategoryChart.appendChild(barGroup);
+            });
+        }
+
+        // NEW: Update Reorder List
+        function updateReorderList() {
+            const lowStockProducts = getLowStockProducts();
+            reorderList.innerHTML = '';
+            
+            if (lowStockProducts.length === 0) {
+                reorderList.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--text-light);">
+                        <div style="font-size: 32px; margin-bottom: 10px;">✅</div>
+                        <p>All stock levels are good!</p>
+                        <p style="font-size: 11px;">No products below 5 units</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            lowStockProducts.forEach(product => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'reorder-item';
+                itemDiv.innerHTML = `
+                    <div class="reorder-item-icon">📦</div>
+                    <div class="reorder-item-details">
+                        <div class="reorder-item-name">${product.name}</div>
+                        <div class="reorder-item-meta">Only ${product.stock} units left • Category: ${product.category || 'General'}</div>
+                    </div>
+                    <button class="reorder-item-action">Reorder</button>
+                `;
+                reorderList.appendChild(itemDiv);
+            });
+        }
+
+        // NEW: Update Today vs This Week metrics
+        function updateSalesOverview(todayData, weekData) {
+            const todayMetrics = calculateMetrics(todayData, 'today');
+            const weekMetrics = calculateMetrics(weekData, 'last7');
+            
+            todayTransactionsEl.textContent = todayMetrics.transactionCount;
+            weekTransactionsEl.textContent = weekMetrics.transactionCount;
+            todayRevenueEl.textContent = formatCurrency(todayMetrics.totalRevenue);
+            weekRevenueEl.textContent = formatCurrency(weekMetrics.totalRevenue);
+        }
+
+        // Update insight cards
+        function updateInsights(metrics, range) {
+            // Total Revenue
+            totalRevenueEl.textContent = formatCurrency(metrics.totalRevenue);
+            
+            // NEW: Stock Volume
+            const stockVolume = calculateStockVolume();
+            stockVolumeEl.textContent = stockVolume.toLocaleString();
+            
+            // NEW: Items Sold Today
+            itemsSoldTodayEl.textContent = metrics.totalItemsSold;
+            
+            // Average Bill Amount
+            avgBillAmountEl.textContent = formatCurrency(metrics.avgBillAmount);
+            
+            // NEW: Update category chart
+            updateBestCategoryChart(metrics.categorySales);
+            
+            // NEW: Update reorder list
+            updateReorderList();
+        }
+
+        // Update most sold items table
+        function updateMostSoldItems(filteredData) {
+            const itemMap = new Map();
+            
+            filteredData.forEach(sale => {
+                sale.items.forEach(item => {
+                    const key = item.productId || item.name;
+                    if (itemMap.has(key)) {
+                        const existing = itemMap.get(key);
+                        existing.quantity += item.quantity;
+                        existing.revenue += item.quantity * item.price;
+                    } else {
+                        itemMap.set(key, {
+                            name: item.name,
+                            quantity: item.quantity,
+                            revenue: item.quantity * item.price
+                        });
+                    }
+                });
+            });
+            
+            const itemsArray = Array.from(itemMap.values());
+            itemsArray.sort((a, b) => b.quantity - a.quantity);
+            const topItems = itemsArray.slice(0, 5);
+            
+            mostSoldItemsBody.innerHTML = '';
+            
+            if (topItems.length === 0) {
+                mostSoldItemsBody.innerHTML = `
+                    <tr>
+                        <td colspan="3">
+                            <div class="empty-state">
+                                <div class="empty-icon">📦</div>
+                                <p>No sales data available</p>
+                                <p>What should you buy next?</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            topItems.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="rank-cell">${index + 1}</td>
+                    <td class="product-cell">${item.name}</td>
+                    <td class="quantity-cell">${item.quantity}</td>
+                `;
+                mostSoldItemsBody.appendChild(row);
+            });
+        }
+
+        // Update peak hours chart
+        function updatePeakHours(timePeriodSales) {
+            peakHoursChart.innerHTML = '';
+            
+            const timePeriods = [
+                { label: "4AM - 12PM", period: "Morning" },
+                { label: "12PM - 8PM", period: "Afternoon" },
+                { label: "8PM - 4AM", period: "Night" }
+            ];
+            
+            const maxSales = Math.max(...timePeriodSales);
+            
+            timePeriods.forEach((period, index) => {
+                const sales = timePeriodSales[index];
+                const barHeight = maxSales > 0 ? (sales / maxSales) * 180 : 10;
+                
+                const barGroup = document.createElement('div');
+                barGroup.className = 'chart-bar-group';
+                
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = `${barHeight}px`;
+                
+                if (sales > 0) {
+                    const valueSpan = document.createElement('span');
+                    valueSpan.className = 'chart-bar-value';
+                    valueSpan.textContent = formatCurrency(sales);
+                    bar.appendChild(valueSpan);
+                }
+                
+                const label = document.createElement('div');
+                label.className = 'chart-bar-label';
+                label.innerHTML = `${period.label}<br><small style="color: var(--text-light); font-weight: normal;">${period.period}</small>`;
+                
+                barGroup.appendChild(bar);
+                barGroup.appendChild(label);
+                peakHoursChart.appendChild(barGroup);
+            });
+        }
+
+        // Update slow moving items
+        function updateSlowItems() {
+            // This would normally check against actual inventory data
+            // For demo, we'll show some sample slow items
+            const slowItems = [
+                { name: "Seasonal Tea", lastSold: "5 days ago", stock: 15 },
+                { name: "Special Coffee Blend", lastSold: "4 days ago", stock: 8 },
+                { name: "Premium Cookies", lastSold: "6 days ago", stock: 12 }
+            ];
+            
+            slowItemsList.innerHTML = '';
+            
+            slowItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'slow-item';
+                itemDiv.innerHTML = `
+                    <div class="slow-item-icon">📦</div>
+                    <div class="slow-item-details">
+                        <div class="slow-item-name">${item.name}</div>
+                        <div class="slow-item-meta">Last sold: ${item.lastSold} • Stock: ${item.stock} units</div>
+                    </div>
+                    <button class="slow-item-action">Create Promotion</button>
+                `;
+                slowItemsList.appendChild(itemDiv);
+            });
+        }
+
+        // Update dashboard with selected range
+        function updateDashboard(range) {
+            const filteredData = filterDataByRange(range);
+            const metrics = calculateMetrics(filteredData, range);
+            
+            // NEW: Get today and week data for comparison
+            const todayData = filterDataByRange('today');
+            const weekData = filterDataByRange('last7');
+            
+            updateInsights(metrics, range);
+            updateSalesOverview(todayData, weekData);
+            updateMostSoldItems(filteredData);
+            updatePeakHours(metrics.timePeriodSales);
+            updateSlowItems();
+        }
+
+        // Initialize the dashboard
+        function init() {
+            // Set up event listeners
+            hamburgerBtn.addEventListener('click', toggleSidebar);
+            
+            logoutBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to logout?')) {
+                    localStorage.removeItem('quickpos-user');
+                    window.location.href = 'login.html';
+                }
+            });
+            
+            // Date range button listeners
+            dateRangeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    dateRangeButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    updateDashboard(btn.dataset.range);
+                });
+            });
+            
+            // Reorder item action buttons
+            reorderList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('reorder-item-action')) {
+                    const itemName = e.target.closest('.reorder-item').querySelector('.reorder-item-name').textContent;
+                    alert(`Reorder action for "${itemName}" would open inventory management.`);
+                }
+            });
+            
+            // Slow item action buttons
+            slowItemsList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('slow-item-action')) {
+                    const itemName = e.target.closest('.slow-item').querySelector('.slow-item-name').textContent;
+                    alert(`Promotion creation for "${itemName}" would open promotion setup.`);
+                }
+            });
+            
+            // Set initial sidebar state
+            const sidebarState = localStorage.getItem('quickpos-sidebar');
+            if (sidebarState === 'collapsed') {
+                toggleSidebar();
+            }
+            
+            // Initial dashboard update
+            updateDashboard('today');
+        }
+
+        // Toggle sidebar function
+        function toggleSidebar() {
+            sidebar.classList.toggle('expanded');
+            sidebar.classList.toggle('collapsed');
+            logo.classList.toggle('collapsed');
+            
+            if (sidebar.classList.contains('collapsed')) {
+                hamburgerIcon.textContent = '→';
+                localStorage.setItem('quickpos-sidebar', 'collapsed');
+            } else {
+                hamburgerIcon.textContent = '☰';
+                localStorage.setItem('quickpos-sidebar', 'expanded');
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Get the user data from storage
+            const user = JSON.parse(localStorage.getItem('quickpos-user'));
+
+            // 2. Security Check: If someone tries to open the file without logging in
+            if (!user) {
+                window.location.href = 'login.html'; 
+                return;
+            }
+
+            // 3. Role Check: If user is a Cashier, hide the Owner-only buttons
+            if (user && user.role.toLowerCase() === 'cashier') {
+                const ownerLinks = document.querySelectorAll('.owner-only');
+                ownerLinks.forEach(link => {
+                    link.style.display = 'none'; 
+                });
+            }
+
+            // 4. Logout Logic
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (confirm('Do you want to logout?')) {
+                        localStorage.removeItem('quickpos-user');
+                        window.location.href = 'login.html';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
