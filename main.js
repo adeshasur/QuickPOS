@@ -14,29 +14,19 @@ const db = new sqlite3.Database('./pos_database.sqlite', (err) => {
 
 function setupDatabase() {
     db.serialize(() => {
-        // Users table එක හැදීම
+        // Users table එක හැදීම (full_name column එකත් එක්ක)
         db.run(`CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTO_INCREMENT,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE,
+            full_name TEXT,
             password TEXT,
             role TEXT
-        )`, (err) => {
-            if (err) {
-                // SQLite doesn't support AUTO_INCREMENT like this, it's AUTOINCREMENT or just INTEGER PRIMARY KEY
-                // Let's use the correct SQLite syntax
-                db.run(`CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT UNIQUE,
-                    password TEXT,
-                    role TEXT
-                )`);
-            }
-        });
+        )`);
 
-        // Seed Users
-        const stmt = db.prepare("INSERT OR IGNORE INTO users (username, password, role) VALUES (?, ?, ?)");
-        stmt.run("Sunil Perera", "admin123", "Owner");
-        stmt.run("Sandun Perera", "user123", "Cashier");
+        // Seed Users - Username එක විදියට 1st name එක පාවිච්චි කරනවා
+        const stmt = db.prepare("INSERT OR IGNORE INTO users (username, full_name, password, role) VALUES (?, ?, ?, ?)");
+        stmt.run("Sunil", "Sunil Perera", "admin123", "Owner");
+        stmt.run("Sandun", "Sandun Perera", "user123", "Cashier");
         stmt.finalize();
     });
 }

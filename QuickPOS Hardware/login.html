@@ -70,7 +70,7 @@
         ipcRenderer.on('login-response', (event, response) => {
             const errorDiv = document.getElementById('error-msg');
             if (response.success) {
-                alert('Login Successful! Welcome ' + response.user.username);
+                alert('Login Successful! Welcome Back, ' + response.user.full_name);
                 // Here you would navigate to the dashboard
                 // window.location.href = 'dashboard.html';
             } else {
