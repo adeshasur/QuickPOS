@@ -526,8 +526,8 @@ document.getElementById('categoriesTableBody').addEventListener('click', e => {
     const cat = categories.find(c => c.id === deletingId);
     if (!cat) return;
     const msg = cat.productCount > 0
-      ? \`"\${cat.name}" has \${cat.productCount} product(s). Deleting it will also remove those products. Continue?\`
-      : \`Are you sure you want to delete "\${cat.name}"?\`;
+      ? `"${cat.name}" has ${cat.productCount} product(s). Deleting it will also remove those products. Continue?`
+      : `Are you sure you want to delete "${cat.name}"?`;
     document.getElementById('delMsg').textContent = msg;
     openModal('deleteModal');
   }
