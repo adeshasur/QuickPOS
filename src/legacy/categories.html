@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPOS Pro — Categories</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="sidebar.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0B0F19;
+  --surface: #111827;
+  --surface2: #1A2235;
+  --surface3: #1F2B3E;
+  --border: #1E2D45;
+  --border2: #263548;
+  --accent: #3B82F6;
+  --accent2: #60A5FA;
+  --accent-glow: rgba(59, 130, 246, .18);
+  --green: #10B981;
+  --green-dim: rgba(16, 185, 129, .12);
+  --amber: #F59E0B;
+  --amber-dim: rgba(245, 158, 11, .12);
+  --red: #EF4444;
+  --red-dim: rgba(239, 68, 68, .1);
+  --purple: #8B5CF6;
+  --cyan: #06B6D4;
+  --text: #E2E8F0;
+  --text2: #94A3B8;
+  --text3: #475569;
+  --font: 'DM Sans', system-ui, sans-serif;
+  --mono: 'DM Mono', monospace;
+  --r: 10px;
+  --r2: 14px;
+}
+
+body {
+  background: var(--bg);
+  font-family: var(--font);
+  color: var(--text);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+/* ─── MAIN ─── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+.topbar {
+  height: 62px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 22px;
+  flex-shrink: 0;
+}
+.tb-title { font-size: 16px; font-weight: 600; color: var(--text); }
+.tb-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.tb-sub { font-size: 13px; color: var(--text2); }
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: #fff;
+}
+
+/* ─── CONTENT ─── */
+.content { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 20px; gap: 16px; }
+
+/* ─── HEADER ROW ─── */
+.page-header { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.page-header-left { display: flex; flex-direction: column; gap: 3px; }
+.page-heading { font-size: 18px; font-weight: 600; color: var(--text); }
+.page-sub { font-size: 12px; color: var(--text3); }
+
+.add-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--r); padding: 10px 18px;
+  font-size: 13px; font-weight: 600; font-family: var(--font);
+  cursor: pointer; transition: all .15s;
+}
+.add-btn:hover { background: #2563EB; transform: translateY(-1px); }
+.add-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ─── STATS ─── */
+.stats-row { display: flex; gap: 12px; flex-shrink: 0; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r2); padding: 14px 18px;
+  display: flex; align-items: center; gap: 14px;
+}
+.stat-icon-wrap {
+  width: 38px; height: 38px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+}
+.stat-icon-wrap.blue { background: var(--accent-glow); }
+.stat-icon-wrap.green { background: var(--green-dim); }
+.stat-icon-wrap svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.stat-icon-wrap.blue svg { stroke: var(--accent2); }
+.stat-icon-wrap.green svg { stroke: var(--green); }
+.stat-val { font-size: 22px; font-weight: 700; font-family: var(--mono); color: var(--text); }
+.stat-lbl { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+/* ─── TABLE AREA ─── */
+.table-wrap {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r2); overflow: hidden; display: flex; flex-direction: column; min-height: 0;
+}
+.table-scroll { flex: 1; overflow-y: auto; }
+.table-scroll::-webkit-scrollbar { width: 4px; }
+.table-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+table { width: 100%; border-collapse: collapse; }
+thead { position: sticky; top: 0; z-index: 10; background: var(--surface2); }
+th {
+  text-align: left; padding: 13px 18px;
+  font-size: 11px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .07em;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+td { padding: 13px 18px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tbody tr { transition: background .12s; }
+tbody tr:hover { background: var(--surface2); }
+tbody tr:last-child td { border-bottom: none; }
+
+.td-name { font-size: 14px; font-weight: 600; color: var(--accent2); }
+.td-desc { font-size: 13px; color: var(--text2); max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-desc.empty { color: var(--text3); font-style: italic; }
+
+.count-badge {
+  display: inline-flex; align-items: center;
+  background: var(--accent-glow); color: var(--accent2);
+  border: 1px solid rgba(59, 130, 246, .2);
+  font-size: 12px; font-weight: 600; font-family: var(--mono);
+  padding: 3px 10px; border-radius: 20px;
+}
+
+.actions-cell { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.tbl-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border: none; border-radius: 7px;
+  font-size: 12px; font-weight: 600; font-family: var(--font);
+  cursor: pointer; transition: all .15s;
+}
+.tbl-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tbl-btn.edit { background: var(--accent-glow); color: var(--accent2); border: 1px solid rgba(59,130,246,.2); }
+.tbl-btn.edit:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.tbl-btn.del { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,.2); }
+.tbl-btn.del:hover { background: var(--red); color: #fff; }
+
+/* Empty state */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 20px; gap: 10px; color: var(--text3);
+}
+.empty-state svg { width: 44px; height: 44px; stroke: var(--border2); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.empty-state p { font-size: 14px; }
+.empty-state small { font-size: 12px; }
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 500; opacity: 0; visibility: hidden;
+  transition: all .2s; backdrop-filter: blur(4px);
+}
+.modal-overlay.open { opacity: 1; visibility: visible; }
+.modal-box {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 20px; width: 90%; max-width: 460px; overflow: hidden;
+  transform: scale(.96); transition: transform .2s;
+}
+.modal-overlay.open .modal-box { transform: scale(1); }
+
+.modal-top {
+  padding: 20px 22px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-size: 17px; font-weight: 600; color: var(--text); }
+.modal-close {
+  background: none; border: none; color: var(--text2); cursor: pointer;
+  width: 30px; height: 30px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center; transition: all .15s;
+}
+.modal-close:hover { background: var(--red-dim); color: var(--red); }
+.modal-close svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.modal-body { padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+
+.field-group { display: flex; flex-direction: column; gap: 6px; }
+.field-label { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; }
+.field-label span { color: var(--red); margin-left: 2px; }
+.field-input, .field-textarea {
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); font-family: var(--font); font-size: 14px;
+  padding: 11px 14px; border-radius: var(--r); outline: none;
+  width: 100%; transition: border-color .15s;
+}
+.field-input::placeholder, .field-textarea::placeholder { color: var(--text3); }
+.field-input:focus, .field-textarea:focus { border-color: var(--accent); }
+.field-textarea { resize: vertical; min-height: 80px; }
+.field-hint { font-size: 11px; color: var(--text3); }
+
+.modal-actions { display: flex; gap: 10px; padding: 0 22px 20px; }
+.mact-btn {
+  flex: 1; padding: 13px; border: none; border-radius: var(--r);
+  font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font); transition: all .15s;
+}
+.mact-btn.cancel { background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); }
+.mact-btn.cancel:hover { color: var(--text); }
+.mact-btn.confirm { background: var(--accent); color: #fff; }
+.mact-btn.confirm:hover { background: #2563EB; }
+
+/* ─── DELETE CONFIRM MODAL ─── */
+.del-modal-box { padding: 28px; text-align: center; }
+.del-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--red-dim); border: 1px solid rgba(239,68,68,.25);
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;
+}
+.del-icon svg { width: 24px; height: 24px; stroke: var(--red); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.del-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.del-msg { font-size: 13px; color: var(--text2); margin-bottom: 22px; line-height: 1.6; }
+.del-actions { display: flex; gap: 10px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <div class="sb-logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+    </div>
+    <span class="sb-logo-text" id="logo">QuickPOS Pro</span>
+    <button class="sb-toggle" id="hamburgerBtn">
+      <svg viewBox="0 0 24 24" id="toggleIcon"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section-label">MAIN</div>
+    <a href="owner_dashboard.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>
+      <span class="nt">Dashboard</span>
+    </a>
+    <a href="sales.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span>
+      <span class="nt">Make a Sale</span>
+    </a>
+    <a href="categories.html" class="nav-item active">
+      <span class="ni"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
+      <span class="nt">Categories</span>
+    </a>
+    <a href="products.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>
+      <span class="nt">Products</span>
+    </a>
+    <div class="sb-section-label">OPERATIONS</div>
+    <a href="inventory.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span>
+      <span class="nt">Inventory</span>
+    </a>
+    <a href="customers.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      <span class="nt">Customers</span>
+    </a>
+    <a href="quotations.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+      <span class="nt">Quotations</span>
+    </a>
+    <a href="ledger.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+      <span class="nt">Credit Ledger</span>
+    </a>
+    <div class="sb-section-label">ANALYTICS</div>
+    <a href="reports.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></span>
+      <span class="nt">Reports</span>
+    </a>
+    <a href="sales_history.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+      <span class="nt">Sales History</span>
+    </a>
+    <div class="sb-section-label">ADMIN</div>
+    <a href="users.html" class="nav-item owner-only">
+      <span class="ni"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <span class="nt">User Management</span>
+    </a>
+    <a href="settings.html" class="nav-item owner-only">
+      <span class="ni"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+      <span class="nt">Settings</span>
+    </a>
+  </div>
+  <div class="sb-bottom">
+    <a href="#" class="nav-item" id="logoutBtn">
+      <span class="ni"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+      <span class="nt">Logout</span>
+    </a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title">Categories</div>
+    <div class="tb-right">
+      <span class="tb-sub">Manage product categories</span>
+      <div class="avatar">OP</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-heading">Category Management</div>
+        <div class="page-sub">Add, edit and organize your product categories</div>
+      </div>
+      <button class="add-btn" id="addCategoryBtn">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add New Category
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon-wrap blue">
+          <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        </div>
+        <div>
+          <div class="stat-val" id="totalCategories">0</div>
+          <div class="stat-lbl">Total Categories</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon-wrap green">
+          <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        </div>
+        <div>
+          <div class="stat-val" id="totalProducts">0</div>
+          <div class="stat-lbl">Products in Categories</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Category Name</th>
+              <th>Description</th>
+              <th>Products</th>
+              <th style="text-align:right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="categoriesTableBody">
+            <tr id="emptyRow">
+              <td colspan="4">
+                <div class="empty-state">
+                  <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                  <p>No categories found</p>
+                  <small>Click "Add New Category" to get started</small>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-overlay" id="categoryModal">
+  <div class="modal-box">
+    <div class="modal-top">
+      <div class="modal-title" id="modalTitle">Add New Category</div>
+      <button class="modal-close" id="closeModalBtn"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="categoryId">
+      <div class="field-group">
+        <label class="field-label" for="categoryName">Category Name <span>*</span></label>
+        <input class="field-input" type="text" id="categoryName" placeholder="e.g. Beverages, Snacks…" maxlength="50">
+        <span class="field-hint">Maximum 50 characters</span>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="categoryDescription">Description <span style="color:var(--text3);font-weight:400;text-transform:none">(optional)</span></label>
+        <textarea class="field-textarea" id="categoryDescription" placeholder="Short description for this category…" maxlength="200" rows="3"></textarea>
+        <span class="field-hint">Maximum 200 characters</span>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="mact-btn cancel" id="cancelModalBtn">Cancel</button>
+      <button class="mact-btn confirm" id="saveModalBtn">Save Category</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box" style="max-width:380px">
+    <div class="del-modal-box">
+      <div class="del-icon">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </div>
+      <div class="del-title">Delete Category?</div>
+      <div class="del-msg" id="delMsg">Are you sure you want to delete this category?</div>
+      <div class="del-actions">
+        <button class="mact-btn cancel" id="cancelDeleteBtn" style="flex:1">Cancel</button>
+        <button class="mact-btn confirm" id="confirmDeleteBtn" style="flex:1;background:var(--red)">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="sidebar.js"></script>
+<script>
+// ─── DATA ───
+let categories = JSON.parse(localStorage.getItem('quickpos-categories')) || [
+  { id: 1, name: "Food", description: "All food items including meals and snacks", productCount: 2 },
+  { id: 2, name: "Drinks", description: "Beverages, juices, and hot drinks", productCount: 3 },
+  { id: 3, name: "Snacks", description: "Quick bites and light snacks", productCount: 1 },
+  { id: 4, name: "Bakery", description: "Freshly baked goods and pastries", productCount: 1 }
+];
+let products = JSON.parse(localStorage.getItem('quickpos-products')) || [];
+let deletingId = null;
+
+// ─── HELPERS ───
+function saveCategories() {
+  localStorage.setItem('quickpos-categories', JSON.stringify(categories));
+}
+
+function updateProductCounts() {
+  categories.forEach(c => c.productCount = 0);
+  products.forEach(p => {
+    const cat = categories.find(c => c.id === p.categoryId);
+    if (cat) cat.productCount++;
+  });
+  saveCategories();
+}
+
+// ─── RENDER ───
+function render() {
+  updateProductCounts();
+  const tbody = document.getElementById('categoriesTableBody');
+  const emptyRow = document.getElementById('emptyRow');
+
+  document.getElementById('totalCategories').textContent = categories.length;
+  const total = categories.reduce((s, c) => s + c.productCount, 0);
+  document.getElementById('totalProducts').textContent = total;
+
+  if (!categories.length) {
+    tbody.innerHTML = '';
+    tbody.appendChild(emptyRow);
+    emptyRow.style.display = '';
+    return;
+  }
+
+  emptyRow.style.display = 'none';
+  const sorted = [...categories].sort((a, b) => a.name.localeCompare(b.name));
+  tbody.innerHTML = '';
+  sorted.forEach(cat => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="td-name">${cat.name}</td>
+      <td class="${cat.description ? 'td-desc' : 'td-desc empty'}">${cat.description || 'No description'}</td>
+      <td><span class="count-badge">${cat.productCount} product${cat.productCount !== 1 ? 's' : ''}</span></td>
+      <td>
+        <div class="actions-cell">
+          <button class="tbl-btn edit" data-id="${cat.id}">
+            <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Edit
+          </button>
+          <button class="tbl-btn del" data-id="${cat.id}">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>
+            Delete
+          </button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ─── MODAL HELPERS ───
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ─── ADD / EDIT ───
+document.getElementById('addCategoryBtn').addEventListener('click', () => {
+  document.getElementById('categoryId').value = '';
+  document.getElementById('categoryName').value = '';
+  document.getElementById('categoryDescription').value = '';
+  document.getElementById('modalTitle').textContent = 'Add New Category';
+  document.getElementById('saveModalBtn').textContent = 'Save Category';
+  openModal('categoryModal');
+  setTimeout(() => document.getElementById('categoryName').focus(), 250);
+});
+
+document.getElementById('categoriesTableBody').addEventListener('click', e => {
+  const editBtn = e.target.closest('.edit');
+  const delBtn  = e.target.closest('.del');
+  if (editBtn) {
+    const cat = categories.find(c => c.id === +editBtn.dataset.id);
+    if (!cat) return;
+    document.getElementById('categoryId').value = cat.id;
+    document.getElementById('categoryName').value = cat.name;
+    document.getElementById('categoryDescription').value = cat.description || '';
+    document.getElementById('modalTitle').textContent = 'Edit Category';
+    document.getElementById('saveModalBtn').textContent = 'Update Category';
+    openModal('categoryModal');
+    setTimeout(() => document.getElementById('categoryName').focus(), 250);
+  }
+  if (delBtn) {
+    deletingId = +delBtn.dataset.id;
+    const cat = categories.find(c => c.id === deletingId);
+    if (!cat) return;
+    const msg = cat.productCount > 0
+      ? \`"\${cat.name}" has \${cat.productCount} product(s). Deleting it will also remove those products. Continue?\`
+      : \`Are you sure you want to delete "\${cat.name}"?\`;
+    document.getElementById('delMsg').textContent = msg;
+    openModal('deleteModal');
+  }
+});
+
+document.getElementById('saveModalBtn').addEventListener('click', () => {
+  const name = document.getElementById('categoryName').value.trim();
+  const desc = document.getElementById('categoryDescription').value.trim();
+  const existingId = document.getElementById('categoryId').value ? +document.getElementById('categoryId').value : null;
+
+  if (!name) { alert('Please enter a category name.'); document.getElementById('categoryName').focus(); return; }
+
+  const duplicate = categories.find(c => c.name.toLowerCase() === name.toLowerCase() && c.id !== existingId);
+  if (duplicate) { alert('A category with this name already exists.'); document.getElementById('categoryName').focus(); return; }
+
+  if (existingId) {
+    const idx = categories.findIndex(c => c.id === existingId);
+    if (idx !== -1) { categories[idx].name = name; categories[idx].description = desc; }
+  } else {
+    const newId = categories.length ? Math.max(...categories.map(c => c.id)) + 1 : 1;
+    categories.push({ id: newId, name, description: desc, productCount: 0 });
+  }
+
+  saveCategories();
+  render();
+  closeModal('categoryModal');
+});
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+  if (!deletingId) return;
+  const cat = categories.find(c => c.id === deletingId);
+  if (cat && cat.productCount > 0) {
+    products = products.filter(p => p.categoryId !== deletingId);
+    localStorage.setItem('quickpos-products', JSON.stringify(products));
+  }
+  categories = categories.filter(c => c.id !== deletingId);
+  saveCategories();
+  render();
+  closeModal('deleteModal');
+  deletingId = null;
+});
+
+// Close buttons
+['closeModalBtn', 'cancelModalBtn'].forEach(id =>
+  document.getElementById(id).addEventListener('click', () => closeModal('categoryModal'))
+);
+document.getElementById('cancelDeleteBtn').addEventListener('click', () => closeModal('deleteModal'));
+
+// Click outside to close
+['categoryModal', 'deleteModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => {
+    if (e.target === document.getElementById(id)) closeModal(id);
+  });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal('categoryModal'); closeModal('deleteModal'); }
+});
+
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', e => {
+  e.preventDefault();
+  if (confirm('Do you want to logout?')) {
+    localStorage.removeItem('quickpos-user');
+    window.location.href = 'login.html';
+  }
+});
+
+// Auth + role check
+document.addEventListener('DOMContentLoaded', () => {
+  const user = JSON.parse(localStorage.getItem('quickpos-user'));
+  if (!user) { window.location.href = 'login.html'; return; }
+  if (user.role === 'cashier') {
+    document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'none');
+  }
+  render();
+});
+</script>
+</body>
+</html>

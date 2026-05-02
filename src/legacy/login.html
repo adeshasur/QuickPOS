@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickPOS Pro — Access Portal</title>
+    <link rel="stylesheet" href="login.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo">
+            <span class="blue">Quick</span><span class="white">POS</span>
+        </div>
+        
+        <h2>System Login</h2>
+        <p class="subtitle">Access your retail management suite</p>
+
+        <div class="role-selector">
+            <button id="cashierBtn" class="role-btn active" onclick="setRole('Cashier')">Cashier</button>
+            <button id="ownerBtn" class="role-btn" onclick="setRole('Owner')">Owner</button>
+        </div>
+
+        <div class="input-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="e.g. admin">
+        </div>
+
+        <div class="input-group">
+            <label for="password">Security Password</label>
+            <input type="password" id="password" placeholder="••••••••">
+        </div>
+
+        <button class="btn-login" id="loginBtn">Authorize Access</button>
+
+        <a href="#" class="forgot-password">Need help accessing? Contact Administrator</a>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        let selectedRole = 'Cashier';
+
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        function setRole(role) {
+            selectedRole = role;
+            document.getElementById('cashierBtn').classList.toggle('active', role === 'Cashier');
+            document.getElementById('ownerBtn').classList.toggle('active', role === 'Owner');
+        }
+
+        function handleEnterKey(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                document.getElementById('loginBtn').click();
+            }
+        }
+
+        document.getElementById('username').addEventListener('keydown', handleEnterKey);
+        document.getElementById('password').addEventListener('keydown', handleEnterKey);
+
+        let isLoggingIn = false;
+
+        document.getElementById('loginBtn').addEventListener('click', (event) => {
+            event.preventDefault();
+            if (isLoggingIn) return;
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                showToast('Please fill in all fields', 'error');
+                return;
+            }
+
+            isLoggingIn = true;
+            const btn = document.getElementById('loginBtn');
+            btn.innerText = 'Verifying...';
+            btn.style.opacity = '0.7';
+            btn.disabled = true;
+
+            ipcRenderer.send('login-attempt', { username, password, role: selectedRole });
+        });
+
+        ipcRenderer.on('login-response', (event, response) => {
+            isLoggingIn = false;
+            const btn = document.getElementById('loginBtn');
+            btn.innerText = 'Authorize Access';
+            btn.style.opacity = '1';
+            btn.disabled = false;
+
+            if (response.success) {
+                showToast('Welcome Back, ' + response.user.full_name, 'success');
+                localStorage.setItem('quickpos-user', JSON.stringify(response.user));
+                setTimeout(() => {
+                    window.location.href = 'owner_dashboard.html';
+                }, 1000);
+            } else {
+                showToast(response.message, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

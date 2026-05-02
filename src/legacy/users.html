@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPOS Pro — User Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="sidebar.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0B0F19;
+  --surface: #111827;
+  --surface2: #1A2235;
+  --surface3: #1F2B3E;
+  --border: #1E2D45;
+  --border2: #263548;
+  --accent: #3B82F6;
+  --accent2: #60A5FA;
+  --accent-glow: rgba(59, 130, 246, .18);
+  --green: #10B981;
+  --green-dim: rgba(16, 185, 129, .12);
+  --amber: #F59E0B;
+  --amber-dim: rgba(245, 158, 11, .12);
+  --red: #EF4444;
+  --red-dim: rgba(239, 68, 68, .1);
+  --purple: #8B5CF6;
+  --cyan: #06B6D4;
+  --text: #E2E8F0;
+  --text2: #94A3B8;
+  --text3: #475569;
+  --font: 'DM Sans', system-ui, sans-serif;
+  --mono: 'DM Mono', monospace;
+  --r: 10px;
+  --r2: 14px;
+}
+
+body {
+  background: var(--bg);
+  font-family: var(--font);
+  color: var(--text);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+.topbar {
+  height: 62px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 22px;
+  flex-shrink: 0;
+}
+.tb-title { font-size: 16px; font-weight: 600; color: var(--text); }
+.tb-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.tb-sub { font-size: 13px; color: var(--text2); }
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: #fff;
+}
+
+.content { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 20px; gap: 16px; }
+
+/* Action Bar */
+.action-bar { display: flex; align-items: center; gap: 12px; }
+.search-wrap { position: relative; flex: 1; max-width: 320px; }
+.search-wrap input {
+  width: 100%; background: var(--surface); border: 1px solid var(--border);
+  padding: 10px 14px 10px 38px; border-radius: 10px; color: var(--text);
+  font-size: 13px; outline: none; transition: all .2s;
+}
+.search-wrap input:focus { border-color: var(--accent); background: var(--surface2); }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text3); }
+
+.btn-add {
+  background: var(--accent); color: #fff; border: none; border-radius: 8px;
+  padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; gap: 8px; transition: all .2s;
+}
+.btn-add:hover { background: #2563EB; transform: translateY(-1px); box-shadow: var(--accent-glow); }
+
+/* Table */
+.table-wrap {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r2); overflow: hidden; display: flex; flex-direction: column; min-height: 0;
+}
+.table-scroll { flex: 1; overflow-y: auto; }
+.table-scroll::-webkit-scrollbar { width: 4px; }
+.table-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+table { width: 100%; border-collapse: collapse; }
+thead { position: sticky; top: 0; z-index: 10; background: var(--surface2); }
+th {
+  text-align: left; padding: 13px 18px;
+  font-size: 11px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .07em;
+  border-bottom: 1px solid var(--border);
+}
+td { padding: 13px 18px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tbody tr:hover { background: var(--surface2); }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  text-transform: uppercase;
+}
+.badge-owner { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245, 158, 11, .2); }
+.badge-cashier { background: var(--green-dim); color: var(--green); border: 1px solid rgba(16, 185, 129, .2); }
+
+.status-row { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+.dot { width: 6px; height: 6px; border-radius: 50%; }
+.dot-active { background: var(--green); box-shadow: 0 0 8px var(--green); }
+
+.act-btns { display: flex; gap: 4px; }
+.act-btn {
+  width: 32px; height: 32px; border: none; border-radius: 6px;
+  background: transparent; color: var(--text3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all .2s;
+}
+.act-btn:hover { background: var(--surface3); color: var(--text); }
+.act-btn.del:hover { color: var(--red); background: var(--red-dim); }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.8);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 500; opacity: 0; visibility: hidden;
+  transition: all .2s; backdrop-filter: blur(4px);
+}
+.modal-overlay.open { opacity: 1; visibility: visible; }
+.modal-box {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 24px; width: 90%; max-width: 440px; overflow: hidden;
+  transform: scale(.96); transition: transform .2s;
+}
+.modal-overlay.open .modal-box { transform: scale(1); }
+.modal-top { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+
+.f-group { display: flex; flex-direction: column; gap: 6px; }
+.f-label { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; }
+.f-input, .f-select {
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); padding: 12px; border-radius: 10px; outline: none; font-size: 14px;
+}
+.f-input:focus, .f-select:focus { border-color: var(--accent); background: var(--surface3); }
+
+.modal-foot { padding: 16px 24px; border-top: 1px solid var(--border); background: var(--surface2); display: flex; gap: 10px; }
+.mbtn { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; }
+.mbtn-cancel { background: var(--surface3); color: var(--text2); }
+.mbtn-save { background: var(--accent); color: #fff; }
+
+</style>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar"></nav>
+
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title">Staff & Security</div>
+    <div class="tb-right"><span class="tb-sub">User Management</span><div class="avatar" id="av">AD</div></div>
+  </div>
+
+  <div class="content">
+    <div class="action-bar">
+      <div class="search-wrap">
+        <span class="search-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input type="text" id="search" placeholder="Search staff members..." oninput="render()">
+      </div>
+      <button class="btn-add" onclick="openModal()">+ Add New User</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Full Name</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th style="text-align:right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="userModal">
+  <div class="modal-box">
+    <div class="modal-top"><div class="modal-title" id="mTitle">Add New User</div></div>
+    <div class="modal-body">
+      <div class="f-group"><label class="f-label">Full Name</label><input class="f-input" type="text" id="fullName"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+        <div class="f-group"><label class="f-label">Username</label><input class="f-input" type="text" id="username"></div>
+        <div class="f-group"><label class="f-label">Role</label><select class="f-select" id="role"><option value="cashier">Cashier</option><option value="owner">Administrator</option></select></div>
+      </div>
+      <div class="f-group"><label class="f-label">Password</label><input class="f-input" type="password" id="password" placeholder="••••••••"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="mbtn mbtn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="mbtn mbtn-save" onclick="saveUser()">Save User</button>
+    </div>
+  </div>
+</div>
+
+<script src="sidebar.js"></script>
+<script>
+let users = JSON.parse(localStorage.getItem('quickpos-users')) || [
+  { id: 'U001', name: 'Admin User', username: 'admin', role: 'owner', status: 'active' },
+  { id: 'U002', name: 'Sam Perera', username: 'sam', role: 'cashier', status: 'active' }
+];
+let editId = null;
+
+function render() {
+  const query = document.getElementById('search').value.toLowerCase();
+  const filtered = users.filter(u => u.name.toLowerCase().includes(query) || u.username.toLowerCase().includes(query));
+
+  document.getElementById('tableBody').innerHTML = filtered.map(u => `
+    <tr>
+      <td style="color:var(--accent2); font-family:var(--mono); font-weight:700">${u.id}</td>
+      <td style="font-weight:600">${u.name}</td>
+      <td style="color:var(--text3)">@${u.username}</td>
+      <td><span class="badge badge-${u.role}">${u.role}</span></td>
+      <td><div class="status-row"><div class="dot dot-active"></div>Active</div></td>
+      <td style="text-align:right">
+        <div class="act-btns" style="justify-content:flex-end">
+          <button class="act-btn" onclick="editUser('${u.id}')">✏️</button>
+          <button class="act-btn del" onclick="deleteUser('${u.id}')">🗑️</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openModal() {
+  editId = null;
+  document.getElementById('mTitle').textContent = 'Add New User';
+  document.getElementById('fullName').value = '';
+  document.getElementById('username').value = '';
+  document.getElementById('password').value = '';
+  document.getElementById('userModal').classList.add('open');
+}
+
+function editUser(id) {
+  const u = users.find(x => x.id === id);
+  editId = id;
+  document.getElementById('mTitle').textContent = 'Edit User';
+  document.getElementById('fullName').value = u.name;
+  document.getElementById('username').value = u.username;
+  document.getElementById('role').value = u.role;
+  document.getElementById('userModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('userModal').classList.remove('open'); }
+
+function saveUser() {
+  const name = document.getElementById('fullName').value;
+  const uname = document.getElementById('username').value;
+  const role = document.getElementById('role').value;
+  
+  if(!name || !uname) return alert('Fill required fields');
+
+  if(editId) {
+    const idx = users.findIndex(u => u.id === editId);
+    users[idx] = { ...users[idx], name, username: uname, role };
+  } else {
+    const id = 'U' + String(users.length + 1).padStart(3, '0');
+    users.push({ id, name, username: uname, role, status: 'active' });
+  }
+
+  localStorage.setItem('quickpos-users', JSON.stringify(users));
+  closeModal();
+  render();
+}
+
+function deleteUser(id) {
+  if(confirm('Delete this user?')) {
+    users = users.filter(u => u.id !== id);
+    localStorage.setItem('quickpos-users', JSON.stringify(users));
+    render();
+  }
+}
+
+function init() {
+  const user = JSON.parse(localStorage.getItem('quickpos-user'));
+  if(user) document.getElementById('av').textContent = (user.username || 'AD').substring(0,2).toUpperCase();
+  render();
+}
+
+init();
+</script>
+</body>
+</html>

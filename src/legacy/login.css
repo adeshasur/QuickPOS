@@ -1,0 +1,186 @@
+:root {
+  --bg: #0B0F19;
+  --surface: #111827;
+  --surface2: #1A2235;
+  --border: #1E2D45;
+  --accent: #3B82F6;
+  --accent2: #60A5FA;
+  --accent-glow: rgba(59, 130, 246, .25);
+  --text: #E2E8F0;
+  --text2: #94A3B8;
+  --font: 'Outfit', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  font-family: var(--font);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: var(--accent);
+  filter: blur(150px);
+  opacity: 0.15;
+  top: -100px;
+  right: -100px;
+  z-index: -1;
+}
+
+body::after {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: #8B5CF6;
+  filter: blur(120px);
+  opacity: 0.1;
+  bottom: -50px;
+  left: -50px;
+  z-index: -1;
+}
+
+.login-card {
+  background: rgba(17, 24, 39, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  width: 100%;
+  max-width: 420px;
+  padding: 48px;
+  border-radius: 28px;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+  text-align: center;
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 32px;
+  letter-spacing: -0.03em;
+}
+.logo .blue { color: var(--accent2); }
+.logo .white { color: #fff; }
+
+h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+.subtitle { color: var(--text2); font-size: 14px; margin-bottom: 32px; }
+
+.role-selector {
+  display: flex;
+  background: var(--surface2);
+  padding: 4px;
+  border-radius: 14px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+}
+
+.role-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: var(--text2);
+}
+
+.role-btn.active {
+  background: var(--surface3);
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.input-group { text-align: left; margin-bottom: 20px; }
+.input-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  letter-spacing: 0.05em;
+}
+.input-group input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.3s;
+}
+.input-group input:focus {
+  border-color: var(--accent);
+  background: var(--surface2);
+  box-shadow: 0 0 0 4px var(--accent-glow);
+}
+
+.btn-login {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.3s;
+}
+.btn-login:hover {
+  background: #2563EB;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--accent-glow);
+}
+
+.forgot-password {
+  display: block;
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--text2);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.forgot-password:hover { color: var(--accent2); }
+
+/* Toast */
+.toast-container { position: fixed; top: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; }
+.toast {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 16px 24px;
+  border-radius: 16px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  transform: translateX(120%);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex; align-items: center; gap: 12px;
+}
+.toast.show { transform: translateX(0); }
+.toast-success { border-left: 4px solid #10B981; }
+.toast-error { border-left: 4px solid #EF4444; }

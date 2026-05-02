@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPOS Pro — Customers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="sidebar.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0B0F19;
+  --surface: #111827;
+  --surface2: #1A2235;
+  --surface3: #1F2B3E;
+  --border: #1E2D45;
+  --border2: #263548;
+  --accent: #3B82F6;
+  --accent2: #60A5FA;
+  --accent-glow: rgba(59, 130, 246, .18);
+  --green: #10B981;
+  --green-dim: rgba(16, 185, 129, .12);
+  --amber: #F59E0B;
+  --amber-dim: rgba(245, 158, 11, .12);
+  --red: #EF4444;
+  --red-dim: rgba(239, 68, 68, .1);
+  --purple: #8B5CF6;
+  --cyan: #06B6D4;
+  --text: #E2E8F0;
+  --text2: #94A3B8;
+  --text3: #475569;
+  --font: 'DM Sans', system-ui, sans-serif;
+  --mono: 'DM Mono', monospace;
+  --r: 10px;
+  --r2: 14px;
+}
+
+body {
+  background: var(--bg);
+  font-family: var(--font);
+  color: var(--text);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+.topbar {
+  height: 62px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 22px;
+  flex-shrink: 0;
+}
+.tb-title { font-size: 16px; font-weight: 600; color: var(--text); }
+.tb-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.tb-sub { font-size: 13px; color: var(--text2); }
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: #fff;
+}
+
+.content { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 20px; gap: 16px; }
+
+.page-header { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.page-header-left { display: flex; flex-direction: column; gap: 3px; }
+.page-heading { font-size: 18px; font-weight: 600; color: var(--text); }
+.page-sub { font-size: 12px; color: var(--text3); }
+
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.search-group { display: flex; align-items: center; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--r); padding: 0 12px; height: 38px; }
+.search-icon { color: var(--text3); flex-shrink: 0; }
+.search-icon svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; }
+.search-input { background: none; border: none; color: var(--text); font-size: 13px; padding: 0 10px; outline: none; width: 220px; }
+
+.add-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--r); padding: 0 18px; height: 38px;
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s;
+}
+.add-btn:hover { background: #2563EB; transform: translateY(-1px); }
+
+/* Table */
+.table-wrap {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r2); overflow: hidden; display: flex; flex-direction: column; min-height: 0;
+}
+.table-scroll { flex: 1; overflow-y: auto; }
+.table-scroll::-webkit-scrollbar { width: 4px; }
+.table-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+table { width: 100%; border-collapse: collapse; }
+thead { position: sticky; top: 0; z-index: 10; background: var(--surface2); }
+th {
+  text-align: left; padding: 13px 18px;
+  font-size: 11px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .07em;
+  border-bottom: 1px solid var(--border);
+}
+td { padding: 13px 18px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tbody tr:hover { background: var(--surface2); }
+
+.td-cust { display: flex; align-items: center; gap: 12px; }
+.td-av { width: 34px; height: 34px; background: var(--accent-glow); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; color: var(--accent2); font-size: 13px; }
+.td-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.td-phone { font-size: 12px; color: var(--text2); font-family: var(--mono); }
+
+.pts-badge {
+  background: var(--green-dim); color: var(--green);
+  padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: var(--mono);
+}
+
+.actions-cell { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.tbl-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border: none; border-radius: 7px;
+  font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s;
+}
+.tbl-btn.edit { background: var(--accent-glow); color: var(--accent2); }
+.tbl-btn.del { background: var(--red-dim); color: var(--red); }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 500; opacity: 0; visibility: hidden;
+  transition: all .2s; backdrop-filter: blur(4px);
+}
+.modal-overlay.open { opacity: 1; visibility: visible; }
+.modal-box {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 20px; width: 90%; max-width: 440px; overflow: hidden;
+  transform: scale(.96); transition: transform .2s;
+}
+.modal-overlay.open .modal-box { transform: scale(1); }
+.modal-top { padding: 20px 22px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-body { padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+.field-group { display: flex; flex-direction: column; gap: 6px; }
+.field-label { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; }
+.field-input { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); padding: 10px 14px; border-radius: var(--r); outline: none; }
+.modal-actions { display: flex; gap: 10px; padding: 0 22px 20px; }
+.mact-btn { flex: 1; padding: 12px; border: none; border-radius: var(--r); font-size: 14px; font-weight: 600; cursor: pointer; }
+.mact-btn.cancel { background: var(--surface2); color: var(--text2); }
+.mact-btn.confirm { background: var(--accent); color: #fff; }
+
+</style>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <div class="sb-logo-icon"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div>
+    <span class="sb-logo-text">QuickPOS Pro</span>
+    <button class="sb-toggle" id="hamburgerBtn"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section-label">MAIN</div>
+    <a href="owner_dashboard.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nt">Dashboard</span></a>
+    <a href="sales.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Make a Sale</span></a>
+    <a href="categories.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span><span class="nt">Categories</span></a>
+    <a href="products.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></span><span class="nt">Products</span></a>
+    <div class="sb-section-label">OPERATIONS</div>
+    <a href="inventory.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Inventory</span></a>
+    <a href="customers.html" class="nav-item active"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="nt">Customers</span></a>
+    <a href="quotations.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></span><span class="nt">Quotations</span></a>
+    <a href="ledger.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/></svg></span><span class="nt">Credit Ledger</span></a>
+    <div class="sb-section-label">ANALYTICS</div>
+    <a href="reports.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg></span><span class="nt">Reports</span></a>
+    <a href="sales_history.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/></svg></span><span class="nt">Sales History</span></a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title">Customers</div>
+    <div class="tb-right"><span class="tb-sub">CRM & Loyalty Program</span><div class="avatar" id="av">AD</div></div>
+  </div>
+
+  <div class="content">
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-heading">Customer Directory</div>
+        <div class="page-sub">Manage your customer base and track loyalty</div>
+      </div>
+      <div class="header-actions">
+        <div class="search-group">
+          <span class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          <input class="search-input" id="custSearch" placeholder="Search by name or phone…">
+        </div>
+        <button class="add-btn" id="addCustBtn"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Add Customer</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Customer Info</th>
+              <th>Contact Details</th>
+              <th>Loyalty Points</th>
+              <th>Total Spent</th>
+              <th style="text-align:right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="customerTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="custModal">
+  <div class="modal-box">
+    <div class="modal-top"><div class="modal-title" id="modalTitle">New Customer</div></div>
+    <form id="customerForm">
+      <div class="modal-body">
+        <input type="hidden" id="customerId">
+        <div class="field-group"><label class="field-label">Full Name *</label><input class="field-input" type="text" id="custName" required></div>
+        <div class="field-group"><label class="field-label">Phone Number *</label><input class="field-input" type="tel" id="custPhone" required></div>
+        <div class="field-group"><label class="field-label">Email</label><input class="field-input" type="email" id="custEmail"></div>
+        <div class="field-group"><label class="field-label">Address</label><input class="field-input" type="text" id="custAddress"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="mact-btn cancel" id="cancelBtn">Cancel</button>
+        <button type="submit" class="mact-btn confirm" id="saveBtn">Save Customer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="sidebar.js"></script>
+<script>
+let customers = JSON.parse(localStorage.getItem('quickpos-customers')) || [];
+
+function init() {
+  render();
+  const user = JSON.parse(localStorage.getItem('quickpos-user'));
+  if(user) document.getElementById('av').textContent = (user.username || 'AD').substring(0,2).toUpperCase();
+}
+
+function render() {
+  const query = document.getElementById('custSearch').value.toLowerCase();
+  const filtered = customers.filter(c => c.name.toLowerCase().includes(query) || c.phone.includes(query));
+  document.getElementById('customerTableBody').innerHTML = filtered.map(c => `
+    <tr>
+      <td><div class="td-cust"><div class="td-av">${c.name.charAt(0).toUpperCase()}</div><div><div class="td-name">${c.name}</div><div style="font-size:11px;color:var(--text3)">Member</div></div></div></td>
+      <td><div class="td-phone">${c.phone}</div><div style="font-size:12px;color:var(--text2)">${c.email || 'No email'}</div></td>
+      <td><span class="pts-badge">${c.points || 0} PTS</span></td>
+      <td style="font-weight:600; color:var(--text)">LKR ${parseFloat(c.spent || 0).toLocaleString()}</td>
+      <td><div class="actions-cell">
+        <button class="tbl-btn edit" onclick="openEdit(${c.id})">Edit</button>
+        <button class="tbl-btn del" onclick="deleteCust(${c.id})">Delete</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function openEdit(id) {
+  const c = customers.find(x => x.id === id);
+  if(!c) return;
+  document.getElementById('customerId').value = c.id;
+  document.getElementById('custName').value = c.name;
+  document.getElementById('custPhone').value = c.phone;
+  document.getElementById('custEmail').value = c.email || '';
+  document.getElementById('custAddress').value = c.address || '';
+  document.getElementById('modalTitle').textContent = 'Edit Customer';
+  document.getElementById('custModal').classList.add('open');
+}
+window.openEdit = openEdit;
+
+function deleteCust(id) {
+  if(!confirm('Delete customer?')) return;
+  customers = customers.filter(x => x.id !== id);
+  localStorage.setItem('quickpos-customers', JSON.stringify(customers));
+  render();
+}
+window.deleteCust = deleteCust;
+
+document.getElementById('addCustBtn').onclick = () => {
+  document.getElementById('customerForm').reset();
+  document.getElementById('customerId').value = '';
+  document.getElementById('modalTitle').textContent = 'New Customer';
+  document.getElementById('custModal').classList.add('open');
+};
+
+document.getElementById('cancelBtn').onclick = () => document.getElementById('custModal').classList.remove('open');
+document.getElementById('custSearch').oninput = render;
+
+document.getElementById('customerForm').onsubmit = e => {
+  e.preventDefault();
+  const id = document.getElementById('customerId').value;
+  const cData = {
+    id: id ? parseInt(id) : Date.now(),
+    name: document.getElementById('custName').value,
+    phone: document.getElementById('custPhone').value,
+    email: document.getElementById('custEmail').value,
+    address: document.getElementById('custAddress').value,
+    points: id ? customers.find(x => x.id == id).points : 0,
+    spent: id ? customers.find(x => x.id == id).spent : 0
+  };
+  if(id) { const idx = customers.findIndex(x => x.id == id); customers[idx] = cData; }
+  else customers.push(cData);
+  localStorage.setItem('quickpos-customers', JSON.stringify(customers));
+  document.getElementById('custModal').classList.remove('open');
+  render();
+};
+
+init();
+</script>
+</body>
+</html>

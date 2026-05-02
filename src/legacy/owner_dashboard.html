@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPOS Pro — Owner Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="sidebar.css">
+<style>
+/* ─── GLOBAL STYLES & THEME VARIABLES ─── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0B0F19;
+  --surface: #111827;
+  --surface2: #1A2235;
+  --surface3: #1F2B3E;
+  --border: #1E2D45;
+  --border2: #263548;
+  --accent: #3B82F6;
+  --accent2: #60A5FA;
+  --accent-glow: rgba(59, 130, 246, .18);
+  --green: #10B981;
+  --green-dim: #064E3B;
+  --amber: #F59E0B;
+  --amber-dim: #451A03;
+  --red: #EF4444;
+  --red-dim: #450A0A;
+  --purple: #8B5CF6;
+  --cyan: #06B6D4;
+  --text: #E2E8F0;
+  --text2: #94A3B8;
+  --text3: #475569;
+  --font: 'DM Sans', system-ui, sans-serif;
+  --mono: 'DM Mono', monospace;
+  --r: 10px;
+  --r2: 14px;
+}
+body {
+  background: var(--bg);
+  font-family: var(--font);
+  color: var(--text);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+/* ─── MAIN CONTENT LAYOUT ─── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ─── TOPBAR ─── */
+.topbar {
+  height: 62px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 22px;
+  flex-shrink: 0;
+}
+.tb-title { font-size: 16px; font-weight: 600; color: var(--text); white-space: nowrap; }
+.tb-chip {
+  background: var(--green-dim);
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.tb-chip::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+.tb-filters { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.filter-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 11px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: var(--font);
+}
+.filter-btn:hover { border-color: var(--accent); color: var(--text); }
+.filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tb-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.tb-icon-btn {
+  width: 34px;
+  height: 34px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all .15s;
+}
+.tb-icon-btn:hover { border-color: var(--accent); color: var(--accent2); }
+.tb-icon-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* ─── CONTENT GRID ─── */
+.content { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-track { background: transparent; }
+.content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ─── KPI CARDS ─── */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2); padding: 18px; position: relative; overflow: hidden; transition: border-color .2s, transform .2s; }
+.kpi-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+.kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.kpi-card.blue::before { background: linear-gradient(90deg, var(--accent), var(--cyan)); }
+.kpi-card.green::before { background: linear-gradient(90deg, var(--green), #34D399); }
+.kpi-card.amber::before { background: linear-gradient(90deg, var(--amber), #FCD34D); }
+.kpi-card.purple::before { background: linear-gradient(90deg, var(--purple), #A78BFA); }
+.kpi-label { font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.kpi-label svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.kpi-val { font-size: 26px; font-weight: 600; color: var(--text); font-family: var(--mono); letter-spacing: -.02em; line-height: 1; margin-bottom: 10px; }
+.kpi-meta { font-size: 12px; display: flex; align-items: center; gap: 5px; }
+.kpi-up { color: var(--green); }
+.kpi-down { color: var(--red); }
+.kpi-neu { color: var(--text3); }
+.kpi-sub { color: var(--text3); }
+.kpi-icon { position: absolute; top: 18px; right: 18px; opacity: .12; }
+.kpi-icon svg { width: 36px; height: 36px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.kpi-card.blue .kpi-icon { color: var(--accent); }
+.kpi-card.green .kpi-icon { color: var(--green); }
+.kpi-card.amber .kpi-icon { color: var(--amber); }
+.kpi-card.purple .kpi-icon { color: var(--purple); }
+
+/* ─── GRID ROWS ─── */
+.grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2); display: flex; flex-direction: column; overflow: hidden; }
+.card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-size: 13px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 7px; }
+.card-title svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .7; }
+.card-body { padding: 16px 18px; flex: 1; }
+.card-action { font-size: 11px; color: var(--accent2); cursor: pointer; display: flex; align-items: center; gap: 3px; transition: opacity .15s; }
+.card-action:hover { opacity: .7; }
+.card-action svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ─── MINI TABLES & LISTS ─── */
+.stat-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.stat-row:last-child { border-bottom: none; padding-bottom: 0; }
+.stat-row:first-child { padding-top: 0; }
+.stat-label { font-size: 13px; color: var(--text2); }
+.stat-vals { display: flex; gap: 20px; }
+.stat-val { font-size: 13px; font-weight: 500; color: var(--text); font-family: var(--mono); text-align: right; min-width: 70px; }
+.stat-val.dim { color: var(--text2); }
+
+/* ─── CHARTS ─── */
+.bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 110px; margin-bottom: 8px; padding-top: 24px; position: relative; }
+.bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; }
+.bar { border-radius: 5px 5px 0 0; transition: height .5s ease; cursor: pointer; position: relative; width: 100%; min-width: 24px; }
+.bar:hover { filter: brightness(1.2); }
+.bar-tip { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: 500; color: var(--text2); white-space: nowrap; background: var(--surface2); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); pointer-events: none; opacity: 0; transition: opacity .15s; }
+.bar:hover .bar-tip { opacity: 1; }
+.bar-lbl { font-size: 10px; color: var(--text3); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+.bar-chart-legend { display: flex; gap: 12px; margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--border); }
+.leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text3); }
+.leg-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+/* ─── HOURLY CHART ─── */
+.hour-chart { display: flex; align-items: flex-end; gap: 3px; height: 90px; margin: 4px 0; }
+.hbar { border-radius: 3px 3px 0 0; background: var(--surface3); flex: 1; cursor: pointer; position: relative; transition: background .15s; }
+.hbar.peak { background: linear-gradient(0deg, var(--accent), rgba(59, 130, 246, .4)); }
+.hbar:hover { background: var(--accent) !important; opacity: .9; }
+.hbar-tip { position: absolute; top: -26px; left: 50%; transform: translateX(-50%); font-size: 9px; white-space: nowrap; background: var(--surface2); border: 1px solid var(--border); padding: 2px 5px; border-radius: 4px; color: var(--text2); opacity: 0; pointer-events: none; transition: opacity .15s; }
+.hbar:hover .hbar-tip { opacity: 1; }
+.hour-labels { display: flex; gap: 3px; margin-top: 6px; }
+.hl { flex: 1; font-size: 9px; color: var(--text3); text-align: center; }
+
+/* ─── TOP ITEMS ─── */
+.top-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.top-item:last-child { border-bottom: none; padding-bottom: 0; }
+.top-item:first-child { padding-top: 0; }
+.rank { font-size: 11px; font-weight: 600; font-family: var(--mono); color: var(--text3); width: 16px; flex-shrink: 0; }
+.rank.r1 { color: var(--amber); }
+.rank.r2 { color: var(--text2); }
+.rank.r3 { color: var(--accent2); }
+.item-info { flex: 1; min-width: 0; }
+.item-name { font-size: 13px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px; }
+.item-cat { font-size: 11px; color: var(--text3); }
+.item-bar-wrap { width: 80px; flex-shrink: 0; }
+.item-bar-bg { height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+.item-bar-fill { height: 100%; border-radius: 2px; background: var(--accent); }
+.item-qty { font-size: 12px; font-weight: 600; font-family: var(--mono); color: var(--text2); margin-top: 3px; text-align: right; }
+
+/* ─── ALERTS & NOTIFICATIONS ─── */
+.alert-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 8px; background: var(--surface2); transition: border-color .15s; }
+.alert-item:last-child { margin-bottom: 0; }
+.alert-item.critical { border-color: rgba(239, 68, 68, .3); background: rgba(239, 68, 68, .04); }
+.alert-item.warn { border-color: rgba(245, 158, 11, .3); background: rgba(245, 158, 11, .04); }
+.alert-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.alert-dot.critical { background: var(--red); }
+.alert-dot.warn { background: var(--amber); }
+.alert-info { flex: 1; min-width: 0; }
+.alert-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.alert-meta { font-size: 11px; color: var(--text3); }
+.alert-qty { font-family: var(--mono); font-size: 12px; font-weight: 600; }
+.alert-qty.critical { color: var(--red); }
+.alert-qty.warn { color: var(--amber); }
+.alert-btn { background: var(--surface3); border: 1px solid var(--border2); color: var(--text2); font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-family: var(--font); transition: all .15s; white-space: nowrap; }
+.alert-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ─── SLOW MOVING ─── */
+.slow-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 8px; background: var(--surface2); }
+.slow-item:last-child { margin-bottom: 0; }
+.slow-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; background: rgba(245, 158, 11, .12); color: var(--amber); border: 1px solid rgba(245, 158, 11, .2); white-space: nowrap; flex-shrink: 0; }
+.slow-name { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); }
+.slow-meta { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.promo-btn { background: transparent; border: 1px solid rgba(139, 92, 246, .4); color: var(--purple); font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-family: var(--font); transition: all .15s; white-space: nowrap; }
+.promo-btn:hover { background: rgba(139, 92, 246, .15); border-color: var(--purple); }
+
+/* ─── BREAKDOWN CHART ─── */
+.cat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.cat-row:last-child { margin-bottom: 0; }
+.cat-name { font-size: 12px; font-weight: 500; color: var(--text2); width: 90px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cat-bar-bg { flex: 1; height: 8px; background: var(--surface3); border-radius: 4px; overflow: hidden; }
+.cat-bar-fill { height: 100%; border-radius: 4px; transition: width .5s ease; }
+.cat-val { font-size: 11px; font-weight: 500; font-family: var(--mono); color: var(--text2); min-width: 72px; text-align: right; }
+
+/* ─── PAYMENT MIX ─── */
+.pay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pay-item { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r); padding: 12px; text-align: center; }
+.pay-pct { font-size: 22px; font-weight: 600; font-family: var(--mono); color: var(--text); line-height: 1; margin-bottom: 4px; }
+.pay-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+.pay-bar { height: 3px; border-radius: 2px; margin-top: 4px; }
+
+/* ─── SCROLL HELPERS ─── */
+.overflow-scroll { overflow-y: auto; max-height: 260px; }
+.overflow-scroll::-webkit-scrollbar { width: 0; }
+
+/* ─── BADGES ─── */
+.section-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+.badge-red { background: rgba(239, 68, 68, .12); color: var(--red); border: 1px solid rgba(239, 68, 68, .2); }
+.badge-green { background: rgba(16, 185, 129, .12); color: var(--green); border: 1px solid rgba(16, 185, 129, .2); }
+.badge-blue { background: rgba(59, 130, 246, .12); color: var(--accent2); border: 1px solid rgba(59, 130, 246, .2); }
+.badge-amber { background: rgba(245, 158, 11, .12); color: var(--amber); border: 1px solid rgba(245, 158, 11, .2); }
+
+/* ─── RESPONSIVE ─── */
+@media(max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .grid-2 { grid-template-columns: 1fr; } .grid-3 { grid-template-columns: 1fr 1fr; } }
+@media(max-width: 768px) { .kpi-grid { grid-template-columns: 1fr 1fr; } .grid-3 { grid-template-columns: 1fr; } .tb-filters { display: none; } }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <div class="sb-logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+    </div>
+    <span class="sb-logo-text" id="logo">QuickPOS Pro</span>
+    <button class="sb-toggle" id="hamburgerBtn">
+      <svg viewBox="0 0 24 24" id="toggleIcon"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+
+  <div class="sb-nav">
+    <div class="sb-section-label">MAIN</div>
+    <a href="owner_dashboard.html" class="nav-item active">
+      <span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>
+      <span class="nt">Dashboard</span>
+    </a>
+    <a href="sales.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span>
+      <span class="nt">Make a Sale</span>
+    </a>
+    <a href="categories.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
+      <span class="nt">Categories</span>
+    </a>
+    <a href="products.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>
+      <span class="nt">Products</span>
+    </a>
+
+    <div class="sb-section-label">OPERATIONS</div>
+    <a href="inventory.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span>
+      <span class="nt">Inventory</span>
+      <span class="nav-badge" id="inventoryAlertBadge" style="display: none;">0</span>
+    </a>
+    <a href="customers.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      <span class="nt">Customers</span>
+    </a>
+    <a href="quotations.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+      <span class="nt">Quotations</span>
+    </a>
+    <a href="ledger.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+      <span class="nt">Credit Ledger</span>
+    </a>
+
+    <div class="sb-section-label">ANALYTICS</div>
+    <a href="reports.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></span>
+      <span class="nt">Reports</span>
+    </a>
+    <a href="sales_history.html" class="nav-item">
+      <span class="ni"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+      <span class="nt">Sales History</span>
+    </a>
+
+    <div class="sb-section-label">ADMIN</div>
+    <a href="users.html" class="nav-item owner-only">
+      <span class="ni"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <span class="nt">User Management</span>
+    </a>
+    <a href="settings.html" class="nav-item owner-only">
+      <span class="ni"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+      <span class="nt">Settings</span>
+    </a>
+  </div>
+
+  <div class="sb-bottom">
+    <a href="#" class="nav-item" id="logoutBtn">
+      <span class="ni"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+      <span class="nt">Logout</span>
+    </a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title">Executive Dashboard</div>
+    <div class="tb-chip">Live</div>
+    <div class="tb-filters">
+      <button class="filter-btn active" data-range="today">Today</button>
+      <button class="filter-btn" data-range="yesterday">Yesterday</button>
+      <button class="filter-btn" data-range="last7">7 Days</button>
+      <button class="filter-btn" data-range="thisMonth">This Month</button>
+      <button class="filter-btn" data-range="lastMonth">Last Month</button>
+    </div>
+    <div class="tb-right">
+      <div class="tb-icon-btn" title="Notifications">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      </div>
+      <div class="tb-icon-btn" title="Refresh" id="refreshBtn">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      </div>
+      <div class="avatar">AK</div>
+    </div>
+  </div>
+
+  <div class="content" id="dashContent">
+    <div class="kpi-grid">
+      <div class="kpi-card blue">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H7"/></svg></div>
+        <div class="kpi-label"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H7"/></svg>Total Revenue</div>
+        <div class="kpi-val" id="kpiRevenue">LKR 0</div>
+        <div class="kpi-meta" id="kpiRevTrend"><span class="kpi-neu">— No data</span></div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M21 8v8a2 2 0 01-1 1.7l-7 4a2 2 0 01-2 0l-7-4A2 2 0 013 16V8a2 2 0 011-1.7l7-4a2 2 0 012 0l7 4A2 2 0 0121 8z"/></svg></div>
+        <div class="kpi-label"><svg viewBox="0 0 24 24"><path d="M21 8v8a2 2 0 01-1 1.7l-7 4a2 2 0 01-2 0l-7-4A2 2 0 013 16V8a2 2 0 011-1.7l7-4a2 2 0 012 0l7 4A2 2 0 0121 8z"/></svg>Stock Volume</div>
+        <div class="kpi-val" id="kpiStock">0 <span style="font-size:14px;color:var(--text3)">units</span></div>
+        <div class="kpi-meta"><span class="kpi-sub" id="kpiStockLow">— Checking stock…</span></div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <div class="kpi-label"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Items Sold Today</div>
+        <div class="kpi-val" id="kpiItems">0</div>
+        <div class="kpi-meta"><span class="kpi-sub">Total quantity</span></div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 01-10 0z"/><path d="M7 8H5a3 3 0 003 3"/><path d="M17 8h2a3 3 0 01-3 3"/><line x1="12" y1="13" x2="12" y2="18"/><line x1="8" y1="22" x2="16" y2="22"/></svg></div>
+        <div class="kpi-label"><svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 01-10 0z"/></svg>Avg Transaction</div>
+        <div class="kpi-val" id="kpiAvg">LKR 0</div>
+        <div class="kpi-meta"><span class="kpi-sub" id="kpiTxCount">— transactions</span></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
+            Sales Overview
+          </div>
+          <span class="section-badge badge-blue">Today vs 7D</span>
+        </div>
+        <div class="card-body">
+          <div id="overviewStats">
+            <div class="stat-row">
+              <span class="stat-label">Transactions</span>
+              <div class="stat-vals">
+                <span class="stat-val" id="ovToday0">0</span>
+                <span class="stat-val dim" id="ovWeek0">0</span>
+              </div>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Revenue</span>
+              <div class="stat-vals">
+                <span class="stat-val" id="ovToday1">LKR 0</span>
+                <span class="stat-val dim" id="ovWeek1">LKR 0</span>
+              </div>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Items Sold</span>
+              <div class="stat-vals">
+                <span class="stat-val" id="ovToday2">0</span>
+                <span class="stat-val dim" id="ovWeek2">0</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:16px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:10px;font-weight:500;text-transform:uppercase;letter-spacing:.06em">Category Breakdown</div>
+            <div id="catChart"></div>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:10px">
+            <span style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--text);display:inline-block"></span>Today</span>
+            <span style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--text3);display:inline-block"></span>7 Days</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title" style="color:var(--red)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--red)"><path d="M10.3 3.9l-8.2 14a1 1 0 00.9 1.5h16.4a1 1 0 00.9-1.5l-8.2-14a1 1 0 00-1.8 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Reorder Alerts
+          </div>
+          <span class="section-badge badge-red" id="reorderBadge">0 items</span>
+        </div>
+        <div class="card-body overflow-scroll" id="reorderList">
+          <div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">Checking stock levels…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            Top Products
+          </div>
+          <span class="section-badge badge-green">by qty</span>
+        </div>
+        <div class="card-body" id="topItemsList">
+          <div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">No sales data</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>
+            Peak Hours
+          </div>
+          <span class="section-badge badge-blue">today</span>
+        </div>
+        <div class="card-body">
+          <div id="hourChart" class="hour-chart"></div>
+          <div id="hourLabels" class="hour-labels"></div>
+          <div class="bar-chart-legend" style="margin-top:12px">
+            <div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>Peak period</div>
+            <div class="leg-item"><div class="leg-dot" style="background:var(--surface3)"></div>Low period</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Payment Mix
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="pay-grid" id="payMix">
+            <div class="pay-item">
+              <div class="pay-pct" id="cashPct">0%</div>
+              <div class="pay-label">Cash</div>
+              <div class="pay-bar" style="background:var(--green)"></div>
+            </div>
+            <div class="pay-item">
+              <div class="pay-pct" id="cardPct">0%</div>
+              <div class="pay-label">Card</div>
+              <div class="pay-bar" style="background:var(--accent)"></div>
+            </div>
+          </div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+            <div class="stat-row" style="padding-top:0">
+              <span class="stat-label" style="font-size:12px">Cash Revenue</span>
+              <span class="stat-val" id="cashRev" style="font-size:12px">LKR 0</span>
+            </div>
+            <div class="stat-row" style="padding-bottom:0">
+              <span class="stat-label" style="font-size:12px">Card Revenue</span>
+              <span class="stat-val" id="cardRev" style="font-size:12px">LKR 0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title" style="color:var(--amber)">
+          <svg viewBox="0 0 24 24" style="stroke:var(--amber)"><path d="M12 2v10"/><path d="M12 18h.01"/><circle cx="12" cy="12" r="10"/></svg>
+          Slow Moving Items
+        </div>
+        <span class="section-badge badge-amber">No sales 3+ days</span>
+      </div>
+      <div class="card-body">
+        <div id="slowList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="sidebar.js"></script>
+
+<script>
+// ─── SAMPLE DATA & INITIALIZATION ───
+function generateSampleData(){
+  const now=new Date();
+  const items=[
+    {id:1,name:"Samba Rice 5kg",price:1250,category:"Grains",qty:2,stock:18},
+    {id:2,name:"Fresh Milk 1L",price:280,category:"Dairy",qty:4,stock:4},
+    {id:3,name:"Coca-Cola 1.5L",price:420,category:"Beverages",qty:3,stock:3},
+    {id:4,name:"Munchee Biscuits",price:150,category:"Snacks",qty:6,stock:25},
+    {id:5,name:"Chicken (Full)",price:1450,category:"Meat",qty:1,stock:2},
+    {id:6,name:"Sunlight Soap",price:110,category:"Personal Care",qty:5,stock:6},
+    {id:7,name:"Dhal 1kg",price:380,category:"Grains",qty:3,stock:12},
+    {id:8,name:"Nestomalt 400g",price:640,category:"Health",qty:2,stock:8}
+  ];
+  const offsets=[0,0,0,0,1,1,2,3,4,5,7,8,10,14,18,21];
+  const hours=[9,10,11,12,13,14,15,16,17,18,19,20,8,11,14,17];
+  return offsets.map((offset,i)=>{
+    const a=items[i%items.length],b=items[(i+2)%items.length];
+    const d=new Date(now);
+    d.setDate(now.getDate()-offset);
+    d.setHours(hours[i],(i*11)%60,0,0);
+    const saleItems=[
+      {productId:a.id,name:a.name,quantity:a.qty,price:a.price,category:a.category},
+      {productId:b.id,name:b.name,quantity:Math.max(1,a.qty-1),price:b.price,category:b.category}
+    ];
+    return{id:i+1,timestamp:d.getTime(),items:saleItems,
+      total:saleItems.reduce((s,x)=>s+x.price*x.quantity,0),
+      paymentMethod:i%3===0?"Card":"Cash"};
+  });
+}
+
+const salesData=generateSampleData();
+const products=JSON.parse(localStorage.getItem('quickpos-products'))||[
+  {name:"Samba Rice 5kg",stock:18,category:"Grains"},
+  {name:"Fresh Milk 1L",stock:4,category:"Dairy"},
+  {name:"Coca-Cola 1.5L",stock:3,category:"Beverages"},
+  {name:"Munchee Biscuits",stock:25,category:"Snacks"},
+  {name:"Chicken (Full)",stock:2,category:"Meat"},
+  {name:"Sunlight Soap",stock:6,category:"Personal Care"},
+  {name:"Dhal 1kg",stock:12,category:"Grains"},
+  {name:"Nestomalt 400g",stock:8,category:"Health"}
+];
+
+function fmt(n){return"LKR "+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function fmtK(n){return n>=1000?"LKR "+(n/1000).toFixed(1)+"k":fmt(n)}
+
+// ─── DASHBOARD LOGIC FUNCTIONS ───
+function filterData(range){
+  const now=new Date(),start=new Date();
+  if(range==='today'){start.setHours(0,0,0,0);}
+  else if(range==='yesterday'){start.setDate(start.getDate()-1);start.setHours(0,0,0,0);now.setDate(now.getDate()-1);now.setHours(23,59,59,999);}
+  else if(range==='last7'){start.setDate(start.getDate()-7);}
+  else if(range==='thisMonth'){start.setDate(1);start.setHours(0,0,0,0);}
+  else if(range==='lastMonth'){start.setMonth(start.getMonth()-1,1);start.setHours(0,0,0,0);now.setDate(0);now.setHours(23,59,59,999);}
+  return salesData.filter(s=>new Date(s.timestamp)>=start&&new Date(s.timestamp)<=now);
+}
+
+function calcMetrics(data){
+  const m={revenue:0,items:0,transactions:data.length,catSales:{},hourSales:new Array(24).fill(0),cash:0,card:0};
+  data.forEach(s=>{
+    m.revenue+=s.total;
+    s.items.forEach(it=>{
+      m.items+=it.quantity;
+      m.catSales[it.category]=(m.catSales[it.category]||0)+it.price*it.quantity;
+    });
+    const h=new Date(s.timestamp).getHours();
+    m.hourSales[h]+=s.total;
+    if(s.paymentMethod==='Cash')m.cash+=s.total;
+    else m.card+=s.total;
+  });
+  m.avg=m.transactions>0?m.revenue/m.transactions:0;
+  return m;
+}
+
+function updateKPIs(m){
+  document.getElementById('kpiRevenue').textContent=fmtK(m.revenue);
+  document.getElementById('kpiItems').textContent=m.items;
+  document.getElementById('kpiAvg').textContent=fmtK(m.avg);
+  document.getElementById('kpiTxCount').textContent=m.transactions+' transactions';
+  const totalStock=products.reduce((s,p)=>s+(p.stock||0),0);
+  document.getElementById('kpiStock').innerHTML=totalStock.toLocaleString()+' <span style="font-size:14px;color:var(--text3)">units</span>';
+  const low=products.filter(p=>p.stock>0&&p.stock<5).length;
+  document.getElementById('kpiStockLow').textContent=low>0?`⚠ ${low} products low stock`:'All stock levels OK';
+  document.getElementById('kpiStockLow').style.color=low>0?'var(--red)':'var(--text3)';
+}
+
+function updateOverview(todayM,weekM){
+  document.getElementById('ovToday0').textContent=todayM.transactions;
+  document.getElementById('ovWeek0').textContent=weekM.transactions;
+  document.getElementById('ovToday1').textContent=fmtK(todayM.revenue);
+  document.getElementById('ovWeek1').textContent=fmtK(weekM.revenue);
+  document.getElementById('ovToday2').textContent=todayM.items;
+  document.getElementById('ovWeek2').textContent=weekM.items;
+}
+
+function updateCatChart(catSales){
+  const cats=Object.entries(catSales).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const max=Math.max(...cats.map(c=>c[1]),1);
+  const colors=['var(--accent)','var(--green)','var(--amber)','var(--purple)','var(--cyan)'];
+  document.getElementById('catChart').innerHTML=cats.map(([name,val],i)=>`
+    <div class="cat-row">
+      <span class="cat-name">${name}</span>
+      <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${(val/max*100).toFixed(1)}%;background:${colors[i%colors.length]}"></div></div>
+      <span class="cat-val">${fmtK(val)}</span>
+    </div>`).join('')||'<div style="color:var(--text3);font-size:13px;padding:10px 0">No data</div>';
+}
+
+function updateReorderList(data){
+  const low=products.filter(p=>p.stock>0&&p.stock<5).sort((a,b)=>a.stock-b.stock);
+  const badge=document.getElementById('reorderBadge');
+  badge.textContent=low.length+' items';
+  badge.className='section-badge '+(low.length>0?'badge-red':'badge-green');
+  document.getElementById('reorderList').innerHTML=low.length===0
+    ?'<div style="text-align:center;padding:30px 0;color:var(--green);font-size:13px">✓ All stock levels are healthy</div>'
+    :low.map(p=>{
+      const crit=p.stock<=2;
+      return`<div class="alert-item ${crit?'critical':'warn'}">
+        <div class="alert-dot ${crit?'critical':'warn'}"></div>
+        <div class="alert-info">
+          <div class="alert-name">${p.name}</div>
+          <div class="alert-meta">${p.category||'General'}</div>
+        </div>
+        <span class="alert-qty ${crit?'critical':'warn'}">${p.stock} left</span>
+        <button class="alert-btn" onclick="alert('Opening inventory for: ${p.name}')">Reorder</button>
+      </div>`;}).join('');
+}
+
+function updateTopItems(data){
+  const map=new Map();
+  data.forEach(s=>s.items.forEach(it=>{
+    const k=it.productId||it.name;
+    const ex=map.get(k)||{name:it.name,category:it.category,qty:0};
+    ex.qty+=it.quantity;map.set(k,ex);
+  }));
+  const sorted=[...map.values()].sort((a,b)=>b.qty-a.qty).slice(0,6);
+  const max=Math.max(...sorted.map(x=>x.qty),1);
+  document.getElementById('topItemsList').innerHTML=sorted.length===0
+    ?'<div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">No sales data</div>'
+    :sorted.map((it,i)=>`
+    <div class="top-item">
+      <span class="rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</span>
+      <div class="item-info">
+        <div class="item-name">${it.name}</div>
+        <div class="item-cat">${it.category||'—'}</div>
+      </div>
+      <div class="item-bar-wrap">
+        <div class="item-bar-bg"><div class="item-bar-fill" style="width:${(it.qty/max*100).toFixed(1)}%"></div></div>
+        <div class="item-qty">${it.qty} qty</div>
+      </div>
+    </div>`).join('');
+}
+
+function updateHourChart(hourSales){
+  const showHours=[6,8,10,12,14,16,18,20,22];
+  const vals=showHours.map(h=>hourSales[h]||0);
+  const max=Math.max(...vals,1);
+  const peakH=showHours[vals.indexOf(Math.max(...vals))];
+  document.getElementById('hourChart').innerHTML=vals.map((v,i)=>{
+    const h=showHours[i];
+    const pct=Math.max(8,(v/max*100)).toFixed(1);
+    const isPeak=h===peakH&&v>0;
+    const label=h>=12?`${h===12?12:h-12}pm`:`${h}am`;
+    return`<div class="hbar ${isPeak?'peak':''}" style="height:${pct}%"><span class="hbar-tip">${label}: ${fmtK(v)}</span></div>`;
+  }).join('');
+  document.getElementById('hourLabels').innerHTML=showHours.map(h=>{
+    const label=h>=12?`${h===12?12:h-12}pm`:`${h}am`;
+    return`<span class="hl">${label}</span>`;
+  }).join('');
+}
+
+function updatePayment(m){
+  const total=m.cash+m.card||1;
+  const cp=Math.round(m.cash/total*100),kp=100-cp;
+  document.getElementById('cashPct').textContent=cp+'%';
+  document.getElementById('cardPct').textContent=kp+'%';
+  document.getElementById('cashRev').textContent=fmtK(m.cash);
+  document.getElementById('cardRev').textContent=fmtK(m.card);
+}
+
+function updateSlowItems(){
+  const slowItems=[
+    {name:"Seasonal Tea Bags",lastSold:5,stock:15,category:"Beverages"},
+    {name:"Special Coffee Blend",lastSold:4,stock:8,category:"Beverages"},
+    {name:"Premium Cookies",lastSold:6,stock:12,category:"Snacks"},
+    {name:"Coconut Milk 400ml",lastSold:3,stock:20,category:"Dairy"}
+  ];
+  document.getElementById('slowList').innerHTML=slowItems.map(it=>`
+    <div class="slow-item">
+      <div style="flex:1;min-width:0">
+        <div class="slow-name">${it.name}</div>
+        <div class="slow-meta">${it.category} · ${it.stock} units in stock</div>
+      </div>
+      <span class="slow-badge">${it.lastSold}d ago</span>
+      <button class="promo-btn" onclick="alert('Create promotion for: ${it.name}')">Promote</button>
+    </div>`).join('');
+}
+
+function updateDashboard(range){
+  const filtered=filterData(range);
+  const m=calcMetrics(filtered);
+  const todayM=calcMetrics(filterData('today'));
+  const weekM=calcMetrics(filterData('last7'));
+  updateKPIs(m);
+  updateOverview(todayM,weekM);
+  updateCatChart(m.catSales);
+  updateReorderList(filtered);
+  updateTopItems(filtered);
+  updateHourChart(m.hourSales);
+  updatePayment(m);
+  updateSlowItems();
+}
+
+// ─── EVENT LISTENERS ───
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    updateDashboard(btn.dataset.range);
+  });
+});
+
+document.getElementById('refreshBtn').addEventListener('click',()=>{
+  const active=document.querySelector('.filter-btn.active');
+  updateDashboard(active?active.dataset.range:'today');
+});
+
+// ─── INITIALIZE ───
+updateDashboard('today');
+</script>
+</body>
+</html>

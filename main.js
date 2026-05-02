@@ -37,14 +37,14 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1280,
         height: 720,
-        icon: path.join(__dirname, 'QuickPOS Hardware', 'icon.jpeg'), 
+        icon: path.join(__dirname, 'src', 'app', 'assets', 'img', 'icon.jpeg'), 
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
         }
     });
 
-    mainWindow.loadFile(path.join(__dirname, 'QuickPOS Hardware', 'login.html'));
+    mainWindow.loadFile(path.join(__dirname, 'src', 'app', 'pages', 'auth', 'login.html'));
     mainWindow.setMenuBarVisibility(false); 
 }
 
