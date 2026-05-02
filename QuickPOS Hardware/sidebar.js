@@ -1,40 +1,27 @@
-(function () {
-    const sidebar = document.getElementById('sidebar');
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const logo = document.getElementById('logo');
+// ─── SIDEBAR TOGGLE & PERSISTENCE ───
+const sidebar = document.getElementById('sidebar');
+const toggleBtn = document.getElementById('hamburgerBtn') || document.getElementById('sidebarToggle');
 
-    if (!sidebar) return;
+if (sidebar && toggleBtn) {
+  toggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    localStorage.setItem('qp-sb', sidebar.classList.contains('collapsed') ? '1' : '0');
+  });
 
-    function applyVisualState(isCollapsed) {
-        sidebar.classList.toggle('collapsed', isCollapsed);
-        sidebar.classList.toggle('expanded', !isCollapsed);
-        if (logo) logo.classList.toggle('collapsed', isCollapsed);
+  // කලින් collapse කරලා තිබුනොත් ඒ state එක load කිරීම
+  if (localStorage.getItem('qp-sb') === '1') {
+    sidebar.classList.add('collapsed');
+  }
+}
+
+// ─── LOGOUT FUNCTIONALITY ───
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', e => {
+    e.preventDefault();
+    if (confirm('Logout from QuickPOS Pro?')) {
+      localStorage.removeItem('quickpos-user');
+      window.location.href = 'login.html';
     }
-
-    function persistState(isCollapsed) {
-        try {
-            localStorage.setItem('quickpos-sidebar', isCollapsed ? 'collapsed' : 'expanded');
-        } catch (_) {}
-    }
-
-    function loadState() {
-        try {
-            return localStorage.getItem('quickpos-sidebar') === 'collapsed';
-        } catch (_) {
-            return false;
-        }
-    }
-
-    const initialCollapsed = loadState();
-    applyVisualState(initialCollapsed);
-
-    if (typeof window.toggleSidebar !== 'function' && hamburgerBtn && !hamburgerBtn.dataset.sidebarBound) {
-        window.toggleSidebar = function () {
-            const isCollapsed = sidebar.classList.contains('collapsed');
-            applyVisualState(!isCollapsed);
-            persistState(!isCollapsed);
-        };
-        hamburgerBtn.addEventListener('click', window.toggleSidebar);
-        hamburgerBtn.dataset.sidebarBound = '1';
-    }
-})();
+  });
+}
