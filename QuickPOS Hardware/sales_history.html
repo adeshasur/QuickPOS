@@ -972,10 +972,10 @@
             const cashAmt  = list.filter(x=>x.method==='Cash').reduce((s,x)=>s+x.total,0);
             const bankAmt  = list.filter(x=>x.method==='Bank').reduce((s,x)=>s+x.total,0);
             $('summaryRow').innerHTML = `
-                <div class="sum-pill">${list.length} sale\${list.length!==1?'s':''}</div>
-                <div class="sum-pill">Total <span class="val green">\${fmtLKR(totalAmt)}</span></div>
-                <div class="sum-pill">Cash <span class="val">\${fmtLKR(cashAmt)}</span></div>
-                <div class="sum-pill">Bank <span class="val">\${fmtLKR(bankAmt)}</span></div>
+                <div class="sum-pill">${list.length} sale${list.length!==1?'s':''}</div>
+                <div class="sum-pill">Total <span class="val green">${fmtLKR(totalAmt)}</span></div>
+                <div class="sum-pill">Cash <span class="val">${fmtLKR(cashAmt)}</span></div>
+                <div class="sum-pill">Bank <span class="val">${fmtLKR(bankAmt)}</span></div>
             `;
 
             if(!list.length){
@@ -989,21 +989,21 @@
                 const itemSummary = s.items.length===1
                     ? s.items[0].name
                     : s.items[0].name+' + '+(s.items.length-1)+' more';
-                return `<tr onclick="openReceipt('\${s.id}')">
-                    <td><span class="inv-id">\${s.id}</span></td>
-                    <td class="muted hide-mob">\${s.date} · \${s.time}</td>
-                    <td class="muted hide-mob">\${itemSummary}</td>
+                return `<tr onclick="openReceipt('${s.id}')">
+                    <td><span class="inv-id">${s.id}</span></td>
+                    <td class="muted hide-mob">${s.date} · ${s.time}</td>
+                    <td class="muted hide-mob">${itemSummary}</td>
                     <td>
-                        <span class="pay-badge \${s.method==='Cash'?'cash':'bank'}">
-                            \${s.method==='Cash'
+                        <span class="pay-badge ${s.method==='Cash'?'cash':'bank'}">
+                            ${s.method==='Cash'
                             ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle></svg>'
                             : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>'}
-                            \${s.method}
+                            ${s.method}
                         </span>
                     </td>
-                    <td class="r amount-cell">\${fmtLKR(s.total)}</td>
+                    <td class="r amount-cell">${fmtLKR(s.total)}</td>
                     <td class="r">
-                        <button class="row-btn" onclick="event.stopPropagation();openReceipt('\${s.id}')" title="View & Print">
+                        <button class="row-btn" onclick="event.stopPropagation();openReceipt('${s.id}')" title="View & Print">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 6 2 18 2 18 9"></polyline>
                             <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
@@ -1031,47 +1031,47 @@
                 <div class="receipt-meta">
                     <div class="receipt-meta-item">
                         <div class="lbl">Invoice</div>
-                        <div class="val">\${s.id}</div>
+                        <div class="val">${s.id}</div>
                     </div>
                     <div class="receipt-meta-item">
                         <div class="lbl">Date</div>
-                        <div class="val">\${s.date}</div>
+                        <div class="val">${s.date}</div>
                     </div>
                     <div class="receipt-meta-item">
                         <div class="lbl">Time</div>
-                        <div class="val">\${s.time}</div>
+                        <div class="val">${s.time}</div>
                     </div>
                     <div class="receipt-meta-item">
                         <div class="lbl">Payment</div>
-                        <div class="val">\${s.method}</div>
+                        <div class="val">${s.method}</div>
                     </div>
                 </div>
 
                 <div class="receipt-items">
-                    \${s.items.map(i=>`
+                    ${s.items.map(i=>`
                     <div class="receipt-item">
-                        <div class="ri-qty">\${i.qty}</div>
+                        <div class="ri-qty">${i.qty}</div>
                         <div class="ri-name">
-                            \${i.name}
-                            <div class="ri-unit">\${fmtLKR(i.price)} × \${i.qty}</div>
+                            ${i.name}
+                            <div class="ri-unit">${fmtLKR(i.price)} × ${i.qty}</div>
                         </div>
-                        <div class="ri-total">\${fmtLKR(i.price*i.qty)}</div>
+                        <div class="ri-total">${fmtLKR(i.price*i.qty)}</div>
                     </div>`).join('')}
                 </div>
 
                 <div class="receipt-total-box">
                     <span class="rt-lbl">Total</span>
-                    <span class="rt-val">\${fmtLKR(s.total)}</span>
+                    <span class="rt-val">${fmtLKR(s.total)}</span>
                 </div>
 
-                \${s.method==='Cash' ? `
+                ${s.method==='Cash' ? `
                     <div class="receipt-pay-row">
                         <span class="lbl">Cash Received</span>
-                        <span class="val">\${fmtLKR(s.cashReceived||s.total)}</span>
+                        <span class="val">${fmtLKR(s.cashReceived||s.total)}</span>
                     </div>
                     <div class="receipt-pay-row">
                         <span class="lbl">Change</span>
-                        <span class="val" style="color:var(--success-color);">\${fmtLKR(change||0)}</span>
+                        <span class="val" style="color:var(--success-color);">${fmtLKR(change||0)}</span>
                     </div>` : `
                     <div class="receipt-pay-row">
                         <span class="lbl">Bank / Card Payment</span>
@@ -1116,32 +1116,32 @@
                 <div class="receipt-meta">
                     <div class="receipt-meta-item">
                         <div class="lbl">Report Date</div>
-                        <div class="val">\${dateText}</div>
+                        <div class="val">${dateText}</div>
                     </div>
                     <div class="receipt-meta-item">
                         <div class="lbl">Printed At</div>
-                        <div class="val">\${new Date().toLocaleTimeString()}</div>
+                        <div class="val">${new Date().toLocaleTimeString()}</div>
                     </div>
                 </div>
                 
                 <div style="margin:20px 0; border-top: 1px dashed #E2E8F0; border-bottom: 1px dashed #E2E8F0; padding: 10px 0;">
                     <div class="receipt-pay-row">
                         <span class="lbl">Total Sales Count</span>
-                        <span class="val">\${salesCount}</span>
+                        <span class="val">${salesCount}</span>
                     </div>
                     <div class="receipt-pay-row">
                         <span class="lbl">Total Cash Sales</span>
-                        <span class="val">\${fmtLKR(cashAmt)}</span>
+                        <span class="val">${fmtLKR(cashAmt)}</span>
                     </div>
                     <div class="receipt-pay-row">
                         <span class="lbl">Total Bank/Card</span>
-                        <span class="val">\${fmtLKR(bankAmt)}</span>
+                        <span class="val">${fmtLKR(bankAmt)}</span>
                     </div>
                 </div>
 
                 <div class="receipt-total-box" style="background:var(--success-bg); border: 1px dashed rgba(45, 106, 79, 0.3);">
                     <span class="rt-lbl">Gross Total</span>
-                    <span class="rt-val" style="color:var(--success-color);">\${fmtLKR(totalAmt)}</span>
+                    <span class="rt-val" style="color:var(--success-color);">${fmtLKR(totalAmt)}</span>
                 </div>
                 
                 <div class="receipt-footer">Z-Report · QuickPOS System</div>
@@ -1164,3 +1164,4 @@
     </script>
 </body>
 </html>
+

@@ -1074,7 +1074,7 @@
 
         // Format currency as LKR
         function formatCurrency(amount) {
-            return \`LKR \${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\`;
+            return `LKR ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         }
 
         // Format date for display
@@ -1110,8 +1110,8 @@
             
             // Load shift info
             const shiftTime = localStorage.getItem('quickpos-shift-time') || '08:00 - 16:00';
-            document.getElementById('shiftInfo').textContent = \`Shift: \${shiftTime}\`;
-            printShift.textContent = \`Shift: \${shiftTime}\`;
+            document.getElementById('shiftInfo').textContent = `Shift: ${shiftTime}`;
+            printShift.textContent = `Shift: ${shiftTime}`;
             
             // Set print date
             printDate.textContent = formatDate(new Date());
@@ -1208,15 +1208,15 @@
         function updateSummaryCards(totals) {
             // Total Sales
             totalSalesAmount.textContent = formatCurrency(totals.totalSales);
-            totalSalesDetails.textContent = \`\${totals.transactionCount} transaction\${totals.transactionCount !== 1 ? 's' : ''}\`;
+            totalSalesDetails.textContent = `${totals.transactionCount} transaction${totals.transactionCount !== 1 ? 's' : ''}`;
             
             // Cash Collected
             cashCollectedAmount.textContent = formatCurrency(totals.cashCollected);
-            cashCollectedDetails.textContent = \`\${totals.cashTransactionCount} cash transaction\${totals.cashTransactionCount !== 1 ? 's' : ''}\`;
+            cashCollectedDetails.textContent = `${totals.cashTransactionCount} cash transaction${totals.cashTransactionCount !== 1 ? 's' : ''}`;
             
             // Card Payments
             cardPaymentsAmount.textContent = formatCurrency(totals.cardPayments);
-            cardPaymentsDetails.textContent = \`\${totals.cardTransactionCount} card transaction\${totals.cardTransactionCount !== 1 ? 's' : ''}\`;
+            cardPaymentsDetails.textContent = `${totals.cardTransactionCount} card transaction${totals.cardTransactionCount !== 1 ? 's' : ''}`;
         }
 
         // Render sales history table
@@ -1235,7 +1235,7 @@
             sortedSales.forEach(sale => {
                 // Format items list
                 const itemsList = sale.items.map(item => 
-                    \`\${item.name} x\${item.quantity}\`
+                    `${item.name} x${item.quantity}`
                 ).join(', ');
                 
                 // Truncate if too long
@@ -1244,14 +1244,14 @@
                     : itemsList;
                 
                 const row = document.createElement('tr');
-                row.innerHTML = \`
-                    <td class="time-cell">\${formatDisplayDate(sale.timestamp)}</td>
-                    <td>\${sale.billId || \`BILL-\${sale.id.toString().padStart(3, '0')}\`}</td>
+                row.innerHTML = `
+                    <td class="time-cell">${formatDisplayDate(sale.timestamp)}</td>
+                    <td>${sale.billId || `BILL-${sale.id.toString().padStart(3, '0')}`}</td>
                     <td class="items-cell">
-                        <div class="items-list" title="\${itemsList}">\${displayItems}</div>
+                        <div class="items-list" title="${itemsList}">${displayItems}</div>
                     </td>
-                    <td class="amount-cell">\${formatCurrency(sale.total)}</td>
-                \`;
+                    <td class="amount-cell">${formatCurrency(sale.total)}</td>
+                `;
                 salesTableBody.appendChild(row);
             });
         }
@@ -1268,11 +1268,11 @@
             
             topItems.forEach((item, index) => {
                 const row = document.createElement('tr');
-                row.innerHTML = \`
-                    <td class="product-name-cell">\${item.name}</td>
-                    <td class="quantity-cell">\${item.quantity}</td>
-                    <td class="revenue-cell">\${formatCurrency(item.revenue)}</td>
-                \`;
+                row.innerHTML = `
+                    <td class="product-name-cell">${item.name}</td>
+                    <td class="quantity-cell">${item.quantity}</td>
+                    <td class="revenue-cell">${formatCurrency(item.revenue)}</td>
+                `;
                 topItemsTableBody.appendChild(row);
             });
         }
@@ -1292,11 +1292,11 @@
             
             sortedMovements.forEach(movement => {
                 const row = document.createElement('tr');
-                row.innerHTML = \`
-                    <td class="inventory-date-cell">\${formatDisplayDate(movement.timestamp)}</td>
-                    <td class="item-name-cell">\${movement.itemName}</td>
-                    <td class="quantity-added-cell">+\${movement.quantityAdded}</td>
-                \`;
+                row.innerHTML = `
+                    <td class="inventory-date-cell">${formatDisplayDate(movement.timestamp)}</td>
+                    <td class="item-name-cell">${movement.itemName}</td>
+                    <td class="quantity-added-cell">+${movement.quantityAdded}</td>
+                `;
                 inventoryTableBody.appendChild(row);
             });
         }
@@ -1372,3 +1372,4 @@
     </script>
 </body>
 </html>
+
