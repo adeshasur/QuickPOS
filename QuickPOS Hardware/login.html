@@ -19,8 +19,8 @@
         <p class="subtitle">Please enter your credentials to continue</p>
 
         <div class="role-selector">
-            <button class="role-btn active" onclick="setRole('Cashier')">Cashier</button>
-            <button class="role-btn" onclick="setRole('Owner')">Owner</button>
+            <button id="cashierBtn" class="role-btn active" onclick="setRole('Cashier')">Cashier</button>
+            <button id="ownerBtn" class="role-btn" onclick="setRole('Owner')">Owner</button>
         </div>
 
         <div class="input-group">
@@ -33,22 +33,51 @@
             <input type="password" id="password" placeholder="••••••••">
         </div>
 
-        <button class="btn-login">Secure Login</button>
+        <button class="btn-login" id="loginBtn">Secure Login</button>
+
+        <div id="error-msg" style="color: #ef4444; margin-top: 1rem; font-size: 0.85rem; display: none;"></div>
 
         <a href="#" class="forgot-password">Forgot Password?</a>
     </div>
 
     <script>
+        const { ipcRenderer } = require('electron');
+        let selectedRole = 'Cashier';
+
         function setRole(role) {
-            const buttons = document.querySelectorAll('.role-btn');
-            buttons.forEach(btn => {
-                if (btn.innerText === role) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
+            selectedRole = role;
+            document.getElementById('cashierBtn').classList.toggle('active', role === 'Cashier');
+            document.getElementById('ownerBtn').classList.toggle('active', role === 'Owner');
+            document.getElementById('error-msg').style.display = 'none';
         }
+
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error-msg');
+
+            if (!username || !password) {
+                errorDiv.innerText = 'Please fill in all fields';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Send login attempt to main process
+            ipcRenderer.send('login-attempt', { username, password, role: selectedRole });
+        });
+
+        // Listen for response from main process
+        ipcRenderer.on('login-response', (event, response) => {
+            const errorDiv = document.getElementById('error-msg');
+            if (response.success) {
+                alert('Login Successful! Welcome ' + response.user.username);
+                // Here you would navigate to the dashboard
+                // window.location.href = 'dashboard.html';
+            } else {
+                errorDiv.innerText = response.message;
+                errorDiv.style.display = 'block';
+            }
+        });
     </script>
 </body>
 </html>
