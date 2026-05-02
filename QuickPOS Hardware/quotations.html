@@ -634,7 +634,7 @@
             const unitPriceDisplay = document.getElementById('unitPriceDisplay');
 
             // Formatting utilities
-            const formatCurrency = (amt) => \`LKR \${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\`;
+            const formatCurrency = (amt) => `LKR ${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             const formatCurrencyPlain = (amt) => amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             const escapeHtml = (text) => {
                 const div = document.createElement('div');
@@ -941,7 +941,7 @@
                         </table>
                         
                         <div class="a4-total">
-                            TOTAL AMOUNT: LKR \${formatCurrencyPlain(total)}
+                            TOTAL AMOUNT: LKR ${formatCurrencyPlain(total)}
                         </div>
                         
                         <div class="a4-footer">

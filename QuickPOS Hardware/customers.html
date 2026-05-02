@@ -717,7 +717,7 @@
             let deleteCandidateId = null;
 
             // Format currency (LKR)
-            const formatCurrency = (amt) => \`LKR \${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\`;
+            const formatCurrency = (amt) => `LKR ${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
             // Render table with optional filter
             function renderCustomers(filterText = '') {
@@ -731,7 +731,7 @@
                 }
 
                 if (filtered.length === 0) {
-                    customerTableBody.innerHTML = \`
+                    customerTableBody.innerHTML = `
                         <tr>
                             <td colspan="5" style="padding:0;">
                                 <div class="empty-state">
@@ -741,29 +741,29 @@
                                 </div>
                             </td>
                         </tr>
-                    \`;
+                    `;
                     return;
                 }
 
                 let html = '';
                 filtered.forEach(cust => {
                     const address = cust.address || '—';
-                    html += \`
-                        <tr data-id="\${cust.id}">
-                            <td><strong>\${escapeHtml(cust.name)}</strong></td>
-                            <td>\${escapeHtml(cust.phone)}</td>
-                            <td>\${escapeHtml(address)}</td>
-                            <td class="balance-cell">\${formatCurrency(cust.balance ?? 0)}</td>
+                    html += `
+                        <tr data-id="${cust.id}">
+                            <td><strong>${escapeHtml(cust.name)}</strong></td>
+                            <td>${escapeHtml(cust.phone)}</td>
+                            <td>${escapeHtml(address)}</td>
+                            <td class="balance-cell">${formatCurrency(cust.balance ?? 0)}</td>
                             <td class="action-cell">
-                                <button class="action-btn edit-btn" data-id="\${cust.id}">
+                                <button class="action-btn edit-btn" data-id="${cust.id}">
                                     <span>✏️</span> Edit
                                 </button>
-                                <button class="action-btn delete-btn" data-id="\${cust.id}">
+                                <button class="action-btn delete-btn" data-id="${cust.id}">
                                     <span>🗑️</span> Delete
                                 </button>
                             </td>
                         </tr>
-                    \`;
+                    `;
                 });
                 customerTableBody.innerHTML = html;
             }

@@ -1056,7 +1056,7 @@
 
         // Helper functions
         function formatCurrency(amount) {
-            return \`LKR \${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\`;
+            return `LKR ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         }
 
         function calculateFinalPrice(basePrice, discount) {
@@ -1096,7 +1096,7 @@
 
         function renderProductsTable() {
             if (products.length === 0) {
-                productsTableBody.innerHTML = \`
+                productsTableBody.innerHTML = `
                     <tr>
                         <td colspan="7">
                             <div class="empty-state">
@@ -1106,7 +1106,7 @@
                             </div>
                         </td>
                     </tr>
-                \`;
+                `;
                 return;
             }
             
@@ -1120,47 +1120,47 @@
                 
                 let measurementCell = '';
                 if (product.isWeighted) {
-                    measurementCell = \`
+                    measurementCell = `
                         <td class="measurement-cell">
                             <span class="measurement-badge">⚖️ By Weight</span>
-                            <span class="unit-badge">\${product.unitType}</span>
+                            <span class="unit-badge">${product.unitType}</span>
                         </td>
-                    \`;
+                    `;
                 } else {
-                    measurementCell = \`
+                    measurementCell = `
                         <td class="measurement-cell">
                             <span class="measurement-badge">📦 Unit</span>
                         </td>
-                    \`;
+                    `;
                 }
                 
                 const row = document.createElement('tr');
-                row.innerHTML = \`
-                    <td class="product-name-cell">\${product.name}</td>
-                    <td class="category-cell">\${categoryName}</td>
-                    \${measurementCell}
-                    <td class="stock-cell \${isLow ? 'low-stock' : 'normal'}">
-                        \${product.currentStock} \${isLow ? '⚠️' : ''}
+                row.innerHTML = `
+                    <td class="product-name-cell">${product.name}</td>
+                    <td class="category-cell">${categoryName}</td>
+                    ${measurementCell}
+                    <td class="stock-cell ${isLow ? 'low-stock' : 'normal'}">
+                        ${product.currentStock} ${isLow ? '⚠️' : ''}
                     </td>
-                    <td class="alert-level-cell">\${product.alertLevel}</td>
+                    <td class="alert-level-cell">${product.alertLevel}</td>
                     <td class="price-cell">
-                        \${hasDiscount ? \`
-                            <span class="base-price">\${formatCurrency(product.basePrice)}</span>
-                            <span class="final-price">\${formatCurrency(product.finalPrice)}</span>
-                            <span class="discount-badge">-\${formatCurrency(product.discount)}</span>
-                        \` : \`
-                            <span class="final-price">\${formatCurrency(product.finalPrice)}</span>
-                        \`}
+                        ${hasDiscount ? `
+                            <span class="base-price">${formatCurrency(product.basePrice)}</span>
+                            <span class="final-price">${formatCurrency(product.finalPrice)}</span>
+                            <span class="discount-badge">-${formatCurrency(product.discount)}</span>
+                        ` : `
+                            <span class="final-price">${formatCurrency(product.finalPrice)}</span>
+                        `}
                     </td>
                     <td class="actions-cell">
-                        <button class="action-btn edit-btn" data-id="\${product.id}">
+                        <button class="action-btn edit-btn" data-id="${product.id}">
                             <span>✏️</span> Edit
                         </button>
-                        <button class="action-btn delete-btn" data-id="\${product.id}">
+                        <button class="action-btn delete-btn" data-id="${product.id}">
                             <span>🗑️</span> Delete
                         </button>
                     </td>
-                \`;
+                `;
                 productsTableBody.appendChild(row);
             });
             

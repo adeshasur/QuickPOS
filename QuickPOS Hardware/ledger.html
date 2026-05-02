@@ -587,7 +587,7 @@
                 }
             }
 
-            const formatCurrency = (amt) => \`LKR \${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\`;
+            const formatCurrency = (amt) => `LKR ${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             const escapeHtml = (text) => {
                 const div = document.createElement('div');
                 div.textContent = text;
@@ -628,7 +628,7 @@
                 totalOutstandingSpan.innerText = formatCurrency(totalOutstanding);
 
                 if (filtered.length === 0) {
-                    tableBody.innerHTML = \`<tr><td colspan="7" style="text-align:center;padding:40px;">No \${currentTab} bills</td></tr>\`;
+                    tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;">No ${currentTab} bills</td></tr>`;
                     return;
                 }
 
@@ -636,23 +636,23 @@
                 filtered.forEach(bill => {
                     const statusClass = bill.status === 'pending' ? '' : 'settled';
                     const actionBtn = bill.status === 'pending' 
-                        ? \`<button class="collect-btn" data-id="\${bill.id}">💰 Collect</button>\`
-                        : \`<span style="color:var(--text-light);font-size:13px;">—</span>\`;
+                        ? `<button class="collect-btn" data-id="${bill.id}">💰 Collect</button>`
+                        : `<span style="color:var(--text-light);font-size:13px;">—</span>`;
                     
-                    html += \`<tr>
-                        <td>\${escapeHtml(bill.date)}</td>
-                        <td><strong>#\${escapeHtml(bill.id)}</strong></td>
-                        <td>\${escapeHtml(bill.customerName)}</td>
-                        <td>\${formatCurrency(bill.total)}</td>
-                        <td>\${formatCurrency(bill.remaining)}</td>
-                        <td><span class="status-badge \${statusClass}">\${bill.status.toUpperCase()}</span></td>
+                    html += `<tr>
+                        <td>${escapeHtml(bill.date)}</td>
+                        <td><strong>#${escapeHtml(bill.id)}</strong></td>
+                        <td>${escapeHtml(bill.customerName)}</td>
+                        <td>${formatCurrency(bill.total)}</td>
+                        <td>${formatCurrency(bill.remaining)}</td>
+                        <td><span class="status-badge ${statusClass}">${bill.status.toUpperCase()}</span></td>
                         <td>
                             <div class="action-btns">
-                                \${actionBtn}
-                                <button class="print-icon" title="Print receipt" data-id="\${bill.id}" data-customer="\${escapeHtml(bill.customerName)}" data-amount="\${bill.remaining}" data-total="\${bill.total}">🖨️</button>
+                                ${actionBtn}
+                                <button class="print-icon" title="Print receipt" data-id="${bill.id}" data-customer="${escapeHtml(bill.customerName)}" data-amount="${bill.remaining}" data-total="${bill.total}">🖨️</button>
                             </div>
                         </td>
-                    </tr>\`;
+                    </tr>`;
                 });
                 tableBody.innerHTML = html;
 
@@ -681,7 +681,7 @@
                 const bill = bills.find(b => b.id == billId);
                 if (!bill) return;
                 selectedBillForPayment = bill;
-                modalBillId.innerText = \`#\${bill.id}\`;
+                modalBillId.innerText = `#${bill.id}`;
                 modalRemaining.innerText = formatCurrency(bill.remaining);
                 paymentAmount.value = bill.remaining.toFixed(2); // suggest full
                 paymentModal.classList.add('active');
@@ -709,7 +709,7 @@
 
                 const bill = bills[billIndex];
                 if (amountReceived > bill.remaining) {
-                    alert(\`Amount exceeds remaining balance (\${formatCurrency(bill.remaining)})\`);
+                    alert(`Amount exceeds remaining balance (${formatCurrency(bill.remaining)})`);
                     return;
                 }
 
@@ -735,27 +735,27 @@
             // print thermal receipt
             function printReceipt(billId, customerName, totalAmount, remaining) {
                 const date = new Date().toLocaleString();
-                const receiptHTML = \`
+                const receiptHTML = `
                     <div class="thermal-receipt" id="thermalReceipt">
                         <div style="text-align:center; font-weight:bold; margin-bottom:12px;">⚡ QUICKPOS PRO</div>
                         <div style="text-align:center;">123 Main Street, City</div>
                         <div style="text-align:center;">Tel: 0112 123456</div>
                         <div style="border-top:1px dashed #333; margin:12px 0;"></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Bill #:</span><span>\${billId}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Customer:</span><span>\${customerName}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Date:</span><span>\${date}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Bill #:</span><span>${billId}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Customer:</span><span>${customerName}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Date:</span><span>${date}</span></div>
                         <div style="border-top:1px dashed #333; margin:12px 0;"></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Total Bill:</span><span>\${formatCurrency(totalAmount)}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Remaining:</span><span>\${formatCurrency(remaining)}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Total Bill:</span><span>${formatCurrency(totalAmount)}</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Remaining:</span><span>${formatCurrency(remaining)}</span></div>
                         <div style="border-top:1px dashed #333; margin:12px 0;"></div>
                         <div style="text-align:center;">Thank you, come again!</div>
                         <div style="text-align:center; font-size:12px; margin-top:8px;">** Receipt **</div>
                     </div>
-                \`;
+                `;
                 const container = document.getElementById('thermalReceiptContainer');
                 container.innerHTML = receiptHTML;
                 const originalTitle = document.title;
-                document.title = \`Receipt_\${billId}\`;
+                document.title = `Receipt_${billId}`;
                 window.print();
                 document.title = originalTitle;
             }
@@ -834,7 +834,7 @@
                     if(avatarEl) avatarEl.textContent = initials.substring(0, 2);
                     
                     const shiftTimeEl = document.getElementById('shiftTime');
-                    if (shiftTimeEl) shiftTimeEl.innerHTML = \`Cashier: \${user.name} | Shift: \${shift}\`;
+                    if (shiftTimeEl) shiftTimeEl.innerHTML = `Cashier: ${user.name} | Shift: ${shift}`;
                 }
             }
 
