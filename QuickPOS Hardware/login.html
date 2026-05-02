@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickPOS | Login</title>
+    <title>QuickPOS Pro — Access Portal</title>
     <link rel="stylesheet" href="login.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,11 +12,11 @@
 <body>
     <div class="login-card">
         <div class="logo">
-            <span class="blue">Quick</span><span class="orange">POS</span>
+            <span class="blue">Quick</span><span class="white">POS</span>
         </div>
         
-        <h2>Welcome Back</h2>
-        <p class="subtitle">Please enter your credentials to continue</p>
+        <h2>System Login</h2>
+        <p class="subtitle">Access your retail management suite</p>
 
         <div class="role-selector">
             <button id="cashierBtn" class="role-btn active" onclick="setRole('Cashier')">Cashier</button>
@@ -25,18 +25,20 @@
 
         <div class="input-group">
             <label for="username">Username</label>
-            <input type="text" id="username" placeholder="Username">
+            <input type="text" id="username" placeholder="e.g. admin">
         </div>
 
         <div class="input-group">
-            <label for="password">Password</label>
+            <label for="password">Security Password</label>
             <input type="password" id="password" placeholder="••••••••">
         </div>
 
-        <button class="btn-login" id="loginBtn">Secure Login</button>
+        <button class="btn-login" id="loginBtn">Authorize Access</button>
 
-        <a href="#" class="forgot-password">Forgot Password?</a>
+        <a href="#" class="forgot-password">Need help accessing? Contact Administrator</a>
     </div>
+
+    <div id="toast-container" class="toast-container"></div>
 
     <script>
         const { ipcRenderer } = require('electron');
@@ -46,23 +48,12 @@
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            
-            const icon = type === 'success' 
-                ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
-                : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
-
-            toast.innerHTML = `
-                <div class="toast-icon">${icon}</div>
-                <div class="toast-message">${message}</div>
-            `;
-            
+            toast.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> ${message}`;
             container.appendChild(toast);
-            
             setTimeout(() => toast.classList.add('show'), 10);
-            
             setTimeout(() => {
                 toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
+                setTimeout(() => toast.remove(), 400);
             }, 3000);
         }
 
@@ -98,29 +89,23 @@
 
             isLoggingIn = true;
             const btn = document.getElementById('loginBtn');
-            btn.innerText = 'Please Wait...';
+            btn.innerText = 'Verifying...';
             btn.style.opacity = '0.7';
             btn.disabled = true;
 
-            // Send login attempt to main process
             ipcRenderer.send('login-attempt', { username, password, role: selectedRole });
         });
 
-        // Listen for response from main process
         ipcRenderer.on('login-response', (event, response) => {
             isLoggingIn = false;
             const btn = document.getElementById('loginBtn');
-            btn.innerText = 'Secure Login';
+            btn.innerText = 'Authorize Access';
             btn.style.opacity = '1';
             btn.disabled = false;
 
             if (response.success) {
-                showToast('Login Successful! Welcome Back, ' + response.user.full_name, 'success');
-                
-                // Save user data to localStorage for the dashboard
+                showToast('Welcome Back, ' + response.user.full_name, 'success');
                 localStorage.setItem('quickpos-user', JSON.stringify(response.user));
-                
-                // Navigate to dashboard
                 setTimeout(() => {
                     window.location.href = 'owner_dashboard.html';
                 }, 1000);
@@ -129,9 +114,5 @@
             }
         });
     </script>
-    
-    <!-- Toast Container -->
-    <div id="toast-container" class="toast-container"></div>
 </body>
 </html>
-

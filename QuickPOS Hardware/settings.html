@@ -1,1135 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickPOS Pro - Settings</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPOS Pro — System Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="sidebar.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0B0F19;
+  --surface: #111827;
+  --surface2: #1A2235;
+  --surface3: #1F2B3E;
+  --border: #1E2D45;
+  --border2: #263548;
+  --accent: #3B82F6;
+  --accent2: #60A5FA;
+  --accent-glow: rgba(59, 130, 246, .18);
+  --green: #10B981;
+  --green-dim: rgba(16, 185, 129, .12);
+  --amber: #F59E0B;
+  --amber-dim: rgba(245, 158, 11, .12);
+  --red: #EF4444;
+  --red-dim: rgba(239, 68, 68, .1);
+  --purple: #8B5CF6;
+  --cyan: #06B6D4;
+  --text: #E2E8F0;
+  --text2: #94A3B8;
+  --text3: #475569;
+  --font: 'DM Sans', system-ui, sans-serif;
+  --mono: 'DM Mono', monospace;
+  --r: 10px;
+  --r2: 14px;
+}
 
-        :root {
-            /* Map legacy variables to global White Theme */
-            --bg-color: var(--bg);
-            --sidebar-color: var(--surface);
-            --primary-color: var(--accent);
-            --success-color: var(--green);
-            --danger-color: var(--red);
-            --warning-color: var(--amber);
-            --text-dark: var(--text);
-            --text-light: var(--text2);
-            --border-color: var(--border);
-            --hover-color: var(--surface2);
-            --shadow: var(--shadow);
-            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.07);
-        }
+body {
+  background: var(--bg);
+  font-family: var(--font);
+  color: var(--text);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-size: 14px;
+}
 
-        body {
-            background-color: var(--bg-color);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-            
-        }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            
-        }
+.topbar {
+  height: 62px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 22px;
+  flex-shrink: 0;
+}
+.tb-title { font-size: 16px; font-weight: 600; color: var(--text); }
+.tb-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.tb-sub { font-size: 13px; color: var(--text2); }
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: #fff;
+}
 
-        .top-bar {
-            height: 70px;
-            background-color: var(--sidebar-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 24px;
-            box-shadow: var(--shadow);
-            z-index: 10;
-            flex-shrink: 0;
-        }
+.content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 24px; gap: 24px; }
 
-        .page-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
+/* Header Actions */
+.sec-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.sec-title { font-size: 22px; font-weight: 700; color: var(--text); }
+.sec-btns { display: flex; gap: 10px; }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+.btn {
+  padding: 10px 20px; border-radius: 10px; border: none;
+  font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-save { background: var(--green); color: #fff; }
+.btn-save:hover { background: #059669; box-shadow: 0 0 15px rgba(16, 185, 129, .2); }
+.btn-reset { background: var(--surface2); color: var(--red); border: 1px solid var(--border); }
+.btn-reset:hover { background: var(--red-dim); }
 
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-        }
+/* Settings Cards Grid */
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+@media (max-width: 900px) { .settings-grid { grid-template-columns: 1fr; } }
 
-        /* Settings Dashboard */
-        .settings-dashboard {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            gap: 20px;
-            overflow-y: auto;
-            min-height: 0;
-        }
+.card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.card-head { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; background: var(--surface2); }
+.card-icon { font-size: 20px; width: 40px; height: 40px; border-radius: 10px; background: var(--surface3); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border2); }
+.card-title { font-size: 16px; font-weight: 700; color: var(--text); }
+.card-body { padding: 20px; display: flex; flex-direction: column; gap: 18px; }
 
-        /* Settings Header */
-        .settings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
+/* Form Fields */
+.f-group { display: flex; flex-direction: column; gap: 6px; }
+.f-label { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; }
+.f-input, .f-select {
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); padding: 12px; border-radius: 10px; outline: none; font-size: 14px;
+  transition: all .2s;
+}
+.f-input:focus, .f-select:focus { border-color: var(--accent); background: var(--surface3); box-shadow: var(--accent-glow); }
+.f-hint { font-size: 12px; color: var(--text3); }
 
-        .header-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--text-dark);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+/* Toggle Row */
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--surface2); border-radius: 10px; border: 1px solid var(--border); }
+.toggle-info { display: flex; flex-direction: column; gap: 2px; }
+.toggle-name { font-weight: 600; font-size: 13px; }
+.toggle-desc { font-size: 12px; color: var(--text3); }
 
-        .header-controls {
-            display: flex;
-            gap: 12px;
-        }
+.switch { position: relative; width: 44px; height: 24px; cursor: pointer; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; inset: 0; background: var(--surface3); border-radius: 20px; transition: .3s; }
+.slider:before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .3s; }
+input:checked + .slider { background: var(--accent); }
+input:checked + .slider:before { transform: translateX(20px); }
 
-        .settings-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+/* Version Options */
+.version-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.v-opt {
+  padding: 16px; background: var(--surface2); border: 2px solid var(--border);
+  border-radius: 12px; cursor: pointer; text-align: center; transition: all .2s;
+}
+.v-opt:hover { border-color: var(--accent2); background: var(--surface3); }
+.v-opt.active { border-color: var(--accent); background: var(--accent-glow); }
+.v-opt i { font-size: 24px; display: block; margin-bottom: 8px; }
+.v-opt-name { font-weight: 700; font-size: 14px; }
 
-        .save-btn {
-            background-color: var(--success-color);
-            color: white;
-        }
+.footer-info { margin-top: auto; padding: 20px; display: flex; justify-content: space-between; align-items: center; color: var(--text3); font-size: 12px; border-top: 1px solid var(--border); }
 
-        .save-btn:hover {
-            background-color: #245c43;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-        }
-
-        .reset-btn {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        .reset-btn:hover {
-            background-color: #c53030;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-        }
-
-        /* Settings Cards Layout */
-        .settings-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-            flex: 1;
-            min-height: 0;
-        }
-
-        @media (max-width: 768px) {
-            .settings-cards {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Settings Card */
-        .settings-card {
-            background-color: var(--sidebar-color);
-            border-radius: 10px;
-            padding: 24px;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            
-        }
-
-        .settings-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .card-icon {
-            font-size: 22px;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background-color: rgba(93, 138, 168, 0.1);
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .card-subtitle {
-            font-size: 13px;
-            color: var(--text-light);
-            margin-top: 4px;
-        }
-
-        /* Form Groups */
-        .form-groups {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .form-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-dark);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .required::after {
-            content: " *";
-            color: var(--danger-color);
-        }
-
-        .form-input, .form-select {
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 14px;
-            transition: all 0.2s ease;
-            background-color: white;
-            width: 100%;
-        }
-
-        .form-input:focus, .form-select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(93, 138, 168, 0.1);
-        }
-
-        .form-hint {
-            font-size: 12px;
-            color: var(--text-light);
-            margin-top: 4px;
-            line-height: 1.4;
-        }
-
-        .form-hint.warning {
-            color: var(--warning-color);
-        }
-
-        .form-hint.error {
-            color: var(--danger-color);
-        }
-
-        /* Toggle Switch */
-        .toggle-group {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .toggle-group:last-child {
-            border-bottom: none;
-        }
-
-        .toggle-label {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-dark);
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .toggle-description {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .toggle-slider {
-            background-color: var(--primary-color);
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(24px);
-        }
-
-        /* System Version Selector */
-        .version-selector {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .version-option {
-            padding: 16px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 8px;
-        }
-
-        .version-option:hover {
-            border-color: var(--primary-color);
-            background-color: rgba(93, 138, 168, 0.05);
-        }
-
-        .version-option.selected {
-            border-color: var(--primary-color);
-            background-color: rgba(93, 138, 168, 0.1);
-        }
-
-        .version-icon {
-            font-size: 24px;
-            color: var(--primary-color);
-        }
-
-        .version-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .version-description {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-
-        /* Password Fields */
-        .password-group {
-            position: relative;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: var(--text-light);
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        /* Footer Actions */
-        .footer-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .system-info {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-
-        .system-version {
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .sidebar.expanded {
-                position: absolute;
-                height: 100%;
-                z-index: 1000;
-            }
-            
-            .settings-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 16px;
-            }
-            
-            .header-controls {
-                align-self: flex-start;
-            }
-            
-            .version-selector {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header-controls {
-                flex-direction: column;
-                width: 100%;
-            }
-            
-            .settings-btn {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .settings-dashboard {
-                padding: 15px;
-                gap: 15px;
-            }
-            
-            .settings-card {
-                padding: 20px;
-            }
-        }
-    </style>
-    <link rel="stylesheet" href="sidebar.css">
+</style>
 </head>
 <body>
-    <!-- SIDEBAR -->
-    <nav class="sidebar" id="sidebar">
-        <div class="sb-top">
-            <div class="sb-logo-icon">
-                <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-            </div>
-            <span class="sb-logo-text" id="logo">QuickPOS Pro</span>
-            <button class="sb-toggle" id="hamburgerBtn">
-                <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-            </button>
-        </div>
 
-        <div class="sb-nav">
-            <div class="sb-section-label">MAIN</div>
-            <a href="owner_dashboard.html" class="nav-item">
-                <span class="ni"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span>
-                <span class="nt">Dashboard</span>
-            </a>
-            <a href="sales.html" class="nav-item">
-                <span class="ni"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></span>
-                <span class="nt">Make a Sale</span>
-            </a>
-            <a href="categories.html" class="nav-item">
-                <span class="ni"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></span>
-                <span class="nt">Categories</span>
-            </a>
-            <a href="products.html" class="nav-item">
-                <span class="ni"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></span>
-                <span class="nt">Products</span>
-            </a>
+<nav class="sidebar" id="sidebar"></nav>
 
-            <div class="sb-section-label">OPERATIONS</div>
-            <a href="inventory.html" class="nav-item">
-                <span class="ni"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
-                <span class="nt">Inventory</span>
-            </a>
-            <a href="customers.html" class="nav-item">
-                <span class="ni"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
-                <span class="nt">Customers</span>
-            </a>
-            <a href="quotations.html" class="nav-item">
-                <span class="ni"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></span>
-                <span class="nt">Quotations</span>
-            </a>
-            <a href="ledger.html" class="nav-item">
-                <span class="ni"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></span>
-                <span class="nt">Credit Ledger</span>
-            </a>
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title">System Settings</div>
+    <div class="tb-right"><span class="tb-sub" id="sysTime">Loading...</span><div class="avatar" id="av">AD</div></div>
+  </div>
 
-            <div class="sb-section-label">ANALYTICS</div>
-            <a href="reports.html" class="nav-item">
-                <span class="ni"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg></span>
-                <span class="nt">Reports</span>
-            </a>
-            <a href="sales_history.html" class="nav-item">
-                <span class="ni"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>
-                <span class="nt">Sales History</span>
-            </a>
-
-            <div class="sb-section-label">ADMIN</div>
-            <a href="users.html" class="nav-item owner-only">
-                <span class="ni"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
-                <span class="nt">User Management</span>
-            </a>
-            <a href="settings.html" class="nav-item active owner-only">
-                <span class="ni"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>
-                <span class="nt">Settings</span>
-            </a>
-        </div>
-
-        <div class="sb-bottom">
-            <a href="login.html" class="nav-item" id="logoutBtn">
-                <span class="ni"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span>
-                <span class="nt">Logout</span>
-            </a>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="top-bar">
-            <div class="page-title">System Settings</div>
-            <div class="user-info">
-                <span id="userRole">Administrator</span>
-                <div class="user-avatar" id="userAvatar">OP</div>
-            </div>
-        </div>
-        
-        <div class="settings-dashboard">
-            <div class="settings-header">
-                <div class="header-title">
-                    <span>⚙️</span> System Configuration
-                </div>
-                <div class="header-controls">
-                    <button class="settings-btn reset-btn" id="resetBtn">
-                        <span>🔄</span> Reset System
-                    </button>
-                    <button class="settings-btn save-btn" id="saveBtn">
-                        <span>💾</span> Save Settings
-                    </button>
-                </div>
-            </div>
-            
-            <div class="settings-cards">
-                <!-- Store Information Card -->
-                <div class="settings-card">
-                    <div class="card-header">
-                        <div class="card-icon">🏪</div>
-                        <div>
-                            <div class="card-title">Store Information</div>
-                            <div class="card-subtitle">Appears on receipts and reports</div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-groups">
-                        <div class="form-group">
-                            <label class="form-label required" for="storeName">
-                                Store Name
-                            </label>
-                            <input type="text" class="form-input" id="storeName" 
-                                   placeholder="Your Store Name" 
-                                   maxlength="50"
-                                   required>
-                            <div class="form-hint">
-                                Will appear at the top of all receipts
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="storeAddress">
-                                Store Address
-                            </label>
-                            <input type="text" class="form-input" id="storeAddress" 
-                                   placeholder="123 Street, City"
-                                   maxlength="100">
-                            <div class="form-hint">
-                                Optional: Address for receipts and invoices
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="storePhone">
-                                Phone Number
-                            </label>
-                            <input type="tel" class="form-input" id="storePhone" 
-                                   placeholder="+94 77 123 4567"
-                                   maxlength="20">
-                            <div class="form-hint">
-                                Customer contact number for receipts
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- System Version Card -->
-                <div class="settings-card">
-                    <div class="card-header">
-                        <div class="card-icon">🚀</div>
-                        <div>
-                            <div class="card-title">System Version</div>
-                            <div class="card-subtitle">Choose your POS system features</div>
-                        </div>
-                    </div>
-                    
-                    <div class="version-selector" id="versionSelector">
-                        <div class="version-option" data-version="lite">
-                            <div class="version-icon">⚡</div>
-                            <div class="version-name">QuickPOS Lite</div>
-                            <div class="version-description">
-                                Basic POS features<br>
-                                No stock management<br>
-                                Fast & lightweight
-                            </div>
-                        </div>
-                        
-                        <div class="version-option" data-version="pro">
-                            <div class="version-icon">🏢</div>
-                            <div class="version-name">QuickPOS Pro</div>
-                            <div class="version-description">
-                                Full stock management<br>
-                                Advanced reporting<br>
-                                Multi-user support
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-hint warning" id="versionHint" style="margin-top: 16px;">
-                        <strong>Note:</strong> Changing to Pro version will enable stock management features. Some features may require backend setup.
-                    </div>
-                </div>
-                
-                <!-- Security Card -->
-                <div class="settings-card">
-                    <div class="card-header">
-                        <div class="card-icon">🔒</div>
-                        <div>
-                            <div class="card-title">Security Settings</div>
-                            <div class="card-subtitle">Manage passwords and access control</div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-groups">
-                        <div class="form-group">
-                            <label class="form-label" for="adminPassword">
-                                Admin/Owner Password
-                            </label>
-                            <div class="password-group">
-                                <input type="password" class="form-input" id="adminPassword" 
-                                       placeholder="Enter new admin password"
-                                       minlength="6">
-                                <button type="button" class="password-toggle" data-target="adminPassword">
-                                    👁️
-                                </button>
-                            </div>
-                            <div class="form-hint">
-                                Minimum 6 characters. Leave empty to keep current password
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="cashierPassword">
-                                Cashier Password
-                            </label>
-                            <div class="password-group">
-                                <input type="password" class="form-input" id="cashierPassword" 
-                                       placeholder="Enter new cashier password"
-                                       minlength="4">
-                                <button type="button" class="password-toggle" data-target="cashierPassword">
-                                    👁️
-                                </button>
-                            </div>
-                            <div class="form-hint">
-                                Minimum 4 characters. Cashiers can only process sales
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Localization Card -->
-                <div class="settings-card">
-                    <div class="card-header">
-                        <div class="card-icon">🌍</div>
-                        <div>
-                            <div class="card-title">Localization</div>
-                            <div class="card-subtitle">Regional and currency settings</div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-groups">
-                        <div class="form-group">
-                            <label class="form-label required" for="currencySymbol">
-                                Currency Symbol
-                            </label>
-                            <div class="toggle-group">
-                                <div class="toggle-label">
-                                    <span>Use LKR (Sri Lankan Rupees)</span>
-                                    <span class="toggle-description">All prices will be displayed in LKR</span>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="currencyToggle" checked>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                            <div class="form-hint">
-                                Currently supports LKR only. Other currencies may be added in future updates.
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="taxPercentage">
-                                Tax Percentage (%)
-                            </label>
-                            <input type="number" class="form-input" id="taxPercentage" 
-                                   placeholder="0.00"
-                                   min="0"
-                                   max="50"
-                                   step="0.01"
-                                   value="0">
-                            <div class="form-hint">
-                                Set to 0 for tax-exempt. Tax will be calculated on final amount.
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="shiftHours">
-                                Default Shift Hours
-                            </label>
-                            <input type="text" class="form-input" id="shiftHours" 
-                                   placeholder="08:00 - 16:00"
-                                   maxlength="20">
-                            <div class="form-hint">
-                                Used for reports and shift tracking
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Footer Actions -->
-            <div class="footer-actions">
-                <div class="system-info">
-                    <div>QuickPOS System</div>
-                    <div class="system-version">Version 1.0.0</div>
-                    <div>© 2024 QuickPOS Lite. All rights reserved.</div>
-                </div>
-                
-                <div>
-                    <button class="settings-btn reset-btn" id="clearCacheBtn" style="background-color: var(--warning-color);">
-                        <span>🗑️</span> Clear Cache
-                    </button>
-                </div>
-            </div>
-        </div>
+  <div class="content">
+    <div class="sec-head">
+      <div class="sec-title">Global Configuration</div>
+      <div class="sec-btns">
+        <button class="btn btn-reset" onclick="resetSystem()">🔄 Reset Defaults</button>
+        <button class="btn btn-save" onclick="saveSettings()">💾 Save Changes</button>
+      </div>
     </div>
 
-    <script>
-        // Default settings
-        const defaultSettings = {
-            storeName: "My QuickPOS Store",
-            storeAddress: "",
-            storePhone: "",
-            systemVersion: "lite", // lite or pro
-            currencySymbol: "LKR",
-            taxPercentage: 0,
-            shiftHours: "08:00 - 16:00",
-            adminPassword: "admin123",
-            cashierPassword: "cashier"
-        };
+    <div class="settings-grid">
+      <!-- Store Info -->
+      <div class="card">
+        <div class="card-head"><div class="card-icon">🏪</div><div class="card-title">Store Identity</div></div>
+        <div class="card-body">
+          <div class="f-group"><label class="f-label">Store Name</label><input class="f-input" type="text" id="storeName" placeholder="QuickPOS Supermarket"></div>
+          <div class="f-group"><label class="f-label">Address</label><input class="f-input" type="text" id="storeAddress" placeholder="No. 123, Main St, City"></div>
+          <div class="f-group"><label class="f-label">Contact Phone</label><input class="f-input" type="text" id="storePhone" placeholder="+94 77 123 4567"></div>
+        </div>
+      </div>
 
-        // Current settings
-        let settings = JSON.parse(localStorage.getItem('quickpos-settings')) || defaultSettings;
+      <!-- Business Version -->
+      <div class="card">
+        <div class="card-head"><div class="card-icon">🚀</div><div class="card-title">System Mode</div></div>
+        <div class="card-body">
+          <div class="version-opts">
+            <div class="v-opt active" onclick="setVersion('lite', this)"><i>⚡</i><div class="v-opt-name">POS Lite</div></div>
+            <div class="v-opt" onclick="setVersion('pro', this)"><i>🏢</i><div class="v-opt-name">POS Pro</div></div>
+          </div>
+          <div class="f-hint">Pro mode enables advanced inventory tracking and credit ledger.</div>
+        </div>
+      </div>
 
-        // DOM elements
-        const logoutBtn = document.getElementById('logoutBtn');
-        const saveBtn = document.getElementById('saveBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const clearCacheBtn = document.getElementById('clearCacheBtn');
-        
-        // Store Information
-        const storeName = document.getElementById('storeName');
-        const storeAddress = document.getElementById('storeAddress');
-        const storePhone = document.getElementById('storePhone');
-        
-        // System Version
-        const versionSelector = document.getElementById('versionSelector');
-        const versionOptions = document.querySelectorAll('.version-option');
-        const versionHint = document.getElementById('versionHint');
-        
-        // Security
-        const adminPassword = document.getElementById('adminPassword');
-        const cashierPassword = document.getElementById('cashierPassword');
-        const passwordToggles = document.querySelectorAll('.password-toggle');
-        
-        // Localization
-        const currencyToggle = document.getElementById('currencyToggle');
-        const taxPercentage = document.getElementById('taxPercentage');
-        const shiftHours = document.getElementById('shiftHours');
+      <!-- Security -->
+      <div class="card">
+        <div class="card-head"><div class="card-icon">🔒</div><div class="card-title">Security & Access</div></div>
+        <div class="card-body">
+          <div class="f-group"><label class="f-label">Admin Master Password</label><input class="f-input" type="password" id="adminPass" placeholder="••••••••"></div>
+          <div class="f-group"><label class="f-label">Shift Hours</label><input class="f-input" type="text" id="shiftHours" placeholder="08:00 - 18:00"></div>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-name">Inventory Control</div><div class="toggle-desc">Require admin approval for stock edits</div></div>
+            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+          </div>
+        </div>
+      </div>
 
-        // Safe localStorage wrapper
-        const safeStorage = {
-            get: (key) => {
-                try { return localStorage.getItem(key); } 
-                catch (e) { console.warn('Storage access denied'); return null; }
-            },
-            getJSON: (key) => {
-                try { 
-                    const item = localStorage.getItem(key);
-                    return item ? JSON.parse(item) : null;
-                } catch (e) { 
-                    console.warn('Storage access denied'); 
-                    return null; 
-                }
-            }
-        };
+      <!-- Regional -->
+      <div class="card">
+        <div class="card-head"><div class="card-icon">🌍</div><div class="card-title">Regional Settings</div></div>
+        <div class="card-body">
+          <div class="f-group"><label class="f-label">Currency Symbol</label><input class="f-input" type="text" id="currency" value="LKR" readonly></div>
+          <div class="f-group"><label class="f-label">Sales Tax (%)</label><input class="f-input" type="number" id="tax" value="0.00"></div>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-name">Dynamic Decimals</div><div class="toggle-desc">Show 2 decimal places in prices</div></div>
+            <label class="switch"><input type="checkbox" id="decimals" checked><span class="slider"></span></label>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        // Initialize the app
-        function init() {
-            // Security Check
-            const user = safeStorage.getJSON('quickpos-user');
-            if (!user) {
-                window.location.href = 'login.html';
-                return;
-            }
+    <div class="footer-info">
+      <div>Core Engine: QuickPOS v2.4.0-premium</div>
+      <div>&copy; 2024 QuickPOS Pro — Engineered for Performance</div>
+    </div>
+  </div>
+</div>
 
-            // Role Check: If user is a Cashier, hide the Owner-only buttons
-            if (user.role === 'cashier') {
-                document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'none');
-            }
-            
-            // Set user initials in avatar
-            if (user.name) {
-                const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
-                const avatarEl = document.getElementById('userAvatar');
-                if(avatarEl) avatarEl.textContent = initials.substring(0, 2);
-            }
-            
-            // Set user role
-            const userRoleEl = document.getElementById('userRole');
-            if(userRoleEl) {
-                userRoleEl.textContent = user.role === 'owner' ? 'Administrator' : 'Cashier';
-            }
+<script src="sidebar.js"></script>
+<script>
+let config = JSON.parse(localStorage.getItem('quickpos-settings')) || {
+  storeName: 'QuickPOS Supermarket',
+  storeAddress: 'Colombo, Sri Lanka',
+  storePhone: '+94 77 111 2222',
+  tax: 0,
+  version: 'pro'
+};
 
-            loadSettings();
-            setupEventListeners();
-            
-            
-            // Log current settings
-            console.log('=== Current Settings ===');
-            console.log(JSON.stringify(settings, null, 2));
-        }
+function setVersion(v, el) {
+  document.querySelectorAll('.v-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  config.version = v;
+}
 
+function loadSettings() {
+  document.getElementById('storeName').value = config.storeName;
+  document.getElementById('storeAddress').value = config.storeAddress;
+  document.getElementById('storePhone').value = config.storePhone;
+  document.getElementById('tax').value = config.tax;
+  
+  // Set version UI
+  const opts = document.querySelectorAll('.v-opt');
+  if(config.version === 'lite') opts[0].classList.add('active');
+  else opts[1].classList.add('active');
+}
 
-        // Load settings into form
-        function loadSettings() {
-            // Store Information
-            storeName.value = settings.storeName || '';
-            storeAddress.value = settings.storeAddress || '';
-            storePhone.value = settings.storePhone || '';
-            
-            // System Version
-            const currentVersion = settings.systemVersion || 'lite';
-            versionOptions.forEach(option => {
-                if (option.dataset.version === currentVersion) {
-                    option.classList.add('selected');
-                } else {
-                    option.classList.remove('selected');
-                }
-            });
-            
-            // Security (don't load passwords for security)
-            adminPassword.value = '';
-            cashierPassword.value = '';
-            
-            // Localization
-            currencyToggle.checked = (settings.currencySymbol === 'LKR');
-            taxPercentage.value = settings.taxPercentage || 0;
-            shiftHours.value = settings.shiftHours || '08:00 - 16:00';
-        }
+function saveSettings() {
+  config.storeName = document.getElementById('storeName').value;
+  config.storeAddress = document.getElementById('storeAddress').value;
+  config.storePhone = document.getElementById('storePhone').value;
+  config.tax = document.getElementById('tax').value;
+  
+  localStorage.setItem('quickpos-settings', JSON.stringify(config));
+  alert('Settings saved successfully!');
+}
 
-        // Save settings
-        function saveSettings() {
-            // Validate required fields
-            if (!storeName.value.trim()) {
-                alert('Store Name is required');
-                storeName.focus();
-                return;
-            }
-            
-            // Store Information
-            settings.storeName = storeName.value.trim();
-            settings.storeAddress = storeAddress.value.trim();
-            settings.storePhone = storePhone.value.trim();
-            
-            // System Version
-            const selectedVersion = document.querySelector('.version-option.selected');
-            settings.systemVersion = selectedVersion ? selectedVersion.dataset.version : 'lite';
-            
-            // Security (only update if changed)
-            if (adminPassword.value.trim() && adminPassword.value.trim().length >= 6) {
-                settings.adminPassword = adminPassword.value.trim();
-            }
-            
-            if (cashierPassword.value.trim() && cashierPassword.value.trim().length >= 4) {
-                settings.cashierPassword = cashierPassword.value.trim();
-            }
-            
-            // Localization
-            settings.currencySymbol = currencyToggle.checked ? 'LKR' : 'LKR'; // Currently only LKR
-            settings.taxPercentage = parseFloat(taxPercentage.value) || 0;
-            settings.shiftHours = shiftHours.value.trim() || '08:00 - 16:00';
-            
-            // Save to localStorage
-            localStorage.setItem('quickpos-settings', JSON.stringify(settings));
-            localStorage.setItem('quickpos-shift-time', settings.shiftHours);
-            
-            // Log to console for backend
-            console.log('=== Settings Saved (Ready for MySQL) ===');
-            console.log(JSON.stringify(settings, null, 2));
-            console.log('========================================');
-            
-            // Show success message
-            alert('Settings saved successfully!');
-            
-            // Reload settings to confirm
-            loadSettings();
-        }
+function resetSystem() {
+  if(confirm('Are you sure you want to reset all settings to defaults? This won\'t delete sales data.')) {
+    localStorage.removeItem('quickpos-settings');
+    location.reload();
+  }
+}
 
-        // Reset system (with confirmation)
-        function resetSystem() {
-            const confirmation = confirm('⚠️ WARNING: This will delete ALL sales data, products, and categories.\n\nThis action cannot be undone!\n\nAre you absolutely sure you want to reset the system?');
-            
-            if (!confirmation) return;
-            
-            const finalConfirmation = confirm('⚠️ FINAL WARNING: All your business data will be permanently deleted.\n\nType "RESET" to confirm:');
-            
-            if (finalConfirmation) {
-                const userInput = prompt('Please type "RESET" (in uppercase) to confirm:');
-                
-                if (userInput === 'RESET') {
-                    // Clear all localStorage data
-                    localStorage.clear();
-                    
-                    // Restore default settings
-                    settings = {...defaultSettings};
-                    localStorage.setItem('quickpos-settings', JSON.stringify(settings));
-                    
-                    // Reload the page
-                    alert('System has been reset to factory defaults. The page will now reload.');
-                    window.location.href = 'login.html';
-                } else {
-                    alert('Reset cancelled. Data was not deleted.');
-                }
-            }
-        }
+function init() {
+  const user = JSON.parse(localStorage.getItem('quickpos-user'));
+  if(user) document.getElementById('av').textContent = (user.username || 'AD').substring(0,2).toUpperCase();
+  
+  setInterval(() => {
+    document.getElementById('sysTime').textContent = new Date().toLocaleTimeString();
+  }, 1000);
 
-        // Clear cache only (keep data)
-        function clearCache() {
-            if (confirm('Clear application cache? This will not delete your sales or product data, but may improve performance.')) {
-                // Clear only cache-related items
-                const settingsCopy = {...settings};
-                const shiftTime = localStorage.getItem('quickpos-shift-time');
-                const sidebarState = localStorage.getItem('quickpos-sidebar');
-                const user = localStorage.getItem('quickpos-user');
-                
-                // Clear all localStorage
-                localStorage.clear();
-                
-                // Restore important data
-                localStorage.setItem('quickpos-settings', JSON.stringify(settingsCopy));
-                if (shiftTime) localStorage.setItem('quickpos-shift-time', shiftTime);
-                if (sidebarState) localStorage.setItem('quickpos-sidebar', sidebarState);
-                if (user) localStorage.setItem('quickpos-user', user);
-                
-                alert('Cache cleared successfully!');
-                location.reload();
-            }
-        }
+  loadSettings();
+}
 
-        // Toggle password visibility
-        function togglePasswordVisibility(targetId) {
-            const input = document.getElementById(targetId);
-            const toggle = document.querySelector(`[data-target="\${targetId}"]`);
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                toggle.textContent = '🙈';
-            } else {
-                input.type = 'password';
-                toggle.textContent = '👁️';
-            }
-        }
-
-        // Set up event listeners
-        function setupEventListeners() {
-            
-            // Logout button
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (confirm('Are you sure you want to logout?')) {
-                        localStorage.removeItem('quickpos-user');
-                        window.location.href = 'login.html';
-                    }
-                });
-            }
-            
-            // Save button
-            saveBtn.addEventListener('click', saveSettings);
-            
-            // Reset button
-            resetBtn.addEventListener('click', resetSystem);
-            
-            // Clear cache button
-            clearCacheBtn.addEventListener('click', clearCache);
-            
-            // System version selection
-            versionOptions.forEach(option => {
-                option.addEventListener('click', () => {
-                    versionOptions.forEach(opt => opt.classList.remove('selected'));
-                    option.classList.add('selected');
-                    
-                    // Update hint based on selection
-                    if (option.dataset.version === 'pro') {
-                        versionHint.innerHTML = '<strong>Note:</strong> Pro version enables stock management. Existing data will be preserved.';
-                        versionHint.classList.remove('warning');
-                        versionHint.classList.add('error');
-                    } else {
-                        versionHint.innerHTML = '<strong>Note:</strong> Lite version is fast and lightweight. Stock management features are hidden.';
-                        versionHint.classList.remove('error');
-                        versionHint.classList.add('warning');
-                    }
-                });
-            });
-            
-            // Password visibility toggles
-            passwordToggles.forEach(toggle => {
-                toggle.addEventListener('click', () => {
-                    togglePasswordVisibility(toggle.dataset.target);
-                });
-            });
-            
-            // Tax percentage validation
-            taxPercentage.addEventListener('change', () => {
-                const value = parseFloat(taxPercentage.value);
-                if (value < 0) taxPercentage.value = 0;
-                if (value > 50) taxPercentage.value = 50;
-            });
-            
-            // Store phone formatting
-            storePhone.addEventListener('input', (e) => {
-                let value = e.target.value.replace(/\D/g, '');
-                if (value.length > 0) {
-                    value = '+94 ' + value;
-                    if (value.length > 7) {
-                        value = value.substring(0, 7) + ' ' + value.substring(7);
-                    }
-                    if (value.length > 12) {
-                        value = value.substring(0, 12) + ' ' + value.substring(12);
-                    }
-                }
-                e.target.value = value;
-            });
-            
-            // Auto-save on some inputs
-            storeName.addEventListener('blur', () => {
-                if (storeName.value.trim()) {
-                    localStorage.setItem('quickpos-store-name', storeName.value.trim());
-                }
-            });
-            
-            shiftHours.addEventListener('blur', () => {
-                if (shiftHours.value.trim()) {
-                    localStorage.setItem('quickpos-shift-time', shiftHours.value.trim());
-                }
-            });
-            
-            // Keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                if (e.ctrlKey && e.key === 's') {
-                    e.preventDefault();
-                    saveSettings();
-                }
-            });
-        }
-
-        // Initialize app when DOM is loaded
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
-    </script>
-    <script src="sidebar.js"></script>
+init();
+</script>
 </body>
 </html>
-
-
-
-
