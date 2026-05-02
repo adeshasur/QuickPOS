@@ -501,7 +501,7 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="top-bar">
-            <div class="page-title">Hardware Quotation</div>
+            <div class="page-title">Supermarket Quotation</div>
             <div class="user-info"><span id="shiftTime">Shift: 08:00 - 16:00</span><div class="user-avatar" id="userAvatar">OP</div></div>
         </div>
 
@@ -509,13 +509,13 @@
             <!-- Left: Products Grid -->
             <div class="products-section">
                 <div class="section-header">
-                    <div class="section-title">Hardware Items</div>
+                    <div class="section-title">Supermarket Items</div>
                     <div class="category-filter">
                         <button class="category-btn active" data-category="all">All</button>
-                        <button class="category-btn" data-category="plumbing">Plumbing</button>
-                        <button class="category-btn" data-category="cement">Cement</button>
-                        <button class="category-btn" data-category="paint">Paint</button>
-                        <button class="category-btn" data-category="steel">Steel</button>
+                        <button class="category-btn" data-category="Groceries">Groceries</button>
+                        <button class="category-btn" data-category="Dairy">Dairy</button>
+                        <button class="category-btn" data-category="Beverages">Beverages</button>
+                        <button class="category-btn" data-category="Snacks">Snacks</button>
                     </div>
                 </div>
                 <div class="products-grid" id="productsGrid"></div>
@@ -584,18 +584,18 @@
             'use strict';
             
             // ---------- HARDWARE PRODUCTS ----------
-            const hardwareProducts = [
-                { id: 101, name: 'S-Lon PVC Pipe 1/2"', price: 180, unit: 'ft', category: 'plumbing', isWeighted: true },
-                { id: 102, name: 'Tokyo Super Cement', price: 2350, unit: 'bag', category: 'cement', isWeighted: false },
-                { id: 103, name: 'JAT Emulsion White 10L', price: 9200, unit: 'tank', category: 'paint', isWeighted: false },
-                { id: 104, name: 'Steel Rod 12mm', price: 2100, unit: 'pc', category: 'steel', isWeighted: false },
-                { id: 105, name: 'Anchor Bolts 1/2"', price: 320, unit: 'pc', category: 'steel', isWeighted: false },
-                { id: 106, name: 'PVC Elbow 1/2"', price: 95, unit: 'pc', category: 'plumbing', isWeighted: false },
-                { id: 107, name: 'Rileem Cement Bag', price: 2380, unit: 'bag', category: 'cement', isWeighted: false },
-                { id: 108, name: 'Paint Brush 4"', price: 450, unit: 'pc', category: 'paint', isWeighted: false }
+            const supermarketProducts = [
+                { id: 1, name: "Samba Rice 5kg", price: 1250, unit: "bag", category: "Groceries", isWeighted: false },
+                { id: 2, name: "Fresh Milk 1L", price: 280, unit: "pc", category: "Dairy", isWeighted: false },
+                { id: 3, name: "Coca-Cola 1.5L", price: 420, unit: "pc", category: "Beverages", isWeighted: false },
+                { id: 4, name: "Munchee Biscuits", price: 150, unit: "pc", category: "Snacks", isWeighted: false },
+                { id: 5, name: "Carrots (kg)", price: 320, unit: "kg", category: "Vegetables", isWeighted: true },
+                { id: 6, name: "Chicken (Full)", price: 1450, unit: "pc", category: "Meat", isWeighted: false },
+                { id: 7, name: "Sunlight Soap", price: 110, unit: "pc", category: "Personal Care", isWeighted: false },
+                { id: 8, name: "Harpic 500ml", price: 580, unit: "pc", category: "Household", isWeighted: false }
             ];
 
-            let products = hardwareProducts;
+            let products = supermarketProducts;
             let quoteItems = [];
             let currentCategory = "all";
             let productToCustomize = null;
@@ -910,8 +910,8 @@
                 return \`
                     <div class="a4-page">
                         <div class="a4-header">
-                            <h1>HARDWARE CENTRE</h1>
-                            <p>No.123, Galle Road, Colombo 03 | Tel: 011-2345678 | Email: info@hardwarecentre.lk</p>
+                            <h1>QUICKPOS SUPERMARKET</h1>
+                            <p>No.45, Main Street, Colombo 01 | Tel: 011-7654321 | Email: sales@quickpos.lk</p>
                         </div>
                         
                         <div class="a4-info">

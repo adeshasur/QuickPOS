@@ -986,150 +986,26 @@
     <script>
         // Hardcoded categories
         let categories = [
-            { id: 1, name: "Food" },
-            { id: 2, name: "Drinks" },
-            { id: 3, name: "Snacks" },
-            { id: 4, name: "Bakery" },
-            { id: 5, name: "Groceries" },
-            { id: 6, name: "Dairy" },
-            { id: 7, name: "Vegetables" },
-            { id: 8, name: "Fruits" },
-            { id: 9, name: "Meat" },
-            { id: 10, name: "Seafood" }
+            { id: 1, name: "Groceries" },
+            { id: 2, name: "Dairy" },
+            { id: 3, name: "Beverages" },
+            { id: 4, name: "Snacks" },
+            { id: 5, name: "Vegetables" },
+            { id: 6, name: "Meat" },
+            { id: 7, name: "Personal Care" },
+            { id: 8, name: "Household" }
         ];
         
         // Hardcoded products with rich data
         let products = [
-            { 
-                id: 1, 
-                name: "Ceylon Black Tea", 
-                categoryId: 2, 
-                basePrice: 550.00, 
-                discount: 50, 
-                finalPrice: 500.00,
-                currentStock: 28,
-                alertLevel: 10,
-                isWeighted: false,
-                unitType: null,
-                costPrice: 0
-            },
-            { 
-                id: 2, 
-                name: "Nadu Raw Rice", 
-                categoryId: 5, 
-                basePrice: 240.00, 
-                discount: 0, 
-                finalPrice: 240.00,
-                currentStock: 120,
-                alertLevel: 25,
-                isWeighted: true,
-                unitType: "kg",
-                costPrice: 0
-            },
-            { 
-                id: 3, 
-                name: "Coconut Oil (Pure)", 
-                categoryId: 5, 
-                basePrice: 420.00, 
-                discount: 30, 
-                finalPrice: 390.00,
-                currentStock: 45,
-                alertLevel: 12,
-                isWeighted: true,
-                unitType: "L",
-                costPrice: 0
-            },
-            { 
-                id: 4, 
-                name: "Wood Apple Juice", 
-                categoryId: 2, 
-                basePrice: 180.00, 
-                discount: 0, 
-                finalPrice: 180.00,
-                currentStock: 65,
-                alertLevel: 15,
-                isWeighted: false,
-                unitType: null,
-                costPrice: 0
-            },
-            { 
-                id: 5, 
-                name: "Red Onions", 
-                categoryId: 7, 
-                basePrice: 160.00, 
-                discount: 10, 
-                finalPrice: 150.00,
-                currentStock: 8,
-                alertLevel: 10,
-                isWeighted: true,
-                unitType: "kg",
-                costPrice: 0
-            },
-            { 
-                id: 6, 
-                name: "Dhal (Red Lentils)", 
-                categoryId: 5, 
-                basePrice: 320.00, 
-                discount: 20, 
-                finalPrice: 300.00,
-                currentStock: 15,
-                alertLevel: 18,
-                isWeighted: true,
-                unitType: "kg",
-                costPrice: 0
-            },
-            { 
-                id: 7, 
-                name: "Fresh Milk", 
-                categoryId: 6, 
-                basePrice: 130.00, 
-                discount: 0, 
-                finalPrice: 130.00,
-                currentStock: 40,
-                alertLevel: 8,
-                isWeighted: false,
-                unitType: null,
-                costPrice: 0
-            },
-            { 
-                id: 8, 
-                name: "Chicken Breast", 
-                categoryId: 9, 
-                basePrice: 980.00, 
-                discount: 80, 
-                finalPrice: 900.00,
-                currentStock: 6,
-                alertLevel: 7,
-                isWeighted: true,
-                unitType: "kg",
-                costPrice: 0
-            },
-            { 
-                id: 9, 
-                name: "Organic Bananas", 
-                categoryId: 8, 
-                basePrice: 120.00, 
-                discount: 0, 
-                finalPrice: 120.00,
-                currentStock: 50,
-                alertLevel: 12,
-                isWeighted: true,
-                unitType: "kg",
-                costPrice: 0
-            },
-            { 
-                id: 10, 
-                name: "Tuna Fish", 
-                categoryId: 10, 
-                basePrice: 850.00, 
-                discount: 50, 
-                finalPrice: 800.00,
-                currentStock: 12,
-                alertLevel: 5,
-                isWeighted: true,
-                unitType: "kg",
-                costPrice: 0
-            }
+            { id: 1, name: "Samba Rice 5kg", categoryId: 1, basePrice: 1250.00, discount: 50, finalPrice: 1200.00, currentStock: 120, alertLevel: 25, isWeighted: false, unitType: null, costPrice: 1100 },
+            { id: 2, name: "Fresh Milk 1L", categoryId: 2, basePrice: 280.00, discount: 0, finalPrice: 280.00, currentStock: 45, alertLevel: 10, isWeighted: false, unitType: null, costPrice: 240 },
+            { id: 3, name: "Coca-Cola 1.5L", categoryId: 3, basePrice: 420.00, discount: 20, finalPrice: 400.00, currentStock: 80, alertLevel: 15, isWeighted: false, unitType: null, costPrice: 380 },
+            { id: 4, name: "Munchee Biscuits", categoryId: 4, basePrice: 150.00, discount: 0, finalPrice: 150.00, currentStock: 200, alertLevel: 50, isWeighted: false, unitType: null, costPrice: 130 },
+            { id: 5, name: "Carrots", categoryId: 5, basePrice: 320.00, discount: 20, finalPrice: 300.00, currentStock: 50, alertLevel: 15, isWeighted: true, unitType: "kg", costPrice: 280 },
+            { id: 6, name: "Chicken (Full)", categoryId: 6, basePrice: 1450.00, discount: 50, finalPrice: 1400.00, currentStock: 30, alertLevel: 10, isWeighted: false, unitType: null, costPrice: 1300 },
+            { id: 7, name: "Sunlight Soap", categoryId: 7, basePrice: 110.00, discount: 0, finalPrice: 110.00, currentStock: 300, alertLevel: 50, isWeighted: false, unitType: null, costPrice: 95 },
+            { id: 8, name: "Harpic 500ml", categoryId: 8, basePrice: 580.00, discount: 30, finalPrice: 550.00, currentStock: 40, alertLevel: 10, isWeighted: false, unitType: null, costPrice: 520 }
         ];
 
         // DOM elements

@@ -462,40 +462,33 @@
     <script>
         // Hardcoded Categories
         const categories = [
-            { id: 1, name: "Beverages" },
-            { id: 2, name: "Food" },
-            { id: 3, name: "Snacks" },
-            { id: 4, name: "Pastry" },
-            { id: 5, name: "Dessert" },
-            { id: 6, name: "Groceries" },
-            { id: 7, name: "Dairy" }
+            { id: 1, name: "Groceries" },
+            { id: 2, name: "Dairy" },
+            { id: 3, name: "Beverages" },
+            { id: 4, name: "Snacks" },
+            { id: 5, name: "Vegetables" },
+            { id: 6, name: "Meat" },
+            { id: 7, name: "Personal Care" },
+            { id: 8, name: "Household" }
         ];
 
         // Hardcoded Products
         let products = [
-            { id: 1, name: "Coffee", categoryId: 1, category: "Beverages", cost_price: 150, selling_price: 450 },
-            { id: 2, name: "Tea", categoryId: 1, category: "Beverages", cost_price: 120, selling_price: 350 },
-            { id: 3, name: "Chocolate Cake", categoryId: 4, category: "Pastry", cost_price: 300, selling_price: 650 },
-            { id: 4, name: "Chicken Sandwich", categoryId: 2, category: "Food", cost_price: 400, selling_price: 850 },
-            { id: 5, name: "Mineral Water", categoryId: 1, category: "Beverages", cost_price: 80, selling_price: 200 },
-            { id: 6, name: "Cheese Pizza", categoryId: 2, category: "Food", cost_price: 500, selling_price: 1200 },
-            { id: 7, name: "French Fries", categoryId: 3, category: "Snacks", cost_price: 200, selling_price: 550 },
-            { id: 8, name: "Fruit Juice", categoryId: 1, category: "Beverages", cost_price: 180, selling_price: 500 },
-            { id: 9, name: "Ice Cream", categoryId: 5, category: "Dessert", cost_price: 250, selling_price: 600 },
-            { id: 10, name: "Burger", categoryId: 2, category: "Food", cost_price: 350, selling_price: 750 },
-            { id: 11, name: "Soft Drink", categoryId: 1, category: "Beverages", cost_price: 90, selling_price: 250 },
-            { id: 12, name: "Fresh Milk", categoryId: 7, category: "Dairy", cost_price: 130, selling_price: 280 }
+            { id: 1, name: "Samba Rice 5kg", categoryId: 1, category: "Groceries", cost_price: 1100, selling_price: 1250 },
+            { id: 2, name: "Fresh Milk 1L", categoryId: 2, category: "Dairy", cost_price: 240, selling_price: 280 },
+            { id: 3, name: "Coca-Cola 1.5L", categoryId: 3, category: "Beverages", cost_price: 380, selling_price: 420 },
+            { id: 4, name: "Munchee Biscuits", categoryId: 4, category: "Snacks", cost_price: 130, selling_price: 150 },
+            { id: 5, name: "Carrots (kg)", categoryId: 5, category: "Vegetables", cost_price: 280, selling_price: 320 },
+            { id: 6, name: "Chicken (Full)", categoryId: 6, category: "Meat", cost_price: 1300, selling_price: 1450 },
+            { id: 7, name: "Sunlight Soap", categoryId: 7, category: "Personal Care", cost_price: 95, selling_price: 110 }
         ];
 
         // Stock items with expiry dates
         let stockItems = JSON.parse(localStorage.getItem('quickpos-stock-items')) || [
-            { id: 1, productId: 1, productName: "Coffee", category: "Beverages", quantity: 50, costPrice: 150, sellingPrice: 450, expiryDate: "2026-05-15", addedDate: new Date().toISOString() },
-            { id: 2, productId: 3, productName: "Chocolate Cake", category: "Pastry", quantity: 20, costPrice: 300, sellingPrice: 650, expiryDate: "2026-04-28", addedDate: new Date().toISOString() },
-            { id: 3, productId: 5, productName: "Mineral Water", category: "Beverages", quantity: 100, costPrice: 80, sellingPrice: 200, expiryDate: "2026-12-20", addedDate: new Date().toISOString() },
-            { id: 4, productId: 7, productName: "French Fries", category: "Snacks", quantity: 40, costPrice: 200, sellingPrice: 550, expiryDate: "2026-04-10", addedDate: new Date().toISOString() },
-            { id: 5, productId: 9, productName: "Ice Cream", category: "Dessert", quantity: 25, costPrice: 250, sellingPrice: 600, expiryDate: "2026-05-01", addedDate: new Date().toISOString() },
-            { id: 6, productId: 11, productName: "Soft Drink", category: "Beverages", quantity: 80, costPrice: 90, sellingPrice: 250, expiryDate: "2026-08-10", addedDate: new Date().toISOString() },
-            { id: 7, productId: 12, productName: "Fresh Milk", category: "Dairy", quantity: 15, costPrice: 130, sellingPrice: 280, expiryDate: "2026-03-28", addedDate: new Date().toISOString() }
+            { id: 1, productId: 1, productName: "Samba Rice 5kg", category: "Groceries", quantity: 50, costPrice: 1100, sellingPrice: 1250, expiryDate: "2026-12-15", addedDate: new Date().toISOString() },
+            { id: 2, productId: 2, productName: "Fresh Milk 1L", category: "Dairy", quantity: 20, costPrice: 240, sellingPrice: 280, expiryDate: "2026-05-10", addedDate: new Date().toISOString() },
+            { id: 3, productId: 3, productName: "Coca-Cola 1.5L", category: "Beverages", quantity: 100, costPrice: 380, sellingPrice: 420, expiryDate: "2026-11-20", addedDate: new Date().toISOString() },
+            { id: 4, productId: 4, productName: "Munchee Biscuits", category: "Snacks", quantity: 40, costPrice: 130, sellingPrice: 150, expiryDate: "2026-08-10", addedDate: new Date().toISOString() }
         ];
 
         let nextStockId = stockItems.length + 1;

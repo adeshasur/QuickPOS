@@ -799,10 +799,14 @@
     <script>
         // Initialize data storage
         let categories = JSON.parse(localStorage.getItem('quickpos-categories')) || [
-            { id: 1, name: "Food", description: "All food items including meals and snacks", productCount: 2 },
-            { id: 2, name: "Drinks", description: "Beverages, juices, and hot drinks", productCount: 3 },
-            { id: 3, name: "Snacks", description: "Quick bites and light snacks", productCount: 1 },
-            { id: 4, name: "Bakery", description: "Freshly baked goods and pastries", productCount: 1 }
+            { id: 1, name: "Groceries", description: "Rice, Sugar, Flour, Oils, etc.", productCount: 2 },
+            { id: 2, name: "Dairy", description: "Milk, Butter, Yogurt, Cheese", productCount: 3 },
+            { id: 3, name: "Beverages", description: "Soft drinks, Juice, Tea, Coffee", productCount: 1 },
+            { id: 4, name: "Snacks", description: "Biscuits, Chips, Chocolates", productCount: 1 },
+            { id: 5, name: "Vegetables", description: "Fresh vegetables and fruits", productCount: 1 },
+            { id: 6, name: "Meat", description: "Fresh meat and poultry", productCount: 1 },
+            { id: 7, name: "Personal Care", description: "Soaps, Shampoos, Toothpaste", productCount: 1 },
+            { id: 8, name: "Household", description: "Cleaning supplies and tools", productCount: 1 }
         ];
         
         // Load products to count per category

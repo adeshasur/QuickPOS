@@ -542,11 +542,11 @@
                 let customers = localStorage.getItem(CUSTOMERS_KEY);
                 if (!customers) {
                     const demoCustomers = [
-                        { id: 1, name: 'Kamal Perera', phone: '0771234567', balance: 50000.00 },
+                        { id: 1, name: 'Kamal Perera', phone: '0771234567', balance: 5000.00 },
                         { id: 2, name: 'Sunimal Silva', phone: '0719876543', balance: 0.00 },
-                        { id: 3, name: 'Hardware Contractor Ltd', phone: '0112233445', balance: 25000.00 },
+                        { id: 3, name: 'Perera Groceries', phone: '0112233445', balance: 2500.00 },
                         { id: 4, name: 'Nimal Fernando', phone: '0765558888', balance: 1250.50 },
-                        { id: 5, name: 'City Builders', phone: '0114445555', balance: 15000.00 }
+                        { id: 5, name: 'City Snacks & Beverages', phone: '0114445555', balance: 1500.00 }
                     ];
                     localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(demoCustomers));
                 }
@@ -561,10 +561,10 @@
                     const yesterday = new Date(today); yesterday.setDate(yesterday.getDate()-1);
                     const fmt = (d) => d.toISOString().split('T')[0];
                     const demoBills = [
-                        { id: '101', date: fmt(today), customerId: 1, customerName: 'Kamal Perera', total: 5000.00, remaining: 5000.00, status: 'pending' },
-                        { id: '102', date: fmt(yesterday), customerId: 3, customerName: 'Hardware Contractor Ltd', total: 25000.00, remaining: 25000.00, status: 'pending' },
+                        { id: '101', date: fmt(today), customerId: 1, customerName: 'Kamal Perera', total: 1250.00, remaining: 1250.00, status: 'pending' },
+                        { id: '102', date: fmt(yesterday), customerId: 3, customerName: 'Perera Groceries', total: 2500.00, remaining: 2500.00, status: 'pending' },
                         { id: '103', date: '2025-02-15', customerId: 2, customerName: 'Sunimal Silva', total: 3200.00, remaining: 0.00, status: 'settled' },
-                        { id: '104', date: '2025-02-10', customerId: 5, customerName: 'City Builders', total: 8700.50, remaining: 8700.50, status: 'pending' }
+                        { id: '104', date: '2025-02-10', customerId: 5, customerName: 'City Snacks & Beverages', total: 870.50, remaining: 870.50, status: 'pending' }
                     ];
                     localStorage.setItem(BILLS_KEY, JSON.stringify(demoBills));
                 }

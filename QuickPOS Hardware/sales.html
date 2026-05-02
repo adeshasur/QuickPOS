@@ -1006,9 +1006,14 @@
                     <div class="section-title">Products</div>
                     <div class="category-filter">
                         <button class="category-btn active" data-category="all">All</button>
-                        <button class="category-btn" data-category="cement">Cement</button>
-                        <button class="category-btn" data-category="plumbing">Plumbing</button>
-                        <button class="category-btn" data-category="steel">Steel</button>
+                        <button class="category-btn" data-category="Groceries">Groceries</button>
+                        <button class="category-btn" data-category="Dairy">Dairy</button>
+                        <button class="category-btn" data-category="Beverages">Beverages</button>
+                        <button class="category-btn" data-category="Snacks">Snacks</button>
+                        <button class="category-btn" data-category="Vegetables">Vegetables</button>
+                        <button class="category-btn" data-category="Meat">Meat</button>
+                        <button class="category-btn" data-category="Personal Care">Personal Care</button>
+                        <button class="category-btn" data-category="Household">Household</button>
                     </div>
                 </div>
                 <div class="quick-stock-check">
@@ -1136,22 +1141,21 @@
     <script>
         // ===== DEMO DATA - Works immediately without localStorage =====
         const demoProducts = [
-            { id: 1, name: "Tokyo Super Cement", price: 2350, category: "cement", stock: 50, isWeighted: false },
-            { id: 2, name: "S-Lon PVC Pipe 1/2 inch", price: 180, category: "plumbing", stock: 100, isWeighted: true, unitType: "ft" },
-            { id: 3, name: "Steel Rod 12mm", price: 2100, category: "steel", stock: 30, isWeighted: false },
-            { id: 4, name: "Rileem Cement", price: 2380, category: "cement", stock: 45, isWeighted: false },
-            { id: 5, name: "PVC Elbow 1/2\"", price: 95, category: "plumbing", stock: 200, isWeighted: false },
-            { id: 6, name: "Steel Rod 10mm", price: 1850, category: "steel", stock: 40, isWeighted: false },
-            { id: 7, name: "Anchor Bolts 1/2\"", price: 320, category: "steel", stock: 150, isWeighted: false },
-            { id: 8, name: "Paint Brush 4\"", price: 450, category: "plumbing", stock: 75, isWeighted: false }
+            { id: 1, name: "Samba Rice 5kg", price: 1250, category: "groceries", stock: 120, isWeighted: false },
+            { id: 2, name: "Fresh Milk 1L", price: 280, category: "dairy", stock: 45, isWeighted: false },
+            { id: 3, name: "Coca-Cola 1.5L", price: 420, category: "beverages", stock: 80, isWeighted: false },
+            { id: 4, name: "Munchee Biscuits", price: 150, category: "snacks", stock: 200, isWeighted: false },
+            { id: 5, name: "Carrots (kg)", price: 320, category: "vegetables", stock: 50, isWeighted: true, unitType: "kg" },
+            { id: 6, name: "Chicken (Full)", price: 1450, category: "meat", stock: 30, isWeighted: false },
+            { id: 7, name: "Sunlight Soap", price: 110, category: "personal-care", stock: 300, isWeighted: false },
+            { id: 8, name: "Harpic 500ml", price: 580, category: "household", stock: 40, isWeighted: false }
         ];
 
         const demoCustomers = [
-            { id: 1, name: 'Kamal Perera', phone: '0771234567', balance: 5000.00 },
-            { id: 2, name: 'Sunimal Silva', phone: '0719876543', balance: 0.00 },
-            { id: 3, name: 'Hardware Contractor Ltd', phone: '0112233445', balance: 25000.00 },
-            { id: 4, name: 'Nimal Fernando', phone: '0765558888', balance: 1250.50 },
-            { id: 5, name: 'City Builders', phone: '0114445555', balance: 15000.00 }
+            { id: 1, name: 'Anura Kumara', phone: '0771234567', balance: 150.00 },
+            { id: 2, name: 'Samanthie Perera', phone: '0719876543', balance: 0.00 },
+            { id: 3, name: 'Wimal Siri', phone: '0765558888', balance: 250.50 },
+            { id: 4, name: 'Nalin Bandara', phone: '0114445555', balance: 0.00 }
         ];
 
         // App State
