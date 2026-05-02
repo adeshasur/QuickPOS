@@ -14,16 +14,16 @@ const db = new sqlite3.Database('./pos_database.sqlite', (err) => {
 
 function setupDatabase() {
     db.serialize(() => {
-        // Users table එක හැදීම (full_name column එකත් එක්ක)
+        // Users table එක හැදීම (username එක COLLATE NOCASE කරලා case-insensitive කලා)
         db.run(`CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE,
+            username TEXT UNIQUE COLLATE NOCASE,
             full_name TEXT,
             password TEXT,
             role TEXT
         )`);
 
-        // Seed Users - Username එක විදියට 1st name එක පාවිච්චි කරනවා
+        // Seed Users
         const stmt = db.prepare("INSERT OR IGNORE INTO users (username, full_name, password, role) VALUES (?, ?, ?, ?)");
         stmt.run("Sunil", "Sunil Perera", "admin123", "Owner");
         stmt.run("Sandun", "Sandun Perera", "user123", "Cashier");
