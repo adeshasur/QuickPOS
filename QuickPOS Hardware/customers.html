@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickPOS Pro - Customers</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        :root {
+            --bg-color: #F0F4F8;
+            --sidebar-color: #FFFFFF;
+            --primary-color: #5D8AA8;
+            --success-color: #2D6A4F;
+            --warning-color: #B45309;
+            --danger-color: #DC2626;
+            --text-dark: #2D3748;
+            --text-light: #718096;
+            --border-color: #E2E8F0;
+            --hover-color: #EDF2F7;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.07);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            background-color: var(--sidebar-color);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            height: 100vh;
+            position: relative;
+        }
+
+        .sidebar.expanded {
+            width: 240px;
+            min-width: 240px;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+            min-width: 70px;
+        }
+
+        .hamburger-menu {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            height: 70px;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hamburger-btn:hover {
+            background-color: var(--hover-color);
+        }
+
+        .logo {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 22px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .logo.collapsed {
+            opacity: 0;
+            width: 0;
+        }
+
+        .nav-items {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            color: var(--text-light);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background-color: var(--hover-color);
+            color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            background-color: rgba(93, 138, 168, 0.1);
+            color: var(--primary-color);
+            border-right: 4px solid var(--primary-color);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .nav-text {
+            margin-left: 16px;
+            font-weight: 500;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed .nav-text {
+            opacity: 0;
+            width: 0;
+            margin-left: 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .top-bar {
+            height: 70px;
+            background-color: var(--sidebar-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            box-shadow: var(--shadow);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Customers Dashboard */
+        .customers-dashboard {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            gap: 24px;
+            overflow: auto; /* allow scrolling if needed */
+        }
+
+        /* Header with search and add button */
+        .customers-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .search-wrapper {
+            flex: 1;
+            min-width: 280px;
+            display: flex;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .search-icon {
+            background-color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            color: var(--text-light);
+            font-size: 18px;
+        }
+
+        #customerSearch {
+            width: 100%;
+            padding: 14px 16px 14px 4px;
+            border: none;
+            font-size: 15px;
+            background: white;
+            outline: none;
+        }
+
+        #customerSearch::placeholder {
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .add-customer-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+            box-shadow: var(--shadow);
+        }
+
+        .add-customer-btn:hover {
+            background-color: #4a7795;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Table container */
+        .table-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            min-height: 400px;
+        }
+
+        .customers-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        .customers-table thead {
+            background-color: var(--bg-color);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .customers-table th {
+            text-align: left;
+            padding: 18px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-dark);
+            white-space: nowrap;
+        }
+
+        .customers-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-dark);
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        .customers-table tbody tr:hover {
+            background-color: var(--hover-color);
+        }
+
+        .balance-cell {
+            font-weight: 600;
+            color: var(--success-color);
+        }
+
+        .action-cell {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 8px;
+        }
+
+        .edit-btn {
+            background-color: rgba(93, 138, 168, 0.1);
+            color: var(--primary-color);
+        }
+
+        .edit-btn:hover {
+            background-color: rgba(93, 138, 168, 0.2);
+        }
+
+        .delete-btn {
+            background-color: rgba(220, 38, 38, 0.1);
+            color: var(--danger-color);
+        }
+
+        .delete-btn:hover {
+            background-color: rgba(220, 38, 38, 0.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--border-color);
+        }
+
+        /* Modal (shared style) */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 16px;
+            padding: 28px;
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: var(--text-light);
+            cursor: pointer;
+            line-height: 1;
+        }
+        .close-modal:hover {
+            color: var(--danger-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.2s;
+            background-color: #fafafa;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(93,138,168,0.2);
+            background-color: white;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 28px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .modal-btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn.cancel {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+        }
+
+        .modal-btn.cancel:hover {
+            background-color: var(--border-color);
+        }
+
+        .modal-btn.primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .modal-btn.primary:hover {
+            background-color: #4a7795;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .modal-btn.danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        .modal-btn.danger:hover {
+            background-color: #b91c1c;
+        }
+
+        .owner-only { display: block; }
+
+        @media (max-width: 768px) {
+            .customers-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-wrapper {
+                width: 100%;
+            }
+            .add-customer-btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar expanded" id="sidebar">
+        <div class="hamburger-menu">
+            <button class="hamburger-btn" id="hamburgerBtn"><span id="hamburgerIcon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </span></button>
+            <div class="logo" id="logo">QuickPOS</div>
+        </div>
+        <div class="nav-items">
+            <a href="owner_dashboard.html" class="nav-item owner-only"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span><span class="nav-text">Dashboard</span></a>
+            <a href="sales.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></span><span class="nav-text">Make a Sale</span></a>
+            <a href="categories.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></span><span class="nav-text">Categories</span></a>
+            <a href="products.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></span><span class="nav-text">Products</span></a>
+            <a href="inventory.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg></span><span class="nav-text">Inventory</span></a>
+            <a href="customers.html" class="nav-item active"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span><span class="nav-text">Customers</span></a>
+            <a href="quotations.html" class="nav-item"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></span><span class="nav-text">Quotations</span></a>
+            <a href="ledger.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></span><span class="nav-text">Credit Ledger</span></a>
+            <a href="reports.html" class="nav-item"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span><span class="nav-text">Shift Reports</span></a>
+
+            <a href="users.html" class="nav-item owner-only"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><span class="nav-text">User Management</span></a>
+            
+            <a href="settings.html" class="nav-item owner-only"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span><span class="nav-text">Settings</span></a>
+            <a href="login.html" class="nav-item" id="logoutBtn"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span><span class="nav-text">Logout</span></a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">Customer Management</div>
+            <div class="user-info">
+                <span id="shiftTime">Shift: 08:00 - 16:00</span>
+                <div class="user-avatar" id="userAvatar">OP</div>
+            </div>
+        </div>
+
+        <div class="customers-dashboard">
+            <!-- Header: search + add button -->
+            <div class="customers-header">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="customerSearch" placeholder="Search by name or phone...">
+                </div>
+                <button class="add-customer-btn" id="addCustomerBtn">
+                    <span>+</span> Add New Customer
+                </button>
+            </div>
+
+            <!-- Customer table -->
+            <div class="table-container">
+                <div class="table-wrapper">
+                    <table class="customers-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Address</th>
+                                <th>Balance (LKR)</th>
+                                <th class="action-cell">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerTableBody">
+                            <!-- dynamic rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Customer Modal (reused) -->
+    <div class="modal" id="customerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Add Customer</div>
+                <button class="close-modal" id="closeModalBtn">&times;</button>
+            </div>
+            <form id="customerForm">
+                <input type="hidden" id="customerId" value="">
+                <div class="form-group">
+                    <label class="form-label" for="custName">Full Name *</label>
+                    <input type="text" class="form-input" id="custName" placeholder="e.g. Kamal Perera" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="custPhone">Phone Number *</label>
+                    <input type="tel" class="form-input" id="custPhone" placeholder="e.g. 0771234567" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="custAddress">Address</label>
+                    <input type="text" class="form-input" id="custAddress" placeholder="e.g. Colombo 03">
+                </div>
+                <!-- Balance is hidden on add (set to 0), editable on edit? For simplicity we keep hidden always set to 0, but you can make visible if needed. We'll treat balance as zero by default and not editable here. -->
+                <input type="hidden" id="custBalance" value="0">
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn cancel" id="cancelModalBtn">Cancel</button>
+                    <button type="submit" class="modal-btn primary" id="saveCustomerBtn">Save Customer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete confirmation modal (optional small inline confirm) -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content" style="max-width:400px;">
+            <div class="modal-header">
+                <div class="modal-title">Confirm Delete</div>
+                <button class="close-modal" id="closeDeleteModalBtn">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px 0; text-align: center;">
+                <p style="margin-bottom: 16px;">Are you sure you want to delete this customer?</p>
+                <p style="color: var(--danger-color); font-size: 13px;">This action cannot be undone.</p>
+            </div>
+            <div class="modal-actions" style="justify-content: center;">
+                <button class="modal-btn cancel" id="cancelDeleteBtn">Cancel</button>
+                <button class="modal-btn danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ----- Data management -----
+            const STORAGE_KEY = 'quickpos-customers';
+
+            // Default demo customers
+            const defaultCustomers = [
+                { id: 1, name: 'Kamal Perera', phone: '0771234567', address: 'Colombo 03', balance: 0 },
+                { id: 2, name: 'Sunimal Silva', phone: '0719876543', address: 'Maharagama', balance: 0 }
+            ];
+
+            // Load customers from localStorage or initialize with demo
+            let customers = [];
+
+            function loadCustomers() {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    try {
+                        customers = JSON.parse(stored);
+                    } catch (e) {
+                        customers = [...defaultCustomers];
+                    }
+                } else {
+                    customers = [...defaultCustomers];
+                }
+                // ensure each has an id
+                customers = customers.map((c, idx) => ({ ...c, id: c.id || idx + 1 }));
+                saveCustomers();
+            }
+
+            function saveCustomers() {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(customers));
+            }
+
+            // Helper to get next id
+            function getNextId() {
+                return customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1;
+            }
+
+            // ----- UI elements -----
+            const sidebar = document.getElementById('sidebar');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const hamburgerIcon = document.getElementById('hamburgerIcon');
+            const logo = document.getElementById('logo');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const addCustomerBtn = document.getElementById('addCustomerBtn');
+            const customerSearch = document.getElementById('customerSearch');
+            const customerTableBody = document.getElementById('customerTableBody');
+
+            // Modal elements
+            const customerModal = document.getElementById('customerModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const cancelModalBtn = document.getElementById('cancelModalBtn');
+            const customerForm = document.getElementById('customerForm');
+            const customerId = document.getElementById('customerId');
+            const custName = document.getElementById('custName');
+            const custPhone = document.getElementById('custPhone');
+            const custAddress = document.getElementById('custAddress');
+            const custBalance = document.getElementById('custBalance'); // hidden
+
+            // Delete modal
+            const deleteModal = document.getElementById('deleteModal');
+            const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
+            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            let deleteCandidateId = null;
+
+            // Format currency (LKR)
+            const formatCurrency = (amt) => \`LKR \${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\`;
+
+            // Render table with optional filter
+            function renderCustomers(filterText = '') {
+                const searchTerm = filterText.trim().toLowerCase();
+                let filtered = customers;
+                if (searchTerm !== '') {
+                    filtered = customers.filter(c => 
+                        c.name.toLowerCase().includes(searchTerm) || 
+                        c.phone.includes(searchTerm) // phone contains digits
+                    );
+                }
+
+                if (filtered.length === 0) {
+                    customerTableBody.innerHTML = \`
+                        <tr>
+                            <td colspan="5" style="padding:0;">
+                                <div class="empty-state">
+                                    <div class="empty-icon">👥</div>
+                                    <p>No customers found</p>
+                                    <p style="font-size:13px;">Add a new customer or adjust search</p>
+                                </div>
+                            </td>
+                        </tr>
+                    \`;
+                    return;
+                }
+
+                let html = '';
+                filtered.forEach(cust => {
+                    const address = cust.address || '—';
+                    html += \`
+                        <tr data-id="\${cust.id}">
+                            <td><strong>\${escapeHtml(cust.name)}</strong></td>
+                            <td>\${escapeHtml(cust.phone)}</td>
+                            <td>\${escapeHtml(address)}</td>
+                            <td class="balance-cell">\${formatCurrency(cust.balance ?? 0)}</td>
+                            <td class="action-cell">
+                                <button class="action-btn edit-btn" data-id="\${cust.id}">
+                                    <span>✏️</span> Edit
+                                </button>
+                                <button class="action-btn delete-btn" data-id="\${cust.id}">
+                                    <span>🗑️</span> Delete
+                                </button>
+                            </td>
+                        </tr>
+                    \`;
+                });
+                customerTableBody.innerHTML = html;
+            }
+
+            // simple escape for innerHTML safety
+            function escapeHtml(unsafe) {
+                if (!unsafe) return '';
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            // Open add modal
+            function openAddModal() {
+                modalTitle.textContent = 'Add Customer';
+                customerId.value = '';
+                custName.value = '';
+                custPhone.value = '';
+                custAddress.value = '';
+                custBalance.value = '0';
+                customerModal.classList.add('active');
+                setTimeout(() => custName.focus(), 250);
+            }
+
+            // Open edit modal
+            function openEditModal(id) {
+                const cust = customers.find(c => c.id === id);
+                if (!cust) return;
+                modalTitle.textContent = 'Edit Customer';
+                customerId.value = cust.id;
+                custName.value = cust.name;
+                custPhone.value = cust.phone;
+                custAddress.value = cust.address || '';
+                custBalance.value = cust.balance ?? 0;
+                customerModal.classList.add('active');
+                setTimeout(() => custName.focus(), 250);
+            }
+
+            // Close modals
+            function closeCustomerModal() {
+                customerModal.classList.remove('active');
+            }
+
+            function closeDeleteModal() {
+                deleteModal.classList.remove('active');
+                deleteCandidateId = null;
+            }
+
+            // Save (add or update)
+            function handleCustomerSubmit(e) {
+                e.preventDefault();
+
+                const name = custName.value.trim();
+                const phone = custPhone.value.trim();
+                const address = custAddress.value.trim();
+                const balance = parseFloat(custBalance.value) || 0;
+                const id = customerId.value ? parseInt(customerId.value) : null;
+
+                if (!name || !phone) {
+                    alert('Name and Phone are required.');
+                    return;
+                }
+
+                if (id) {
+                    // update existing
+                    const index = customers.findIndex(c => c.id === id);
+                    if (index !== -1) {
+                        customers[index] = { ...customers[index], name, phone, address, balance };
+                    }
+                } else {
+                    // add new
+                    const newId = getNextId();
+                    customers.push({ id: newId, name, phone, address, balance });
+                }
+
+                saveCustomers();
+                renderCustomers(customerSearch.value);
+                closeCustomerModal();
+            }
+
+            // Delete flow
+            function requestDelete(id) {
+                deleteCandidateId = id;
+                deleteModal.classList.add('active');
+            }
+
+            function confirmDelete() {
+                if (deleteCandidateId) {
+                    customers = customers.filter(c => c.id !== deleteCandidateId);
+                    saveCustomers();
+                    renderCustomers(customerSearch.value);
+                }
+                closeDeleteModal();
+            }
+
+            // ----- Event listeners -----
+            function init() {
+                loadCustomers();
+                renderCustomers();
+
+                // Sidebar toggle
+                hamburgerBtn.addEventListener('click', () => {
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    if (isCollapsed) {
+                        sidebar.classList.remove('collapsed');
+                        sidebar.classList.add('expanded');
+                        logo.classList.remove('collapsed');
+                        hamburgerIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
+                        localStorage.setItem('quickpos-sidebar', 'expanded');
+                    } else {
+                        sidebar.classList.remove('expanded');
+                        sidebar.classList.add('collapsed');
+                        logo.classList.add('collapsed');
+                        hamburgerIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+                        localStorage.setItem('quickpos-sidebar', 'collapsed');
+                    }
+                });
+
+                // Load sidebar state
+                const savedSidebar = localStorage.getItem('quickpos-sidebar');
+                if (savedSidebar === 'collapsed') {
+                    sidebar.classList.remove('expanded');
+                    sidebar.classList.add('collapsed');
+                    logo.classList.add('collapsed');
+                    hamburgerIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+                }
+
+                // User Info
+                const user = JSON.parse(localStorage.getItem('quickpos-user'));
+                if (user && user.name) {
+                    const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                    document.getElementById('userAvatar').textContent = initials.substring(0, 2);
+                }
+
+                // Logout
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (confirm('Logout?')) {
+                        localStorage.removeItem('quickpos-user');
+                        window.location.href = 'login.html';
+                    }
+                });
+
+                // Add button
+                addCustomerBtn.addEventListener('click', openAddModal);
+
+                // Search input
+                customerSearch.addEventListener('input', (e) => {
+                    renderCustomers(e.target.value);
+                });
+
+                // Table actions (edit/delete) via delegation
+                customerTableBody.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button');
+                    if (!btn) return;
+                    const row = btn.closest('tr');
+                    if (!row) return;
+                    const custId = parseInt(row.dataset.id);
+
+                    if (btn.classList.contains('edit-btn')) {
+                        openEditModal(custId);
+                    } else if (btn.classList.contains('delete-btn')) {
+                        requestDelete(custId);
+                    }
+                });
+
+                // Modal close buttons
+                closeModalBtn.addEventListener('click', closeCustomerModal);
+                cancelModalBtn.addEventListener('click', closeCustomerModal);
+                customerModal.addEventListener('click', (e) => {
+                    if (e.target === customerModal) closeCustomerModal();
+                });
+
+                // Delete modal controls
+                closeDeleteModalBtn.addEventListener('click', closeDeleteModal);
+                cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+                deleteModal.addEventListener('click', (e) => {
+                    if (e.target === deleteModal) closeDeleteModal();
+                });
+                confirmDeleteBtn.addEventListener('click', confirmDelete);
+
+                // Form submit
+                customerForm.addEventListener('submit', handleCustomerSubmit);
+
+                // Security/role: hide owner items if cashier
+                if (user && user.role && user.role.toLowerCase() === 'cashier') {
+                    document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'none');
+                }
+                const shift = localStorage.getItem('quickpos-shift-time') || '08:00 - 16:00';
+                document.getElementById('shiftTime').textContent = \`Shift: \${shift}\`;
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
+</body>
+</html>

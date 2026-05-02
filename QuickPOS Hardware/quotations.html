@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickPOS Pro - Quotation (Hardware)</title>
+    <!-- html2pdf library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        :root {
+            --bg-color: #F0F4F8;
+            --sidebar-color: #FFFFFF;
+            --primary-color: #5D8AA8;
+            --success-color: #2D6A4F;
+            --text-dark: #2D3748;
+            --text-light: #718096;
+            --border-color: #E2E8F0;
+            --hover-color: #EDF2F7;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.07);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        /* Sidebar - sticky */
+        .sidebar {
+            background-color: var(--sidebar-color);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+        }
+        .sidebar.expanded { width: 240px; min-width: 240px; }
+        .sidebar.collapsed { width: 70px; min-width: 70px; }
+        .hamburger-menu {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            height: 70px;
+        }
+        .hamburger-btn {
+            background: none; border: none; font-size: 20px; color: var(--primary-color);
+            cursor: pointer; padding: 8px; border-radius: 6px; transition: all 0.2s ease;
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+        }
+        .hamburger-btn:hover { background-color: var(--hover-color); }
+        .logo { font-weight: 700; color: var(--primary-color); font-size: 22px; white-space: nowrap; overflow: hidden; }
+        .logo.collapsed { opacity: 0; width: 0; }
+        .nav-items { flex: 1; padding: 20px 0; overflow-y: auto; }
+        .nav-item {
+            display: flex; align-items: center; padding: 14px 20px; color: var(--text-light);
+            text-decoration: none; transition: all 0.2s ease; white-space: nowrap; overflow: hidden;
+            border: none; background: none; width: 100%; text-align: left; cursor: pointer;
+        }
+        .nav-item:hover { background-color: var(--hover-color); color: var(--primary-color); }
+        .nav-item.active { background-color: rgba(93, 138, 168, 0.1); color: var(--primary-color); border-right: 4px solid var(--primary-color); }
+        .nav-icon { font-size: 20px; min-width: 30px; text-align: center; }
+        .nav-text { margin-left: 16px; font-weight: 500; transition: opacity 0.3s ease; }
+        .sidebar.collapsed .nav-text { opacity: 0; width: 0; margin-left: 0; }
+
+        /* Main content - natural flow */
+        .main-content {
+            flex: 1;
+            display: block;
+            background-color: var(--bg-color);
+            padding-bottom: 20px;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        .top-bar {
+            height: 70px; background-color: var(--sidebar-color); display: flex;
+            align-items: center; justify-content: space-between; padding: 0 24px;
+            box-shadow: var(--shadow); position: sticky; top: 0; z-index: 90;
+        }
+        .page-title { font-size: 24px; font-weight: 600; color: var(--text-dark); }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .user-avatar {
+            width: 40px; height: 40px; border-radius: 50%; background-color: var(--primary-color);
+            display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;
+        }
+
+        .dashboard {
+            display: flex;
+            padding: 24px;
+            gap: 24px;
+            align-items: flex-start;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        /* Products section */
+        .products-section {
+            flex: 2;
+            background-color: var(--sidebar-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            min-width: 300px;
+        }
+        .section-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .section-title { font-size: 20px; font-weight: 600; color: var(--text-dark); margin-bottom: 12px; }
+        .category-filter { display: flex; gap: 8px; flex-wrap: wrap; }
+        .category-btn {
+            padding: 8px 16px; background-color: var(--bg-color); border: none; border-radius: 20px;
+            color: var(--text-light); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;
+        }
+        .category-btn:hover { background-color: var(--border-color); }
+        .category-btn.active { background-color: var(--primary-color); color: white; }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            padding: 20px;
+        }
+        .product-card {
+            background-color: var(--sidebar-color);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .product-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+        .product-name { font-size: 16px; font-weight: 600; color: var(--text-dark); }
+        .product-detail { display: flex; justify-content: space-between; align-items: center; }
+        .product-unit { font-size: 14px; color: var(--primary-color); font-weight: 500; background: var(--bg-color); padding: 4px 8px; border-radius: 20px; }
+        .product-price { font-size: 20px; font-weight: 700; color: var(--success-color); }
+
+        /* Customize button */
+        .customize-btn {
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 10px;
+            border-radius: 30px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: 0.2s;
+            box-shadow: var(--shadow);
+            border: 1px solid transparent;
+            margin-top: 8px;
+            width: fit-content;
+        }
+        .customize-btn:hover {
+            background-color: #4a7795;
+            transform: scale(1.02);
+        }
+        .customize-btn span {
+            font-size: 15px;
+        }
+
+        /* Quotation side */
+        .quotation-side {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--sidebar-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            min-width: 380px;
+            align-self: flex-start;
+        }
+        .quotation-header {
+            padding: 20px; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .quotation-title { font-size: 20px; font-weight: 600; color: var(--text-dark); }
+        .quotation-count { color: var(--primary-color); font-weight: 600; background-color: var(--bg-color); padding: 4px 12px; border-radius: 20px; }
+
+        .customer-details {
+            padding: 16px 20px; border-bottom: 1px solid var(--border-color);
+            background: var(--bg-color); display: flex; flex-wrap: wrap; gap: 12px;
+        }
+        .customer-field {
+            flex: 1 1 calc(50% - 6px); display: flex; flex-direction: column; gap: 4px;
+        }
+        .customer-field label { font-size: 12px; font-weight: 600; color: var(--text-light); text-transform: uppercase; }
+        .customer-field input {
+            padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px;
+            font-size: 14px; transition: all 0.2s; background: white;
+        }
+        .customer-field input:focus { outline: none; border-color: var(--primary-color); }
+
+        .quotation-items {
+            padding: 20px;
+            background: white;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .quote-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid var(--border-color);
+        }
+        .item-info { flex: 1; }
+        .item-name { font-size: 16px; font-weight: 500; color: var(--text-dark); }
+        .item-unit-price { font-size: 13px; color: var(--primary-color); }
+        .item-controls { display: flex; align-items: center; gap: 12px; }
+        .quantity-btn {
+            width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border-color);
+            background-color: var(--bg-color); color: var(--primary-color); font-weight: 700; font-size: 18px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .quantity-btn:hover { background-color: var(--primary-color); color: white; }
+        .item-quantity { font-weight: 600; color: var(--text-dark); min-width: 40px; text-align: center; font-size: 16px; }
+        .item-total { font-weight: 700; color: var(--success-color); min-width: 90px; text-align: right; }
+
+        .empty-quote { text-align: center; color: var(--text-light); padding: 40px; }
+        .empty-quote-icon { font-size: 48px; margin-bottom: 16px; color: var(--border-color); }
+
+        .quotation-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            background: white;
+        }
+        .total-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0;
+            border-top: 2px solid var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            margin-bottom: 16px;
+            background-color: #fafcff;
+        }
+        .total-label { font-size: 20px; font-weight: 700; color: var(--text-dark); }
+        .total-amount { font-size: 28px; font-weight: 800; color: var(--success-color); }
+        .pdf-button {
+            width: 100%; padding: 16px; border: none; border-radius: 8px;
+            background-color: var(--primary-color); color: white; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .pdf-button:hover { background-color: #4a7795; transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+        .pdf-button:disabled { background-color: var(--text-light); cursor: not-allowed; transform: none; }
+
+        /* Customize modal */
+        .customize-modal {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background-color: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center;
+            z-index: 2000; opacity:0; visibility:hidden; transition:0.2s;
+        }
+        .customize-modal.active { opacity:1; visibility:visible; }
+        .customize-modal-content {
+            background: white; border-radius: 28px; padding: 32px; width: 90%; max-width: 500px;
+            box-shadow: var(--shadow-lg); transform: scale(0.95); transition: transform 0.2s;
+            border-top: 6px solid var(--primary-color);
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .modal-title { font-size: 28px; font-weight: 700; color: var(--text-dark); }
+        .close-customize { background: none; border: none; font-size: 36px; color: var(--text-light); cursor: pointer; }
+        .unit-price-display {
+            background-color: var(--bg-color); padding: 16px 18px; border-radius: 16px;
+            margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid var(--border-color);
+        }
+        .unit-price-display span:last-child { font-weight: 700; color: var(--primary-color); font-size: 26px; }
+        .input-group-sm { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+        .input-group-sm label { font-weight: 600; color: var(--text-dark); font-size: 16px; }
+        .input-group-sm input { padding: 14px 16px; font-size: 22px; border: 2px solid var(--border-color); border-radius: 16px; text-align: right; font-weight: 600; }
+        .price-group-big { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+        .price-group-big label { font-weight: 700; color: var(--text-dark); font-size: 20px; }
+        .price-group-big input {
+            padding: 24px 20px; font-size: 42px; border: 3px solid var(--primary-color); border-radius: 24px;
+            text-align: right; font-weight: 800; background: #fffaf0; color: var(--text-dark);
+        }
+        .modal-actions { display: flex; gap: 16px; margin-top: 16px; }
+        .modal-btn { flex: 1; padding: 20px; border: none; border-radius: 60px; font-size: 20px; font-weight: 700; cursor: pointer; }
+        .modal-btn.cancel { background: var(--bg-color); color: var(--text-dark); border: 1px solid var(--border-color); }
+        .modal-btn.primary { background: var(--primary-color); color: white; }
+
+        /* PDF Preview Modal */
+        .pdf-preview-modal {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background-color: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center;
+            z-index: 3000; opacity:0; visibility:hidden; transition:0.3s;
+        }
+        .pdf-preview-modal.active { opacity:1; visibility:visible; }
+        .pdf-preview-content {
+            background: #525659; width: 100%; height: 100%;
+            overflow-y: auto; position: relative;
+            display: flex; flex-direction: column; align-items: center; padding: 20px;
+        }
+        .pdf-preview-close {
+            position: fixed; top: 20px; right: 20px; background: var(--primary-color);
+            color: white; border: none; width: 40px; height: 40px; border-radius: 50%;
+            font-size: 24px; cursor: pointer; z-index: 3001; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .pdf-preview-actions {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: white; padding: 15px 30px; display: flex; gap: 15px;
+            border-radius: 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .pdf-action-btn {
+            padding: 12px 30px; border: none; border-radius: 25px; font-size: 16px;
+            font-weight: 600; cursor: pointer; transition: all 0.2s;
+        }
+        .pdf-action-btn.primary { background: var(--primary-color); color: white; }
+        .pdf-action-btn.secondary { background: #f0f0f0; color: var(--text-dark); }
+
+        /* A4 PDF Styles - PERFECT A4 CENTERING */
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 0 auto 20px auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #333;
+            box-sizing: border-box;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .a4-header {
+            text-align: center;
+            border-bottom: 3px solid #2D6A4F;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .a4-header h1 {
+            color: #2D6A4F;
+            font-size: 28pt;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: 3px;
+        }
+        
+        .a4-header p {
+            color: #666;
+            font-size: 10pt;
+            margin: 8px 0 0 0;
+        }
+        
+        .a4-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            font-size: 11pt;
+        }
+        
+        .a4-info-left, .a4-info-right {
+            width: 48%;
+        }
+        
+        .a4-info-right {
+            text-align: right;
+        }
+        
+        .a4-info strong {
+            color: #2D6A4F;
+        }
+        
+        .a4-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 10pt;
+        }
+        
+        .a4-table th {
+            background-color: #2D6A4F;
+            color: white;
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid #2D6A4F;
+        }
+        
+        .a4-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            vertical-align: middle;
+        }
+        
+        .a4-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .a4-total {
+            text-align: right;
+            font-size: 14pt;
+            font-weight: bold;
+            color: #2D6A4F;
+            border-top: 3px solid #2D6A4F;
+            border-bottom: 3px solid #2D6A4F;
+            padding: 15px 0;
+            margin: 20px 0;
+        }
+        
+        .a4-footer {
+            margin-top: auto;
+            padding-top: 20px;
+        }
+        
+        .a4-terms {
+            background-color: #f5f5f5;
+            padding: 12px;
+            border-left: 4px solid #2D6A4F;
+            margin-bottom: 30px;
+            font-size: 9pt;
+        }
+        
+        .a4-signature {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-size: 10pt;
+        }
+        
+        .a4-signature-line {
+            border-top: 1px solid #333;
+            width: 180px;
+            text-align: center;
+            padding-top: 5px;
+        }
+
+        .owner-only { display: block; }
+        @media (max-width: 1200px) { .dashboard { flex-direction: column; } .quotation-side { min-width: 100%; } }
+        
+        /* Print-specific styles */
+        @media print {
+            body { background: white; }
+            .a4-page {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                min-height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar expanded" id="sidebar">
+        <div class="hamburger-menu">
+            <button class="hamburger-btn" id="hamburgerBtn"><span id="hamburgerIcon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </span></button>
+            <div class="logo" id="logo">QuickPOS</div>
+        </div>
+        <div class="nav-items">
+            <a href="owner_dashboard.html" class="nav-item owner-only"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span><span class="nav-text">Dashboard</span></a>
+            <a href="sales.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></span><span class="nav-text">Make a Sale</span></a>
+            <a href="categories.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></span><span class="nav-text">Categories</span></a>
+            <a href="products.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></span><span class="nav-text">Products</span></a>
+            <a href="inventory.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg></span><span class="nav-text">Inventory</span></a>
+            <a href="customers.html" class="nav-item"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span><span class="nav-text">Customers</span></a>
+            <a href="quotations.html" class="nav-item active"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></span><span class="nav-text">Quotations</span></a>
+            <a href="ledger.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></span><span class="nav-text">Credit Ledger</span></a>
+            <a href="reports.html" class="nav-item"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span><span class="nav-text">Shift Reports</span></a>
+
+            <a href="users.html" class="nav-item owner-only"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><span class="nav-text">User Management</span></a>
+            
+            <a href="settings.html" class="nav-item owner-only"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span><span class="nav-text">Settings</span></a>
+            <a href="login.html" class="nav-item" id="logoutBtn"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span><span class="nav-text">Logout</span></a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">Hardware Quotation</div>
+            <div class="user-info"><span id="shiftTime">Shift: 08:00 - 16:00</span><div class="user-avatar" id="userAvatar">OP</div></div>
+        </div>
+
+        <div class="dashboard">
+            <!-- Left: Products Grid -->
+            <div class="products-section">
+                <div class="section-header">
+                    <div class="section-title">Hardware Items</div>
+                    <div class="category-filter">
+                        <button class="category-btn active" data-category="all">All</button>
+                        <button class="category-btn" data-category="plumbing">Plumbing</button>
+                        <button class="category-btn" data-category="cement">Cement</button>
+                        <button class="category-btn" data-category="paint">Paint</button>
+                        <button class="category-btn" data-category="steel">Steel</button>
+                    </div>
+                </div>
+                <div class="products-grid" id="productsGrid"></div>
+            </div>
+
+            <!-- Right: Quotation Panel -->
+            <div class="quotation-side">
+                <div class="quotation-header">
+                    <div class="quotation-title">Quotation</div>
+                    <div class="quotation-count">Items: <span id="quoteItemCount">0</span></div>
+                </div>
+                <div class="customer-details">
+                    <div class="customer-field"><label>Customer Name</label><input type="text" id="customerName" value="Walk-in Customer"></div>
+                    <div class="customer-field"><label>Contact No</label><input type="text" id="customerPhone" placeholder="07X XXX XXXX"></div>
+                    <div class="customer-field"><label>Valid Until</label><input type="date" id="validUntil"></div>
+                </div>
+                <div class="quotation-items" id="quotationItems">
+                    <div class="empty-quote"><div class="empty-quote-icon">📋</div><p>No items added</p></div>
+                </div>
+                <div class="quotation-footer">
+                    <div class="total-row"><div class="total-label">Total (LKR):</div><div class="total-amount" id="quoteTotal">0.00</div></div>
+                    <button class="pdf-button" id="generatePDFBtn"><span>📎</span> Generate PDF Quotation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customize Modal -->
+    <div class="customize-modal" id="customizeModal">
+        <div class="customize-modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="customizeProductName">Product</div>
+                <button class="close-customize" id="closeCustomizeBtn">&times;</button>
+            </div>
+            <div class="unit-price-display">
+                <span>Unit price</span>
+                <span id="unitPriceDisplay">LKR 0.00</span>
+            </div>
+            <div class="input-group-sm">
+                <label>Quantity (ft/kg/pieces)</label>
+                <input type="number" id="customQty" step="0.01" min="0.01" value="1.00">
+            </div>
+            <div class="price-group-big">
+                <label>💰 Price (LKR) — edit manually</label>
+                <input type="number" id="customPrice" step="0.01" min="0">
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="cancelCustomizeBtn">Cancel</button>
+                <button class="modal-btn primary" id="addCustomToCartBtn">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Preview Modal -->
+    <div class="pdf-preview-modal" id="pdfPreviewModal">
+        <button class="pdf-preview-close" id="closePreviewBtn">&times;</button>
+        <div id="pdfPreviewContainer" style="margin-top: 20px;"></div>
+        <div class="pdf-preview-actions">
+            <button class="pdf-action-btn secondary" id="editQuoteBtn">✏️ Edit</button>
+            <button class="pdf-action-btn primary" id="downloadPdfBtn">📥 Download PDF</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+            
+            // ---------- HARDWARE PRODUCTS ----------
+            const hardwareProducts = [
+                { id: 101, name: 'S-Lon PVC Pipe 1/2"', price: 180, unit: 'ft', category: 'plumbing', isWeighted: true },
+                { id: 102, name: 'Tokyo Super Cement', price: 2350, unit: 'bag', category: 'cement', isWeighted: false },
+                { id: 103, name: 'JAT Emulsion White 10L', price: 9200, unit: 'tank', category: 'paint', isWeighted: false },
+                { id: 104, name: 'Steel Rod 12mm', price: 2100, unit: 'pc', category: 'steel', isWeighted: false },
+                { id: 105, name: 'Anchor Bolts 1/2"', price: 320, unit: 'pc', category: 'steel', isWeighted: false },
+                { id: 106, name: 'PVC Elbow 1/2"', price: 95, unit: 'pc', category: 'plumbing', isWeighted: false },
+                { id: 107, name: 'Rileem Cement Bag', price: 2380, unit: 'bag', category: 'cement', isWeighted: false },
+                { id: 108, name: 'Paint Brush 4"', price: 450, unit: 'pc', category: 'paint', isWeighted: false }
+            ];
+
+            let products = hardwareProducts;
+            let quoteItems = [];
+            let currentCategory = "all";
+            let productToCustomize = null;
+            let priceManuallyEdited = false;
+            let currentPdfElement = null;
+
+            // DOM elements
+            const sidebar = document.getElementById('sidebar');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const hamburgerIcon = document.getElementById('hamburgerIcon');
+            const logo = document.getElementById('logo');
+            const productsGrid = document.getElementById('productsGrid');
+            const quotationItemsDiv = document.getElementById('quotationItems');
+            const quoteItemCount = document.getElementById('quoteItemCount');
+            const quoteTotalSpan = document.getElementById('quoteTotal');
+            const categoryBtns = document.querySelectorAll('.category-btn');
+            const generatePDFBtn = document.getElementById('generatePDFBtn');
+            const customerName = document.getElementById('customerName');
+            const customerPhone = document.getElementById('customerPhone');
+            const validUntil = document.getElementById('validUntil');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const pdfPreviewModal = document.getElementById('pdfPreviewModal');
+            const pdfPreviewContainer = document.getElementById('pdfPreviewContainer');
+            const closePreviewBtn = document.getElementById('closePreviewBtn');
+            const editQuoteBtn = document.getElementById('editQuoteBtn');
+            const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+
+            // Customize modal
+            const customizeModal = document.getElementById('customizeModal');
+            const closeCustomizeBtn = document.getElementById('closeCustomizeBtn');
+            const cancelCustomizeBtn = document.getElementById('cancelCustomizeBtn');
+            const addCustomToCartBtn = document.getElementById('addCustomToCartBtn');
+            const customQty = document.getElementById('customQty');
+            const customPrice = document.getElementById('customPrice');
+            const customizeProductName = document.getElementById('customizeProductName');
+            const unitPriceDisplay = document.getElementById('unitPriceDisplay');
+
+            // Formatting utilities
+            const formatCurrency = (amt) => \`LKR \${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\`;
+            const formatCurrencyPlain = (amt) => amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const escapeHtml = (text) => {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            };
+
+            // Safe localStorage wrapper
+            const safeStorage = {
+                get: (key) => {
+                    try { return localStorage.getItem(key); } 
+                    catch (e) { console.warn('Storage access denied'); return null; }
+                },
+                set: (key, value) => {
+                    try { localStorage.setItem(key, value); return true; } 
+                    catch (e) { console.warn('Storage access denied'); return false; }
+                },
+                remove: (key) => {
+                    try { localStorage.removeItem(key); return true; } 
+                    catch (e) { console.warn('Storage access denied'); return false; }
+                },
+                getJSON: (key) => {
+                    try { 
+                        const item = localStorage.getItem(key);
+                        return item ? JSON.parse(item) : null;
+                    } catch (e) { 
+                        console.warn('Storage access denied'); 
+                        return null; 
+                    }
+                }
+            };
+
+            // Add item to quotation
+            function addToQuote(productId, quantity = 1, overridePrice = null) {
+                const product = products.find(p => p.id === productId);
+                if (!product) return;
+                
+                const finalPrice = overridePrice !== null ? overridePrice : product.price;
+                const existing = quoteItems.find(i => i.id === product.id && Math.abs(i.overridePrice - finalPrice) < 0.01);
+                
+                if (existing) {
+                    existing.quantity += quantity;
+                } else {
+                    quoteItems.push({
+                        id: product.id,
+                        name: product.name,
+                        price: finalPrice,
+                        overridePrice: finalPrice,
+                        quantity: quantity,
+                        unit: product.unit || 'pc'
+                    });
+                }
+                renderQuotation();
+            }
+
+            // Render product grid
+            function renderProducts() {
+                productsGrid.innerHTML = '';
+                const filtered = currentCategory === 'all' ? products : products.filter(p => p.category === currentCategory);
+                
+                if (!filtered.length) {
+                    productsGrid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px;">No products</div>';
+                    return;
+                }
+                
+                const fragment = document.createDocumentFragment();
+                filtered.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.dataset.id = p.id;
+                    
+                    const nameDiv = document.createElement('div');
+                    nameDiv.className = 'product-name';
+                    nameDiv.textContent = p.name;
+                    
+                    const detailDiv = document.createElement('div');
+                    detailDiv.className = 'product-detail';
+                    
+                    const unitSpan = document.createElement('span');
+                    unitSpan.className = 'product-unit';
+                    unitSpan.textContent = p.unit;
+                    
+                    const priceSpan = document.createElement('span');
+                    priceSpan.className = 'product-price';
+                    priceSpan.textContent = formatCurrency(p.price);
+                    
+                    detailDiv.appendChild(unitSpan);
+                    detailDiv.appendChild(priceSpan);
+                    
+                    card.appendChild(nameDiv);
+                    card.appendChild(detailDiv);
+                    
+                    if (p.isWeighted) {
+                        const btn = document.createElement('button');
+                        btn.className = 'customize-btn';
+                        btn.dataset.id = p.id;
+                        btn.innerHTML = '<span>⚖️</span> Customize';
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            openCustomizeModal(p);
+                        });
+                        card.appendChild(btn);
+                    }
+                    
+                    card.addEventListener('click', () => {
+                        if (p.isWeighted) {
+                            openCustomizeModal(p);
+                        } else {
+                            addToQuote(p.id);
+                        }
+                    });
+                    
+                    fragment.appendChild(card);
+                });
+                
+                productsGrid.appendChild(fragment);
+            }
+
+            // Render quotation items
+            function renderQuotation() {
+                if (!quoteItems.length) {
+                    quotationItemsDiv.innerHTML = '<div class="empty-quote"><div class="empty-quote-icon">📋</div><p>No items added</p><p>Click products to add</p></div>';
+                    quoteItemCount.textContent = '0';
+                    quoteTotalSpan.textContent = '0.00';
+                    return;
+                }
+                
+                let total = 0, count = 0;
+                const fragment = document.createDocumentFragment();
+                
+                quoteItems.forEach((item, index) => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    count += item.quantity;
+                    
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'quote-item';
+                    itemDiv.dataset.index = index;
+                    
+                    const infoDiv = document.createElement('div');
+                    infoDiv.className = 'item-info';
+                    
+                    const nameDiv = document.createElement('div');
+                    nameDiv.className = 'item-name';
+                    nameDiv.textContent = item.name;
+                    
+                    const unitPriceDiv = document.createElement('div');
+                    unitPriceDiv.className = 'item-unit-price';
+                    unitPriceDiv.textContent = \`\${item.unit} @ \${formatCurrency(item.price)}\`;
+                    
+                    infoDiv.appendChild(nameDiv);
+                    infoDiv.appendChild(unitPriceDiv);
+                    
+                    const controlsDiv = document.createElement('div');
+                    controlsDiv.className = 'item-controls';
+                    
+                    const decBtn = document.createElement('button');
+                    decBtn.className = 'quantity-btn decrease';
+                    decBtn.textContent = '−';
+                    decBtn.addEventListener('click', () => updateQuantity(index, -0.1));
+                    
+                    const qtySpan = document.createElement('span');
+                    qtySpan.className = 'item-quantity';
+                    qtySpan.textContent = item.quantity.toFixed(2);
+                    
+                    const incBtn = document.createElement('button');
+                    incBtn.className = 'quantity-btn increase';
+                    incBtn.textContent = '+';
+                    incBtn.addEventListener('click', () => updateQuantity(index, 0.1));
+                    
+                    controlsDiv.appendChild(decBtn);
+                    controlsDiv.appendChild(qtySpan);
+                    controlsDiv.appendChild(incBtn);
+                    
+                    const totalDiv = document.createElement('div');
+                    totalDiv.className = 'item-total';
+                    totalDiv.textContent = formatCurrency(itemTotal);
+                    
+                    itemDiv.appendChild(infoDiv);
+                    itemDiv.appendChild(controlsDiv);
+                    itemDiv.appendChild(totalDiv);
+                    
+                    fragment.appendChild(itemDiv);
+                });
+                
+                quotationItemsDiv.innerHTML = '';
+                quotationItemsDiv.appendChild(fragment);
+                quoteItemCount.textContent = count.toFixed(2);
+                quoteTotalSpan.textContent = formatCurrencyPlain(total);
+            }
+
+            // Update quantity
+            function updateQuantity(index, delta) {
+                if (index < 0 || index >= quoteItems.length) return;
+                
+                const newQty = quoteItems[index].quantity + delta;
+                if (newQty <= 0) {
+                    quoteItems.splice(index, 1);
+                } else {
+                    quoteItems[index].quantity = Math.round(newQty * 100) / 100;
+                }
+                renderQuotation();
+            }
+
+            // Open customize modal
+            function openCustomizeModal(product) {
+                productToCustomize = product;
+                customizeProductName.textContent = product.name;
+                unitPriceDisplay.textContent = formatCurrency(product.price);
+                customQty.value = '1.00';
+                customPrice.value = product.price.toFixed(2);
+                priceManuallyEdited = false;
+                customizeModal.classList.add('active');
+            }
+
+            // Close customize modal
+            function closeCustomizeModal() {
+                customizeModal.classList.remove('active');
+                productToCustomize = null;
+                priceManuallyEdited = false;
+            }
+
+            // Add customized item to cart
+            function addCustomizedToCart() {
+                if (!productToCustomize) return;
+                
+                const qty = parseFloat(customQty.value) || 0;
+                const finalPrice = parseFloat(customPrice.value) || 0;
+                
+                if (qty <= 0) { 
+                    alert('Please enter a valid quantity greater than 0'); 
+                    return; 
+                }
+                if (finalPrice < 0) { 
+                    alert('Please enter a valid price'); 
+                    return; 
+                }
+
+                addToQuote(productToCustomize.id, qty, finalPrice);
+                closeCustomizeModal();
+            }
+
+            // Build A4 PDF HTML content - PERFECTLY CENTERED
+            function buildPdfContent() {
+                const quoteNo = 'Q-HW-' + Date.now().toString().slice(-6);
+                const today = new Date();
+                const validDate = validUntil.value || (() => {
+                    const d = new Date();
+                    d.setDate(d.getDate() + 7);
+                    return d.toISOString().split('T')[0];
+                })();
+                
+                const custName = customerName.value.trim() || 'Walk-in Customer';
+                const custPhone = customerPhone.value.trim() || '-';
+
+                let itemsHtml = '';
+                let total = 0;
+
+                quoteItems.forEach((item, idx) => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    itemsHtml += \`
+                        <tr>
+                            <td style="border:1px solid #ddd; padding:8px; text-align:left;">\${idx + 1}. \${escapeHtml(item.name)}</td>
+                            <td style="border:1px solid #ddd; padding:8px; text-align:center; width:60px;">\${item.quantity.toFixed(2)}</td>
+                            <td style="border:1px solid #ddd; padding:8px; text-align:center; width:50px;">\${escapeHtml(item.unit || 'pc')}</td>
+                            <td style="border:1px solid #ddd; padding:8px; text-align:right; width:90px;">\${formatCurrencyPlain(item.price)}</td>
+                            <td style="border:1px solid #ddd; padding:8px; text-align:right; width:100px; font-weight:600;">\${formatCurrencyPlain(itemTotal)}</td>
+                        </tr>
+                    \`;
+                });
+
+                return \`
+                    <div class="a4-page">
+                        <div class="a4-header">
+                            <h1>HARDWARE CENTRE</h1>
+                            <p>No.123, Galle Road, Colombo 03 | Tel: 011-2345678 | Email: info@hardwarecentre.lk</p>
+                        </div>
+                        
+                        <div class="a4-info">
+                            <div class="a4-info-left">
+                                <p><strong>Quotation No:</strong> \${escapeHtml(quoteNo)}</p>
+                                <p><strong>Date:</strong> \${today.toLocaleDateString('en-GB')}</p>
+                            </div>
+                            <div class="a4-info-right">
+                                
+                                <p><strong>Valid Until:</strong> \${new Date(validDate).toLocaleDateString('en-GB')}</p>
+                            </div>
+                        </div>
+                        
+                        <table class="a4-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:auto;">Item Description</th>
+                                    <th style="width:60px; text-align:center;">Qty</th>
+                                    <th style="width:50px; text-align:center;">Unit</th>
+                                    <th style="width:90px; text-align:right;">Unit Price</th>
+                                    <th style="width:100px; text-align:right;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                \${itemsHtml}
+                            </tbody>
+                        </table>
+                        
+                        <div class="a4-total">
+                            TOTAL AMOUNT: LKR \${formatCurrencyPlain(total)}
+                        </div>
+                        
+                        <div class="a4-footer">
+                            <div class="a4-terms">
+                                <strong>Terms & Conditions:</strong><br>
+                                • Prices are subject to change without prior notice<br>
+                               
+                                
+                                • This quotation is valid until the date specified above
+                            </div>
+                            
+                            <div class="a4-signature">
+                                <div style="color:#666; font-size:9pt;">
+                                    <p>Thank you for your business!</p>
+                                    <p>Computer generated by QuickPOS Hardware</p>
+                                </div>
+                                <div class="a4-signature-line">
+                                    Authorized Signature
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                \`;
+            }
+
+            // Generate and show PDF preview
+            function generatePDF() {
+                if (quoteItems.length === 0) {
+                    alert('Please add at least one item to generate a quotation.');
+                    return;
+                }
+
+                const pdfHtml = buildPdfContent();
+                pdfPreviewContainer.innerHTML = pdfHtml;
+                currentPdfElement = pdfPreviewContainer.querySelector('.a4-page');
+                
+                // Show preview modal
+                pdfPreviewModal.classList.add('active');
+                
+                // Store quote data for download
+                pdfPreviewModal.dataset.quoteNo = 'Q-HW-' + Date.now().toString().slice(-6);
+            }
+
+            // Download PDF from preview
+            function downloadPDF() {
+                if (!currentPdfElement) return;
+                
+                const quoteNo = pdfPreviewModal.dataset.quoteNo || 'Quotation';
+                
+                // Configure for A4 output - USING MM FOR PERFECT A4
+                const opt = {
+                    margin: 0,
+                    filename: \`Hardware_Quotation_\${quoteNo}.pdf\`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { 
+                        scale: 2, 
+                        useCORS: true, 
+                        logging: false,
+                        width: 794,
+                        height: 1123,
+                        windowWidth: 794,
+                        x: 0,
+                        y: 0,
+                        scrollX: 0,
+                        scrollY: 0
+                    },
+                    jsPDF: { 
+                        unit: 'mm', 
+                        format: 'a4',
+                        orientation: 'portrait',
+                        putOnlyUsedFonts: true,
+                        floatPrecision: 16
+                    }
+                };
+
+                downloadPdfBtn.textContent = 'Generating...';
+                downloadPdfBtn.disabled = true;
+
+                html2pdf().set(opt).from(currentPdfElement).save()
+                    .then(() => {
+                        downloadPdfBtn.textContent = '📥 Download PDF';
+                        downloadPdfBtn.disabled = false;
+                    })
+                    .catch(err => {
+                        console.error('PDF Error:', err);
+                        alert('PDF generation failed. Please try again.');
+                        downloadPdfBtn.textContent = '📥 Download PDF';
+                        downloadPdfBtn.disabled = false;
+                    });
+            }
+
+            // Close PDF preview
+            function closePdfPreview() {
+                pdfPreviewModal.classList.remove('active');
+                currentPdfElement = null;
+            }
+
+            // Sidebar toggle
+            function toggleSidebar() {
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                if (isCollapsed) {
+                    sidebar.classList.remove('collapsed');
+                    sidebar.classList.add('expanded');
+                    logo.classList.remove('collapsed');
+                    hamburgerIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
+                    safeStorage.set('quickpos-sidebar', 'expanded');
+                } else {
+                    sidebar.classList.remove('expanded');
+                    sidebar.classList.add('collapsed');
+                    logo.classList.add('collapsed');
+                    hamburgerIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+                    safeStorage.set('quickpos-sidebar', 'collapsed');
+                }
+            }
+
+            // Set category filter
+            function setCategory(cat) {
+                currentCategory = cat;
+                categoryBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.category === cat));
+                renderProducts();
+            }
+
+            // Setup event listeners
+            function setupListeners() {
+                hamburgerBtn.addEventListener('click', toggleSidebar);
+                
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to logout?')) {
+                        safeStorage.remove('quickpos-user');
+                        window.location.href = 'login.html';
+                    }
+                });
+
+                // Category filters
+                categoryBtns.forEach(btn => {
+                    btn.addEventListener('click', () => setCategory(btn.dataset.category));
+                });
+
+                // Modal controls
+                closeCustomizeBtn.addEventListener('click', closeCustomizeModal);
+                cancelCustomizeBtn.addEventListener('click', closeCustomizeModal);
+                addCustomToCartBtn.addEventListener('click', addCustomizedToCart);
+
+                // Auto-calculate price based on quantity
+                customQty.addEventListener('input', () => {
+                    if (!productToCustomize || priceManuallyEdited) return;
+                    const qty = parseFloat(customQty.value) || 0;
+                    customPrice.value = (qty * productToCustomize.price).toFixed(2);
+                });
+
+                customPrice.addEventListener('input', () => {
+                    priceManuallyEdited = true;
+                });
+
+                // Close modal on outside click
+                customizeModal.addEventListener('click', (e) => {
+                    if (e.target === customizeModal) closeCustomizeModal();
+                });
+
+                // PDF controls
+                generatePDFBtn.addEventListener('click', generatePDF);
+                closePreviewBtn.addEventListener('click', closePdfPreview);
+                editQuoteBtn.addEventListener('click', closePdfPreview);
+                downloadPdfBtn.addEventListener('click', downloadPDF);
+
+                // Close preview on outside click
+                pdfPreviewModal.addEventListener('click', (e) => {
+                    if (e.target === pdfPreviewModal) closePdfPreview();
+                });
+
+                // Set default valid until date (7 days from now)
+                const d = new Date();
+                d.setDate(d.getDate() + 7);
+                validUntil.value = d.toISOString().split('T')[0];
+            }
+
+            // Security / role check
+            function enforceRole() {
+                const user = safeStorage.getJSON('quickpos-user');
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                if (user.role === 'cashier') {
+                    document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'none');
+                }
+                const shift = safeStorage.get('quickpos-shift-time') || '08:00 - 16:00';
+                
+                // Set initials based on user name, if available
+                if (user.name) {
+                    const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                    const avatarEl = document.getElementById('userAvatar');
+                    if(avatarEl) avatarEl.textContent = initials.substring(0, 2);
+                }
+
+                document.getElementById('shiftTime').textContent = \`Shift: \${shift}\`;
+            }
+
+            // Initialize
+            function init() {
+                enforceRole();
+                
+                const sidebarState = safeStorage.get('quickpos-sidebar');
+                if (sidebarState === 'collapsed' && sidebar.classList.contains('expanded')) {
+                    toggleSidebar();
+                } else if (sidebarState === 'collapsed') {
+                    hamburgerIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+                } else {
+                    hamburgerIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
+                }
+                
+                renderProducts();
+                renderQuotation();
+                setupListeners();
+            }
+
+            // Start when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
+</body>
+</html>

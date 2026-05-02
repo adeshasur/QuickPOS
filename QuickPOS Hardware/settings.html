@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickPOS Pro - Settings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        :root {
+            --bg-color: #F0F4F8;
+            --sidebar-color: #FFFFFF;
+            --primary-color: #5D8AA8;
+            --success-color: #2D6A4F;
+            --danger-color: #E53E3E;
+            --warning-color: #B45309;
+            --text-dark: #2D3748;
+            --text-light: #718096;
+            --border-color: #E2E8F0;
+            --hover-color: #EDF2F7;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.07);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            background-color: var(--sidebar-color);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            height: 100vh;
+            position: relative;
+        }
+
+        .sidebar.expanded {
+            width: 240px;
+            min-width: 240px;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+            min-width: 70px;
+        }
+
+        .hamburger-menu {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            height: 70px;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hamburger-btn:hover {
+            background-color: var(--hover-color);
+        }
+
+        .logo {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 22px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .logo.collapsed {
+            opacity: 0;
+            width: 0;
+        }
+
+        .nav-items {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            color: var(--text-light);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background-color: var(--hover-color);
+            color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            background-color: rgba(93, 138, 168, 0.1);
+            color: var(--primary-color);
+            border-right: 4px solid var(--primary-color);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .nav-text {
+            margin-left: 16px;
+            font-weight: 500;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed .nav-text {
+            opacity: 0;
+            width: 0;
+            margin-left: 0;
+        }
+
+        .owner-only { display: block; }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .top-bar {
+            height: 70px;
+            background-color: var(--sidebar-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            box-shadow: var(--shadow);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Settings Dashboard */
+        .settings-dashboard {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 20px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        /* Settings Header */
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .settings-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .save-btn {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .save-btn:hover {
+            background-color: #245c43;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .reset-btn {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .reset-btn:hover {
+            background-color: #c53030;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        /* Settings Cards Layout */
+        .settings-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        @media (max-width: 768px) {
+            .settings-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Settings Card */
+        .settings-card {
+            background-color: var(--sidebar-color);
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .settings-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-icon {
+            font-size: 22px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: rgba(93, 138, 168, 0.1);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .card-subtitle {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        /* Form Groups */
+        .form-groups {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .required::after {
+            content: " *";
+            color: var(--danger-color);
+        }
+
+        .form-input, .form-select {
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background-color: white;
+            width: 100%;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(93, 138, 168, 0.1);
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        .form-hint.warning {
+            color: var(--warning-color);
+        }
+
+        .form-hint.error {
+            color: var(--danger-color);
+        }
+
+        /* Toggle Switch */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .toggle-group:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .toggle-description {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        /* System Version Selector */
+        .version-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .version-option {
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 8px;
+        }
+
+        .version-option:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(93, 138, 168, 0.05);
+        }
+
+        .version-option.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(93, 138, 168, 0.1);
+        }
+
+        .version-icon {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .version-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .version-description {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* Password Fields */
+        .password-group {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* Footer Actions */
+        .footer-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .system-info {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .system-version {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar.expanded {
+                position: absolute;
+                height: 100%;
+                z-index: 1000;
+            }
+            
+            .settings-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .header-controls {
+                align-self: flex-start;
+            }
+            
+            .version-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-controls {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .settings-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .settings-dashboard {
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .settings-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar expanded" id="sidebar">
+        <div class="hamburger-menu">
+            <button class="hamburger-btn" id="hamburgerBtn"><span id="hamburgerIcon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </span></button>
+            <div class="logo" id="logo">QuickPOS</div>
+        </div>
+        <div class="nav-items">
+            <a href="owner_dashboard.html" class="nav-item owner-only"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span><span class="nav-text">Dashboard</span></a>
+            <a href="sales.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></span><span class="nav-text">Make a Sale</span></a>
+            <a href="categories.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></span><span class="nav-text">Categories</span></a>
+            <a href="products.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></span><span class="nav-text">Products</span></a>
+            <a href="inventory.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg></span><span class="nav-text">Inventory</span></a>
+            <a href="customers.html" class="nav-item"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span><span class="nav-text">Customers</span></a>
+            <a href="quotations.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></span><span class="nav-text">Quotations</span></a>
+            <a href="ledger.html" class="nav-item "><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></span><span class="nav-text">Credit Ledger</span></a>
+            <a href="reports.html" class="nav-item"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span><span class="nav-text">Shift Reports</span></a>
+
+            <a href="users.html" class="nav-item owner-only"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><span class="nav-text">User Management</span></a>
+            
+            <a href="settings.html" class="nav-item owner-only active"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span><span class="nav-text">Settings</span></a>
+            <a href="login.html" class="nav-item" id="logoutBtn"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span><span class="nav-text">Logout</span></a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">System Settings</div>
+            <div class="user-info">
+                <span id="userRole">Administrator</span>
+                <div class="user-avatar" id="userAvatar">OP</div>
+            </div>
+        </div>
+        
+        <div class="settings-dashboard">
+            <div class="settings-header">
+                <div class="header-title">
+                    <span>⚙️</span> System Configuration
+                </div>
+                <div class="header-controls">
+                    <button class="settings-btn reset-btn" id="resetBtn">
+                        <span>🔄</span> Reset System
+                    </button>
+                    <button class="settings-btn save-btn" id="saveBtn">
+                        <span>💾</span> Save Settings
+                    </button>
+                </div>
+            </div>
+            
+            <div class="settings-cards">
+                <!-- Store Information Card -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div class="card-icon">🏪</div>
+                        <div>
+                            <div class="card-title">Store Information</div>
+                            <div class="card-subtitle">Appears on receipts and reports</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-groups">
+                        <div class="form-group">
+                            <label class="form-label required" for="storeName">
+                                Store Name
+                            </label>
+                            <input type="text" class="form-input" id="storeName" 
+                                   placeholder="Your Store Name" 
+                                   maxlength="50"
+                                   required>
+                            <div class="form-hint">
+                                Will appear at the top of all receipts
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="storeAddress">
+                                Store Address
+                            </label>
+                            <input type="text" class="form-input" id="storeAddress" 
+                                   placeholder="123 Street, City"
+                                   maxlength="100">
+                            <div class="form-hint">
+                                Optional: Address for receipts and invoices
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="storePhone">
+                                Phone Number
+                            </label>
+                            <input type="tel" class="form-input" id="storePhone" 
+                                   placeholder="+94 77 123 4567"
+                                   maxlength="20">
+                            <div class="form-hint">
+                                Customer contact number for receipts
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Version Card -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div class="card-icon">🚀</div>
+                        <div>
+                            <div class="card-title">System Version</div>
+                            <div class="card-subtitle">Choose your POS system features</div>
+                        </div>
+                    </div>
+                    
+                    <div class="version-selector" id="versionSelector">
+                        <div class="version-option" data-version="lite">
+                            <div class="version-icon">⚡</div>
+                            <div class="version-name">QuickPOS Lite</div>
+                            <div class="version-description">
+                                Basic POS features<br>
+                                No stock management<br>
+                                Fast & lightweight
+                            </div>
+                        </div>
+                        
+                        <div class="version-option" data-version="pro">
+                            <div class="version-icon">🏢</div>
+                            <div class="version-name">QuickPOS Pro</div>
+                            <div class="version-description">
+                                Full stock management<br>
+                                Advanced reporting<br>
+                                Multi-user support
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-hint warning" id="versionHint" style="margin-top: 16px;">
+                        <strong>Note:</strong> Changing to Pro version will enable stock management features. Some features may require backend setup.
+                    </div>
+                </div>
+                
+                <!-- Security Card -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div class="card-icon">🔒</div>
+                        <div>
+                            <div class="card-title">Security Settings</div>
+                            <div class="card-subtitle">Manage passwords and access control</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-groups">
+                        <div class="form-group">
+                            <label class="form-label" for="adminPassword">
+                                Admin/Owner Password
+                            </label>
+                            <div class="password-group">
+                                <input type="password" class="form-input" id="adminPassword" 
+                                       placeholder="Enter new admin password"
+                                       minlength="6">
+                                <button type="button" class="password-toggle" data-target="adminPassword">
+                                    👁️
+                                </button>
+                            </div>
+                            <div class="form-hint">
+                                Minimum 6 characters. Leave empty to keep current password
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="cashierPassword">
+                                Cashier Password
+                            </label>
+                            <div class="password-group">
+                                <input type="password" class="form-input" id="cashierPassword" 
+                                       placeholder="Enter new cashier password"
+                                       minlength="4">
+                                <button type="button" class="password-toggle" data-target="cashierPassword">
+                                    👁️
+                                </button>
+                            </div>
+                            <div class="form-hint">
+                                Minimum 4 characters. Cashiers can only process sales
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Localization Card -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div class="card-icon">🌍</div>
+                        <div>
+                            <div class="card-title">Localization</div>
+                            <div class="card-subtitle">Regional and currency settings</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-groups">
+                        <div class="form-group">
+                            <label class="form-label required" for="currencySymbol">
+                                Currency Symbol
+                            </label>
+                            <div class="toggle-group">
+                                <div class="toggle-label">
+                                    <span>Use LKR (Sri Lankan Rupees)</span>
+                                    <span class="toggle-description">All prices will be displayed in LKR</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="currencyToggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="form-hint">
+                                Currently supports LKR only. Other currencies may be added in future updates.
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="taxPercentage">
+                                Tax Percentage (%)
+                            </label>
+                            <input type="number" class="form-input" id="taxPercentage" 
+                                   placeholder="0.00"
+                                   min="0"
+                                   max="50"
+                                   step="0.01"
+                                   value="0">
+                            <div class="form-hint">
+                                Set to 0 for tax-exempt. Tax will be calculated on final amount.
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="shiftHours">
+                                Default Shift Hours
+                            </label>
+                            <input type="text" class="form-input" id="shiftHours" 
+                                   placeholder="08:00 - 16:00"
+                                   maxlength="20">
+                            <div class="form-hint">
+                                Used for reports and shift tracking
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer Actions -->
+            <div class="footer-actions">
+                <div class="system-info">
+                    <div>QuickPOS System</div>
+                    <div class="system-version">Version 1.0.0</div>
+                    <div>© 2024 QuickPOS Lite. All rights reserved.</div>
+                </div>
+                
+                <div>
+                    <button class="settings-btn reset-btn" id="clearCacheBtn" style="background-color: var(--warning-color);">
+                        <span>🗑️</span> Clear Cache
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default settings
+        const defaultSettings = {
+            storeName: "My QuickPOS Store",
+            storeAddress: "",
+            storePhone: "",
+            systemVersion: "lite", // lite or pro
+            currencySymbol: "LKR",
+            taxPercentage: 0,
+            shiftHours: "08:00 - 16:00",
+            adminPassword: "admin123",
+            cashierPassword: "cashier"
+        };
+
+        // Current settings
+        let settings = JSON.parse(localStorage.getItem('quickpos-settings')) || defaultSettings;
+
+        // DOM elements
+        const sidebar = document.getElementById('sidebar');
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const hamburgerIcon = document.getElementById('hamburgerIcon');
+        const logo = document.getElementById('logo');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const clearCacheBtn = document.getElementById('clearCacheBtn');
+        
+        // Store Information
+        const storeName = document.getElementById('storeName');
+        const storeAddress = document.getElementById('storeAddress');
+        const storePhone = document.getElementById('storePhone');
+        
+        // System Version
+        const versionSelector = document.getElementById('versionSelector');
+        const versionOptions = document.querySelectorAll('.version-option');
+        const versionHint = document.getElementById('versionHint');
+        
+        // Security
+        const adminPassword = document.getElementById('adminPassword');
+        const cashierPassword = document.getElementById('cashierPassword');
+        const passwordToggles = document.querySelectorAll('.password-toggle');
+        
+        // Localization
+        const currencyToggle = document.getElementById('currencyToggle');
+        const taxPercentage = document.getElementById('taxPercentage');
+        const shiftHours = document.getElementById('shiftHours');
+
+        // Safe localStorage wrapper
+        const safeStorage = {
+            get: (key) => {
+                try { return localStorage.getItem(key); } 
+                catch (e) { console.warn('Storage access denied'); return null; }
+            },
+            getJSON: (key) => {
+                try { 
+                    const item = localStorage.getItem(key);
+                    return item ? JSON.parse(item) : null;
+                } catch (e) { 
+                    console.warn('Storage access denied'); 
+                    return null; 
+                }
+            }
+        };
+
+        // Initialize the app
+        function init() {
+            // Security Check
+            const user = safeStorage.getJSON('quickpos-user');
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Role Check: If user is a Cashier, hide the Owner-only buttons
+            if (user.role === 'cashier') {
+                document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'none');
+            }
+            
+            // Set user initials in avatar
+            if (user.name) {
+                const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                const avatarEl = document.getElementById('userAvatar');
+                if(avatarEl) avatarEl.textContent = initials.substring(0, 2);
+            }
+            
+            // Set user role
+            const userRoleEl = document.getElementById('userRole');
+            if(userRoleEl) {
+                userRoleEl.textContent = user.role === 'owner' ? 'Administrator' : 'Cashier';
+            }
+
+            loadSettings();
+            setupEventListeners();
+            
+            // Set initial sidebar state from localStorage
+            const sidebarState = safeStorage.get('quickpos-sidebar');
+            if (sidebarState === 'collapsed' && sidebar.classList.contains('expanded')) {
+                toggleSidebar();
+            } else if (sidebarState === 'collapsed') {
+                hamburgerIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+            } else {
+                hamburgerIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
+            }
+            
+            // Log current settings
+            console.log('=== Current Settings ===');
+            console.log(JSON.stringify(settings, null, 2));
+        }
+
+        // Toggle sidebar between expanded and collapsed
+        function toggleSidebar() {
+            sidebar.classList.toggle('expanded');
+            sidebar.classList.toggle('collapsed');
+            logo.classList.toggle('collapsed');
+            
+            // Update hamburger icon
+            if (sidebar.classList.contains('collapsed')) {
+                hamburgerIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+                localStorage.setItem('quickpos-sidebar', 'collapsed');
+            } else {
+                hamburgerIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
+                localStorage.setItem('quickpos-sidebar', 'expanded');
+            }
+        }
+
+        // Load settings into form
+        function loadSettings() {
+            // Store Information
+            storeName.value = settings.storeName || '';
+            storeAddress.value = settings.storeAddress || '';
+            storePhone.value = settings.storePhone || '';
+            
+            // System Version
+            const currentVersion = settings.systemVersion || 'lite';
+            versionOptions.forEach(option => {
+                if (option.dataset.version === currentVersion) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+            
+            // Security (don't load passwords for security)
+            adminPassword.value = '';
+            cashierPassword.value = '';
+            
+            // Localization
+            currencyToggle.checked = (settings.currencySymbol === 'LKR');
+            taxPercentage.value = settings.taxPercentage || 0;
+            shiftHours.value = settings.shiftHours || '08:00 - 16:00';
+        }
+
+        // Save settings
+        function saveSettings() {
+            // Validate required fields
+            if (!storeName.value.trim()) {
+                alert('Store Name is required');
+                storeName.focus();
+                return;
+            }
+            
+            // Store Information
+            settings.storeName = storeName.value.trim();
+            settings.storeAddress = storeAddress.value.trim();
+            settings.storePhone = storePhone.value.trim();
+            
+            // System Version
+            const selectedVersion = document.querySelector('.version-option.selected');
+            settings.systemVersion = selectedVersion ? selectedVersion.dataset.version : 'lite';
+            
+            // Security (only update if changed)
+            if (adminPassword.value.trim() && adminPassword.value.trim().length >= 6) {
+                settings.adminPassword = adminPassword.value.trim();
+            }
+            
+            if (cashierPassword.value.trim() && cashierPassword.value.trim().length >= 4) {
+                settings.cashierPassword = cashierPassword.value.trim();
+            }
+            
+            // Localization
+            settings.currencySymbol = currencyToggle.checked ? 'LKR' : 'LKR'; // Currently only LKR
+            settings.taxPercentage = parseFloat(taxPercentage.value) || 0;
+            settings.shiftHours = shiftHours.value.trim() || '08:00 - 16:00';
+            
+            // Save to localStorage
+            localStorage.setItem('quickpos-settings', JSON.stringify(settings));
+            localStorage.setItem('quickpos-shift-time', settings.shiftHours);
+            
+            // Log to console for backend
+            console.log('=== Settings Saved (Ready for MySQL) ===');
+            console.log(JSON.stringify(settings, null, 2));
+            console.log('========================================');
+            
+            // Show success message
+            alert('Settings saved successfully!');
+            
+            // Reload settings to confirm
+            loadSettings();
+        }
+
+        // Reset system (with confirmation)
+        function resetSystem() {
+            const confirmation = confirm('⚠️ WARNING: This will delete ALL sales data, products, and categories.\n\nThis action cannot be undone!\n\nAre you absolutely sure you want to reset the system?');
+            
+            if (!confirmation) return;
+            
+            const finalConfirmation = confirm('⚠️ FINAL WARNING: All your business data will be permanently deleted.\n\nType "RESET" to confirm:');
+            
+            if (finalConfirmation) {
+                const userInput = prompt('Please type "RESET" (in uppercase) to confirm:');
+                
+                if (userInput === 'RESET') {
+                    // Clear all localStorage data
+                    localStorage.clear();
+                    
+                    // Restore default settings
+                    settings = {...defaultSettings};
+                    localStorage.setItem('quickpos-settings', JSON.stringify(settings));
+                    
+                    // Reload the page
+                    alert('System has been reset to factory defaults. The page will now reload.');
+                    window.location.href = 'login.html';
+                } else {
+                    alert('Reset cancelled. Data was not deleted.');
+                }
+            }
+        }
+
+        // Clear cache only (keep data)
+        function clearCache() {
+            if (confirm('Clear application cache? This will not delete your sales or product data, but may improve performance.')) {
+                // Clear only cache-related items
+                const settingsCopy = {...settings};
+                const shiftTime = localStorage.getItem('quickpos-shift-time');
+                const sidebarState = localStorage.getItem('quickpos-sidebar');
+                const user = localStorage.getItem('quickpos-user');
+                
+                // Clear all localStorage
+                localStorage.clear();
+                
+                // Restore important data
+                localStorage.setItem('quickpos-settings', JSON.stringify(settingsCopy));
+                if (shiftTime) localStorage.setItem('quickpos-shift-time', shiftTime);
+                if (sidebarState) localStorage.setItem('quickpos-sidebar', sidebarState);
+                if (user) localStorage.setItem('quickpos-user', user);
+                
+                alert('Cache cleared successfully!');
+                location.reload();
+            }
+        }
+
+        // Toggle password visibility
+        function togglePasswordVisibility(targetId) {
+            const input = document.getElementById(targetId);
+            const toggle = document.querySelector(`[data-target="\${targetId}"]`);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                toggle.textContent = '👁️';
+            }
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Hamburger menu toggle
+            hamburgerBtn.addEventListener('click', toggleSidebar);
+            
+            // Logout button
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to logout?')) {
+                        localStorage.removeItem('quickpos-user');
+                        window.location.href = 'login.html';
+                    }
+                });
+            }
+            
+            // Save button
+            saveBtn.addEventListener('click', saveSettings);
+            
+            // Reset button
+            resetBtn.addEventListener('click', resetSystem);
+            
+            // Clear cache button
+            clearCacheBtn.addEventListener('click', clearCache);
+            
+            // System version selection
+            versionOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    versionOptions.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    
+                    // Update hint based on selection
+                    if (option.dataset.version === 'pro') {
+                        versionHint.innerHTML = '<strong>Note:</strong> Pro version enables stock management. Existing data will be preserved.';
+                        versionHint.classList.remove('warning');
+                        versionHint.classList.add('error');
+                    } else {
+                        versionHint.innerHTML = '<strong>Note:</strong> Lite version is fast and lightweight. Stock management features are hidden.';
+                        versionHint.classList.remove('error');
+                        versionHint.classList.add('warning');
+                    }
+                });
+            });
+            
+            // Password visibility toggles
+            passwordToggles.forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    togglePasswordVisibility(toggle.dataset.target);
+                });
+            });
+            
+            // Tax percentage validation
+            taxPercentage.addEventListener('change', () => {
+                const value = parseFloat(taxPercentage.value);
+                if (value < 0) taxPercentage.value = 0;
+                if (value > 50) taxPercentage.value = 50;
+            });
+            
+            // Store phone formatting
+            storePhone.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 0) {
+                    value = '+94 ' + value;
+                    if (value.length > 7) {
+                        value = value.substring(0, 7) + ' ' + value.substring(7);
+                    }
+                    if (value.length > 12) {
+                        value = value.substring(0, 12) + ' ' + value.substring(12);
+                    }
+                }
+                e.target.value = value;
+            });
+            
+            // Auto-save on some inputs
+            storeName.addEventListener('blur', () => {
+                if (storeName.value.trim()) {
+                    localStorage.setItem('quickpos-store-name', storeName.value.trim());
+                }
+            });
+            
+            shiftHours.addEventListener('blur', () => {
+                if (shiftHours.value.trim()) {
+                    localStorage.setItem('quickpos-shift-time', shiftHours.value.trim());
+                }
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    saveSettings();
+                }
+            });
+        }
+
+        // Initialize app when DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
