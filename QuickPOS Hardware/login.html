@@ -4,19 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuickPOS | Login</title>
-    <style>
-        body { font-family: sans-serif; background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-box { background: #1e293b; padding: 2rem; border-radius: 12px; text-align: center; width: 300px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
-        button { background: #6366f1; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 100%; }
-    </style>
+    <link rel="stylesheet" href="login.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="login-box">
-        <h2>QuickPOS Login</h2>
-        <input type="text" placeholder="Username">
-        <input type="password" placeholder="Password">
-        <button>Login</button>
+    <div class="login-card">
+        <div class="logo">
+            <span class="blue">Quick</span><span class="orange">POS</span>
+        </div>
+        
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Please enter your credentials to continue</p>
+
+        <div class="role-selector">
+            <button class="role-btn active" onclick="setRole('Cashier')">Cashier</button>
+            <button class="role-btn" onclick="setRole('Owner')">Owner</button>
+        </div>
+
+        <div class="input-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Username">
+        </div>
+
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="••••••••">
+        </div>
+
+        <button class="btn-login">Secure Login</button>
+
+        <a href="#" class="forgot-password">Forgot Password?</a>
     </div>
+
+    <script>
+        function setRole(role) {
+            const buttons = document.querySelectorAll('.role-btn');
+            buttons.forEach(btn => {
+                if (btn.innerText === role) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+    </script>
 </body>
 </html>
