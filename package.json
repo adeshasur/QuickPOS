@@ -21,5 +21,8 @@
   "homepage": "https://github.com/adeshasur/QuickPOS#readme",
   "devDependencies": {
     "electron": "^41.5.0"
+  },
+  "dependencies": {
+    "sqlite3": "^6.0.1"
   }
 }
