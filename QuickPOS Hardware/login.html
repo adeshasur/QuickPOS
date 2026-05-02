@@ -35,8 +35,6 @@
 
         <button class="btn-login" id="loginBtn">Secure Login</button>
 
-        <div id="error-msg" style="color: #ef4444; margin-top: 1rem; font-size: 0.85rem; display: none;"></div>
-
         <a href="#" class="forgot-password">Forgot Password?</a>
     </div>
 
@@ -44,21 +42,42 @@
         const { ipcRenderer } = require('electron');
         let selectedRole = 'Cashier';
 
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icon = type === 'success' 
+                ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
+                : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+
+            toast.innerHTML = `
+                <div class="toast-icon">${icon}</div>
+                <div class="toast-message">${message}</div>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
         function setRole(role) {
             selectedRole = role;
             document.getElementById('cashierBtn').classList.toggle('active', role === 'Cashier');
             document.getElementById('ownerBtn').classList.toggle('active', role === 'Owner');
-            document.getElementById('error-msg').style.display = 'none';
         }
 
         document.getElementById('loginBtn').addEventListener('click', () => {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('error-msg');
 
             if (!username || !password) {
-                errorDiv.innerText = 'Please fill in all fields';
-                errorDiv.style.display = 'block';
+                showToast('Please fill in all fields', 'error');
                 return;
             }
 
@@ -68,16 +87,17 @@
 
         // Listen for response from main process
         ipcRenderer.on('login-response', (event, response) => {
-            const errorDiv = document.getElementById('error-msg');
             if (response.success) {
-                alert('Login Successful! Welcome Back, ' + response.user.full_name);
+                showToast('Login Successful! Welcome Back, ' + response.user.full_name, 'success');
                 // Here you would navigate to the dashboard
                 // window.location.href = 'dashboard.html';
             } else {
-                errorDiv.innerText = response.message;
-                errorDiv.style.display = 'block';
+                showToast(response.message, 'error');
             }
         });
     </script>
+    
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
 </body>
 </html>
