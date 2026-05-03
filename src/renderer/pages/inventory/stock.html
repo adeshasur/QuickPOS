@@ -1,147 +1,148 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QuickPOS Pro â€” Stock Control</title>
-<link rel="stylesheet" href="../../assets/css/global.css">
-<link rel="stylesheet" href="../../assets/css/components.css">
-<link rel="stylesheet" href="../../assets/css/sidebar.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPOS Pro - Stock Control</title>
+<link rel="stylesheet" href="../../assets/css/global.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="../../assets/css/sidebar.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <div class="sb-logo-icon"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg></div>
+    <span class="sb-logo-text">QuickPOS Pro</span>
+    <button class="sb-toggle" id="hamburgerBtn"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section-label">MAIN</div>
+    <a href="../dashboard/dashboard.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nt">Dashboard</span></a>
+    <a href="../sales/pos.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Make a Sale</span></a>
+    
+    <div class="sb-section-label">INVENTORY</div>
+    <a href="products.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></span><span class="nt">Products</span></a>
+    <a href="categories.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg></span><span class="nt">Categories</span></a>
+    <a href="stock.html" class="nav-item active"><span class="ni"><svg viewBox="0 0 24 24"><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Stock Control</span></a>
+
+    <div class="sb-section-label">PEOPLE</div>
+    <a href="../people/customers.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="nt">Customers</span></a>
+    <a href="../people/users.html" class="nav-item owner-only"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/></svg></span><span class="nt">Staff</span></a>
+
+    <div class="sb-section-label">ANALYTICS</div>
+    <a href="../analytics/reports.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg></span><span class="nt">Reports</span></a>
+    <a href="../sales/history.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/></svg></span><span class="nt">Sales History</span></a>
+    
+    <div class="sb-section-label">SYSTEM</div>
+    <a href="../system/settings.html" class="nav-item owner-only"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg></span><span class="nt">Settings</span></a>
+  </div>
+  <div class="sb-bottom">
+    <a href="#" class="nav-item" id="logoutBtn"><span class="ni"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg></span><span class="nt">Logout</span></a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title">Stock Management</div>
+    <div class="tb-right"><span class="tb-sub" id="sysTime">...</span><div class="avatar" id="av">AD</div></div>
+  </div>
+
+  <div class="content">
+    <div class="card" style="margin-bottom:20px">
+      <h3 style="margin-bottom:16px">Stock Adjustment</h3>
+      <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap:16px; align-items:flex-end">
+        <div class="form-group"><label class="label">Product</label><select id="adjProd" class="select"></select></div>
+        <div class="form-group"><label class="label">Action</label><select id="adjAction" class="select"><option value="add">Add (+)</option><option value="sub">Subtract (-)</option></select></div>
+        <div class="form-group"><label class="label">Quantity</label><input type="number" id="adjQty" class="input" value="1" min="1"></div>
+        <button class="btn btn-primary" style="height:44px" id="adjustBtn">Update Stock</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Product Name</th>
+              <th>SKU</th>
+              <th>Current Level</th>
+              <th>Min Alert</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../assets/js/core.js"></script>
+<script>
+const { ipcRenderer } = require('electron');
+let products = [];
+
+async function loadData() {
+    try {
+        products = await ipcRenderer.invoke('get-all-products');
+        render();
+    } catch (err) {
+        window.showToast('Failed to load products', 'error');
+    }
+}
+
+function render() {
+    const tbody = document.getElementById('inventoryTableBody');
+    const sel = document.getElementById('adjProd');
+    
+    sel.innerHTML = products.map(p => `<option value="${p.id}">${p.name} (Stock: ${p.current_stock})</option>`).join('');
+    
+    tbody.innerHTML = products.map(p => {
+        const isLow = p.current_stock <= p.alert_level;
+        return `
+            <tr>
+                <td style="font-weight:600">${p.name}</td>
+                <td style="font-family:var(--mono);font-size:12px">${p.sku || '-'}</td>
+                <td style="font-family:var(--mono)">${p.current_stock}</td>
+                <td style="font-family:var(--mono)">${p.alert_level}</td>
+                <td><span class="badge ${isLow ? 'badge-red' : 'badge-green'}">${isLow ? 'Low Stock' : 'Stable'}</span></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+document.getElementById('adjustBtn').onclick = async () => {
+    const product_id = parseInt(document.getElementById('adjProd').value);
+    const change_type = document.getElementById('adjAction').value;
+    const quantity = parseInt(document.getElementById('adjQty').value) || 0;
+    
+    if (!product_id || quantity <= 0) {
+        window.showToast('Please select a product and valid quantity', 'error');
+        return;
+    }
+    
+    if (change_type === 'sub') {
+        const p = products.find(x => x.id === product_id);
+        if (quantity > p.current_stock) {
+            window.showToast('Cannot subtract more than current stock', 'error');
+            return;
+        }
+    }
+    
+    try {
+        await ipcRenderer.invoke('adjust-stock', { product_id, change_type, quantity, notes: 'Manual adjustment' });
+        window.showToast('Stock updated successfully');
+        await loadData();
+    } catch (err) {
+        window.showToast('Failed to update stock', 'error');
+    }
+};
+
+loadData();
+</script>
+</body>
+</html>
 
-<nav class="sidebar" id="sidebar">
-  <div class="sb-top">
-    <div class="sb-logo-icon"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg></div>
-    <span class="sb-logo-text">QuickPOS Pro</span>
-    <button class="sb-toggle" id="hamburgerBtn"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-  </div>
-  <div class="sb-nav">
-    <div class="sb-section-label">MAIN</div>
-    <a href="../dashboard/dashboard.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nt">Dashboard</span></a>
-    <a href="../sales/pos.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Make a Sale</span></a>
-    
-    <div class="sb-section-label">INVENTORY</div>
-    <a href="products.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></span><span class="nt">Products</span></a>
-    <a href="categories.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg></span><span class="nt">Categories</span></a>
-    <a href="stock.html" class="nav-item active"><span class="ni"><svg viewBox="0 0 24 24"><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Stock Control</span></a>
-
-    <div class="sb-section-label">PEOPLE</div>
-    <a href="../people/customers.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="nt">Customers</span></a>
-    <a href="../people/users.html" class="nav-item owner-only"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/></svg></span><span class="nt">Staff</span></a>
-
-    <div class="sb-section-label">ANALYTICS</div>
-    <a href="../analytics/reports.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg></span><span class="nt">Reports</span></a>
-    <a href="../sales/history.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/></svg></span><span class="nt">Sales History</span></a>
-    
-    <div class="sb-section-label">SYSTEM</div>
-    <a href="../system/settings.html" class="nav-item owner-only"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg></span><span class="nt">Settings</span></a>
-  </div>
-  <div class="sb-bottom">
-    <a href="#" class="nav-item" id="logoutBtn"><span class="ni"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg></span><span class="nt">Logout</span></a>
-  </div>
-</nav>
-
-<div class="main">
-  <div class="topbar">
-    <div class="tb-title">Stock Management</div>
-    <div class="tb-right"><span class="tb-sub" id="sysTime">...</span><div class="avatar" id="av">AD</div></div>
-  </div>
-
-  <div class="content">
-    <div class="card" style="margin-bottom:20px">
-      <h3 style="margin-bottom:16px">Stock Adjustment</h3>
-      <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap:16px; align-items:flex-end">
-        <div class="form-group"><label class="label">Product</label><select id="adjProd" class="select"></select></div>
-        <div class="form-group"><label class="label">Action</label><select id="adjAction" class="select"><option value="add">Add (+)</option><option value="sub">Subtract (-)</option></select></div>
-        <div class="form-group"><label class="label">Quantity</label><input type="number" id="adjQty" class="input" value="1" min="1"></div>
-        <button class="btn btn-primary" style="height:44px" id="adjustBtn">Update Stock</button>
-      </div>
-    </div>
-
-    <div class="table-wrap">
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Product Name</th>
-              <th>SKU</th>
-              <th>Current Level</th>
-              <th>Min Alert</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="inventoryTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="../../assets/js/core.js"></script>
-<script>
-const { ipcRenderer } = require('electron');
-let products = [];
-
-async function loadData() {
-    try {
-        products = await ipcRenderer.invoke('get-all-products');
-        render();
-    } catch (err) {
-        window.showToast('Failed to load products', 'error');
-    }
-}
-
-function render() {
-    const tbody = document.getElementById('inventoryTableBody');
-    const sel = document.getElementById('adjProd');
-    
-    sel.innerHTML = products.map(p => `<option value="${p.id}">${p.name} (Stock: ${p.current_stock})</option>`).join('');
-    
-    tbody.innerHTML = products.map(p => {
-        const isLow = p.current_stock <= p.alert_level;
-        return `
-            <tr>
-                <td style="font-weight:600">${p.name}</td>
-                <td style="font-family:var(--mono);font-size:12px">${p.sku || 'â€”'}</td>
-                <td style="font-family:var(--mono)">${p.current_stock}</td>
-                <td style="font-family:var(--mono)">${p.alert_level}</td>
-                <td><span class="badge ${isLow ? 'badge-red' : 'badge-green'}">${isLow ? 'Low Stock' : 'Stable'}</span></td>
-            </tr>
-        `;
-    }).join('');
-}
-
-document.getElementById('adjustBtn').onclick = async () => {
-    const product_id = parseInt(document.getElementById('adjProd').value);
-    const change_type = document.getElementById('adjAction').value;
-    const quantity = parseInt(document.getElementById('adjQty').value) || 0;
-    
-    if (!product_id || quantity <= 0) {
-        window.showToast('Please select a product and valid quantity', 'error');
-        return;
-    }
-    
-    if (change_type === 'sub') {
-        const p = products.find(x => x.id === product_id);
-        if (quantity > p.current_stock) {
-            window.showToast('Cannot subtract more than current stock', 'error');
-            return;
-        }
-    }
-    
-    try {
-        await ipcRenderer.invoke('adjust-stock', { product_id, change_type, quantity, notes: 'Manual adjustment' });
-        window.showToast('Stock updated successfully');
-        await loadData();
-    } catch (err) {
-        window.showToast('Failed to update stock', 'error');
-    }
-};
-
-loadData();
-</script>
-</body>
-</html>

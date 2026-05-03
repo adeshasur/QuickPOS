@@ -1,150 +1,151 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QuickPOS Pro â€” System Settings</title>
-<link rel="stylesheet" href="../../assets/css/global.css">
-<link rel="stylesheet" href="../../assets/css/components.css">
-<link rel="stylesheet" href="../../assets/css/sidebar.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body>
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPOS Pro â€” System Settings</title>
+<link rel="stylesheet" href="../../assets/css/global.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="../../assets/css/sidebar.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <div class="sb-logo-icon"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg></div>
+    <span class="sb-logo-text">QuickPOS Pro</span>
+    <button class="sb-toggle" id="hamburgerBtn"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section-label">MAIN</div>
+    <a href="../dashboard/dashboard.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nt">Dashboard</span></a>
+    <a href="../sales/pos.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Make a Sale</span></a>
+    
+    <div class="sb-section-label">INVENTORY</div>
+    <a href="../inventory/products.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></span><span class="nt">Products</span></a>
+    <a href="../inventory/categories.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg></span><span class="nt">Categories</span></a>
+    <a href="../inventory/stock.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Stock Control</span></a>
+
+    <div class="sb-section-label">PEOPLE</div>
+    <a href="../people/customers.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="nt">Customers</span></a>
+    <a href="../people/users.html" class="nav-item owner-only"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/></svg></span><span class="nt">Staff</span></a>
+
+    <div class="sb-section-label">ANALYTICS</div>
+    <a href="../analytics/reports.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg></span><span class="nt">Reports</span></a>
+    <a href="../sales/history.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/></svg></span><span class="nt">Sales History</span></a>
+    
+    <div class="sb-section-label">SYSTEM</div>
+    <a href="settings.html" class="nav-item active owner-only"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg></span><span class="nt">Settings</span></a>
+  </div>
+  <div class="sb-bottom">
+    <a href="#" class="nav-item" id="logoutBtn"><span class="ni"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg></span><span class="nt">Logout</span></a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title">System Settings</div>
+    <div class="tb-right"><span class="tb-sub" id="sysTime">...</span><div class="avatar" id="av">AD</div></div>
+  </div>
+
+  <div class="content">
+    <div style="max-width: 600px">
+      <div class="card" style="margin-bottom:24px">
+        <h3 style="margin-bottom:20px">Business Information</h3>
+        <div class="form-group"><label class="label">Shop Name</label><input type="text" class="input" id="shopName" value="QuickPOS Pro Hardware"></div>
+        <div class="form-group"><label class="label">Address</label><textarea class="textarea" id="shopAddr" rows="3">No. 123, Main Street, Colombo</textarea></div>
+        <div class="form-group"><label class="label">Phone</label><input type="text" class="input" id="shopPhone"></div>
+        <div class="form-group"><label class="label">Currency Symbol</label><input type="text" class="input" id="shopCurr" value="LKR"></div>
+        <button class="btn btn-primary" id="saveSettingsBtn">Save Changes</button>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:20px; color:var(--red)">Danger Zone</h3>
+        <p class="tb-sub" style="margin-bottom:16px">Resetting the system will wipe all data including products, sales, customers, and users.</p>
+        <button class="btn btn-danger" id="resetBtn">Factory Reset System</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../assets/js/core.js"></script>
+<script>
+const { ipcRenderer } = require('electron');
+
+document.getElementById('saveSettingsBtn').onclick = () => {
+    const settings = {
+        shopName: document.getElementById('shopName').value,
+        shopAddr: document.getElementById('shopAddr').value,
+        shopPhone: document.getElementById('shopPhone').value,
+        shopCurr: document.getElementById('shopCurr').value
+    };
+    localStorage.setItem('quickpos-settings', JSON.stringify(settings));
+    window.showToast('Settings saved');
+};
+
+document.getElementById('resetBtn').onclick = async () => {
+    if (!await window.confirmAction('WARNING: This will delete ALL data. Are you sure?')) return;
+    try {
+        await new Promise((resolve, reject) => {
+            const { db } = require('../../database/db');
+            db.serialize(() => {
+                db.run("DELETE FROM sale_items");
+                db.run("DELETE FROM stock_history");
+                db.run("DELETE FROM sales");
+                db.run("DELETE FROM products");
+                db.run("DELETE FROM customers");
+                db.run("DELETE FROM categories");
+                db.run("DELETE FROM users");
+                
+                const userStmt = db.prepare("INSERT OR IGNORE INTO users (username, full_name, password, role) VALUES (?, ?, ?, ?)");
+                userStmt.run("Sunil", "Sunil Perera", "admin123", "Owner");
+                userStmt.run("Sandun", "Sandun Perera", "user123", "Cashier");
+                userStmt.finalize();
+                
+                const catStmt = db.prepare("INSERT OR IGNORE INTO categories (name, description) VALUES (?, ?)");
+                catStmt.run("Groceries", "Daily grocery items");
+                catStmt.run("Beverages", "Drinks and beverages");
+                catStmt.run("Snacks", "Snack items");
+                catStmt.run("Household", "Household products");
+                catStmt.finalize();
+                
+                const prodStmt = db.prepare("INSERT OR IGNORE INTO products (name, sku, category_id, base_price, sale_price, cost_price, current_stock, alert_level, is_weighted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                prodStmt.run("Keells Dhal 500g", "SKU001", 1, 450, 420, 350, 100, 20, 0);
+                prodStmt.run("Coca Cola 1L", "SKU002", 2, 350, 320, 250, 150, 30, 0);
+                prodStmt.run("Munchee Digestive", "SKU003", 3, 280, 260, 200, 80, 15, 0);
+                prodStmt.run("Rice 1kg", "SKU004", 1, 320, 300, 250, 200, 50, 1);
+                prodStmt.run("Sugar 1kg", "SKU005", 1, 280, 260, 220, 120, 25, 0);
+                prodStmt.run("Tea Bags 100s", "SKU006", 2, 550, 520, 420, 60, 10, 0);
+                prodStmt.run("Milk Powder 400g", "SKU007", 2, 850, 820, 700, 40, 10, 0);
+                prodStmt.run("Biscuit Mix", "SKU008", 3, 180, 160, 120, 200, 30, 0);
+                prodStmt.finalize();
+                
+                const custStmt = db.prepare("INSERT OR IGNORE INTO customers (name, phone, email, total_spent, points) VALUES (?, ?, ?, ?, ?)");
+                custStmt.run("John Doe", "0771234567", "john@email.com", 45200, 120);
+                custStmt.run("Jane Smith", "0779876543", "jane@email.com", 32100, 85);
+                custStmt.finalize();
+                
+                resolve();
+            });
+        });
+        localStorage.clear();
+        window.showToast('System reset complete');
+        setTimeout(() => location.reload(), 1500);
+    } catch (err) {
+        window.showToast('Reset failed', 'error');
+    }
+};
+
+const saved = JSON.parse(localStorage.getItem('quickpos-settings'));
+if (saved) {
+    document.getElementById('shopName').value = saved.shopName || '';
+    document.getElementById('shopAddr').value = saved.shopAddr || '';
+    document.getElementById('shopPhone').value = saved.shopPhone || '';
+    document.getElementById('shopCurr').value = saved.shopCurr || 'LKR';
+}
+</script>
+</body>
+</html>
 
-<nav class="sidebar" id="sidebar">
-  <div class="sb-top">
-    <div class="sb-logo-icon"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg></div>
-    <span class="sb-logo-text">QuickPOS Pro</span>
-    <button class="sb-toggle" id="hamburgerBtn"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-  </div>
-  <div class="sb-nav">
-    <div class="sb-section-label">MAIN</div>
-    <a href="../dashboard/dashboard.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nt">Dashboard</span></a>
-    <a href="../sales/pos.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Make a Sale</span></a>
-    
-    <div class="sb-section-label">INVENTORY</div>
-    <a href="../inventory/products.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></span><span class="nt">Products</span></a>
-    <a href="../inventory/categories.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg></span><span class="nt">Categories</span></a>
-    <a href="../inventory/stock.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Stock Control</span></a>
-
-    <div class="sb-section-label">PEOPLE</div>
-    <a href="../people/customers.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="nt">Customers</span></a>
-    <a href="../people/users.html" class="nav-item owner-only"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/></svg></span><span class="nt">Staff</span></a>
-
-    <div class="sb-section-label">ANALYTICS</div>
-    <a href="../analytics/reports.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg></span><span class="nt">Reports</span></a>
-    <a href="../sales/history.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/></svg></span><span class="nt">Sales History</span></a>
-    
-    <div class="sb-section-label">SYSTEM</div>
-    <a href="settings.html" class="nav-item active owner-only"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg></span><span class="nt">Settings</span></a>
-  </div>
-  <div class="sb-bottom">
-    <a href="#" class="nav-item" id="logoutBtn"><span class="ni"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg></span><span class="nt">Logout</span></a>
-  </div>
-</nav>
-
-<div class="main">
-  <div class="topbar">
-    <div class="tb-title">System Settings</div>
-    <div class="tb-right"><span class="tb-sub" id="sysTime">...</span><div class="avatar" id="av">AD</div></div>
-  </div>
-
-  <div class="content">
-    <div style="max-width: 600px">
-      <div class="card" style="margin-bottom:24px">
-        <h3 style="margin-bottom:20px">Business Information</h3>
-        <div class="form-group"><label class="label">Shop Name</label><input type="text" class="input" id="shopName" value="QuickPOS Pro Hardware"></div>
-        <div class="form-group"><label class="label">Address</label><textarea class="textarea" id="shopAddr" rows="3">No. 123, Main Street, Colombo</textarea></div>
-        <div class="form-group"><label class="label">Phone</label><input type="text" class="input" id="shopPhone"></div>
-        <div class="form-group"><label class="label">Currency Symbol</label><input type="text" class="input" id="shopCurr" value="LKR"></div>
-        <button class="btn btn-primary" id="saveSettingsBtn">Save Changes</button>
-      </div>
-
-      <div class="card">
-        <h3 style="margin-bottom:20px; color:var(--red)">Danger Zone</h3>
-        <p class="tb-sub" style="margin-bottom:16px">Resetting the system will wipe all data including products, sales, customers, and users.</p>
-        <button class="btn btn-danger" id="resetBtn">Factory Reset System</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="../../assets/js/core.js"></script>
-<script>
-const { ipcRenderer } = require('electron');
-
-document.getElementById('saveSettingsBtn').onclick = () => {
-    const settings = {
-        shopName: document.getElementById('shopName').value,
-        shopAddr: document.getElementById('shopAddr').value,
-        shopPhone: document.getElementById('shopPhone').value,
-        shopCurr: document.getElementById('shopCurr').value
-    };
-    localStorage.setItem('quickpos-settings', JSON.stringify(settings));
-    window.showToast('Settings saved');
-};
-
-document.getElementById('resetBtn').onclick = async () => {
-    if (!await window.confirmAction('WARNING: This will delete ALL data. Are you sure?')) return;
-    try {
-        await new Promise((resolve, reject) => {
-            const { db } = require('../../database/db');
-            db.serialize(() => {
-                db.run("DELETE FROM sale_items");
-                db.run("DELETE FROM stock_history");
-                db.run("DELETE FROM sales");
-                db.run("DELETE FROM products");
-                db.run("DELETE FROM customers");
-                db.run("DELETE FROM categories");
-                db.run("DELETE FROM users");
-                
-                const userStmt = db.prepare("INSERT OR IGNORE INTO users (username, full_name, password, role) VALUES (?, ?, ?, ?)");
-                userStmt.run("Sunil", "Sunil Perera", "admin123", "Owner");
-                userStmt.run("Sandun", "Sandun Perera", "user123", "Cashier");
-                userStmt.finalize();
-                
-                const catStmt = db.prepare("INSERT OR IGNORE INTO categories (name, description) VALUES (?, ?)");
-                catStmt.run("Groceries", "Daily grocery items");
-                catStmt.run("Beverages", "Drinks and beverages");
-                catStmt.run("Snacks", "Snack items");
-                catStmt.run("Household", "Household products");
-                catStmt.finalize();
-                
-                const prodStmt = db.prepare("INSERT OR IGNORE INTO products (name, sku, category_id, base_price, sale_price, cost_price, current_stock, alert_level, is_weighted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                prodStmt.run("Keells Dhal 500g", "SKU001", 1, 450, 420, 350, 100, 20, 0);
-                prodStmt.run("Coca Cola 1L", "SKU002", 2, 350, 320, 250, 150, 30, 0);
-                prodStmt.run("Munchee Digestive", "SKU003", 3, 280, 260, 200, 80, 15, 0);
-                prodStmt.run("Rice 1kg", "SKU004", 1, 320, 300, 250, 200, 50, 1);
-                prodStmt.run("Sugar 1kg", "SKU005", 1, 280, 260, 220, 120, 25, 0);
-                prodStmt.run("Tea Bags 100s", "SKU006", 2, 550, 520, 420, 60, 10, 0);
-                prodStmt.run("Milk Powder 400g", "SKU007", 2, 850, 820, 700, 40, 10, 0);
-                prodStmt.run("Biscuit Mix", "SKU008", 3, 180, 160, 120, 200, 30, 0);
-                prodStmt.finalize();
-                
-                const custStmt = db.prepare("INSERT OR IGNORE INTO customers (name, phone, email, total_spent, points) VALUES (?, ?, ?, ?, ?)");
-                custStmt.run("John Doe", "0771234567", "john@email.com", 45200, 120);
-                custStmt.run("Jane Smith", "0779876543", "jane@email.com", 32100, 85);
-                custStmt.finalize();
-                
-                resolve();
-            });
-        });
-        localStorage.clear();
-        window.showToast('System reset complete');
-        setTimeout(() => location.reload(), 1500);
-    } catch (err) {
-        window.showToast('Reset failed', 'error');
-    }
-};
-
-const saved = JSON.parse(localStorage.getItem('quickpos-settings'));
-if (saved) {
-    document.getElementById('shopName').value = saved.shopName || '';
-    document.getElementById('shopAddr').value = saved.shopAddr || '';
-    document.getElementById('shopPhone').value = saved.shopPhone || '';
-    document.getElementById('shopCurr').value = saved.shopCurr || 'LKR';
-}
-</script>
-</body>
-</html>
