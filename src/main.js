@@ -18,6 +18,7 @@ function createWindow() {
     });
 
     mainWindow.loadFile(path.join(__dirname, 'renderer', 'pages', 'auth', 'login.html'));
+    mainWindow.maximize();
     mainWindow.setMenuBarVisibility(false);
 }
 

@@ -1,260 +1,261 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QuickPOS Pro â€” Point of Sale</title>
-<link rel="stylesheet" href="../../assets/css/global.css">
-<link rel="stylesheet" href="../../assets/css/components.css">
-<link rel="stylesheet" href="../../assets/css/sidebar.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-.pos-layout { display: grid; grid-template-columns: 1fr 400px; gap: 20px; flex: 1; overflow: hidden; }
-.catalog-area { display: flex; flex-direction: column; gap: 16px; overflow: hidden; }
-.cart-area {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r2); display: flex; flex-direction: column; overflow: hidden;
-  box-shadow: var(--shadow-sm);
-}
-.search-bar {
-  background: var(--surface); border: 2px solid var(--border);
-  border-radius: var(--r); padding: 14px 18px; width: 100%; color: var(--text); outline: none;
-  font-size: 15px; box-shadow: var(--shadow-sm); transition: all .2s;
-}
-.search-bar:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-light); }
-.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; overflow-y: auto; padding-right: 4px; flex: 1; }
-.prod-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all .2s; text-align: center; }
-.prod-card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 4px 12px var(--accent-glow); }
-.prod-card .price { font-family: var(--mono); font-weight: 700; color: var(--green); margin-top: 8px; }
-.prod-card .stock { font-size: 11px; color: var(--text3); margin-top: 4px; }
-.cart-items { flex: 1; overflow-y: auto; padding: 16px; }
-.cart-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
-.cart-item-info { flex: 1; }
-.cart-item-info .item-name { font-weight: 600; font-size: 14px; }
-.cart-item-info .item-price { font-size: 12px; color: var(--text2); margin-top: 2px; }
-.cart-item-controls { display: flex; align-items: center; gap: 10px; }
-.qty-btn {
-  width: 36px; height: 36px; border-radius: 10px; border: 2px solid var(--border);
-  background: var(--surface); color: var(--text); cursor: pointer;
-  display: flex; align-items: center; justify-content: center; font-weight: 700;
-  transition: all .2s; user-select: none; font-size: 18px;
-}
-.qty-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
-.qty-btn:active { transform: scale(0.95); }
-.qty-display { font-family: var(--mono); font-weight: 700; min-width: 32px; text-align: center; font-size: 16px; }
-.cart-foot { padding: 20px; background: var(--surface2); border-top: 1px solid var(--border); }
-.total-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
-.total-row.grand { font-size: 20px; font-weight: 700; color: var(--accent); }
-.empty-cart { text-align: center; padding: 60px 20px; color: var(--text3); }
-.empty-cart .icon { font-size: 48px; margin-bottom: 16px; }
-</style>
-</head>
-<body>
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPOS Pro - Point of Sale</title>
+<link rel="stylesheet" href="../../assets/css/global.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="../../assets/css/sidebar.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+.pos-layout { display: grid; grid-template-columns: 1fr 400px; gap: 20px; flex: 1; overflow: hidden; }
+.catalog-area { display: flex; flex-direction: column; gap: 16px; overflow: hidden; }
+.cart-area {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r2); display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.search-bar {
+  background: var(--surface); border: 2px solid var(--border);
+  border-radius: var(--r); padding: 14px 18px; width: 100%; color: var(--text); outline: none;
+  font-size: 15px; box-shadow: var(--shadow-sm); transition: all .2s;
+}
+.search-bar:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-light); }
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; overflow-y: auto; padding-right: 4px; flex: 1; }
+.prod-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all .2s; text-align: center; }
+.prod-card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 4px 12px var(--accent-glow); }
+.prod-card .price { font-family: var(--mono); font-weight: 700; color: var(--green); margin-top: 8px; }
+.prod-card .stock { font-size: 11px; color: var(--text3); margin-top: 4px; }
+.cart-items { flex: 1; overflow-y: auto; padding: 16px; }
+.cart-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+.cart-item-info { flex: 1; }
+.cart-item-info .item-name { font-weight: 600; font-size: 14px; }
+.cart-item-info .item-price { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.cart-item-controls { display: flex; align-items: center; gap: 10px; }
+.qty-btn {
+  width: 36px; height: 36px; border-radius: 10px; border: 2px solid var(--border);
+  background: var(--surface); color: var(--text); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-weight: 700;
+  transition: all .2s; user-select: none; font-size: 18px;
+}
+.qty-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.qty-btn:active { transform: scale(0.95); }
+.qty-display { font-family: var(--mono); font-weight: 700; min-width: 32px; text-align: center; font-size: 16px; }
+.cart-foot { padding: 20px; background: var(--surface2); border-top: 1px solid var(--border); }
+.total-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+.total-row.grand { font-size: 20px; font-weight: 700; color: var(--accent); }
+.empty-cart { text-align: center; padding: 60px 20px; color: var(--text3); }
+.empty-cart .icon { font-size: 48px; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <div class="sb-logo-icon"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg></div>
+    <span class="sb-logo-text">QuickPOS Pro</span>
+    <button class="sb-toggle" id="hamburgerBtn"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section-label">MAIN</div>
+    <a href="../dashboard/dashboard.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nt">Dashboard</span></a>
+    <a href="pos.html" class="nav-item active"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Make a Sale</span></a>
+    
+    <div class="sb-section-label">INVENTORY</div>
+    <a href="../inventory/products.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></span><span class="nt">Products</span></a>
+    <a href="../inventory/categories.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg></span><span class="nt">Categories</span></a>
+    <a href="../inventory/stock.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Stock Control</span></a>
+
+    <div class="sb-section-label">PEOPLE</div>
+    <a href="../people/customers.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="nt">Customers</span></a>
+    <a href="../people/users.html" class="nav-item owner-only"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/></svg></span><span class="nt">Staff</span></a>
+
+    <div class="sb-section-label">ANALYTICS</div>
+    <a href="../analytics/reports.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg></span><span class="nt">Reports</span></a>
+    <a href="history.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/></svg></span><span class="nt">Sales History</span></a>
+    
+    <div class="sb-section-label">SYSTEM</div>
+    <a href="../system/settings.html" class="nav-item owner-only"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg></span><span class="nt">Settings</span></a>
+  </div>
+  <div class="sb-bottom">
+    <a href="#" class="nav-item" id="logoutBtn"><span class="ni"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg></span><span class="nt">Logout</span></a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title">Point of Sale</div>
+    <div class="tb-right"><span class="tb-sub" id="sysTime">...</span><div class="avatar" id="av">AD</div></div>
+  </div>
+
+  <div class="content">
+    <div class="pos-layout">
+      <div class="catalog-area">
+        <input type="text" class="search-bar" id="pSearch" placeholder="Search products by name or SKU...">
+        <div class="product-grid" id="productGrid"></div>
+      </div>
+
+      <div class="cart-area">
+        <div style="padding:16px; border-bottom:1px solid var(--border)"><h3>Current Order</h3></div>
+        <div class="cart-items" id="cartItems">
+          <div class="empty-cart">Cart is empty<br><small>Add products to get started</small></div>
+        </div>
+        <div class="cart-foot">
+          <div class="total-row"><span>Subtotal</span><span id="subTotal">LKR 0.00</span></div>
+          <div class="total-row"><span>Tax (0%)</span><span id="taxAmount">LKR 0.00</span></div>
+          <div class="total-row grand"><span>Total</span><span id="grandTotal">LKR 0.00</span></div>
+          <button class="btn btn-primary" style="width:100%; height:50px; font-size:16px; margin-top:10px" id="checkoutBtn">Complete Transaction</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../assets/js/core.js"></script>
+<script>
+const { ipcRenderer } = require('electron');
+let products = [];
+let cart = [];
+
+async function loadProducts() {
+    try {
+        products = await ipcRenderer.invoke('get-all-products');
+        renderProducts();
+    } catch (err) {
+        console.error('Failed to load products:', err);
+        window.showToast('Failed to load products', 'error');
+    }
+}
+
+function renderProducts(filter = '') {
+    const grid = document.getElementById('productGrid');
+    const filtered = filter ? products.filter(p => 
+        p.name.toLowerCase().includes(filter.toLowerCase()) || 
+        (p.sku && p.sku.toLowerCase().includes(filter.toLowerCase()))
+    ) : products;
+    
+    grid.innerHTML = filtered.map(p => `
+        <div class="prod-card ${p.current_stock <= 0 ? 'out-of-stock' : ''}" onclick="addToCart(${p.id})">
+            <div style="margin-bottom:10px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <div class="name">${p.name}</div>
+            <div class="price">${window.formatCurrency(p.sale_price || p.base_price)}</div>
+            <div class="stock">Stock: ${p.current_stock}</div>
+        </div>
+    `).join('');
+}
+
+document.getElementById('pSearch').addEventListener('input', (e) => {
+    renderProducts(e.target.value);
+});
+
+function addToCart(id) {
+    const p = products.find(x => x.id === id);
+    if (!p || p.current_stock <= 0) return;
+    
+    const existing = cart.find(x => x.id === id);
+    if (existing) {
+        if (existing.qty < p.current_stock) {
+            existing.qty++;
+        } else {
+            window.showToast('Maximum stock reached', 'error');
+            return;
+        }
+    } else {
+        cart.push({ id: p.id, name: p.name, price: p.sale_price || p.base_price, qty: 1 });
+    }
+    updateCartUI();
+}
+
+function updateQty(id, delta) {
+    const item = cart.find(x => x.id === id);
+    if (!item) return;
+    
+    const product = products.find(p => p.id === id);
+    const newQty = item.qty + delta;
+    
+    if (newQty <= 0) {
+        cart = cart.filter(x => x.id !== id);
+    } else if (newQty <= product.current_stock) {
+        item.qty = newQty;
+    } else {
+        window.showToast('Maximum stock reached', 'error');
+        return;
+    }
+    updateCartUI();
+}
+
+function updateCartUI() {
+    const items = document.getElementById('cartItems');
+    
+    if (cart.length === 0) {
+        items.innerHTML = '<div class="empty-cart"><div style="margin-bottom:16px"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></div>Cart is empty<br><small>Add products to get started</small></div>';
+    } else {
+        items.innerHTML = cart.map(c => `
+            <div class="cart-item">
+                <div class="cart-item-info">
+                    <div class="item-name">${c.name}</div>
+                    <div class="item-price">${window.formatCurrency(c.price)} each</div>
+                </div>
+                <div class="cart-item-controls">
+                    <button class="qty-btn" onclick="updateQty(${c.id}, -1)">âˆ’</button>
+                    <span class="qty-display">${c.qty}</span>
+                    <button class="qty-btn" onclick="updateQty(${c.id}, 1)">+</button>
+                </div>
+                <div style="font-weight:700; min-width:80px; text-align:right">${window.formatCurrency(c.price * c.qty)}</div>
+            </div>
+        `).join('');
+    }
+    
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const tax = 0;
+    const total = subtotal + tax;
+    
+    document.getElementById('subTotal').textContent = window.formatCurrency(subtotal);
+    document.getElementById('taxAmount').textContent = window.formatCurrency(tax);
+    document.getElementById('grandTotal').textContent = window.formatCurrency(total);
+}
+
+document.getElementById('checkoutBtn').addEventListener('click', async () => {
+    if (cart.length === 0) {
+        window.showToast('Cart is empty', 'error');
+        return;
+    }
+    
+    const user = JSON.parse(localStorage.getItem('quickpos-user'));
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    
+    const saleData = {
+        customer_id: null,
+        user_id: user ? user.id : null,
+        subtotal: subtotal,
+        discount: 0,
+        tax: 0,
+        total: subtotal,
+        payment_method: 'Cash',
+        items: cart.map(item => ({
+            product_id: item.id,
+            quantity: item.qty,
+            unit_price: item.price,
+            total: item.price * item.qty
+        }))
+    };
+    
+    try {
+        const result = await ipcRenderer.invoke('complete-sale', saleData);
+        window.showToast(`Transaction completed! Invoice: ${result.invoice_no}`);
+        cart = [];
+        updateCartUI();
+        await loadProducts();
+    } catch (err) {
+        console.error('Checkout failed:', err);
+        window.showToast('Transaction failed', 'error');
+    }
+});
+
+loadProducts();
+</script>
+</body>
+</html>
 
-<nav class="sidebar" id="sidebar">
-  <div class="sb-top">
-    <div class="sb-logo-icon"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg></div>
-    <span class="sb-logo-text">QuickPOS Pro</span>
-    <button class="sb-toggle" id="hamburgerBtn"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-  </div>
-  <div class="sb-nav">
-    <div class="sb-section-label">MAIN</div>
-    <a href="../dashboard/dashboard.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nt">Dashboard</span></a>
-    <a href="pos.html" class="nav-item active"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Make a Sale</span></a>
-    
-    <div class="sb-section-label">INVENTORY</div>
-    <a href="../inventory/products.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></span><span class="nt">Products</span></a>
-    <a href="../inventory/categories.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg></span><span class="nt">Categories</span></a>
-    <a href="../inventory/stock.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Stock Control</span></a>
-
-    <div class="sb-section-label">PEOPLE</div>
-    <a href="../people/customers.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="nt">Customers</span></a>
-    <a href="../people/users.html" class="nav-item owner-only"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/></svg></span><span class="nt">Staff</span></a>
-
-    <div class="sb-section-label">ANALYTICS</div>
-    <a href="../analytics/reports.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg></span><span class="nt">Reports</span></a>
-    <a href="history.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/></svg></span><span class="nt">Sales History</span></a>
-    
-    <div class="sb-section-label">SYSTEM</div>
-    <a href="../system/settings.html" class="nav-item owner-only"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg></span><span class="nt">Settings</span></a>
-  </div>
-  <div class="sb-bottom">
-    <a href="#" class="nav-item" id="logoutBtn"><span class="ni"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg></span><span class="nt">Logout</span></a>
-  </div>
-</nav>
-
-<div class="main">
-  <div class="topbar">
-    <div class="tb-title">Point of Sale</div>
-    <div class="tb-right"><span class="tb-sub" id="sysTime">...</span><div class="avatar" id="av">AD</div></div>
-  </div>
-
-  <div class="content">
-    <div class="pos-layout">
-      <div class="catalog-area">
-        <input type="text" class="search-bar" id="pSearch" placeholder="Search products by name or SKU...">
-        <div class="product-grid" id="productGrid"></div>
-      </div>
-
-      <div class="cart-area">
-        <div style="padding:16px; border-bottom:1px solid var(--border)"><h3>Current Order</h3></div>
-        <div class="cart-items" id="cartItems">
-          <div class="empty-cart">Cart is empty<br><small>Add products to get started</small></div>
-        </div>
-        <div class="cart-foot">
-          <div class="total-row"><span>Subtotal</span><span id="subTotal">LKR 0.00</span></div>
-          <div class="total-row"><span>Tax (0%)</span><span id="taxAmount">LKR 0.00</span></div>
-          <div class="total-row grand"><span>Total</span><span id="grandTotal">LKR 0.00</span></div>
-          <button class="btn btn-primary" style="width:100%; height:50px; font-size:16px; margin-top:10px" id="checkoutBtn">Complete Transaction</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="../../assets/js/core.js"></script>
-<script>
-const { ipcRenderer } = require('electron');
-let products = [];
-let cart = [];
-
-async function loadProducts() {
-    try {
-        products = await ipcRenderer.invoke('get-all-products');
-        renderProducts();
-    } catch (err) {
-        console.error('Failed to load products:', err);
-        window.showToast('Failed to load products', 'error');
-    }
-}
-
-function renderProducts(filter = '') {
-    const grid = document.getElementById('productGrid');
-    const filtered = filter ? products.filter(p => 
-        p.name.toLowerCase().includes(filter.toLowerCase()) || 
-        (p.sku && p.sku.toLowerCase().includes(filter.toLowerCase()))
-    ) : products;
-    
-    grid.innerHTML = filtered.map(p => `
-        <div class="prod-card ${p.current_stock <= 0 ? 'out-of-stock' : ''}" onclick="addToCart(${p.id})">
-            <div style="margin-bottom:10px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-            <div class="name">${p.name}</div>
-            <div class="price">${window.formatCurrency(p.sale_price || p.base_price)}</div>
-            <div class="stock">Stock: ${p.current_stock}</div>
-        </div>
-    `).join('');
-}
-
-document.getElementById('pSearch').addEventListener('input', (e) => {
-    renderProducts(e.target.value);
-});
-
-function addToCart(id) {
-    const p = products.find(x => x.id === id);
-    if (!p || p.current_stock <= 0) return;
-    
-    const existing = cart.find(x => x.id === id);
-    if (existing) {
-        if (existing.qty < p.current_stock) {
-            existing.qty++;
-        } else {
-            window.showToast('Maximum stock reached', 'error');
-            return;
-        }
-    } else {
-        cart.push({ id: p.id, name: p.name, price: p.sale_price || p.base_price, qty: 1 });
-    }
-    updateCartUI();
-}
-
-function updateQty(id, delta) {
-    const item = cart.find(x => x.id === id);
-    if (!item) return;
-    
-    const product = products.find(p => p.id === id);
-    const newQty = item.qty + delta;
-    
-    if (newQty <= 0) {
-        cart = cart.filter(x => x.id !== id);
-    } else if (newQty <= product.current_stock) {
-        item.qty = newQty;
-    } else {
-        window.showToast('Maximum stock reached', 'error');
-        return;
-    }
-    updateCartUI();
-}
-
-function updateCartUI() {
-    const items = document.getElementById('cartItems');
-    
-    if (cart.length === 0) {
-        items.innerHTML = '<div class="empty-cart"><div style="margin-bottom:16px"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></div>Cart is empty<br><small>Add products to get started</small></div>';
-    } else {
-        items.innerHTML = cart.map(c => `
-            <div class="cart-item">
-                <div class="cart-item-info">
-                    <div class="item-name">${c.name}</div>
-                    <div class="item-price">${window.formatCurrency(c.price)} each</div>
-                </div>
-                <div class="cart-item-controls">
-                    <button class="qty-btn" onclick="updateQty(${c.id}, -1)">âˆ’</button>
-                    <span class="qty-display">${c.qty}</span>
-                    <button class="qty-btn" onclick="updateQty(${c.id}, 1)">+</button>
-                </div>
-                <div style="font-weight:700; min-width:80px; text-align:right">${window.formatCurrency(c.price * c.qty)}</div>
-            </div>
-        `).join('');
-    }
-    
-    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    const tax = 0;
-    const total = subtotal + tax;
-    
-    document.getElementById('subTotal').textContent = window.formatCurrency(subtotal);
-    document.getElementById('taxAmount').textContent = window.formatCurrency(tax);
-    document.getElementById('grandTotal').textContent = window.formatCurrency(total);
-}
-
-document.getElementById('checkoutBtn').addEventListener('click', async () => {
-    if (cart.length === 0) {
-        window.showToast('Cart is empty', 'error');
-        return;
-    }
-    
-    const user = JSON.parse(localStorage.getItem('quickpos-user'));
-    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    
-    const saleData = {
-        customer_id: null,
-        user_id: user ? user.id : null,
-        subtotal: subtotal,
-        discount: 0,
-        tax: 0,
-        total: subtotal,
-        payment_method: 'Cash',
-        items: cart.map(item => ({
-            product_id: item.id,
-            quantity: item.qty,
-            unit_price: item.price,
-            total: item.price * item.qty
-        }))
-    };
-    
-    try {
-        const result = await ipcRenderer.invoke('complete-sale', saleData);
-        window.showToast(`Transaction completed! Invoice: ${result.invoice_no}`);
-        cart = [];
-        updateCartUI();
-        await loadProducts();
-    } catch (err) {
-        console.error('Checkout failed:', err);
-        window.showToast('Transaction failed', 'error');
-    }
-});
-
-loadProducts();
-</script>
-</body>
-</html>
