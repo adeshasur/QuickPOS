@@ -1,56 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickPOS Pro - Customers</title>
-    <link rel="stylesheet" href="../assets/css/common.css">
-    <link rel="stylesheet" href="../assets/css/customers.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPOS Pro — Customers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/common.css">
+<link rel="stylesheet" href="../assets/css/customers.css">
 </head>
 <body>
 
-    <div id="sidebar-container"></div>
+<div id="sidebar-container"></div>
 
-    <div class="main-content">
-        <div class="top-bar">
-            <div class="page-title">Customer Management</div>
-            <div class="user-info">
-                <span id="userRoleDisplay" style="color:var(--text-light); font-size:14px;">Loading...</span>
-                <div class="user-avatar" id="userAvatar">AD</div>
-            </div>
-        </div>
+<div class="main-content">
+  <div class="topbar">
+    <div class="tb-title">Customer Management</div>
+    <div class="tb-right">
+      <div class="tb-shift" id="shiftDisplay">Shift: 08:00 – 16:00</div>
+      <div class="avatar">AD</div>
+    </div>
+  </div>
 
-        <div class="customers-container">
-            <div class="customers-header">
-                <div class="search-wrap">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" class="search-input" id="customerSearch" placeholder="Search by name or phone...">
-                </div>
-                <button class="add-btn" id="addCustomerBtn">➕ Add New Customer</button>
-            </div>
-
-            <div class="table-section">
-                <div class="table-wrapper">
-                    <table class="customer-table" id="customerTable">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Phone</th>
-                                <th>Address</th>
-                                <th>Balance (LKR)</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="customerTableBody">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+  <div class="content">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input class="search-input" id="searchInput" placeholder="Search by name or phone…">
+      </div>
+      <div class="count-badge">Total: <span id="countDisplay">0</span></div>
+      <button class="add-btn" id="addBtn">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Customer
+      </button>
     </div>
 
-    <script src="../assets/js/components.js"></script>
-    <script src="../assets/js/customers.js"></script>
+    <div class="table-card">
+      <div class="table-head">
+        <div class="th"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Customer</div>
+        <div class="th"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81 19.79 19.79 0 01.1 2.27 2 2 0 012.11.09h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.72 6.72l1.01-.45a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg> Phone</div>
+        <div class="th"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Address</div>
+        <div class="th"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H7"/></svg> Balance</div>
+        <div class="th" style="justify-content:flex-end">Actions</div>
+      </div>
+      <div class="table-body" id="tableBody">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <p>No customers yet</p>
+          <small>Click "Add Customer" to get started</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="formModal">
+  <div class="modal-box">
+    <div class="modal-top">
+      <div class="modal-title" id="formModalTitle">Add Customer</div>
+      <button class="modal-close" id="closeFormModal"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Full Name <span class="req">*</span></label>
+          <input class="field-input" type="text" id="fName" placeholder="Kamal Perera">
+        </div>
+        <div class="field">
+          <label class="field-label">Phone <span class="req">*</span></label>
+          <input class="field-input" type="tel" id="fPhone" placeholder="0771234567">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Address</label>
+        <input class="field-input" type="text" id="fAddress" placeholder="Colombo 03">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="mact cancel" id="cancelFormModal">Cancel</button>
+      <button class="mact confirm" id="saveCustomer">Save Customer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box" style="max-width:360px">
+    <div class="modal-top">
+      <div class="modal-title">Delete Customer</div>
+      <button class="modal-close" id="closeDeleteModal"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="del-modal-body">
+      <div class="del-icon"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div>
+      <div class="del-name" id="delName">Customer Name</div>
+      <div class="del-sub">This action cannot be undone. The customer's credit balance will also be removed.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="mact cancel" id="cancelDelete">Cancel</button>
+      <button class="mact danger" id="confirmDelete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toastMsg"></span></div>
+
+<script src="../assets/js/components.js"></script>
+<script src="../assets/js/customers.js"></script>
 </body>
 </html>
