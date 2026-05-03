@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPOS Pro — Product Management</title>
+<link rel="stylesheet" href="../../assets/css/global.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="../../assets/css/sidebar.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+.badge-unit { background: var(--accent-glow); color: var(--accent2); }
+.badge-weight { background: var(--purple-dim); color: var(--purple); }
+.price-final { color: var(--green); font-weight: 700; font-family: var(--mono); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+</style>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <div class="sb-logo-icon"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg></div>
+    <span class="sb-logo-text">QuickPOS Pro</span>
+    <button class="sb-toggle" id="hamburgerBtn"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section-label">MAIN</div>
+    <a href="../dashboard/dashboard.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nt">Dashboard</span></a>
+    <a href="../sales/pos.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Make a Sale</span></a>
+    
+    <div class="sb-section-label">INVENTORY</div>
+    <a href="products.html" class="nav-item active"><span class="ni"><svg viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></span><span class="nt">Products</span></a>
+    <a href="categories.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg></span><span class="nt">Categories</span></a>
+    <a href="stock.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></span><span class="nt">Stock Control</span></a>
+
+    <div class="sb-section-label">PEOPLE</div>
+    <a href="../people/customers.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="nt">Customers</span></a>
+    <a href="../people/users.html" class="nav-item owner-only"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/></svg></span><span class="nt">Staff</span></a>
+
+    <div class="sb-section-label">ANALYTICS</div>
+    <a href="../analytics/reports.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg></span><span class="nt">Reports</span></a>
+    <a href="../sales/history.html" class="nav-item"><span class="ni"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/></svg></span><span class="nt">Sales History</span></a>
+    
+    <div class="sb-section-label">SYSTEM</div>
+    <a href="../system/settings.html" class="nav-item owner-only"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg></span><span class="nt">Settings</span></a>
+  </div>
+  <div class="sb-bottom">
+    <a href="#" class="nav-item" id="logoutBtn"><span class="ni"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg></span><span class="nt">Logout</span></a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title">Products</div>
+    <div class="tb-right"><span class="tb-sub" id="sysTime">...</span><div class="avatar" id="av">AD</div></div>
+  </div>
+
+  <div class="content">
+    <div style="display:flex; justify-content:space-between; align-items:center">
+      <div>
+        <h2 class="page-heading">Product Catalog</h2>
+        <p class="tb-sub">Manage items and pricing</p>
+      </div>
+      <button class="btn btn-primary" id="addProductBtn">+ Add New Product</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>SKU</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th>Stock</th>
+              <th style="text-align:right">Price</th>
+              <th style="text-align:right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="productsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="productModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3 id="modalTitle">Add Product</h3><button onclick="closeModal('productModal')" class="tb-sub" style="background:none; border:none; cursor:pointer;font-size:18px">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="label">Product Name</label><input type="text" id="pName" class="input"></div>
+      <div class="form-group"><label class="label">SKU</label><input type="text" id="pSku" class="input"></div>
+      <div class="form-group"><label class="label">Category</label><select id="pCat" class="select"></select></div>
+      <div class="form-row">
+        <div class="form-group"><label class="label">Cost Price</label><input type="number" id="pCost" class="input"></div>
+        <div class="form-group"><label class="label">Sale Price</label><input type="number" id="pPrice" class="input"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="label">Stock</label><input type="number" id="pStock" class="input"></div>
+        <div class="form-group"><label class="label">Alert Level</label><input type="number" id="pAlert" class="input" value="10"></div>
+      </div>
+      <div class="form-group"><label class="label">Description</label><textarea id="pDesc" class="textarea"></textarea></div>
+      <div class="form-group"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="pWeighted"> Weighted Product</label></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('productModal')">Cancel</button>
+      <button class="btn btn-primary" id="saveProductBtn">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<script src="../../assets/js/core.js"></script>
+<script>
+const { ipcRenderer } = require('electron');
+let products = [];
+let categories = [];
+let editingId = null;
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+async function loadData() {
+    try {
+        products = await ipcRenderer.invoke('get-all-products');
+        categories = await ipcRenderer.invoke('get-all-categories');
+        render();
+        populateCategories();
+    } catch (err) {
+        console.error('Failed to load data:', err);
+        window.showToast('Failed to load data', 'error');
+    }
+}
+
+function render() {
+    const tbody = document.getElementById('productsTableBody');
+    tbody.innerHTML = products.map(p => `
+        <tr>
+            <td class="td-name">${p.name}</td>
+            <td style="font-family:var(--mono);font-size:12px">${p.sku || '—'}</td>
+            <td>${p.category_name || '—'}</td>
+            <td><span class="badge ${p.is_weighted ? 'badge-weight' : 'badge-unit'}">${p.is_weighted ? 'Weighted' : 'Unit'}</span></td>
+            <td><span class="badge ${p.current_stock <= p.alert_level ? 'badge-red' : 'badge-green'}">${p.current_stock}</span></td>
+            <td style="text-align:right"><div class="price-final">${window.formatCurrency(p.sale_price || p.base_price)}</div></td>
+            <td style="text-align:right">
+                <button class="btn btn-secondary" style="padding:5px 10px; font-size:11px" onclick="editProduct(${p.id})">Edit</button>
+                <button class="btn btn-danger" style="padding:5px 10px; font-size:11px" onclick="deleteProduct(${p.id})">Delete</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function populateCategories() {
+    const sel = document.getElementById('pCat');
+    sel.innerHTML = '<option value="">Select Category</option>' + categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+}
+
+document.getElementById('addProductBtn').onclick = () => {
+    editingId = null;
+    document.getElementById('modalTitle').textContent = 'Add Product';
+    document.getElementById('pName').value = '';
+    document.getElementById('pSku').value = '';
+    document.getElementById('pCat').value = '';
+    document.getElementById('pCost').value = '';
+    document.getElementById('pPrice').value = '';
+    document.getElementById('pStock').value = '';
+    document.getElementById('pAlert').value = '10';
+    document.getElementById('pDesc').value = '';
+    document.getElementById('pWeighted').checked = false;
+    openModal('productModal');
+};
+
+async function editProduct(id) {
+    try {
+        const p = await ipcRenderer.invoke('get-product', id);
+        if (!p) return;
+        
+        editingId = id;
+        document.getElementById('modalTitle').textContent = 'Edit Product';
+        document.getElementById('pName').value = p.name;
+        document.getElementById('pSku').value = p.sku || '';
+        document.getElementById('pCat').value = p.category_id || '';
+        document.getElementById('pCost').value = p.cost_price;
+        document.getElementById('pPrice').value = p.sale_price || p.base_price;
+        document.getElementById('pStock').value = p.current_stock;
+        document.getElementById('pAlert').value = p.alert_level;
+        document.getElementById('pDesc').value = p.description || '';
+        document.getElementById('pWeighted').checked = !!p.is_weighted;
+        openModal('productModal');
+    } catch (err) {
+        window.showToast('Failed to load product', 'error');
+    }
+}
+
+async function deleteProduct(id) {
+    if (!await window.confirmAction('Delete this product?')) return;
+    try {
+        await ipcRenderer.invoke('delete-product', id);
+        window.showToast('Product deleted');
+        await loadData();
+    } catch (err) {
+        window.showToast('Failed to delete product', 'error');
+    }
+}
+
+document.getElementById('saveProductBtn').onclick = async () => {
+    const name = document.getElementById('pName').value.trim();
+    const sku = document.getElementById('pSku').value.trim();
+    const category_id = document.getElementById('pCat').value || null;
+    const cost_price = parseFloat(document.getElementById('pCost').value) || 0;
+    const sale_price = parseFloat(document.getElementById('pPrice').value) || 0;
+    const current_stock = parseInt(document.getElementById('pStock').value) || 0;
+    const alert_level = parseInt(document.getElementById('pAlert').value) || 10;
+    const description = document.getElementById('pDesc').value.trim();
+    const is_weighted = document.getElementById('pWeighted').checked;
+    
+    if (!name) { window.showToast('Product name is required', 'error'); return; }
+    
+    const product = { name, sku, category_id, base_price: sale_price, sale_price, cost_price, current_stock, alert_level, is_weighted, description };
+    
+    try {
+        if (editingId) {
+            product.id = editingId;
+            await ipcRenderer.invoke('update-product', product);
+            window.showToast('Product updated');
+        } else {
+            await ipcRenderer.invoke('add-product', product);
+            window.showToast('Product added');
+        }
+        closeModal('productModal');
+        await loadData();
+    } catch (err) {
+        window.showToast('Failed to save product', 'error');
+    }
+};
+
+loadData();
+</script>
+</body>
+</html>

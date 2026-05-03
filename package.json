@@ -1,18 +1,25 @@
 {
   "name": "quickpos",
   "version": "1.0.0",
-  "description": "",
-  "main": "main.js",
+  "description": "QuickPOS - Desktop Point of Sale System for Supermarkets",
+  "main": "src/main.js",
   "scripts": {
     "start": "electron .",
+    "dev": "electron . --dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/adeshasur/QuickPOS.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "pos",
+    "point-of-sale",
+    "supermarket",
+    "electron",
+    "sqlite"
+  ],
+  "author": "Sunil Perera",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
