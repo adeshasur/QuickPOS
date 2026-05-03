@@ -3,16 +3,107 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QuickPOS Pro — Dashboard</title>
+<title>QuickPOS — Executive Dashboard</title>
 <link rel="stylesheet" href="../../assets/css/global.css">
 <link rel="stylesheet" href="../../assets/css/components.css">
 <link rel="stylesheet" href="../../assets/css/sidebar.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-.chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-.activity-card { flex: 1; overflow-y: auto; }
+/* Dashboard Layout Grid */
+.db-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto auto auto;
+    gap: 20px;
+}
+
+/* Header Style */
+.db-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #E8F5E9;
+    color: #2E7D32;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 12px;
+}
+.live-dot { width: 6px; height: 6px; background: #4CAF50; border-radius: 50%; }
+
+/* Period Selector */
+.period-selector {
+    display: flex;
+    background: var(--surface2);
+    padding: 4px;
+    border-radius: 12px;
+}
+.period-btn {
+    padding: 6px 14px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    cursor: pointer;
+}
+.period-btn.active {
+    background: #ffffff;
+    color: var(--accent2);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Stat Cards */
+.stat-card-mini {
+    padding: 20px;
+    border-left: 4px solid var(--accent);
+}
+.stat-card-mini:nth-child(2) { border-left-color: #4CAF50; }
+.stat-card-mini:nth-child(3) { border-left-color: #FF9800; }
+.stat-card-mini:nth-child(4) { border-left-color: #2196F3; }
+
+.stat-title { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-main { font-size: 24px; font-weight: 800; margin: 8px 0 4px; color: var(--text); }
+.stat-sub { font-size: 12px; color: var(--text3); font-weight: 500; }
+
+/* Section Specifics */
+.sales-overview { grid-column: span 2; }
+.reorder-alerts { grid-column: span 2; }
+.top-products { grid-column: span 1; }
+.peak-hours { grid-column: span 1; }
+.payment-mix { grid-column: span 2; }
+
+/* Progress Bars */
+.progress-group { margin-top: 16px; }
+.progress-item { margin-bottom: 12px; }
+.progress-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; font-weight: 600; }
+.progress-bar-bg { height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+
+/* Tables/Lists */
+.item-list { display: flex; flex-direction: column; gap: 12px; }
+.list-entry { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+.entry-rank { width: 24px; font-weight: 800; color: var(--accent); font-size: 13px; }
+.entry-info { flex: 1; }
+.entry-name { font-size: 14px; font-weight: 600; }
+.entry-sub { font-size: 11px; color: var(--text3); }
+.entry-val { font-family: var(--mono); font-weight: 700; font-size: 13px; }
+
+/* Payment Mix UI */
+.payment-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+.pay-card { background: var(--surface2); padding: 16px; border-radius: 12px; text-align: center; }
+.pay-percent { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+.pay-label { font-size: 12px; font-weight: 600; color: var(--text3); }
+
 </style>
 </head>
 <body>
@@ -51,32 +142,150 @@
 
 <div class="main">
   <div class="topbar">
-    <div class="tb-title">Dashboard</div>
-    <div class="tb-right"><span class="tb-sub" id="sysTime">...</span><div class="avatar" id="av">AD</div></div>
+    <div class="tb-title">Executive Dashboard <span class="live-indicator"><div class="live-dot"></div> Live</span></div>
+    <div class="tb-right">
+        <div class="period-selector">
+            <button class="period-btn active">Today</button>
+            <button class="period-btn">Yesterday</button>
+            <button class="period-btn">7 Days</button>
+            <button class="period-btn">This Month</button>
+        </div>
+        <div class="avatar" id="av">AD</div>
+    </div>
   </div>
 
   <div class="content">
-    <div class="stats-grid">
-      <div class="card stat-card"><div class="stat-icon" style="background:var(--accent-glow); color:var(--accent2)">💰</div><div><div class="tb-sub">Today Revenue</div><div style="font-size:22px; font-weight:700" id="todayRevenue">LKR 0.00</div></div></div>
-      <div class="card stat-card"><div class="stat-icon" style="background:var(--green-dim); color:var(--green)">🛍️</div><div><div class="tb-sub">Today Orders</div><div style="font-size:22px; font-weight:700" id="todayOrders">0</div></div></div>
-      <div class="card stat-card"><div class="stat-icon" style="background:var(--amber-dim); color:var(--amber)">👤</div><div><div class="tb-sub">Total Customers</div><div style="font-size:22px; font-weight:700" id="totalCustomers">0</div></div></div>
-      <div class="card stat-card"><div class="stat-icon" style="background:var(--red-dim); color:var(--red)">📉</div><div><div class="tb-sub">Low Stock Items</div><div style="font-size:22px; font-weight:700" id="lowStock">0</div></div></div>
-    </div>
+    <!-- Top Mini Stats -->
+    <div class="db-grid">
+      <div class="card stat-card-mini">
+        <div class="stat-title">Total Revenue</div>
+        <div class="stat-main" id="todayRevenue">LKR 0.00</div>
+        <div class="stat-sub">â€” No data</div>
+      </div>
+      <div class="card stat-card-mini">
+        <div class="stat-title">Stock Volume</div>
+        <div class="stat-main" id="stockVolume">0 units</div>
+        <div class="stat-sub" id="stockStatus">All stock levels OK</div>
+      </div>
+      <div class="card stat-card-mini">
+        <div class="stat-title">Items Sold Today</div>
+        <div class="stat-main" id="todayOrders">0</div>
+        <div class="stat-sub">Total quantity</div>
+      </div>
+      <div class="card stat-card-mini">
+        <div class="stat-title">Avg Transaction</div>
+        <div class="stat-main" id="avgTrans">LKR 0.00</div>
+        <div class="stat-sub">3 transactions</div>
+      </div>
 
-    <div class="chart-grid">
-      <div class="card" style="height: 400px; display: flex; align-items: center; justify-content: center; color: var(--text3)">
-        <div style="text-align:center">
-            <div style="font-size:48px;margin-bottom:16px">📊</div>
-            <div>Sales Analytics</div>
-            <div class="tb-sub">Complete more sales to see trends</div>
+      <!-- Sales Overview & Reorder Alerts -->
+      <div class="card sales-overview">
+        <div class="db-header" style="margin-bottom:16px">
+            <div class="stat-title">Sales Overview</div>
+            <div class="stat-sub">Today vs 7D</div>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding-bottom:12px; border-bottom:1px solid var(--border)">
+            <div class="stat-sub">Category</div>
+            <div class="stat-sub">Amount</div>
+        </div>
+        <div class="progress-group">
+            <div class="progress-item">
+                <div class="progress-label"><span>Meat</span><span>LKR 2.9k</span></div>
+                <div class="progress-bar-bg"><div class="progress-fill" style="width: 85%; background: #2196F3;"></div></div>
+            </div>
+            <div class="progress-item">
+                <div class="progress-label"><span>Grains</span><span>LKR 2.5k</span></div>
+                <div class="progress-bar-bg"><div class="progress-fill" style="width: 70%; background: #4CAF50;"></div></div>
+            </div>
+            <div class="progress-item">
+                <div class="progress-label"><span>Beverages</span><span>LKR 1.7k</span></div>
+                <div class="progress-bar-bg"><div class="progress-fill" style="width: 55%; background: #FF9800;"></div></div>
+            </div>
+            <div class="progress-item">
+                <div class="progress-label"><span>Dairy</span><span>LKR 1.1k</span></div>
+                <div class="progress-bar-bg"><div class="progress-fill" style="width: 40%; background: #9C27B0;"></div></div>
+            </div>
         </div>
       </div>
-      <div class="card activity-card">
-        <div class="tb-title" style="margin-bottom:16px">Recent Activity</div>
-        <div id="recentActivity" style="display:flex; flex-direction:column; gap:12px">
-            <div class="tb-sub" style="text-align:center;padding:20px">No recent activity</div>
+
+      <div class="card reorder-alerts">
+        <div class="db-header">
+            <div class="stat-title" style="color:#EF4444">âš  Reorder Alerts</div>
+            <span class="badge badge-red" id="lowStockCount">0 items</span>
+        </div>
+        <div id="reorderList" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:180px; color:var(--text3)">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:12px; color:#4CAF50"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <div style="font-weight:600; color:#4CAF50">All stock levels are healthy</div>
         </div>
       </div>
+
+      <!-- Bottom Row -->
+      <div class="card top-products">
+        <div class="stat-title" style="margin-bottom:16px">Top Products</div>
+        <div class="item-list">
+            <div class="list-entry">
+                <div class="entry-rank">1</div>
+                <div class="entry-info">
+                    <div class="entry-name">Coca-Cola 1.5L</div>
+                    <div class="entry-sub">Beverages</div>
+                </div>
+                <div class="entry-val">4 qty</div>
+            </div>
+            <div class="list-entry">
+                <div class="entry-rank">2</div>
+                <div class="entry-info">
+                    <div class="entry-name">Fresh Milk 1L</div>
+                    <div class="entry-sub">Dairy</div>
+                </div>
+                <div class="entry-val">4 qty</div>
+            </div>
+            <div class="list-entry">
+                <div class="entry-rank">3</div>
+                <div class="entry-info">
+                    <div class="entry-name">Munchee Biscuits</div>
+                    <div class="entry-sub">Snacks</div>
+                </div>
+                <div class="entry-val">3 qty</div>
+            </div>
+        </div>
+      </div>
+
+      <div class="card peak-hours">
+        <div class="stat-title" style="margin-bottom:16px">Peak Hours</div>
+        <div style="height:150px; display:flex; align-items:flex-end; gap:8px; padding-bottom:20px">
+            <div style="flex:1; height:20%; background:var(--surface2); border-radius:4px"></div>
+            <div style="flex:1; height:35%; background:var(--surface2); border-radius:4px"></div>
+            <div style="flex:1; height:85%; background:var(--accent2); border-radius:4px"></div>
+            <div style="flex:1; height:45%; background:var(--surface2); border-radius:4px"></div>
+            <div style="flex:1; height:30%; background:var(--surface2); border-radius:4px"></div>
+        </div>
+        <div class="stat-sub" style="text-align:center">10am - 12pm is peak</div>
+      </div>
+
+      <div class="card payment-mix">
+        <div class="stat-title">Payment Mix</div>
+        <div class="payment-cards">
+            <div class="pay-card">
+                <div class="pay-percent" style="color:#4CAF50">66%</div>
+                <div class="pay-label">Cash</div>
+                <div style="height:4px; background:#4CAF50; width:66%; margin:8px auto; border-radius:2px"></div>
+            </div>
+            <div class="pay-card">
+                <div class="pay-percent" style="color:#2196F3">34%</div>
+                <div class="pay-label">Card</div>
+                <div style="height:4px; background:#2196F3; width:34%; margin:8px auto; border-radius:2px"></div>
+            </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:13px">
+            <span class="text-gray">Cash Revenue</span>
+            <span class="font-bold">LKR 5.7k</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:8px">
+            <span class="text-gray">Card Revenue</span>
+            <span class="font-bold">LKR 2.9k</span>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -90,8 +299,21 @@ async function loadDashboard() {
         const stats = await ipcRenderer.invoke('get-dashboard-stats');
         document.getElementById('todayRevenue').textContent = window.formatCurrency(stats.today_revenue);
         document.getElementById('todayOrders').textContent = stats.today_orders;
-        document.getElementById('totalCustomers').textContent = stats.total_customers;
-        document.getElementById('lowStock').textContent = stats.low_stock_items;
+        document.getElementById('lowStockCount').textContent = `${stats.low_stock_items} items`;
+        
+        if (stats.low_stock_items > 0) {
+            document.getElementById('reorderList').innerHTML = `
+                <div style="text-align:center; color:#EF4444">
+                    <div style="font-size:24px; margin-bottom:8px">âš </div>
+                    <div style="font-weight:600">${stats.low_stock_items} items need restocking</div>
+                </div>
+            `;
+        }
+        
+        // Calculate Avg Transaction
+        const avg = stats.today_orders > 0 ? stats.today_revenue / stats.today_orders : 0;
+        document.getElementById('avgTrans').textContent = window.formatCurrency(avg);
+
     } catch (err) {
         console.error('Failed to load dashboard stats:', err);
     }
