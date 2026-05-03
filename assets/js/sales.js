@@ -1,10 +1,6 @@
 // App State
 let products = [];
 let customers = [];
-
-// App State
-let products = [];
-let customers = [];
 let cart = [];
 let currentCategory = "all";
 let productToCustomize = null;
