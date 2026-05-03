@@ -91,6 +91,26 @@ db.serialize(() => {
             VALUES ('Administrator', 'admin', '123', 'owner')`);
     db.run(`INSERT OR IGNORE INTO users (name, username, password, role) 
             VALUES ('Cashier Staff', 'staff', '123', 'cashier')`);
+
+    // --- Supermarket Initial Data Seeding ---
+    
+    // 1. Categories
+    const categories = ['Groceries', 'Beverages', 'Vegetables', 'Dairy', 'Bakery', 'Household'];
+    categories.forEach(cat => {
+        db.run(`INSERT OR IGNORE INTO categories (name) VALUES (?)`, [cat]);
+    });
+
+    // 2. Sample Products
+    const samples = [
+        ['001', 'Fresh Milk 1L', 1, 350.00, 420.00, 50, 'bottle', '2026-06-01'],
+        ['002', 'Keeri Samba 5kg', 1, 1400.00, 1650.00, 20, 'pkt', '2027-01-01'],
+        ['003', 'Munchee Super Cream Cracker', 5, 180.00, 210.00, 100, 'pkt', '2026-12-31']
+    ];
+    
+    samples.forEach(p => {
+        db.run(`INSERT OR IGNORE INTO products (barcode, name, category_id, cost_price, selling_price, current_stock, unit_type, expiry_date) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, p);
+    });
 });
 
 module.exports = db;

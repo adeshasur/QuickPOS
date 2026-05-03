@@ -4,7 +4,8 @@
   "description": "QuickPOS Hardware Management System",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder"
   },
   "repository": {
     "type": "git",

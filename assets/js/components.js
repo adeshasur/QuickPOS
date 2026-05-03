@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sidebarContainer) {
         const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
         const activePage = window.location.pathname.split("/").pop();
+        
+        // Dashboard පේජ් එකක් නම් body එකට class එක දාන්න (common.css flex වැඩ කරන්න)
+        document.body.classList.add('dashboard-body');
 
         sidebarContainer.innerHTML = `
             <div class="sidebar expanded" id="sidebar">

@@ -20,13 +20,19 @@
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
-/* මුළු පිටුවේම Layout එක හරියටම තියාගන්න */
-body {
+/* මුළු පිටුවේම Layout එක හරියටම තියාගන්න (Dashboard සඳහා පමණි) */
+body.dashboard-body {
     background-color: var(--bg-color);
     display: flex;
     height: 100vh;
     width: 100vw;
     overflow: hidden;
+}
+
+body {
+    background-color: var(--bg-color);
+    margin: 0;
+    padding: 0;
 }
 
 /* සයිඩ්බාර් එක පවතින Container එක */
