@@ -29,11 +29,12 @@
                     <table class="products-table" id="productsTable">
                         <thead>
                             <tr>
+                                <th>Barcode</th>
                                 <th>Product Name</th>
                                 <th>Category</th>
                                 <th>Measurement</th>
                                 <th>Current Stock</th>
-                                <th>Alert Level</th>
+                                <th>Expiry Date</th>
                                 <th>Price (LKR)</th>
                                 <th class="owner-only">Actions</th>
                             </tr>
@@ -53,9 +54,15 @@
             </div>
             
             <form class="modal-body" id="addProductForm">
-                <div class="form-group">
-                    <label class="form-label" for="productName">Product Name *</label>
-                    <input type="text" class="form-input" id="productName" placeholder="e.g., Nadu Rice, Coconut Oil" required>
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label" for="productBarcode">Barcode / SKU *</label>
+                        <input type="text" class="form-input" id="productBarcode" placeholder="Scan or enter barcode" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="productName">Product Name *</label>
+                        <input type="text" class="form-input" id="productName" placeholder="e.g., Nadu Rice, Coconut Oil" required>
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -73,10 +80,10 @@
                     
                     <div class="unit-field disabled" id="unitField">
                         <div class="unit-input-wrapper">
-                            <input type="text" class="form-input" id="unitType" placeholder="e.g., kg, L, ft, m" disabled>
+                            <input type="text" class="form-input" id="unitType" placeholder="e.g., kg, g, pkt, bottle" disabled>
                         </div>
                         <div class="unit-examples">
-                            <span>kg</span> <span>L</span> <span>ft</span> <span>m</span> <span>g</span>
+                            <span>kg</span> <span>g</span> <span>pkt</span> <span>bottle</span> <span>pcs</span>
                         </div>
                     </div>
                 </div>
@@ -87,12 +94,14 @@
                         <div class="stock-field">
                             <label class="form-label" for="initialStock">Initial Stock</label>
                             <input type="number" class="form-input" id="initialStock" placeholder="0" min="0" value="0">
-                            <div class="stock-info">Starting quantity</div>
                         </div>
                         <div class="stock-field">
                             <label class="form-label" for="alertLevel">Alert Level</label>
-                            <input type="number" class="form-input" id="alertLevel" placeholder="5" min="0" value="5">
-                            <div class="stock-info">Low stock warning</div>
+                            <input type="number" class="form-input" id="alertLevel" placeholder="10" min="0" value="10">
+                        </div>
+                        <div class="stock-field">
+                            <label class="form-label" for="expiryDate">Expiry Date</label>
+                            <input type="date" class="form-input" id="expiryDate">
                         </div>
                     </div>
                 </div>
@@ -140,9 +149,15 @@
             <form class="modal-body" id="editProductForm">
                 <input type="hidden" id="editProductId">
                 
-                <div class="form-group">
-                    <label class="form-label" for="editProductName">Product Name *</label>
-                    <input type="text" class="form-input" id="editProductName" required>
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label" for="editProductBarcode">Barcode / SKU *</label>
+                        <input type="text" class="form-input" id="editProductBarcode" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="editProductName">Product Name *</label>
+                        <input type="text" class="form-input" id="editProductName" required>
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -160,10 +175,10 @@
                     
                     <div class="unit-field disabled" id="editUnitField">
                         <div class="unit-input-wrapper">
-                            <input type="text" class="form-input" id="editUnitType" placeholder="e.g., kg, L, ft, m" disabled>
+                            <input type="text" class="form-input" id="editUnitType" placeholder="e.g., kg, g, pkt, bottle" disabled>
                         </div>
                         <div class="unit-examples">
-                            <span>kg</span> <span>L</span> <span>ft</span> <span>m</span> <span>g</span>
+                            <span>kg</span> <span>g</span> <span>pkt</span> <span>bottle</span> <span>pcs</span>
                         </div>
                     </div>
                 </div>
@@ -174,12 +189,14 @@
                         <div class="stock-field">
                             <label class="form-label" for="editCurrentStock">Current Stock</label>
                             <input type="number" class="form-input" id="editCurrentStock" min="0" disabled>
-                            <div class="stock-info">Auto-updated by sales</div>
                         </div>
                         <div class="stock-field">
                             <label class="form-label" for="editAlertLevel">Alert Level *</label>
                             <input type="number" class="form-input" id="editAlertLevel" min="0" required>
-                            <div class="stock-info">Low stock warning</div>
+                        </div>
+                        <div class="stock-field">
+                            <label class="form-label" for="editExpiryDate">Expiry Date</label>
+                            <input type="date" class="form-input" id="editExpiryDate">
                         </div>
                     </div>
                 </div>

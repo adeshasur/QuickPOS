@@ -1,13 +1,12 @@
-// ===== DEMO DATA =====
+// ===== DEMO DATA (Supermarket Edition) =====
 const demoProducts = [
-    { id: 1, name: "Tokyo Super Cement", price: 2350, category: "cement", stock: 50, isWeighted: false },
-    { id: 2, name: "S-Lon PVC Pipe 1/2 inch", price: 180, category: "plumbing", stock: 100, isWeighted: true, unitType: "ft" },
-    { id: 3, name: "Steel Rod 12mm", price: 2100, category: "steel", stock: 30, isWeighted: false },
-    { id: 4, name: "Rileem Cement", price: 2380, category: "cement", stock: 45, isWeighted: false },
-    { id: 5, name: "PVC Elbow 1/2\"", price: 95, category: "plumbing", stock: 200, isWeighted: false },
-    { id: 6, name: "Steel Rod 10mm", price: 1850, category: "steel", stock: 40, isWeighted: false },
-    { id: 7, name: "Anchor Bolts 1/2\"", price: 320, category: "steel", stock: 150, isWeighted: false },
-    { id: 8, name: "Paint Brush 4\"", price: 450, category: "plumbing", stock: 75, isWeighted: false }
+    { id: 1, barcode: "4791234567890", name: "Ceylon Black Tea 250g", price: 500, category: "grocery", stock: 50, isWeighted: false, unitType: "pkt" },
+    { id: 2, barcode: "4790000000001", name: "Nadu Raw Rice", price: 240, category: "grocery", stock: 500, isWeighted: true, unitType: "kg" },
+    { id: 3, barcode: "4790000000002", name: "Full Cream Milk 1L", price: 400, category: "dairy", stock: 45, isWeighted: false, unitType: "bottle" },
+    { id: 4, barcode: "4790000000003", name: "Fresh Tomatoes", price: 180, category: "vegetables", stock: 25, isWeighted: true, unitType: "kg" },
+    { id: 5, barcode: "4790000000004", name: "Orange Juice 500ml", price: 320, category: "beverages", stock: 60, isWeighted: false, unitType: "bottle" },
+    { id: 6, barcode: "4790000000005", name: "Marie Biscuits", price: 120, category: "grocery", stock: 100, isWeighted: false, unitType: "pkt" },
+    { id: 7, barcode: "4790000000006", name: "Carrots", price: 220, category: "vegetables", stock: 30, isWeighted: true, unitType: "kg" }
 ];
 
 const demoCustomers = [
@@ -280,9 +279,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     customerSearch.addEventListener('input', (e) => searchCustomers(e.target.value));
     stockSearch.addEventListener('input', (e) => {
-        const val = e.target.value.toLowerCase();
+        const val = e.target.value.trim().toLowerCase();
+        if (!val) { stockResult.innerHTML = ''; return; }
+        
+        // Exact Barcode Match
+        const barcodeMatch = products.find(p => p.barcode === val);
+        if (barcodeMatch) {
+            addToCart(barcodeMatch.id, 1, barcodeMatch.price);
+            e.target.value = ''; // Clear for next scan
+            stockResult.innerHTML = `<span class="material-symbols-rounded success s18" style="vertical-align:middle;">check_circle</span> Added ${barcodeMatch.name}`;
+            setTimeout(() => stockResult.innerHTML = '', 2000);
+            return;
+        }
+
+        // Fuzzy Name Search
         const prod = products.find(p => p.name.toLowerCase().includes(val));
-        stockResult.innerHTML = prod ? `${prod.name}: ${getStockBadgeText(prod.stock)}` : (val ? 'Not found' : '');
+        stockResult.innerHTML = prod ? `${prod.name}: ${getStockBadgeText(prod.stock)}` : 'Not found';
     });
 
     document.addEventListener('click', (e) => {

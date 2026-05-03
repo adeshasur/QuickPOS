@@ -1,24 +1,23 @@
-// Hardcoded categories
+// Mock categories - should eventually come from SQLite
 let categories = [
-    { id: 1, name: "Food" },
-    { id: 2, name: "Drinks" },
-    { id: 3, name: "Snacks" },
-    { id: 4, name: "Bakery" },
-    { id: 5, name: "Groceries" },
-    { id: 6, name: "Dairy" },
-    { id: 7, name: "Vegetables" },
-    { id: 8, name: "Fruits" },
-    { id: 9, name: "Meat" },
-    { id: 10, name: "Seafood" }
+    { id: 1, name: "Groceries" },
+    { id: 2, name: "Beverages" },
+    { id: 3, name: "Dairy" },
+    { id: 4, name: "Vegetables" },
+    { id: 5, name: "Fruits" },
+    { id: 6, name: "Snacks" },
+    { id: 7, name: "Bakery" },
+    { id: 8, name: "Meat & Seafood" },
+    { id: 9, name: "Household" },
+    { id: 10, name: "Personal Care" }
 ];
 
-// Hardcoded products
+// Mock products
 let products = [
-    { id: 1, name: "Ceylon Black Tea", categoryId: 2, basePrice: 550.00, discount: 50, finalPrice: 500.00, currentStock: 28, alertLevel: 10, isWeighted: false, unitType: null, costPrice: 0 },
-    { id: 2, name: "Nadu Raw Rice", categoryId: 5, basePrice: 240.00, discount: 0, finalPrice: 240.00, currentStock: 120, alertLevel: 25, isWeighted: true, unitType: "kg", costPrice: 0 },
-    { id: 3, name: "Coconut Oil (Pure)", categoryId: 5, basePrice: 420.00, discount: 30, finalPrice: 390.00, currentStock: 45, alertLevel: 12, isWeighted: true, unitType: "L", costPrice: 0 },
-    { id: 4, name: "Wood Apple Juice", categoryId: 2, basePrice: 180.00, discount: 0, finalPrice: 180.00, currentStock: 65, alertLevel: 15, isWeighted: false, unitType: null, costPrice: 0 },
-    { id: 5, name: "Red Onions", categoryId: 7, basePrice: 160.00, discount: 10, finalPrice: 150.00, currentStock: 8, alertLevel: 10, isWeighted: true, unitType: "kg", costPrice: 0 }
+    { id: 1, barcode: "4791234567890", name: "Ceylon Black Tea 250g", categoryId: 2, basePrice: 550.00, discount: 50, finalPrice: 500.00, currentStock: 28, alertLevel: 10, isWeighted: false, unitType: "pkt", costPrice: 450.00, expiryDate: "2025-12-01" },
+    { id: 2, barcode: "4790000000001", name: "Nadu Raw Rice", categoryId: 1, basePrice: 240.00, discount: 0, finalPrice: 240.00, currentStock: 120, alertLevel: 50, isWeighted: true, unitType: "kg", costPrice: 210.00, expiryDate: "2025-06-15" },
+    { id: 3, barcode: "4790000000002", name: "Full Cream Milk 1L", categoryId: 3, basePrice: 420.00, discount: 20, finalPrice: 400.00, currentStock: 45, alertLevel: 15, isWeighted: false, unitType: "bottle", costPrice: 380.00, expiryDate: "2024-05-20" },
+    { id: 4, barcode: "4790000000003", name: "Fresh Tomatoes", categoryId: 4, basePrice: 180.00, discount: 0, finalPrice: 180.00, currentStock: 15, alertLevel: 20, isWeighted: true, unitType: "kg", costPrice: 140.00, expiryDate: "2024-05-10" }
 ];
 
 // DOM elements
@@ -30,6 +29,7 @@ const addProductModal = document.getElementById('addProductModal');
 const closeAddModalBtn = document.getElementById('closeAddModalBtn');
 const cancelAddBtn = document.getElementById('cancelAddBtn');
 const addProductForm = document.getElementById('addProductForm');
+const productBarcode = document.getElementById('productBarcode');
 const productName = document.getElementById('productName');
 const productCategory = document.getElementById('productCategory');
 const sellByWeight = document.getElementById('sellByWeight');
@@ -37,6 +37,7 @@ const unitType = document.getElementById('unitType');
 const unitField = document.getElementById('unitField');
 const initialStock = document.getElementById('initialStock');
 const alertLevel = document.getElementById('alertLevel');
+const expiryDate = document.getElementById('expiryDate');
 const basePrice = document.getElementById('basePrice');
 const discountAmount = document.getElementById('discountAmount');
 const displayBasePrice = document.getElementById('displayBasePrice');
@@ -49,6 +50,7 @@ const closeEditModalBtn = document.getElementById('closeEditModalBtn');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
 const editProductForm = document.getElementById('editProductForm');
 const editProductId = document.getElementById('editProductId');
+const editProductBarcode = document.getElementById('editProductBarcode');
 const editProductName = document.getElementById('editProductName');
 const editProductCategory = document.getElementById('editProductCategory');
 const editSellByWeight = document.getElementById('editSellByWeight');
@@ -56,6 +58,7 @@ const editUnitType = document.getElementById('editUnitType');
 const editUnitField = document.getElementById('editUnitField');
 const editCurrentStock = document.getElementById('editCurrentStock');
 const editAlertLevel = document.getElementById('editAlertLevel');
+const editExpiryDate = document.getElementById('editExpiryDate');
 const editBasePrice = document.getElementById('editBasePrice');
 const editDiscountAmount = document.getElementById('editDiscountAmount');
 const editDisplayBasePrice = document.getElementById('editDisplayBasePrice');
@@ -107,23 +110,24 @@ function renderProductsTable() {
         const categoryName = category ? category.name : 'Uncategorized';
         const hasDiscount = product.discount > 0;
         const isLow = isLowStock(product.currentStock, product.alertLevel);
+        const isExpired = product.expiryDate && new Date(product.expiryDate) < new Date();
         
         let measurementCell = product.isWeighted 
             ? `<td class="measurement-cell"><span class="measurement-badge"><span class="material-symbols-rounded s18" style="vertical-align:middle; margin-right:4px;">scale</span>By Weight</span><span class="unit-badge">${product.unitType}</span></td>`
-            : `<td class="measurement-cell"><span class="measurement-badge"><span class="material-symbols-rounded s18" style="vertical-align:middle; margin-right:4px;">inventory_2</span>Unit</span></td>`;
+            : `<td class="measurement-cell"><span class="measurement-badge"><span class="material-symbols-rounded s18" style="vertical-align:middle; margin-right:4px;">package_2</span>Unit</span><span class="unit-badge">${product.unitType || 'pcs'}</span></td>`;
         
         const row = document.createElement('tr');
         row.innerHTML = `
+            <td class="barcode-cell" style="font-family: monospace; font-size: 13px; color: var(--text-light);">${product.barcode || 'N/A'}</td>
             <td class="product-name-cell">${product.name}</td>
             <td class="category-cell">${categoryName}</td>
             ${measurementCell}
-            <td class="stock-cell ${isLow ? 'low-stock' : 'normal'}">${product.currentStock} ${isLow ? '<span class="material-symbols-rounded warning s18" style="vertical-align:middle;">warning</span>' : ''}</td>
-            <td class="alert-level-cell">${product.alertLevel}</td>
+            <td class="stock-cell ${isLow ? 'low-stock' : 'normal'}">${product.currentStock} ${isLow ? '<span class="material-symbols-rounded warning s18" style="vertical-align:middle; margin-left:4px;">warning</span>' : ''}</td>
+            <td class="expiry-cell ${isExpired ? 'low-stock' : ''}">${product.expiryDate || 'N/A'} ${isExpired ? '<span class="material-symbols-rounded danger s18" style="vertical-align:middle; margin-left:4px;">event_busy</span>' : ''}</td>
             <td class="price-cell">
                 ${hasDiscount ? `
                     <span class="base-price">${formatCurrency(product.basePrice)}</span>
                     <span class="final-price">${formatCurrency(product.finalPrice)}</span>
-                    <span class="discount-badge">-${formatCurrency(product.discount)}</span>
                 ` : `<span class="final-price">${formatCurrency(product.finalPrice)}</span>`}
             </td>
             <td class="owner-only actions-cell">
@@ -162,33 +166,36 @@ function updateEditPriceDisplay() {
 
 function openAddProductModal() {
     addProductForm.reset();
-    discountAmount.value = 0; initialStock.value = 0; alertLevel.value = 5;
-    sellByWeight.checked = false; unitType.disabled = true; unitField.classList.add('disabled');
+    productBarcode.value = '';
+    discountAmount.value = 0; initialStock.value = 0; alertLevel.value = 10;
+    sellByWeight.checked = false; unitType.disabled = false; unitField.classList.remove('disabled');
     updatePriceDisplay();
     addProductModal.classList.add('active');
-    setTimeout(() => productName.focus(), 300);
+    setTimeout(() => productBarcode.focus(), 300);
 }
 
 function addProduct(event) {
     event.preventDefault();
+    const barcode = productBarcode.value.trim();
     const name = productName.value.trim();
     const categoryId = parseInt(productCategory.value);
     const stock = parseInt(initialStock.value) || 0;
-    const alert = parseInt(alertLevel.value) || 5;
+    const alert = parseInt(alertLevel.value) || 10;
+    const expiry = expiryDate.value;
     const base = parseFloat(basePrice.value);
     const discount = parseFloat(discountAmount.value) || 0;
     const isWeighted = sellByWeight.checked;
-    const unit = isWeighted ? unitType.value.trim() : null;
+    const unit = unitType.value.trim();
     
-    if (!name || !categoryId || !base || base <= 0) { window.alert('Please fill all required fields'); return; }
-    if (isWeighted && !unit) { window.alert('Please enter unit type'); return; }
+    if (!name || !categoryId || !base || base <= 0 || !barcode) { window.alert('Please fill all required fields'); return; }
+    if (products.some(p => p.barcode === barcode)) { window.alert('Barcode already exists'); return; }
     if (discount > base) { window.alert('Discount too high'); return; }
     
     const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
     products.push({
-        id: newId, name: name, categoryId: categoryId, basePrice: base, discount: discount,
+        id: newId, barcode: barcode, name: name, categoryId: categoryId, basePrice: base, discount: discount,
         finalPrice: calculateFinalPrice(base, discount), currentStock: stock, alertLevel: alert,
-        isWeighted: isWeighted, unitType: unit, costPrice: 0
+        isWeighted: isWeighted, unitType: unit, costPrice: base * 0.8, expiryDate: expiry
     });
     
     saveProducts(); renderProductsTable(); addProductModal.classList.remove('active'); window.alert('Product added!');
@@ -198,16 +205,18 @@ function openEditProductModal(productId) {
     const product = products.find(p => p.id === productId);
     if (!product) return;
     
-    editProductId.value = product.id; editProductName.value = product.name; editProductCategory.value = product.categoryId;
-    editCurrentStock.value = product.currentStock; editAlertLevel.value = product.alertLevel;
-    editBasePrice.value = product.basePrice; editDiscountAmount.value = product.discount;
+    editProductId.value = product.id; 
+    editProductBarcode.value = product.barcode || '';
+    editProductName.value = product.name; 
+    editProductCategory.value = product.categoryId;
+    editCurrentStock.value = product.currentStock; 
+    editAlertLevel.value = product.alertLevel;
+    editExpiryDate.value = product.expiryDate || '';
+    editBasePrice.value = product.basePrice; 
+    editDiscountAmount.value = product.discount;
     
     editSellByWeight.checked = product.isWeighted;
-    if (product.isWeighted) {
-        editUnitType.disabled = false; editUnitField.classList.remove('disabled'); editUnitType.value = product.unitType || '';
-    } else {
-        editUnitType.disabled = true; editUnitField.classList.add('disabled'); editUnitType.value = '';
-    }
+    editUnitType.disabled = false; editUnitField.classList.remove('disabled'); editUnitType.value = product.unitType || '';
     
     updateEditPriceDisplay(); editProductModal.classList.add('active'); setTimeout(() => editProductName.focus(), 300);
 }
@@ -215,24 +224,26 @@ function openEditProductModal(productId) {
 function updateProduct(event) {
     event.preventDefault();
     const productId = parseInt(editProductId.value);
+    const barcode = editProductBarcode.value.trim();
     const name = editProductName.value.trim();
     const categoryId = parseInt(editProductCategory.value);
     const alert = parseInt(editAlertLevel.value) || 0;
+    const expiry = editExpiryDate.value;
     const base = parseFloat(editBasePrice.value);
     const discount = parseFloat(editDiscountAmount.value) || 0;
     const isWeighted = editSellByWeight.checked;
-    const unit = isWeighted ? editUnitType.value.trim() : null;
+    const unit = editUnitType.value.trim();
     
-    if (!name || !categoryId || !base || base <= 0 || alert < 0) { window.alert('Invalid fields'); return; }
-    if (isWeighted && !unit) { window.alert('Please enter unit'); return; }
+    if (!name || !categoryId || !base || base <= 0 || alert < 0 || !barcode) { window.alert('Invalid fields'); return; }
+    if (products.some(p => p.barcode === barcode && p.id !== productId)) { window.alert('Barcode already exists'); return; }
     if (discount > base) { window.alert('Discount too high'); return; }
     
     const productIndex = products.findIndex(p => p.id === productId);
     if (productIndex !== -1) {
         products[productIndex] = {
-            ...products[productIndex], name: name, categoryId: categoryId, basePrice: base,
+            ...products[productIndex], barcode: barcode, name: name, categoryId: categoryId, basePrice: base,
             discount: discount, finalPrice: calculateFinalPrice(base, discount), alertLevel: alert,
-            isWeighted: isWeighted, unitType: unit
+            isWeighted: isWeighted, unitType: unit, expiryDate: expiry
         };
         saveProducts(); renderProductsTable(); editProductModal.classList.remove('active'); window.alert('Product updated!');
     }

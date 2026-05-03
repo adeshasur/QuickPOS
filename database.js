@@ -28,18 +28,19 @@ db.serialize(() => {
         description TEXT
     )`);
 
-    // 3. Products Table
+    // 3. Products Table (Supermarket Edition)
     db.run(`CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        barcode TEXT UNIQUE, -- බාර්කෝඩ් එකක් අනිවාර්යයි
         name TEXT,
         category_id INTEGER,
-        base_price REAL,
-        discount REAL DEFAULT 0,
-        final_price REAL,
+        cost_price REAL,
+        selling_price REAL,
         current_stock REAL DEFAULT 0,
-        alert_level REAL DEFAULT 5,
-        unit_type TEXT,
-        is_weighted INTEGER DEFAULT 0,
+        alert_level REAL DEFAULT 10, -- Supermarket නිසා මේක 10 වගේ තිබ්බම හොඳයි
+        unit_type TEXT, -- kg, g, pcs, pkt, bottle, bundle
+        is_weighted INTEGER DEFAULT 0, -- කිරලා දෙන බඩු වලට (උදා: එළවළු)
+        expiry_date DATE, -- Supermarket බඩු වලට මේක මාරම වැදගත්
         FOREIGN KEY (category_id) REFERENCES categories (id)
     )`);
 

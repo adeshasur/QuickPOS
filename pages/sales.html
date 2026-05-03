@@ -20,15 +20,16 @@
                     <div class="section-title">Products</div>
                     <div class="category-filter">
                         <button class="category-btn active" data-category="all">All</button>
-                        <button class="category-btn" data-category="cement">Cement</button>
-                        <button class="category-btn" data-category="plumbing">Plumbing</button>
-                        <button class="category-btn" data-category="steel">Steel</button>
+                        <button class="category-btn" data-category="grocery">Grocery</button>
+                        <button class="category-btn" data-category="dairy">Dairy</button>
+                        <button class="category-btn" data-category="beverages">Beverages</button>
+                        <button class="category-btn" data-category="vegetables">Vegetables</button>
                     </div>
                 </div>
                 <div class="quick-stock-check">
                     <div class="search-wrap" style="position:relative; width:100%;">
-                        <span class="material-symbols-rounded" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:20px; color:var(--text-light);">search</span>
-                        <input type="text" id="stockSearch" placeholder="Quick stock check..." style="padding-left:40px;">
+                        <span class="material-symbols-rounded" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:20px; color:var(--text-light);">barcode_scanner</span>
+                        <input type="text" id="stockSearch" placeholder="Scan Barcode or Search Products..." style="padding-left:40px;" autofocus>
                     </div>
                     <span id="stockResult"></span>
                 </div>
@@ -83,7 +84,7 @@
                 <span id="unitPriceDisplay">LKR 0.00</span>
             </div>
             <div class="input-group-sm">
-                <label>Quantity (kg/L/units)</label>
+                <label>Quantity (kg/g/pkt/bottle)</label>
                 <input type="number" id="customQty" step="0.01" min="0.01" value="1.00">
             </div>
             <div class="price-group-big">
