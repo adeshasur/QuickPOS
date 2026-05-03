@@ -1,105 +1,373 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickPOS Pro - Settings</title>
-    <link rel="stylesheet" href="../assets/css/common.css">
-    <link rel="stylesheet" href="../assets/css/settings.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPOS Pro — Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/common.css">
+<link rel="stylesheet" href="../assets/css/settings.css">
 </head>
 <body>
-    <div id="sidebar-container"></div>
 
-    <div class="main-content">
-        <div id="topbar-container"></div>
-        
-        <div class="settings-dashboard">
-            <div class="settings-header">
-                <div class="header-title"><span class="material-symbols-rounded">settings</span> System Configuration</div>
-                <div class="header-controls">
-                    <button class="settings-btn reset-btn" id="resetBtn"><span class="material-symbols-rounded s18">refresh</span> Reset System</button>
-                    <button class="settings-btn save-btn" id="saveBtn"><span class="material-symbols-rounded s18">save</span> Save Settings</button>
-                </div>
-            </div>
-            
-            <div class="settings-cards">
-                <div class="settings-card">
-                    <div class="card-header">
-                        <div class="card-icon"><span class="material-symbols-rounded">store</span></div>
-                        <div><div class="card-title">Store Information</div></div>
-                    </div>
-                    <div class="form-groups">
-                        <div class="form-group">
-                            <label class="form-label required">Store Name</label>
-                            <input type="text" class="form-input" id="storeName">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Address</label>
-                            <input type="text" class="form-input" id="storeAddress">
-                        </div>
-                    </div>
-                </div>
+<div id="sidebar-container"></div>
 
-                <div class="settings-card">
-                    <div class="card-header">
-                        <div class="card-icon"><span class="material-symbols-rounded">rocket_launch</span></div>
-                        <div><div class="card-title">System Version</div></div>
-                    </div>
-                    <div class="version-selector" id="versionSelector">
-                        <div class="version-option" data-version="lite">
-                            <div class="version-name">Lite</div>
-                        </div>
-                        <div class="version-option" data-version="pro">
-                            <div class="version-name">Pro</div>
-                        </div>
-                    </div>
-                    <div class="form-hint warning" id="versionHint">Change versions to toggle advanced features.</div>
-                </div>
+<div class="main-content">
+  <div class="topbar">
+    <div class="tb-title">System Settings</div>
+    <div class="tb-right">
+      <span class="kbd-hint"><kbd>Ctrl</kbd>+<kbd>S</kbd> to save</span>
+      <button class="reset-topbar-btn" id="resetBtn">
+        <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+        Reset
+      </button>
+      <button class="save-topbar-btn" id="saveBtn">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Settings
+      </button>
+      <span class="tb-role" id="userRoleDisplay">Administrator</span>
+      <div class="avatar">AD</div>
+    </div>
+  </div>
 
-                <div class="settings-card">
-                    <div class="card-header">
-                        <div class="card-icon"><span class="material-symbols-rounded">lock</span></div>
-                        <div class="card-title">Security</div>
-                    </div>
-                    <div class="form-groups">
-                        <div class="form-group">
-                            <label class="form-label">New Owner Password</label>
-                            <input type="password" class="form-input" id="adminPassword">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">New Cashier Password</label>
-                            <input type="password" class="form-input" id="cashierPassword">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-card">
-                    <div class="card-header">
-                        <div class="card-icon"><span class="material-symbols-rounded">public</span></div>
-                        <div class="card-title">Regional</div>
-                    </div>
-                    <div class="form-groups">
-                        <div class="form-group">
-                            <label class="form-label">Tax (%)</label>
-                            <input type="number" class="form-input" id="taxPercentage">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Shift Hours</label>
-                            <input type="text" class="form-input" id="shiftHours">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="footer-actions">
-                <div class="system-info">QuickPOS Hardware | <span class="system-version">v1.0.0</span></div>
-                <button class="settings-btn" id="clearCacheBtn" style="background:#eee;"><span class="material-symbols-rounded s18">delete</span> Clear Cache</button>
-            </div>
-        </div>
+  <div class="settings-body">
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="store">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Store Info
+      </button>
+      <button class="tab-btn" data-tab="version">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        System Version
+      </button>
+      <button class="tab-btn" data-tab="security">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Security
+      </button>
+      <button class="tab-btn" data-tab="local">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+        Localization
+      </button>
+      <button class="tab-btn" data-tab="system">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        System Info
+      </button>
+      <div class="tab-divider"></div>
+      <button class="tab-danger-btn" data-tab="danger">
+        <svg viewBox="0 0 24 24"><path d="M10.3 3.9l-8.2 14a1 1 0 00.9 1.5h16.4a1 1 0 00.9-1.5l-8.2-14a1 1 0 00-1.8 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Danger Zone
+      </button>
     </div>
 
-    <script src="../assets/js/components.js"></script>
-    <script src="../assets/js/settings.js"></script>
+    <div class="panels">
+
+      <div class="panel active" id="panel-store">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Store Information
+        </div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr;grid-template-rows:auto auto;align-content:start">
+          <div class="scard" style="grid-column:1/-1">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+              Basic Details
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">Store Name <span style="color:var(--red)">*</span></label>
+                <input class="field-input" type="text" id="storeName" placeholder="My QuickPOS Store" maxlength="50">
+                <span class="field-hint">Appears at the top of all receipts</span>
+              </div>
+              <div class="field">
+                <label class="field-label">Phone Number</label>
+                <input class="field-input" type="tel" id="storePhone" placeholder="+94 77 123 4567" maxlength="20">
+                <span class="field-hint">Customer contact on receipts</span>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Store Address</label>
+              <input class="field-input" type="text" id="storeAddress" placeholder="123 Main Street, Colombo" maxlength="100">
+              <span class="field-hint">Optional — shown on invoices and receipts</span>
+            </div>
+          </div>
+          <div class="scard">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Shift Settings
+            </div>
+            <div class="field">
+              <label class="field-label">Default Shift Hours</label>
+              <input class="field-input" type="text" id="shiftHours" placeholder="08:00 - 16:00" maxlength="20">
+              <span class="field-hint">Used for reports and shift tracking</span>
+            </div>
+          </div>
+          <div class="scard">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Receipt Options
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><span class="toggle-name">Print receipt after sale</span><span class="toggle-desc">Automatically prompt receipt print</span></div>
+              <label class="ts"><input type="checkbox" id="autoPrint" checked><span class="ts-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><span class="toggle-name">Show store logo on receipt</span><span class="toggle-desc">If a logo has been uploaded</span></div>
+              <label class="ts"><input type="checkbox" id="showLogo"><span class="ts-slider"></span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-version">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          System Version
+        </div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr;align-content:start">
+          <div class="scard" style="grid-column:1/-1">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Choose your POS edition
+            </div>
+            <div class="ver-grid">
+              <div class="ver-card" data-version="lite">
+                <div class="ver-icon"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+                <div class="ver-name">QuickPOS Lite</div>
+                <div class="ver-desc">Basic POS features<br>No stock management<br>Fast &amp; lightweight</div>
+              </div>
+              <div class="ver-card selected" data-version="pro">
+                <div class="ver-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div>
+                <div class="ver-name">QuickPOS Pro</div>
+                <div class="ver-desc">Full stock management<br>Advanced reporting<br>Multi-user support</div>
+              </div>
+            </div>
+            <div class="field-hint warn" id="versionHint" style="margin-top:4px"><strong>Currently on Pro:</strong> All features are enabled including inventory, reports and multi-user management.</div>
+          </div>
+          <div class="scard">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+              Pro Features
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><span class="toggle-name">Stock Management</span><span class="toggle-desc">Track product inventory levels</span></div>
+              <label class="ts"><input type="checkbox" checked><span class="ts-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><span class="toggle-name">Advanced Reports</span><span class="toggle-desc">Owner dashboard analytics</span></div>
+              <label class="ts"><input type="checkbox" checked><span class="ts-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><span class="toggle-name">Multi-User Support</span><span class="toggle-desc">Cashier and owner roles</span></div>
+              <label class="ts"><input type="checkbox" checked><span class="ts-slider"></span></label>
+            </div>
+          </div>
+          <div class="scard">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Lite Features
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><span class="toggle-name">Basic Sales</span><span class="toggle-desc">Cash and card payments</span></div>
+              <label class="ts"><input type="checkbox" checked><span class="ts-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><span class="toggle-name">Receipt Printing</span><span class="toggle-desc">Simple receipt generation</span></div>
+              <label class="ts"><input type="checkbox" checked><span class="ts-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><span class="toggle-name">Credit Sales</span><span class="toggle-desc">Record credit transactions</span></div>
+              <label class="ts"><input type="checkbox" checked><span class="ts-slider"></span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-security">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Security Settings
+        </div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr;align-content:start">
+          <div class="scard">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Admin / Owner Password
+            </div>
+            <div class="field">
+              <label class="field-label">New Password</label>
+              <div class="pw-wrap">
+                <input class="field-input" type="password" id="adminPassword" placeholder="Enter new admin password" minlength="6">
+                <button class="pw-eye" data-target="adminPassword"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
+              <span class="field-hint">Minimum 6 characters. Leave blank to keep current.</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Confirm Password</label>
+              <div class="pw-wrap">
+                <input class="field-input" type="password" id="adminPasswordConfirm" placeholder="Repeat password">
+                <button class="pw-eye" data-target="adminPasswordConfirm"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
+            </div>
+          </div>
+          <div class="scard">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Cashier Password
+            </div>
+            <div class="field">
+              <label class="field-label">New Password</label>
+              <div class="pw-wrap">
+                <input class="field-input" type="password" id="cashierPassword" placeholder="Enter new cashier password" minlength="4">
+                <button class="pw-eye" data-target="cashierPassword"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
+              <span class="field-hint">Minimum 4 characters. Cashiers can only process sales.</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Confirm Password</label>
+              <div class="pw-wrap">
+                <input class="field-input" type="password" id="cashierPasswordConfirm" placeholder="Repeat password">
+                <button class="pw-eye" data-target="cashierPasswordConfirm"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
+            </div>
+          </div>
+          <div class="scard" style="grid-column:1/-1">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Access Control
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><span class="toggle-name">Require login on startup</span><span class="toggle-desc">Always prompt for credentials when opening</span></div>
+              <label class="ts"><input type="checkbox" checked><span class="ts-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><span class="toggle-name">Auto-logout after idle</span><span class="toggle-desc">Log out after 30 minutes of inactivity</span></div>
+              <label class="ts"><input type="checkbox"><span class="ts-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><span class="toggle-name">Cashier can view reports</span><span class="toggle-desc">Allow cashiers to see sales history</span></div>
+              <label class="ts"><input type="checkbox"><span class="ts-slider"></span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-local">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+          Localization
+        </div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr;align-content:start">
+          <div class="scard">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H7"/></svg>
+              Currency
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><span class="toggle-name">Use LKR (Sri Lankan Rupees)</span><span class="toggle-desc">All prices displayed in LKR</span></div>
+              <label class="ts"><input type="checkbox" id="currencyToggle" checked><span class="ts-slider"></span></label>
+            </div>
+            <div class="field" style="margin-top:8px">
+              <label class="field-label">Tax Percentage (%)</label>
+              <input class="field-input" type="number" id="taxPercentage" placeholder="0.00" min="0" max="50" step="0.01" value="0">
+              <span class="field-hint">Set 0 for tax-exempt. Applied on final amount.</span>
+            </div>
+          </div>
+          <div class="scard">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Date &amp; Time
+            </div>
+            <div class="field">
+              <label class="field-label">Date Format</label>
+              <select class="field-input" id="dateFormat">
+                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Time Format</label>
+              <select class="field-input" id="timeFormat">
+                <option value="12h">12-hour (AM/PM)</option>
+                <option value="24h">24-hour</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-system">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          System Information
+        </div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr;align-content:start">
+          <div class="scard">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Application
+            </div>
+            <div class="sys-info-row"><span class="sys-info-label">Application</span><span class="sys-info-val">QuickPOS Pro</span></div>
+            <div class="sys-info-row"><span class="sys-info-label">Version</span><span class="sys-info-val">1.0.0</span></div>
+            <div class="sys-info-row"><span class="sys-info-label">Edition</span><span class="sys-info-val">Pro</span></div>
+            <div class="sys-info-row"><span class="sys-info-label">Build</span><span class="sys-info-val">2026.05</span></div>
+            <div class="sys-info-row"><span class="sys-info-label">License</span><span class="sys-info-val" style="color:var(--green)">Active</span></div>
+          </div>
+          <div class="scard">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Storage
+            </div>
+            <div class="sys-info-row"><span class="sys-info-label">Storage Type</span><span class="sys-info-val">localStorage</span></div>
+            <div class="sys-info-row"><span class="sys-info-label">Products</span><span class="sys-info-val" id="sysProducts">—</span></div>
+            <div class="sys-info-row"><span class="sys-info-label">Sales Records</span><span class="sys-info-val" id="sysSales">—</span></div>
+            <div class="sys-info-row"><span class="sys-info-label">Customers</span><span class="sys-info-val" id="sysCustomers">—</span></div>
+            <div class="sys-info-row"><span class="sys-info-label">Cache Size</span><span class="sys-info-val" id="sysCache">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-danger">
+        <div class="panel-title" style="color:var(--red)">
+          <svg viewBox="0 0 24 24" style="stroke:var(--red)"><path d="M10.3 3.9l-8.2 14a1 1 0 00.9 1.5h16.4a1 1 0 00.9-1.5l-8.2-14a1 1 0 00-1.8 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Danger Zone
+        </div>
+        <div class="settings-grid single" style="align-content:start">
+          <div class="danger-card">
+            <div class="danger-card-info">
+              <div class="danger-card-title">Clear Application Cache</div>
+              <div class="danger-card-desc">Removes temporary data. Your sales and products will not be affected.</div>
+            </div>
+            <button class="danger-action-btn amber" id="clearCacheBtn">Clear Cache</button>
+          </div>
+          <div class="danger-card">
+            <div class="danger-card-info">
+              <div class="danger-card-title">Reset All Settings</div>
+              <div class="danger-card-desc">Restore all settings to factory defaults. Sales data will not be deleted.</div>
+            </div>
+            <button class="danger-action-btn" id="resetSettingsBtn">Reset Settings</button>
+          </div>
+          <div class="danger-card" style="border-color:rgba(229,62,62,.4)">
+            <div class="danger-card-info">
+              <div class="danger-card-title">⚠ Full System Reset</div>
+              <div class="danger-card-desc">Permanently delete ALL data — sales, products, customers and settings. This cannot be undone.</div>
+            </div>
+            <button class="danger-action-btn" id="fullResetBtn">Reset System</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toastMsg">Settings saved</span>
+</div>
+
+<script src="../assets/js/components.js"></script>
+<script src="../assets/js/settings.js"></script>
 </body>
 </html>
