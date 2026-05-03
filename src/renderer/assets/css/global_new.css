@@ -1,0 +1,122 @@
+﻿/* QuickPOS Pro â€” Global Design System */
+
+:root {
+  /* Core Colors - Login Page Light Theme */
+  --bg: #F8F9FA;
+  --surface: #FFFFFF;
+  --surface2: #F1F3F5;
+  --surface3: #E9ECEF;
+  --border: #E0E0E0;
+  --border2: #D0D0D0;
+
+  /* Accent Colors - Login Page Colors */
+  --accent: #FF8C00;
+  --accent2: #000080;
+  --accent-glow: rgba(255, 140, 0, 0.12);
+  --accent-light: rgba(255, 140, 0, 0.08);
+
+  /* Semantic Colors */
+  --green: #10B981;
+  --green-dim: rgba(16, 185, 129, 0.1);
+  --amber: #F59E0B;
+  --amber-dim: rgba(245, 158, 11, 0.1);
+  --red: #EF4444;
+  --red-dim: rgba(239, 68, 68, 0.1);
+  --purple: #8B5CF6;
+  --purple-dim: rgba(139, 92, 246, 0.1);
+  --cyan: #06B6D4;
+
+  /* Typography Colors */
+  --text: #1a1a1a;
+  --text2: #666666;
+  --text3: #999999;
+
+  /* Fonts */
+  --font: 'Outfit', system-ui, -apple-system, sans-serif;
+  --mono: 'Outfit', 'Courier New', monospace;
+
+  /* Radius */
+  --r: 12px;
+  --r2: 16px;
+  --r3: 20px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.12);
+}
+
+/* Reset & Base */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  font-family: var(--font);
+  color: var(--text);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; transition: background 0.2s; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+/* Layout Components */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+.topbar {
+  height: 64px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+.tb-title { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+.tb-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.tb-sub { font-size: 13px; color: var(--text2); font-weight: 500; }
+.avatar {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 128, 0.2);
+}
+
+.content { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 24px; gap: 20px; }
+
+.page-heading { font-size: 24px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+
+.textarea {
+  background: var(--surface); border: 2px solid var(--border);
+  color: var(--text); padding: 14px 16px; border-radius: var(--r);
+  font-size: 14px; outline: none; transition: all 0.2s;
+  font-family: var(--font); resize: vertical; min-height: 80px;
+  box-shadow: var(--shadow-sm);
+}
+.textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-light); }
+
+.toast-container { position: fixed; top: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; }
+.toast {
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 16px 24px; border-radius: var(--r3);
+  transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: var(--shadow-lg);
+  font-weight: 600;
+}
+.toast.show { transform: translateX(0); }
+.toast-success { border-left: 4px solid var(--green); }
+.toast-error { border-left: 4px solid var(--red); }
+.toast-info { border-left: 4px solid var(--accent); }

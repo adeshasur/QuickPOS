@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QuickPOS Pro — Categories</title>
+<title>QuickPOS Pro â€” Categories</title>
 <link rel="stylesheet" href="../../assets/css/global.css">
 <link rel="stylesheet" href="../../assets/css/components.css">
 <link rel="stylesheet" href="../../assets/css/sidebar.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -79,7 +79,7 @@
 
 <div class="modal-overlay" id="catModal">
   <div class="modal-box">
-    <div class="modal-head"><h3 id="catModalTitle">Add Category</h3><button onclick="closeModal('catModal')" class="tb-sub" style="background:none; border:none; cursor:pointer;font-size:18px">✕</button></div>
+    <div class="modal-head"><h3 id="catModalTitle">Add Category</h3><button onclick="closeModal('catModal')" class="tb-sub" style="background:none; border:none; cursor:pointer;font-size:18px">âœ•</button></div>
     <div class="modal-body">
       <div class="form-group"><label class="label">Name</label><input type="text" id="catName" class="input"></div>
       <div class="form-group"><label class="label">Description</label><textarea id="catDesc" class="textarea"></textarea></div>
@@ -115,7 +115,7 @@ function render() {
         <tr>
             <td style="font-family:var(--mono)">${c.id}</td>
             <td style="font-weight:600">${c.name}</td>
-            <td class="tb-sub">${c.description || '—'}</td>
+            <td class="tb-sub">${c.description || 'â€”'}</td>
             <td style="text-align:right">
                 <button class="btn btn-secondary" style="padding:5px 10px; font-size:11px" onclick="editCategory(${c.id})">Edit</button>
                 <button class="btn btn-danger" style="padding:5px 10px; font-size:11px" onclick="deleteCategory(${c.id})">Delete</button>

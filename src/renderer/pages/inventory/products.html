@@ -1,19 +1,28 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QuickPOS Pro — Product Management</title>
+<title>QuickPOS Pro â€” Product Management</title>
 <link rel="stylesheet" href="../../assets/css/global.css">
 <link rel="stylesheet" href="../../assets/css/components.css">
 <link rel="stylesheet" href="../../assets/css/sidebar.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-.badge-unit { background: var(--accent-glow); color: var(--accent2); }
+.badge-unit { background: var(--accent-light); color: var(--accent); }
 .badge-weight { background: var(--purple-dim); color: var(--purple); }
-.price-final { color: var(--green); font-weight: 700; font-family: var(--mono); }
+.price-final { color: var(--green); font-weight: 700; font-family: var(--mono); font-size: 15px; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.action-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--surface);
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+  transition: all .2s; color: var(--text2);
+}
+.action-btn:hover { background: var(--surface2); color: var(--text); transform: scale(1.05); }
+.action-btn.edit:hover { border-color: var(--accent); color: var(--accent); }
+.action-btn.delete:hover { border-color: var(--red); color: var(--red); }
 </style>
 </head>
 <body>
@@ -88,7 +97,7 @@
 
 <div class="modal-overlay" id="productModal">
   <div class="modal-box">
-    <div class="modal-head"><h3 id="modalTitle">Add Product</h3><button onclick="closeModal('productModal')" class="tb-sub" style="background:none; border:none; cursor:pointer;font-size:18px">✕</button></div>
+    <div class="modal-head"><h3 id="modalTitle">Add Product</h3><button onclick="closeModal('productModal')" class="tb-sub" style="background:none; border:none; cursor:pointer;font-size:18px">âœ•</button></div>
     <div class="modal-body">
       <div class="form-group"><label class="label">Product Name</label><input type="text" id="pName" class="input"></div>
       <div class="form-group"><label class="label">SKU</label><input type="text" id="pSku" class="input"></div>
@@ -138,8 +147,8 @@ function render() {
     tbody.innerHTML = products.map(p => `
         <tr>
             <td class="td-name">${p.name}</td>
-            <td style="font-family:var(--mono);font-size:12px">${p.sku || '—'}</td>
-            <td>${p.category_name || '—'}</td>
+            <td style="font-family:var(--mono);font-size:12px">${p.sku || 'â€”'}</td>
+            <td>${p.category_name || 'â€”'}</td>
             <td><span class="badge ${p.is_weighted ? 'badge-weight' : 'badge-unit'}">${p.is_weighted ? 'Weighted' : 'Unit'}</span></td>
             <td><span class="badge ${p.current_stock <= p.alert_level ? 'badge-red' : 'badge-green'}">${p.current_stock}</span></td>
             <td style="text-align:right"><div class="price-final">${window.formatCurrency(p.sale_price || p.base_price)}</div></td>

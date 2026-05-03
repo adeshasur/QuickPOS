@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QuickPOS Pro — Customers</title>
+<title>QuickPOS Pro â€” Customers</title>
 <link rel="stylesheet" href="../../assets/css/global.css">
 <link rel="stylesheet" href="../../assets/css/components.css">
 <link rel="stylesheet" href="../../assets/css/sidebar.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -81,7 +81,7 @@
 
 <div class="modal-overlay" id="customerModal">
   <div class="modal-box">
-    <div class="modal-head"><h3 id="customerModalTitle">Add Customer</h3><button onclick="closeModal('customerModal')" class="tb-sub" style="background:none; border:none; cursor:pointer;font-size:18px">✕</button></div>
+    <div class="modal-head"><h3 id="customerModalTitle">Add Customer</h3><button onclick="closeModal('customerModal')" class="tb-sub" style="background:none; border:none; cursor:pointer;font-size:18px">âœ•</button></div>
     <div class="modal-body">
       <div class="form-group"><label class="label">Name</label><input type="text" id="cName" class="input"></div>
       <div class="form-group"><label class="label">Phone</label><input type="text" id="cPhone" class="input"></div>
@@ -118,8 +118,8 @@ function render() {
     tbody.innerHTML = customers.map(c => `
         <tr>
             <td style="font-weight:600">${c.name}</td>
-            <td class="tb-sub">${c.phone || '—'}</td>
-            <td class="tb-sub">${c.email || '—'}</td>
+            <td class="tb-sub">${c.phone || 'â€”'}</td>
+            <td class="tb-sub">${c.email || 'â€”'}</td>
             <td style="font-weight:700">${window.formatCurrency(c.total_spent)}</td>
             <td><span class="badge badge-green">${c.points || 0} pts</span></td>
             <td style="text-align:right">

@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QuickPOS Pro — Stock Control</title>
+<title>QuickPOS Pro â€” Stock Control</title>
 <link rel="stylesheet" href="../../assets/css/global.css">
 <link rel="stylesheet" href="../../assets/css/components.css">
 <link rel="stylesheet" href="../../assets/css/sidebar.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -105,7 +105,7 @@ function render() {
         return `
             <tr>
                 <td style="font-weight:600">${p.name}</td>
-                <td style="font-family:var(--mono);font-size:12px">${p.sku || '—'}</td>
+                <td style="font-family:var(--mono);font-size:12px">${p.sku || 'â€”'}</td>
                 <td style="font-family:var(--mono)">${p.current_stock}</td>
                 <td style="font-family:var(--mono)">${p.alert_level}</td>
                 <td><span class="badge ${isLow ? 'badge-red' : 'badge-green'}">${isLow ? 'Low Stock' : 'Stable'}</span></td>

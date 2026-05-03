@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QuickPOS Pro — Staff Management</title>
+<title>QuickPOS Pro â€” Staff Management</title>
 <link rel="stylesheet" href="../../assets/css/global.css">
 <link rel="stylesheet" href="../../assets/css/components.css">
 <link rel="stylesheet" href="../../assets/css/sidebar.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -80,7 +80,7 @@
 
 <div class="modal-overlay" id="userModal">
   <div class="modal-box">
-    <div class="modal-head"><h3 id="userModalTitle">Add Staff Member</h3><button onclick="closeModal('userModal')" class="tb-sub" style="background:none; border:none; cursor:pointer;font-size:18px">✕</button></div>
+    <div class="modal-head"><h3 id="userModalTitle">Add Staff Member</h3><button onclick="closeModal('userModal')" class="tb-sub" style="background:none; border:none; cursor:pointer;font-size:18px">âœ•</button></div>
     <div class="modal-body">
       <div class="form-group"><label class="label">Username</label><input type="text" id="uUsername" class="input"></div>
       <div class="form-group"><label class="label">Full Name</label><input type="text" id="uName" class="input"></div>
@@ -124,7 +124,7 @@ function render() {
     tbody.innerHTML = users.map(u => `
         <tr>
             <td style="font-weight:600">${u.username}</td>
-            <td>${u.full_name || '—'}</td>
+            <td>${u.full_name || 'â€”'}</td>
             <td><span class="badge ${u.role === 'Owner' ? 'badge-amber' : 'badge-unit'}">${u.role}</span></td>
             <td class="tb-sub">${new Date(u.created_at).toLocaleDateString()}</td>
             <td style="text-align:right">
