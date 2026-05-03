@@ -214,3 +214,36 @@ body.sidebar-collapsed #sidebar-container {
     color: white;
     font-weight: 600;
 }
+/* Global Responsive Tweaks */
+@media (max-width: 1400px) {
+    #sidebar-container, .sidebar {
+        width: 200px;
+        min-width: 200px;
+    }
+}
+
+@media (max-width: 1200px) {
+    #sidebar-container, .sidebar {
+        width: 70px;
+        min-width: 70px;
+    }
+    .nav-text, .logo {
+        display: none;
+    }
+    .nav-item {
+        justify-content: center;
+        padding: 14px 0;
+    }
+    .nav-icon {
+        margin: 0;
+    }
+}
+
+@media (max-height: 700px) {
+    .top-bar {
+        height: 60px;
+    }
+    .nav-item {
+        padding: 10px 20px;
+    }
+}
