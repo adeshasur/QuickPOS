@@ -22,11 +22,6 @@ let products = [
 ];
 
 // DOM elements
-const sidebar = document.getElementById('sidebar');
-const hamburgerBtn = document.getElementById('hamburgerBtn');
-const hamburgerIcon = document.getElementById('hamburgerIcon');
-const logo = document.getElementById('logo');
-const logoutBtn = document.getElementById('logoutBtn');
 const addProductBtn = document.getElementById('addProductBtn');
 const productsTableBody = document.getElementById('productsTableBody');
 
@@ -243,23 +238,8 @@ function deleteProduct(productId) {
     saveProducts(); renderProductsTable(); window.alert('Product deleted!');
 }
 
-function toggleSidebar() {
-    sidebar.classList.toggle('expanded'); sidebar.classList.toggle('collapsed');
-    logo.classList.toggle('collapsed');
-    localStorage.setItem('quickpos-sidebar', sidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
-    hamburgerIcon.textContent = sidebar.classList.contains('collapsed') ? '→' : '☰';
-}
 
 function setupEventListeners() {
-    hamburgerBtn.addEventListener('click', toggleSidebar);
-    logoutBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (confirm('Are you sure you want to logout?')) {
-            localStorage.removeItem('quickpos-user');
-            window.location.href = 'login.html';
-        }
-    });
-    
     addProductBtn.addEventListener('click', openAddProductModal);
     closeAddModalBtn.addEventListener('click', () => addProductModal.classList.remove('active'));
     cancelAddBtn.addEventListener('click', () => addProductModal.classList.remove('active'));
@@ -295,6 +275,11 @@ function setupEventListeners() {
 }
 
 function init() {
+    // Initialize Components
+    Components.init({
+        title: 'Products Management'
+    });
+
     const savedProducts = localStorage.getItem('quickpos-products');
     if (savedProducts) {
         const parsed = JSON.parse(savedProducts);
@@ -303,25 +288,17 @@ function init() {
     
     renderCategoryDropdowns(); renderProductsTable(); setupEventListeners();
     
-    if (localStorage.getItem('quickpos-sidebar') === 'collapsed') toggleSidebar();
-    
     const user = JSON.parse(localStorage.getItem('quickpos-user'));
     if (!user) {
         window.location.href = 'login.html';
     } else {
-        // Set Header Name
-        const shiftTime = document.getElementById('shiftTime');
-        if(shiftTime) {
-            shiftTime.textContent = `${user.role === 'owner' ? 'Owner' : 'Cashier'}: ${user.name}`;
-        }
-        
         // Hide Owner Menus and Action Buttons if Cashier
         if (user.role === 'cashier') {
-            document.querySelectorAll('.owner-only').forEach(link => link.style.display = 'none');
             // Hide add/edit/delete buttons for cashier
             if(addProductBtn) addProductBtn.style.display = 'none';
             document.querySelectorAll('.actions-cell').forEach(cell => cell.style.display = 'none');
-            document.querySelector('.products-table th:last-child').style.display = 'none';
+            const lastHeader = document.querySelector('.products-table th:last-child');
+            if(lastHeader) lastHeader.style.display = 'none';
         }
     }
 }

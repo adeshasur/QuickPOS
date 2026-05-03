@@ -22,20 +22,6 @@
 
     let currentDate = 'all';
 
-    // Sidebar Toggle
-    const hamburgerBtn = $('hamburgerBtn');
-    if(hamburgerBtn) {
-        hamburgerBtn.addEventListener('click', () => {
-            const sidebar = $('sidebar');
-            const logo = $('logo');
-            const icon = $('hamburgerIcon');
-            if(sidebar && logo && icon) {
-                sidebar.classList.toggle('expanded'); sidebar.classList.toggle('collapsed');
-                logo.classList.toggle('collapsed');
-                icon.textContent = sidebar.classList.contains('collapsed') ? '→' : '☰';
-            }
-        });
-    }
 
     window.setDateTab = function(btn) {
         document.querySelectorAll('.dtab').forEach(b => b.classList.remove('active'));
@@ -151,10 +137,11 @@
         window.location.href = 'login.html'; 
     }
     else {
-        const cashierName = $('cashierName');
-        if(cashierName) cashierName.textContent = `${user.role === 'owner' ? 'Owner' : 'Cashier'}: ${user.name}`;
-        if (user.role === 'cashier') document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'none');
-    }
+        // Initialize Components
+        Components.init({
+            title: 'Invoice History'
+        });
 
-    renderTable();
+        renderTable();
+    }
 })();

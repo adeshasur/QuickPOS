@@ -5,22 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'login.html';
         return;
     }
-    
-    // Set Header Name
-    const cashierNameDisplay = document.getElementById('cashierNameDisplay');
-    const userAvatar = document.getElementById('userAvatar');
-    if (cashierNameDisplay) {
-        cashierNameDisplay.textContent = `${user.role === 'owner' ? 'Owner' : 'Cashier'}: ${user.name}`;
-    }
-    if (userAvatar && user.name) {
-        userAvatar.textContent = user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-    }
 
-    if (user.role === 'cashier') {
-        document.querySelectorAll('.owner-only').forEach(link => link.style.display = 'none');
-    }
-
-    // ---------- localStorage keys ----------
+    // Initialize Components
+    Components.init({
+        title: 'Credit Ledger'
+    });
     const BILLS_KEY = 'quickpos-credit-bills';
     const CUSTOMERS_KEY = 'quickpos-customers';
 
@@ -91,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const closePaymentModalBtn = document.getElementById('closePaymentModal');
     const cancelPaymentBtn = document.getElementById('cancelPayment');
     const confirmPaymentBtn = document.getElementById('confirmPayment');
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
 
     // Render Table
     function renderLedger() {
@@ -245,50 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(cancelPaymentBtn) cancelPaymentBtn.addEventListener('click', closeModal);
     if(confirmPaymentBtn) confirmPaymentBtn.addEventListener('click', handleConfirmPayment);
 
-    // Sidebar Toggle
-    if(hamburgerBtn) {
-        hamburgerBtn.addEventListener('click', () => {
-            const sidebar = document.getElementById('sidebar');
-            const logo = document.getElementById('logo');
-            const icon = document.getElementById('hamburgerIcon');
-            sidebar.classList.toggle('expanded');
-            sidebar.classList.toggle('collapsed');
-            logo.classList.toggle('collapsed');
-            
-            if (sidebar.classList.contains('collapsed')) {
-                icon.textContent = '→';
-                localStorage.setItem('quickpos-sidebar', 'collapsed');
-            } else {
-                icon.textContent = '☰';
-                localStorage.setItem('quickpos-sidebar', 'expanded');
-            }
-        });
-    }
 
-    // Check saved sidebar state
-    if (localStorage.getItem('quickpos-sidebar') === 'collapsed') {
-        const sidebar = document.getElementById('sidebar');
-        const logo = document.getElementById('logo');
-        const icon = document.getElementById('hamburgerIcon');
-        if(sidebar && logo && icon) {
-            sidebar.classList.remove('expanded');
-            sidebar.classList.add('collapsed');
-            logo.classList.add('collapsed');
-            icon.textContent = '→';
-        }
-    }
-
-    // Logout
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (confirm('Logout?')) {
-                localStorage.removeItem('quickpos-user');
-                window.location.href = 'login.html';
-            }
-        });
-    }
 
     // Init Render
     renderLedger();

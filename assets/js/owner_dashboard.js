@@ -2,13 +2,6 @@
 let salesData = JSON.parse(localStorage.getItem('quickpos-dashboard-sales')) || generateSampleData();
 
 // DOM Elements
-const sidebar = document.getElementById('sidebar');
-const hamburgerBtn = document.getElementById('hamburgerBtn');
-const hamburgerIcon = document.getElementById('hamburgerIcon');
-const logo = document.getElementById('logo');
-const logoutBtn = document.getElementById('logoutBtn');
-const dateRangeButtons = document.querySelectorAll('.date-range-btn');
-
 const totalRevenueEl = document.getElementById('totalRevenue');
 const revenueTrendEl = document.getElementById('revenueTrend');
 const stockVolumeEl = document.getElementById('stockVolume');
@@ -290,19 +283,6 @@ function updateDashboard(range) {
     updateSlowItems();
 }
 
-function toggleSidebar() {
-    sidebar.classList.toggle('expanded');
-    sidebar.classList.toggle('collapsed');
-    logo.classList.toggle('collapsed');
-    
-    if (sidebar.classList.contains('collapsed')) {
-        hamburgerIcon.textContent = '→';
-        localStorage.setItem('quickpos-sidebar', 'collapsed');
-    } else {
-        hamburgerIcon.textContent = '☰';
-        localStorage.setItem('quickpos-sidebar', 'expanded');
-    }
-}
 
 document.addEventListener('DOMContentLoaded', () => {
     const user = JSON.parse(localStorage.getItem('quickpos-user'));
@@ -311,31 +291,37 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    if (user.role === 'cashier') {
-        document.querySelectorAll('.owner-only').forEach(link => link.style.display = 'none');
-    }
+    // Initialize Components
+    const filtersHtml = `
+        <div class="data-filters">
+            <span class="date-range-label">View Data For:</span>
+            <div class="date-range-buttons">
+                <button class="date-range-btn active" data-range="today">Today</button>
+                <button class="date-range-btn" data-range="yesterday">Yesterday</button>
+                <button class="date-range-btn" data-range="last7">Last 7 Days</button>
+                <button class="date-range-btn" data-range="thisMonth">This Month</button>
+                <button class="date-range-btn" data-range="lastMonth">Last Month</button>
+                <button class="custom-range-btn">
+                    <span>📅</span> Custom Range
+                </button>
+            </div>
+        </div>
+    `;
 
-    hamburgerBtn.addEventListener('click', toggleSidebar);
-    
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (confirm('Do you want to logout?')) {
-                localStorage.removeItem('quickpos-user');
-                window.location.href = 'login.html';
-            }
-        });
-    }
+    Components.init({
+        title: 'Executive Dashboard',
+        extra: filtersHtml
+    });
 
+    // Re-select date range buttons after injection
+    const dateRangeButtons = document.querySelectorAll('.date-range-btn');
     dateRangeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            dateRangeButtons.forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.date-range-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             updateDashboard(btn.dataset.range);
         });
     });
 
-    if (localStorage.getItem('quickpos-sidebar') === 'collapsed') toggleSidebar();
-    
     updateDashboard('today');
 });

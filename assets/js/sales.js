@@ -262,37 +262,13 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'login.html';
         return;
     }
-    
-    // Set dynamically logged in user name
-    const cashierNameDisplay = document.getElementById('cashierNameDisplay');
-    if(cashierNameDisplay) {
-        cashierNameDisplay.textContent = `${user.role === 'owner' ? 'Owner' : 'Cashier'}: ${user.name}`;
-    }
 
-    if (user.role === 'cashier') {
-        document.querySelectorAll('.owner-only').forEach(link => link.style.display = 'none');
-    }
-
-    // LOGOUT LOGIC
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (confirm('Do you want to logout?')) {
-                localStorage.removeItem('quickpos-user');
-                window.location.href = 'login.html';
-            }
-        });
-    }
+    // Initialize Components
+    Components.init({
+        title: 'Make a Sale'
+    });
 
     renderProducts(); renderCart();
-
-    document.getElementById('hamburgerBtn').addEventListener('click', () => {
-        const sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('expanded'); sidebar.classList.toggle('collapsed');
-        document.getElementById('logo').classList.toggle('collapsed');
-        document.getElementById('hamburgerIcon').textContent = sidebar.classList.contains('collapsed') ? '→' : '☰';
-    });
 
     categoryButtons.forEach(btn => {
         btn.addEventListener('click', () => {

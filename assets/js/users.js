@@ -10,7 +10,6 @@
     const staffTableBody = document.getElementById('staffTableBody');
     const userModalOverlay = document.getElementById('userModalOverlay');
     const submitUserBtn = document.getElementById('submitUserBtn');
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
 
     function renderStaffTable(filteredUsers = users) {
         if(!staffTableBody) return;
@@ -67,19 +66,13 @@
             return;
         }
 
-        renderStaffTable();
+        // Initialize Components
+        Components.init({
+            title: 'Staff Management',
+            topbarRight: `<button class="create-user-btn" id="createUserBtn" style="background:var(--primary-color); color:white; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:8px;"><span>+</span> Create New User</button>`
+        });
 
-        // Event Listeners
-        if(hamburgerBtn) {
-            hamburgerBtn.addEventListener('click', () => {
-                const sb = document.getElementById('sidebar');
-                const hi = document.getElementById('hamburgerIcon');
-                if(sb && hi) {
-                    sb.classList.toggle('collapsed'); sb.classList.toggle('expanded');
-                    hi.textContent = sb.classList.contains('collapsed') ? '→' : '☰';
-                }
-            });
-        }
+        renderStaffTable();
 
         const createUserBtn = document.getElementById('createUserBtn');
         if(createUserBtn) {
@@ -126,17 +119,6 @@
                 localStorage.setItem('quickpos-users', JSON.stringify(users));
                 renderStaffTable();
                 if(userModalOverlay) userModalOverlay.classList.remove('active');
-            });
-        }
-
-        // Logout
-        const logoutBtn = document.getElementById('logoutBtn');
-        if(logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-                if(confirm('Logout?')) {
-                    localStorage.removeItem('quickpos-user');
-                    window.location.href = 'login.html';
-                }
             });
         }
     }

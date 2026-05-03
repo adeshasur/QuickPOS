@@ -30,9 +30,7 @@
         shift: document.getElementById('shiftHours'),
         saveBtn: document.getElementById('saveBtn'),
         resetBtn: document.getElementById('resetBtn'),
-        clearCacheBtn: document.getElementById('clearCacheBtn'),
-        hamburgerBtn: document.getElementById('hamburgerBtn'),
-        logoutBtn: document.getElementById('logoutBtn')
+        clearCacheBtn: document.getElementById('clearCacheBtn')
     };
 
     function loadSettings() {
@@ -85,18 +83,6 @@
     function setupListeners() {
         if(elements.saveBtn) elements.saveBtn.addEventListener('click', saveSettings);
         if(elements.resetBtn) elements.resetBtn.addEventListener('click', resetSystem);
-        
-        if(elements.hamburgerBtn) {
-            elements.hamburgerBtn.addEventListener('click', () => {
-                const sb = document.getElementById('sidebar');
-                const hi = document.getElementById('hamburgerIcon');
-                if(sb && hi) {
-                    sb.classList.toggle('collapsed');
-                    sb.classList.toggle('expanded');
-                    hi.textContent = sb.classList.contains('collapsed') ? '→' : '☰';
-                }
-            });
-        }
 
         if(elements.versionOptions) {
             elements.versionOptions.forEach(opt => {
@@ -104,15 +90,6 @@
                     elements.versionOptions.forEach(o => o.classList.remove('selected'));
                     opt.classList.add('selected');
                 });
-            });
-        }
-
-        if (elements.logoutBtn) {
-            elements.logoutBtn.addEventListener('click', () => {
-                if(confirm('Logout?')) {
-                    localStorage.removeItem('quickpos-user');
-                    window.location.href = 'login.html';
-                }
             });
         }
     }
@@ -124,6 +101,12 @@
             window.location.href = user ? 'owner_dashboard.html' : 'login.html';
             return;
         }
+
+        // Initialize Components
+        Components.init({
+            title: 'Settings'
+        });
+
         loadSettings();
         setupListeners();
     }

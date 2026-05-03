@@ -21,10 +21,6 @@
     let currentPdfElement = null;
 
     // DOM elements
-    const sidebar = document.getElementById('sidebar');
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const hamburgerIcon = document.getElementById('hamburgerIcon');
-    const logo = document.getElementById('logo');
     const productsGrid = document.getElementById('productsGrid');
     const quotationItemsDiv = document.getElementById('quotationItems');
     const quoteItemCount = document.getElementById('quoteItemCount');
@@ -34,7 +30,6 @@
     const customerName = document.getElementById('customerName');
     const customerPhone = document.getElementById('customerPhone');
     const validUntil = document.getElementById('validUntil');
-    const logoutBtn = document.getElementById('logoutBtn');
     const pdfPreviewModal = document.getElementById('pdfPreviewModal');
     const pdfPreviewContainer = document.getElementById('pdfPreviewContainer');
     const closePreviewBtn = document.getElementById('closePreviewBtn');
@@ -465,24 +460,6 @@
         currentPdfElement = null;
     }
 
-    // Sidebar toggle
-    function toggleSidebar() {
-        if(!sidebar) return;
-        const isCollapsed = sidebar.classList.contains('collapsed');
-        if (isCollapsed) {
-            sidebar.classList.remove('collapsed');
-            sidebar.classList.add('expanded');
-            if(logo) logo.classList.remove('collapsed');
-            if(hamburgerIcon) hamburgerIcon.textContent = '☰';
-            safeStorage.set('quickpos-sidebar', 'expanded');
-        } else {
-            sidebar.classList.remove('expanded');
-            sidebar.classList.add('collapsed');
-            if(logo) logo.classList.add('collapsed');
-            if(hamburgerIcon) hamburgerIcon.textContent = '→';
-            safeStorage.set('quickpos-sidebar', 'collapsed');
-        }
-    }
 
     // Set category filter
     function setCategory(cat) {
@@ -495,18 +472,6 @@
 
     // Setup event listeners
     function setupListeners() {
-        if(hamburgerBtn) hamburgerBtn.addEventListener('click', toggleSidebar);
-        
-        if(logoutBtn) {
-            logoutBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (confirm('Are you sure you want to logout?')) {
-                    safeStorage.remove('quickpos-user');
-                    window.location.href = 'login.html';
-                }
-            });
-        }
-
         // Category filters
         if(categoryBtns) {
             categoryBtns.forEach(btn => {
@@ -562,32 +527,20 @@
         }
     }
 
-    // Security / role check
-    function enforceRole() {
+
+    // Initialize
+    function init() {
+        // Security check
         const user = safeStorage.getJSON('quickpos-user');
         if (!user) {
             window.location.href = 'login.html';
             return;
         }
-        if (user.role === 'cashier') {
-            document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'none');
-        }
-        
-        // Show Name instead of standard shiftTime
-        const shiftTime = document.getElementById('shiftTime');
-        if(shiftTime) shiftTime.textContent = `${user.role === 'owner' ? 'Owner' : 'Cashier'}: ${user.name}`;
-    }
 
-    // Initialize
-    function init() {
-        enforceRole();
-        
-        if(sidebar) {
-            const sidebarState = safeStorage.get('quickpos-sidebar');
-            if (sidebarState === 'collapsed' && sidebar.classList.contains('expanded')) {
-                toggleSidebar();
-            }
-        }
+        // Initialize Components
+        Components.init({
+            title: 'Hardware Quotation'
+        });
         
         renderProducts();
         renderQuotation();

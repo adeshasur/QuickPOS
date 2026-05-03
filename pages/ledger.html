@@ -8,35 +8,10 @@
     <link rel="stylesheet" href="../assets/css/ledger.css">
 </head>
 <body>
-    <div class="sidebar expanded" id="sidebar">
-        <div class="hamburger-menu">
-            <button class="hamburger-btn" id="hamburgerBtn"><span id="hamburgerIcon">☰</span></button>
-            <div class="logo" id="logo">QuickPOS</div>
-        </div>
-        <div class="nav-items">
-            <a href="owner_dashboard.html" class="nav-item owner-only"><span class="nav-icon">📋</span><span class="nav-text">Dashboard</span></a>
-            <a href="sales.html" class="nav-item"><span class="nav-icon">💰</span><span class="nav-text">Make a Sale</span></a>
-            <a href="categories.html" class="nav-item"><span class="nav-icon">🏷️</span><span class="nav-text">Categories</span></a>
-            <a href="products.html" class="nav-item"><span class="nav-icon">📦</span><span class="nav-text">Products</span></a>
-            <a href="inventory.html" class="nav-item"><span class="nav-icon">🚚</span><span class="nav-text">Inventory</span></a>
-            <a href="customers.html" class="nav-item"><span class="nav-icon">👤</span><span class="nav-text">Customers</span></a>
-            <a href="quotations.html" class="nav-item"><span class="nav-icon">📄</span><span class="nav-text">Quotations</span></a>
-            <a href="ledger.html" class="nav-item active"><span class="nav-icon">📒</span><span class="nav-text">Credit Ledger</span></a>
-            <a href="reports.html" class="nav-item"><span class="nav-icon">📊</span><span class="nav-text">Shift Reports</span></a>
-            <a href="users.html" class="nav-item owner-only"><span class="nav-icon">👥</span><span class="nav-text">User Management</span></a>
-            <a href="settings.html" class="nav-item owner-only"><span class="nav-icon">⚙️</span><span class="nav-text">Settings</span></a>
-            <a href="#" class="nav-item" id="logoutBtn"><span class="nav-icon">🚪</span><span class="nav-text">Logout</span></a>
-        </div>
-    </div>
+    <div id="sidebar-container"></div>
 
     <div class="main-content">
-        <div class="top-bar">
-            <div class="page-title">Credit Ledger</div>
-            <div class="user-info">
-                <span id="cashierNameDisplay" style="color:var(--text-light);font-size:14px;">Loading...</span>
-                <div class="user-avatar" id="userAvatar">👤</div>
-            </div>
-        </div>
+        <div id="topbar-container"></div>
 
         <div class="ledger-container">
             <div class="outstanding-card">
@@ -92,6 +67,7 @@
 
     <div id="thermalReceiptContainer" style="display: none;"></div>
 
+    <script src="../assets/js/components.js"></script>
     <script src="../assets/js/ledger.js"></script>
 </body>
 </html>

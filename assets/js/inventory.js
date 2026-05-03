@@ -237,51 +237,30 @@ function setupFilters() {
 }
 
 // Sidebar Toggle
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const logo = document.getElementById('logo');
-    sidebar.classList.toggle('expanded');
-    sidebar.classList.toggle('collapsed');
-    logo.classList.toggle('collapsed');
-    
-    const icon = document.getElementById('hamburgerIcon');
-    if (sidebar.classList.contains('collapsed')) {
-        icon.textContent = '→';
-        localStorage.setItem('quickpos-sidebar', 'collapsed');
-    } else {
-        icon.textContent = '☰';
-        localStorage.setItem('quickpos-sidebar', 'expanded');
-    }
-}
 
 // Initialize
 function init() {
-    // Check security & User Data
+    // Check security
     const user = JSON.parse(localStorage.getItem('quickpos-user'));
     if (!user) {
         window.location.href = 'login.html';
         return;
     }
-    
-    // Set User Name/Initials
-    if (user && user.name) {
-        const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
-        document.getElementById('userAvatar').textContent = initials.substring(0, 2);
-        document.getElementById('shiftInfo').textContent = `${user.role === 'owner' ? 'Owner' : 'Cashier'}: ${user.name}`;
-    }
+
+    // Initialize Components
+    Components.init({
+        title: 'Inventory Management'
+    });
 
     // Role Check
     if (user && user.role === 'cashier') {
-        document.querySelectorAll('.owner-only').forEach(link => link.style.display = 'none');
         // Hide add stock section and delete buttons for cashiers
         const stockInCard = document.querySelector('.stock-in-card');
         if(stockInCard) stockInCard.style.display = 'none';
         
-        // Let them only view the table (CSS can handle hiding the delete column)
+        // Hide action column
         const css = document.createElement('style');
-        css.innerHTML = `
-            .stock-table th:last-child, .stock-table td:last-child { display: none !important; }
-        `;
+        css.innerHTML = `.stock-table th:last-child, .stock-table td:last-child { display: none !important; }`;
         document.head.appendChild(css);
     }
 
@@ -290,28 +269,17 @@ function init() {
     setupProductAutoFill();
     
     const categorySelect = document.getElementById('stockCategory');
-    categorySelect.addEventListener('change', function() {
-        populateProductDropdown(this.value);
-    });
+    if(categorySelect) {
+        categorySelect.addEventListener('change', function() {
+            populateProductDropdown(this.value);
+        });
+    }
     
-    document.getElementById('addStockBtn').addEventListener('click', addStock);
+    const addStockBtn = document.getElementById('addStockBtn');
+    if(addStockBtn) addStockBtn.addEventListener('click', addStock);
     
     setupFilters();
     renderStockTable();
-    
-    // Sidebar
-    document.getElementById('hamburgerBtn').addEventListener('click', toggleSidebar);
-    const sidebarState = localStorage.getItem('quickpos-sidebar');
-    if (sidebarState === 'collapsed') toggleSidebar();
-    
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-        e.preventDefault();
-        if (confirm('Logout?')) {
-            localStorage.removeItem('quickpos-user');
-            window.location.href = 'login.html';
-        }
-    });
 }
 
 document.addEventListener('DOMContentLoaded', init);

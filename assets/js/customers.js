@@ -34,11 +34,6 @@
     }
 
     // ----- UI elements -----
-    const sidebar = document.getElementById('sidebar');
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const hamburgerIcon = document.getElementById('hamburgerIcon');
-    const logo = document.getElementById('logo');
-    const logoutBtn = document.getElementById('logoutBtn');
     const addCustomerBtn = document.getElementById('addCustomerBtn');
     const customerSearch = document.getElementById('customerSearch');
     const customerTableBody = document.getElementById('customerTableBody');
@@ -198,46 +193,20 @@
     }
 
     function init() {
-        loadCustomers();
-        renderCustomers();
+        // Security check
+        const user = JSON.parse(localStorage.getItem('quickpos-user') || 'null');
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
 
-        // Sidebar toggle
-        hamburgerBtn.addEventListener('click', () => {
-            const isCollapsed = sidebar.classList.contains('collapsed');
-            if (isCollapsed) {
-                sidebar.classList.remove('collapsed');
-                sidebar.classList.add('expanded');
-                logo.classList.remove('collapsed');
-                hamburgerIcon.textContent = '☰';
-                localStorage.setItem('quickpos-sidebar', 'expanded');
-            } else {
-                sidebar.classList.remove('expanded');
-                sidebar.classList.add('collapsed');
-                logo.classList.add('collapsed');
-                hamburgerIcon.textContent = '→';
-                localStorage.setItem('quickpos-sidebar', 'collapsed');
-            }
+        // Initialize Components
+        Components.init({
+            title: 'Customer Management'
         });
 
-        // Load sidebar state
-        const savedSidebar = localStorage.getItem('quickpos-sidebar');
-        if (savedSidebar === 'collapsed') {
-            sidebar.classList.remove('expanded');
-            sidebar.classList.add('collapsed');
-            logo.classList.add('collapsed');
-            hamburgerIcon.textContent = '→';
-        }
-
-        // Logout
-        if(logoutBtn) {
-            logoutBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (confirm('Logout?')) {
-                    localStorage.removeItem('quickpos-user');
-                    window.location.href = 'login.html';
-                }
-            });
-        }
+        loadCustomers();
+        renderCustomers();
 
         // Search & Add
         addCustomerBtn.addEventListener('click', openAddModal);
@@ -273,20 +242,6 @@
         confirmDeleteBtn.addEventListener('click', confirmDelete);
 
         customerForm.addEventListener('submit', handleCustomerSubmit);
-
-        // Security/role
-        const user = JSON.parse(localStorage.getItem('quickpos-user') || 'null');
-        if (!user) {
-            window.location.href = 'login.html';
-            return;
-        }
-
-        if (user.role === 'cashier') {
-            document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'none');
-            // Hide action buttons for cashiers if needed (optional)
-        }
-        
-        document.getElementById('shiftTime').textContent = `${user.role === 'owner' ? 'Owner' : 'Cashier'}: ${user.name}`;
     }
 
     if (document.readyState === 'loading') {
