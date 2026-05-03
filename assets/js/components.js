@@ -97,6 +97,8 @@ const Components = (function() {
         if (sidebarState === 'collapsed') {
             sidebar.classList.remove('expanded');
             sidebar.classList.add('collapsed');
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) mainContent.style.marginLeft = '70px';
             const logo = document.getElementById('logo');
             if(logo) logo.classList.add('collapsed');
             const icon = document.getElementById('hamburgerIcon');
@@ -114,6 +116,12 @@ const Components = (function() {
                 if(!sb) return;
                 sb.classList.toggle('expanded');
                 sb.classList.toggle('collapsed');
+                
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) {
+                    mainContent.style.marginLeft = sb.classList.contains('collapsed') ? '70px' : '240px';
+                }
+                
                 if(lg) lg.classList.toggle('collapsed');
                 
                 const isCollapsed = sb.classList.contains('collapsed');

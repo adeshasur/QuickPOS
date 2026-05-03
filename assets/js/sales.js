@@ -236,30 +236,31 @@ async function completeSale(method, message) {
         total: total,
         method: method,
         received: method === 'Cash' ? parseFloat(document.getElementById('amountReceived').value) || total : total,
-        balance: method === 'Cash' ? (parseFloat(document.getElementById('amountReceived').value) || total) - total : 0,
+        change: method === 'Cash' ? (parseFloat(document.getElementById('amountReceived').value) || total) - total : 0,
         cashier: user ? user.name : 'Unknown',
         items: cart.map(item => ({
             id: item.id,
-            quantity: item.quantity,
+            qty: item.quantity,
             price: item.price
         }))
     };
 
     try {
-        await window.api.saveSale(saleData);
-        
-        document.getElementById('saleCompleteTitle').textContent = `${method} Sale Complete!`;
-        document.getElementById('saleCompleteAmount').textContent = formatCurrency(total);
-        document.getElementById('saleCompleteMessage').textContent = message;
-        
-        saleCompleteOverlay.classList.add('active');
-        cart = []; 
-        renderCart(); 
-        
-        // Refresh products to show updated stock
-        products = await window.api.getProducts();
-        renderProducts(); 
-        paymentModal.classList.remove('active');
+        const result = await window.api.saveSale(saleData);
+        if (result.success) {
+            document.getElementById('saleCompleteTitle').textContent = `${method} Sale Complete!`;
+            document.getElementById('saleCompleteAmount').textContent = formatCurrency(total);
+            document.getElementById('saleCompleteMessage').textContent = message;
+            
+            saleCompleteOverlay.classList.add('active');
+            cart = []; 
+            renderCart(); 
+            
+            // Refresh products to show updated stock
+            products = await window.api.getProducts();
+            renderProducts(); 
+            paymentModal.classList.remove('active');
+        }
     } catch (err) {
         console.error('Sale Error:', err);
         alert('Error saving sale: ' + err.message);

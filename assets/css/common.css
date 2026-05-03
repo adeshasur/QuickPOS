@@ -12,9 +12,6 @@ body {
     line-height: 1.5;
     min-height: 100vh;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
 }
 
 /* Login Container */
@@ -196,22 +193,52 @@ body {
     outline: 2px solid #1e40af; outline-offset: 2px;
 }
 
+/* Global Layout Fixes */
+.sidebar {
+    width: 240px;
+    position: fixed;
+    height: 100vh;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    transition: width 0.3s ease;
+    z-index: 1000;
+}
+
+.main-content {
+    flex: 1;
+    margin-left: 240px;
+    padding: 30px;
+    min-height: 100vh;
+    background-color: #f8fafc;
+}
+
+/* Sidebar Collapsed State */
+.sidebar.collapsed {
+    width: 70px;
+}
+
+.sidebar.collapsed + .main-content,
+.main-content {
+    margin-left: 240px;
+}
+
 /* Material Symbols Rounded Base Styles */
 .material-symbols-rounded {
-  font-family: 'Material Symbols Rounded';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
-  
+    font-family: 'Material Symbols Rounded';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 20px; /* Fixed default size */
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+}
+
 /* Standard sizes */
 .material-symbols-rounded.s18 { font-size: 18px; }
 .material-symbols-rounded.s20 { font-size: 20px; }
@@ -227,4 +254,3 @@ body {
 .material-symbols-rounded.warning { color: #f59e0b; }
 .material-symbols-rounded.danger { color: #ef4444; }
 .material-symbols-rounded.white { color: #ffffff; }
-}

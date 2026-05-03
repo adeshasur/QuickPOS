@@ -12,5 +12,9 @@ contextBridge.exposeInMainWorld('api', {
     
     // Sales (බිල්) සම්බන්ධ වැඩ
     saveSale: (saleData) => ipcRenderer.invoke('save-sale', saleData),
-    getSalesHistory: () => ipcRenderer.invoke('get-sales-history')
+    getSalesHistory: () => ipcRenderer.invoke('get-sales-history'),
+
+    // Security & Logic
+    loginAuth: (creds) => ipcRenderer.invoke('login-auth', creds),
+    getExpiredItems: () => ipcRenderer.invoke('get-expired-items')
 });
