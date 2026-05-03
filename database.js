@@ -79,9 +79,17 @@ db.serialize(() => {
         FOREIGN KEY (product_id) REFERENCES products (id)
     )`);
 
+    // 7. Settings Table
+    db.run(`CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT
+    )`);
+
     // Default Admin User කෙනෙක්ව ඇඩ් කරමු (මුලින්ම ඇප් එක දාද්දි විතරයි මේක වෙන්නේ)
     db.run(`INSERT OR IGNORE INTO users (name, username, password, role) 
             VALUES ('Administrator', 'admin', '123', 'owner')`);
+    db.run(`INSERT OR IGNORE INTO users (name, username, password, role) 
+            VALUES ('Cashier Staff', 'staff', '123', 'cashier')`);
 });
 
 module.exports = db;

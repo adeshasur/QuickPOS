@@ -1,12 +1,4 @@
-/* Main Layout overrides for Quotations */
-.main-content {
-    flex: 1;
-    display: block;
-    background-color: var(--bg-color);
-    padding-bottom: 20px;
-    width: 100%;
-    overflow-x: hidden;
-}
+/* Layout handled by common.css */
 
 .dashboard {
     display: flex;

@@ -9,12 +9,10 @@
         systemVersion: "pro", 
         currencySymbol: "LKR",
         taxPercentage: 0,
-        shiftHours: "08:00 - 16:00",
-        adminPassword: "admin123",
-        cashierPassword: "staff"
+        shiftHours: "08:00 - 16:00"
     };
 
-    let settings = JSON.parse(localStorage.getItem('quickpos-settings')) || defaultSettings;
+    let settings = { ...defaultSettings };
 
     // DOM Elements
     const elements = {
@@ -23,66 +21,63 @@
         storePhone: document.getElementById('storePhone'),
         versionOptions: document.querySelectorAll('.version-option'),
         versionHint: document.getElementById('versionHint'),
-        adminPass: document.getElementById('adminPassword'),
-        cashierPass: document.getElementById('cashierPassword'),
-        currencyToggle: document.getElementById('currencyToggle'),
         tax: document.getElementById('taxPercentage'),
         shift: document.getElementById('shiftHours'),
         saveBtn: document.getElementById('saveBtn'),
-        resetBtn: document.getElementById('resetBtn'),
-        clearCacheBtn: document.getElementById('clearCacheBtn')
+        resetBtn: document.getElementById('resetBtn')
     };
 
-    function loadSettings() {
-        if(elements.storeName) elements.storeName.value = settings.storeName || '';
-        if(elements.storeAddress) elements.storeAddress.value = settings.storeAddress || '';
-        if(elements.storePhone) elements.storePhone.value = settings.storePhone || '';
-        if(elements.tax) elements.tax.value = settings.taxPercentage || 0;
-        if(elements.shift) elements.shift.value = settings.shiftHours || '';
-        
-        if(elements.versionOptions) {
-            elements.versionOptions.forEach(opt => {
-                opt.classList.toggle('selected', opt.dataset.version === settings.systemVersion);
-            });
+    async function loadSettings() {
+        try {
+            const dbSettings = await window.api.getSettings();
+            if (Object.keys(dbSettings).length > 0) {
+                settings = { ...settings, ...dbSettings };
+            }
+            
+            if(elements.storeName) elements.storeName.value = settings.storeName || '';
+            if(elements.storeAddress) elements.storeAddress.value = settings.storeAddress || '';
+            if(elements.storePhone) elements.storePhone.value = settings.storePhone || '';
+            if(elements.tax) elements.tax.value = settings.taxPercentage || 0;
+            if(elements.shift) elements.shift.value = settings.shiftHours || '';
+            
+            if(elements.versionOptions) {
+                elements.versionOptions.forEach(opt => {
+                    opt.classList.toggle('selected', opt.dataset.version === settings.systemVersion);
+                });
+            }
+        } catch (err) {
+            console.error('Error loading settings:', err);
         }
     }
 
-    function saveSettings() {
+    async function saveSettings() {
         if (!elements.storeName.value.trim()) { alert('Store Name is required'); return; }
 
-        settings.storeName = elements.storeName.value.trim();
-        settings.storeAddress = elements.storeAddress.value.trim();
-        settings.storePhone = elements.storePhone.value.trim();
-        settings.taxPercentage = parseFloat(elements.tax.value) || 0;
-        settings.shiftHours = elements.shift.value.trim();
-        
-        const selectedVer = document.querySelector('.version-option.selected');
-        settings.systemVersion = selectedVer ? selectedVer.dataset.version : 'pro';
+        try {
+            const newSettings = {
+                storeName: elements.storeName.value.trim(),
+                storeAddress: elements.storeAddress.value.trim(),
+                storePhone: elements.storePhone.value.trim(),
+                taxPercentage: parseFloat(elements.tax.value) || 0,
+                shiftHours: elements.shift.value.trim()
+            };
+            
+            const selectedVer = document.querySelector('.version-option.selected');
+            newSettings.systemVersion = selectedVer ? selectedVer.dataset.version : 'pro';
 
-        if (elements.adminPass && elements.adminPass.value.trim().length >= 6) settings.adminPassword = elements.adminPass.value.trim();
-        if (elements.cashierPass && elements.cashierPass.value.trim().length >= 4) settings.cashierPassword = elements.cashierPass.value.trim();
-
-        localStorage.setItem('quickpos-settings', JSON.stringify(settings));
-        localStorage.setItem('quickpos-shift-time', settings.shiftHours);
-        
-        alert('✅ Settings saved successfully!');
-        location.reload();
-    }
-
-    function resetSystem() {
-        if (confirm('⚠️ WARNING: This will delete ALL business data.\nType "RESET" to confirm:')) {
-            const input = prompt('Please type "RESET":');
-            if (input === 'RESET') {
-                localStorage.clear();
-                alert('System Reset Complete.');
-                window.location.href = 'login.html';
+            for (const [key, value] of Object.entries(newSettings)) {
+                await window.api.saveSetting(key, value);
             }
+            
+            alert('✅ Settings saved successfully!');
+            location.reload();
+        } catch (err) {
+            alert('Error saving settings: ' + err.message);
         }
     }
 
     function setupListeners() {
         if(elements.saveBtn) elements.saveBtn.addEventListener('click', saveSettings);
-        if(elements.resetBtn) elements.resetBtn.addEventListener('click', resetSystem);
 
         if(elements.versionOptions) {
             elements.versionOptions.forEach(opt => {
@@ -94,7 +89,7 @@
         }
     }
 
-    function init() {
+    async function init() {
         const user = JSON.parse(localStorage.getItem('quickpos-user'));
         if (!user || user.role !== 'owner') {
             alert('Access Denied: Owner Only');
@@ -102,12 +97,7 @@
             return;
         }
 
-        // Initialize Components
-        Components.init({
-            title: 'Settings'
-        });
-
-        loadSettings();
+        await loadSettings();
         setupListeners();
     }
 

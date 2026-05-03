@@ -68,12 +68,6 @@
     </div>
 
     <script>
-        // Valid users database
-        const validUsers = {
-            'admin': { password: '123', name: 'Admin', role: 'owner', displayName: 'Admin User' },
-            'staff': { password: '456', name: 'Staff', role: 'cashier', displayName: 'Cashier User' }
-        };
-
         // DOM Elements
         const loginForm = document.getElementById('loginForm');
         const usernameInput = document.getElementById('username');
@@ -81,7 +75,6 @@
         const passwordToggle = document.getElementById('passwordToggle');
         const errorMessage = document.getElementById('errorMessage');
         const loginBtn = document.getElementById('loginBtn');
-        const loadingSpinner = document.getElementById('loadingSpinner');
         const quickAdminBtn = document.getElementById('quickAdminBtn');
         const quickStaffBtn = document.getElementById('quickStaffBtn');
         const forgotPasswordLink = document.getElementById('forgotPassword');
@@ -99,52 +92,61 @@
         });
 
         quickStaffBtn.addEventListener('click', function() {
-            usernameInput.value = 'staff'; passwordInput.value = '456'; errorMessage.classList.remove('show');
+            usernameInput.value = 'staff'; passwordInput.value = '123';
+            errorMessage.classList.remove('show');
         });
 
         // Forgot password
         forgotPasswordLink.addEventListener('click', function(e) {
             e.preventDefault();
-            alert('For security, please contact the system administrator to reset your password.\n\nDemo accounts:\n• Owner: admin / 123\n• Cashier: staff / 456');
+            alert('For security, please contact the system administrator to reset your password.');
         });
 
-        // Login function
-        function loginUser(username, password) {
-            if (!validUsers[username]) return { success: false, message: 'Invalid username' };
-            const user = validUsers[username];
-            if (user.password !== password) return { success: false, message: 'Invalid password' };
-            return { success: true, user: { name: user.displayName, role: user.role, username: username } };
-        }
-
         // Handle form submission
-        loginForm.addEventListener('submit', function(e) {
+        loginForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             const username = usernameInput.value.trim();
             const password = passwordInput.value.trim();
             
             errorMessage.classList.remove('show');
             loginBtn.disabled = true;
-            loadingSpinner.style.display = 'block';
-            loginBtn.innerHTML = '<div class="loading"></div><span>Logging in...</span>';
+            loginBtn.innerHTML = '<div class="loading" style="display:block"></div><span>Logging in...</span>';
             
-            setTimeout(() => {
-                const result = loginUser(username, password);
-                if (result.success) {
-                    localStorage.setItem('quickpos-user', JSON.stringify({
-                        name: result.user.name, role: result.user.role, username: result.user.username, timestamp: new Date().toISOString()
-                    }));
-                    if (result.user.role === 'owner') {
-                        window.location.href = 'owner_dashboard.html';
-                    } else {
-                        window.location.href = 'sales.html';
+            try {
+                const roles = ['owner', 'cashier'];
+                let success = false;
+                
+                for (const role of roles) {
+                    const result = await window.api.loginAuth({ username, password, role });
+                    if (result.success) {
+                        localStorage.setItem('quickpos-user', JSON.stringify({
+                            name: result.user.name, 
+                            role: result.user.role, 
+                            username: username, 
+                            timestamp: new Date().toISOString()
+                        }));
+                        
+                        if (result.user.role === 'owner') {
+                            window.location.href = 'owner_dashboard.html';
+                        } else {
+                            window.location.href = 'sales.html';
+                        }
+                        success = true;
+                        break;
                     }
-                } else {
+                }
+                
+                if (!success) {
                     errorMessage.classList.add('show');
                     loginBtn.disabled = false;
-                    loadingSpinner.style.display = 'none';
-                    loginBtn.innerHTML = '<span>Login</span><div class="loading"></div>';
+                    loginBtn.innerHTML = '<span>Login</span>';
                 }
-            }, 800);
+            } catch (err) {
+                console.error(err);
+                alert('Login error: ' + err.message);
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<span>Login</span>';
+            }
         });
 
         document.addEventListener('DOMContentLoaded', function() {

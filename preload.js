@@ -1,16 +1,30 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
-    // Products සම්බන්ධ වැඩ
+    // Products
     addProduct: (product) => ipcRenderer.invoke('add-product', product),
     getProducts: () => ipcRenderer.invoke('get-products'),
     searchProductByBarcode: (barcode) => ipcRenderer.invoke('search-barcode', barcode),
     
-    // Categories සම්බන්ධ වැඩ
+    // Categories
     getCategories: () => ipcRenderer.invoke('get-categories'),
     addCategory: (name) => ipcRenderer.invoke('add-category', name),
     
-    // Sales (බිල්) සම්බන්ධ වැඩ
+    // Customers
+    getCustomers: () => ipcRenderer.invoke('get-customers'),
+    saveCustomer: (customer) => ipcRenderer.invoke('save-customer', customer),
+    deleteCustomer: (id) => ipcRenderer.invoke('delete-customer', id),
+
+    // Users
+    getUsers: () => ipcRenderer.invoke('get-users'),
+    saveUser: (user) => ipcRenderer.invoke('save-user', user),
+    deleteUser: (id) => ipcRenderer.invoke('delete-user', id),
+
+    // Settings
+    getSettings: () => ipcRenderer.invoke('get-settings'),
+    saveSetting: (key, value) => ipcRenderer.invoke('save-setting', key, value),
+
+    // Sales (බිල්)
     saveSale: (saleData) => ipcRenderer.invoke('save-sale', saleData),
     getSalesHistory: () => ipcRenderer.invoke('get-sales-history'),
 

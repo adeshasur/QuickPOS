@@ -1,36 +1,13 @@
 (function() {
-    // ----- Data management -----
-    const STORAGE_KEY = 'quickpos-customers';
-
-    // Default demo customers
-    const defaultCustomers = [
-        { id: 1, name: 'Kamal Perera', phone: '0771234567', address: 'Colombo 03', balance: 0 },
-        { id: 2, name: 'Sunimal Silva', phone: '0719876543', address: 'Maharagama', balance: 0 }
-    ];
-
     let customers = [];
 
-    function loadCustomers() {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-            try {
-                customers = JSON.parse(stored);
-            } catch (e) {
-                customers = [...defaultCustomers];
-            }
-        } else {
-            customers = [...defaultCustomers];
+    async function loadCustomers() {
+        try {
+            customers = await window.api.getCustomers();
+            renderCustomers();
+        } catch (err) {
+            console.error('Error loading customers:', err);
         }
-        customers = customers.map((c, idx) => ({ ...c, id: c.id || idx + 1 }));
-        saveCustomers();
-    }
-
-    function saveCustomers() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(customers));
-    }
-
-    function getNextId() {
-        return customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1;
     }
 
     // ----- UI elements -----
@@ -50,13 +27,6 @@
     const custAddress = document.getElementById('custAddress');
     const custBalance = document.getElementById('custBalance');
 
-    // Delete modal
-    const deleteModal = document.getElementById('deleteModal');
-    const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
-    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-    let deleteCandidateId = null;
-
     const formatCurrency = (amt) => `LKR ${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     function renderCustomers(filterText = '') {
@@ -64,8 +34,8 @@
         let filtered = customers;
         if (searchTerm !== '') {
             filtered = customers.filter(c => 
-                c.name.toLowerCase().includes(searchTerm) || 
-                c.phone.includes(searchTerm)
+                (c.name && c.name.toLowerCase().includes(searchTerm)) || 
+                (c.phone && c.phone.includes(searchTerm))
             );
         }
 
@@ -94,10 +64,10 @@
                     <td>${escapeHtml(address)}</td>
                     <td class="balance-cell">${formatCurrency(cust.balance ?? 0)}</td>
                     <td class="action-cell">
-                        <button class="action-btn edit" onclick="openEditModal(${cust.id})">
+                        <button class="action-btn edit-btn">
                             <span class="material-symbols-rounded s18">edit</span>
                         </button>
-                        <button class="action-btn delete" onclick="requestDelete(${cust.id})">
+                        <button class="action-btn delete-btn">
                             <span class="material-symbols-rounded s18">delete</span>
                         </button>
                     </td>
@@ -109,7 +79,7 @@
 
     function escapeHtml(unsafe) {
         if (!unsafe) return '';
-        return unsafe
+        return String(unsafe)
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
@@ -141,16 +111,7 @@
         setTimeout(() => custName.focus(), 250);
     }
 
-    function closeCustomerModal() {
-        customerModal.classList.remove('active');
-    }
-
-    function closeDeleteModal() {
-        deleteModal.classList.remove('active');
-        deleteCandidateId = null;
-    }
-
-    function handleCustomerSubmit(e) {
+    async function handleCustomerSubmit(e) {
         e.preventDefault();
         const name = custName.value.trim();
         const phone = custPhone.value.trim();
@@ -163,33 +124,24 @@
             return;
         }
 
-        if (id) {
-            const index = customers.findIndex(c => c.id === id);
-            if (index !== -1) {
-                customers[index] = { ...customers[index], name, phone, address, balance };
+        try {
+            await window.api.saveCustomer({ id, name, phone, address, balance });
+            customerModal.classList.remove('active');
+            loadCustomers();
+        } catch (err) {
+            alert('Error saving customer: ' + err.message);
+        }
+    }
+
+    async function deleteCustomer(id) {
+        if (confirm('Are you sure you want to delete this customer?')) {
+            try {
+                await window.api.deleteCustomer(id);
+                loadCustomers();
+            } catch (err) {
+                alert('Error deleting customer: ' + err.message);
             }
-        } else {
-            const newId = getNextId();
-            customers.push({ id: newId, name, phone, address, balance });
         }
-
-        saveCustomers();
-        renderCustomers(customerSearch.value);
-        closeCustomerModal();
-    }
-
-    function requestDelete(id) {
-        deleteCandidateId = id;
-        deleteModal.classList.add('active');
-    }
-
-    function confirmDelete() {
-        if (deleteCandidateId) {
-            customers = customers.filter(c => c.id !== deleteCandidateId);
-            saveCustomers();
-            renderCustomers(customerSearch.value);
-        }
-        closeDeleteModal();
     }
 
     function init() {
@@ -200,19 +152,11 @@
             return;
         }
 
-        // Initialize Components
-        Components.init({
-            title: 'Customer Management'
-        });
-
         loadCustomers();
-        renderCustomers();
 
-        // Search & Add
         addCustomerBtn.addEventListener('click', openAddModal);
         customerSearch.addEventListener('input', (e) => renderCustomers(e.target.value));
 
-        // Table actions
         customerTableBody.addEventListener('click', (e) => {
             const btn = e.target.closest('button');
             if (!btn) return;
@@ -223,24 +167,12 @@
             if (btn.classList.contains('edit-btn')) {
                 openEditModal(custId);
             } else if (btn.classList.contains('delete-btn')) {
-                requestDelete(custId);
+                deleteCustomer(custId);
             }
         });
 
-        // Modals
-        closeModalBtn.addEventListener('click', closeCustomerModal);
-        cancelModalBtn.addEventListener('click', closeCustomerModal);
-        customerModal.addEventListener('click', (e) => {
-            if (e.target === customerModal) closeCustomerModal();
-        });
-
-        closeDeleteModalBtn.addEventListener('click', closeDeleteModal);
-        cancelDeleteBtn.addEventListener('click', closeDeleteModal);
-        deleteModal.addEventListener('click', (e) => {
-            if (e.target === deleteModal) closeDeleteModal();
-        });
-        confirmDeleteBtn.addEventListener('click', confirmDelete);
-
+        closeModalBtn.addEventListener('click', () => customerModal.classList.remove('active'));
+        cancelModalBtn.addEventListener('click', () => customerModal.classList.remove('active'));
         customerForm.addEventListener('submit', handleCustomerSubmit);
     }
 
