@@ -1,143 +1,176 @@
-(function() {
-    'use strict';
+// ─── DATA ───
+let categories = JSON.parse(localStorage.getItem('quickpos-categories')) || [
+  { id: 1, name: "Food", description: "All food items including meals and snacks", productCount: 2 },
+  { id: 2, name: "Drinks", description: "Beverages, juices, and hot drinks", productCount: 3 },
+  { id: 3, name: "Snacks", description: "Quick bites and light snacks", productCount: 1 },
+  { id: 4, name: "Bakery", description: "Freshly baked goods and pastries", productCount: 1 }
+];
+let products = JSON.parse(localStorage.getItem('quickpos-products')) || [];
+let deletingId = null;
 
-    let categories = [];
-    let currentEditId = null;
+// ─── HELPERS ───
+function saveCategories() {
+  localStorage.setItem('quickpos-categories', JSON.stringify(categories));
+}
 
-    // DOM Elements
-    const categoriesTableBody = document.getElementById('categoriesTableBody');
-    const addCategoryBtn = document.getElementById('addCategoryBtn');
-    const categoryModalOverlay = document.getElementById('categoryModalOverlay');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const cancelModalBtn = document.getElementById('cancelModalBtn');
-    const saveCategoryBtn = document.getElementById('saveCategoryBtn');
-    const modalTitle = document.getElementById('modalTitle');
-    const catName = document.getElementById('catName');
-    const catDesc = document.getElementById('catDesc');
+function updateProductCounts() {
+  categories.forEach(c => c.productCount = 0);
+  products.forEach(p => {
+    const cat = categories.find(c => c.id === p.categoryId);
+    if (cat) cat.productCount++;
+  });
+  saveCategories();
+}
 
-    async function loadData() {
-        try {
-            categories = await window.api.getCategories();
-            renderTable();
-        } catch (err) {
-            console.error('Error loading categories:', err);
-        }
-    }
+// ─── RENDER ───
+function render() {
+  updateProductCounts();
+  const tbody = document.getElementById('categoriesTableBody');
+  const emptyRow = document.getElementById('emptyRow');
 
-    function renderTable() {
-        if (!categoriesTableBody) return;
+  document.getElementById('totalCategories').textContent = categories.length;
+  const total = categories.reduce((s, c) => s + c.productCount, 0);
+  document.getElementById('totalProducts').textContent = total;
 
-        if (categories.length === 0) {
-            categoriesTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:#718096;">No categories found. Click "Add New Category" to start.</td></tr>';
-            return;
-        }
+  if (!categories.length) {
+    tbody.innerHTML = '';
+    tbody.appendChild(emptyRow);
+    emptyRow.style.display = '';
+    return;
+  }
 
-        categoriesTableBody.innerHTML = categories.map(cat => `
-            <tr>
-                <td>#${String(cat.id).padStart(3, '0')}</td>
-                <td class="category-name-cell">${cat.name}</td>
-                <td style="color: #718096;">${cat.description || '-'}</td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="action-btn edit-btn" data-id="${cat.id}" title="Edit">
-                            <span class="material-symbols-rounded s18">edit</span>
-                        </button>
-                        <button class="action-btn delete-btn" data-id="${cat.id}" title="Delete">
-                            <span class="material-symbols-rounded s18">delete</span>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
+  emptyRow.style.display = 'none';
+  const sorted = [...categories].sort((a, b) => a.name.localeCompare(b.name));
+  tbody.innerHTML = '';
+  sorted.forEach(cat => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="td-name">${cat.name}</td>
+      <td class="${cat.description ? 'td-desc' : 'td-desc empty'}">${cat.description || 'No description'}</td>
+      <td><span class="count-badge">${cat.productCount} product${cat.productCount !== 1 ? 's' : ''}</span></td>
+      <td>
+        <div class="actions-cell">
+          <button class="tbl-btn edit" data-id="${cat.id}">
+            <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Edit
+          </button>
+          <button class="tbl-btn del" data-id="${cat.id}">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>
+            Delete
+          </button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
 
-        // Attach events
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', () => openModal(parseInt(btn.dataset.id)));
-        });
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', () => deleteCategory(parseInt(btn.dataset.id)));
-        });
-    }
+// ─── MODAL HELPERS ───
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-    function openModal(id = null) {
-        currentEditId = id;
-        if (id) {
-            const cat = categories.find(c => c.id === id);
-            if (!cat) return;
-            modalTitle.innerText = 'Edit Category';
-            catName.value = cat.name;
-            catDesc.value = cat.description || '';
-        } else {
-            modalTitle.innerText = 'Add Category';
-            catName.value = '';
-            catDesc.value = '';
-        }
-        categoryModalOverlay.classList.add('active');
-        catName.focus();
-    }
+// ─── ADD / EDIT ───
+document.getElementById('addCategoryBtn').addEventListener('click', () => {
+  document.getElementById('categoryId').value = '';
+  document.getElementById('categoryName').value = '';
+  document.getElementById('categoryDescription').value = '';
+  document.getElementById('modalTitle').textContent = 'Add New Category';
+  document.getElementById('saveModalBtn').textContent = 'Save Category';
+  openModal('categoryModal');
+  setTimeout(() => document.getElementById('categoryName').focus(), 250);
+});
 
-    function closeModal() {
-        categoryModalOverlay.classList.remove('active');
-        currentEditId = null;
-    }
+document.getElementById('categoriesTableBody').addEventListener('click', e => {
+  const editBtn = e.target.closest('.edit');
+  const delBtn  = e.target.closest('.del');
+  
+  if (editBtn) {
+    const cat = categories.find(c => c.id === +editBtn.dataset.id);
+    if (!cat) return;
+    document.getElementById('categoryId').value = cat.id;
+    document.getElementById('categoryName').value = cat.name;
+    document.getElementById('categoryDescription').value = cat.description || '';
+    document.getElementById('modalTitle').textContent = 'Edit Category';
+    document.getElementById('saveModalBtn').textContent = 'Update Category';
+    openModal('categoryModal');
+    setTimeout(() => document.getElementById('categoryName').focus(), 250);
+  }
+  
+  if (delBtn) {
+    deletingId = +delBtn.dataset.id;
+    const cat = categories.find(c => c.id === deletingId);
+    if (!cat) return;
+    const msg = cat.productCount > 0
+      ? `"${cat.name}" has ${cat.productCount} product(s). Deleting it will also remove those products. Continue?`
+      : `Are you sure you want to delete "${cat.name}"?`;
+    document.getElementById('delMsg').textContent = msg;
+    openModal('deleteModal');
+  }
+});
 
-    async function handleSave() {
-        const name = catName.value.trim();
-        const description = catDesc.value.trim();
+document.getElementById('saveModalBtn').addEventListener('click', () => {
+  const name = document.getElementById('categoryName').value.trim();
+  const desc = document.getElementById('categoryDescription').value.trim();
+  const existingId = document.getElementById('categoryId').value ? +document.getElementById('categoryId').value : null;
 
-        if (!name) {
-            alert('Please enter category name');
-            return;
-        }
+  if (!name) { alert('Please enter a category name.'); document.getElementById('categoryName').focus(); return; }
 
-        try {
-            const result = await window.api.saveCategory({
-                id: currentEditId,
-                name: name,
-                description: description
-            });
+  const duplicate = categories.find(c => c.name.toLowerCase() === name.toLowerCase() && c.id !== existingId);
+  if (duplicate) { alert('A category with this name already exists.'); document.getElementById('categoryName').focus(); return; }
 
-            if (result.success) {
-                closeModal();
-                loadData();
-            }
-        } catch (err) {
-            alert('Error saving category: ' + err.message);
-        }
-    }
+  if (existingId) {
+    const idx = categories.findIndex(c => c.id === existingId);
+    if (idx !== -1) { categories[idx].name = name; categories[idx].description = desc; }
+  } else {
+    const newId = categories.length ? Math.max(...categories.map(c => c.id)) + 1 : 1;
+    categories.push({ id: newId, name, description: desc, productCount: 0 });
+  }
 
-    async function deleteCategory(id) {
-        if (confirm('Are you sure you want to delete this category? Products linked to this category may appear as uncategorized.')) {
-            try {
-                const result = await window.api.deleteCategory(id);
-                if (result.success) loadData();
-            } catch (err) {
-                alert('Error deleting category: ' + err.message);
-            }
-        }
-    }
+  saveCategories();
+  render();
+  closeModal('categoryModal');
+});
 
-    function init() {
-        const user = JSON.parse(localStorage.getItem('quickpos-user'));
-        if (!user) { window.location.href = 'login.html'; return; }
+document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+  if (!deletingId) return;
+  const cat = categories.find(c => c.id === deletingId);
+  if (cat && cat.productCount > 0) {
+    products = products.filter(p => p.categoryId !== deletingId);
+    localStorage.setItem('quickpos-products', JSON.stringify(products));
+  }
+  categories = categories.filter(c => c.id !== deletingId);
+  saveCategories();
+  render();
+  closeModal('deleteModal');
+  deletingId = null;
+});
 
-        // Hide "Add" button if cashier
-        if (user.role === 'cashier') {
-            if (addCategoryBtn) addCategoryBtn.style.display = 'none';
-            // In a real app we'd also hide edit/delete buttons in the table
-        }
+// Close buttons
+['closeModalBtn', 'cancelModalBtn'].forEach(id =>
+  document.getElementById(id).addEventListener('click', () => closeModal('categoryModal'))
+);
+document.getElementById('cancelDeleteBtn').addEventListener('click', () => closeModal('deleteModal'));
 
-        loadData();
+// Click outside to close
+['categoryModal', 'deleteModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => {
+    if (e.target === document.getElementById(id)) closeModal(id);
+  });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal('categoryModal'); closeModal('deleteModal'); }
+});
 
-        if (addCategoryBtn) addCategoryBtn.addEventListener('click', () => openModal());
-        if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
-        if (cancelModalBtn) cancelModalBtn.addEventListener('click', closeModal);
-        if (saveCategoryBtn) saveCategoryBtn.addEventListener('click', handleSave);
-
-        window.addEventListener('click', (e) => {
-            if (e.target === categoryModalOverlay) closeModal();
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', init);
-})();
+// Auth + role check
+document.addEventListener('DOMContentLoaded', () => {
+  const user = JSON.parse(localStorage.getItem('quickpos-user'));
+  if (!user) { window.location.href = 'login.html'; return; }
+  
+  // Prevent Cashier from accessing Categories
+  if (user.role === 'cashier') {
+    alert('Access Denied: Cashiers cannot manage categories.');
+    window.location.href = 'sales.html';
+    return;
+  }
+  
+  render();
+});
