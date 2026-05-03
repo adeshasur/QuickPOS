@@ -1,0 +1,194 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickPOS Pro - User Management</title>
+    <link rel="stylesheet" href="../styles/common.css">
+    
+    
+    <link rel="stylesheet" href="../styles/users.css">
+</head>
+<body>
+    <!-- Sidebar (EXACT from reports.html) -->
+    <div class="sidebar expanded" id="sidebar">
+        <div class="hamburger-menu">
+            <button class="hamburger-btn" id="hamburgerBtn">
+                <span id="hamburgerIcon">â˜°</span>
+            </button>
+            <div class="logo" id="logo">QuickPOS</div>
+        </div>
+        
+        <div class="nav-items">
+            <a href="owner_dashboard.html" class="nav-item owner-only">
+                <span class="nav-icon">ðŸ“‹</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+            <a href="sales.html" class="nav-item">
+                <span class="nav-icon">ðŸ’°</span>
+                <span class="nav-text">Make a Sale</span>
+            </a>
+            
+            <a href="categories.html" class="nav-item ">
+                <span class="nav-icon">ðŸ·ï¸</span>
+                <span class="nav-text">Categories</span>
+            </a>
+            <a href="products.html" class="nav-item">
+                <span class="nav-icon">ðŸ“¦</span>
+                <span class="nav-text">Products</span>
+            </a>
+            <a href="inventory.html" class="nav-item ">
+                <span class="nav-icon">ðŸšš</span>
+                <span class="nav-text">Inventory</span>
+            </a>
+            <a href="customers.html" class="nav-item ">
+                <span class="nav-icon">ðŸ‘¤</span>
+                <span class="nav-text">Customers</span>
+            </a>
+            <a href="quotations.html" class="nav-item">
+                <span class="nav-icon">ðŸ“„</span>
+                <span class="nav-text">Quotations</span>
+                
+            </a>
+            <a href="ledger.html" class="nav-item">
+                <span class="nav-icon">ðŸ“’</span>
+                <span class="nav-text">Credit Ledger</span>
+                
+            </a>
+            
+            <a href="reports.html" class="nav-item">
+                <span class="nav-icon">ðŸ“Š</span>
+                <span class="nav-text">Shift Reports</span>
+                
+            </a>
+            
+            <a href="users.html" class="nav-item owner-only active">
+                <span class="nav-icon">ðŸ‘¥</span>
+                <span class="nav-text">User Management</span>
+            </a>
+            <a href="settings.html" class="nav-item owner-only">
+                <span class="nav-icon">âš™ï¸</span>
+                <span class="nav-text">Settings</span>
+            </a>
+            <a href="#" class="nav-item" id="logoutBtn">
+            <span class="nav-icon">ðŸšª</span>
+            <span class="nav-text">Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">Staff & Security</div>
+            
+            <div class="header-controls">
+                <div class="search-container">
+                    <div class="search-icon">ðŸ”</div>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search staff by name...">
+                </div>
+                <button class="create-user-btn" id="createUserBtn">
+                    <span>+</span> Create New User
+                </button>
+            </div>
+        </div>
+        
+        <div class="user-management-content">
+            <!-- Staff Table -->
+            <div class="staff-table-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span>ðŸ‘¥</span> Staff Members
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="staff-table" id="staffTable">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Full Name</th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffTableBody">
+                            <!-- Staff rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal - OPTIMIZED 80% width -->
+    <div class="modal-overlay" id="userModalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span>ðŸ‘¤</span> Create New User
+                </div>
+                <button class="close-modal" id="closeModalBtn">Ã—</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="userName">Full Name *</label>
+                        <input type="text" class="form-input" id="userName" placeholder="Enter full name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="userUsername">Username *</label>
+                        <input type="text" class="form-input" id="userUsername" placeholder="Enter username" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="userPassword">Password *</label>
+                        <input type="password" class="form-input" id="userPassword" placeholder="Enter password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="userRole">Role *</label>
+                        <select class="form-select" id="userRole">
+                            <option value="cashier">Cashier</option>
+                            <option value="manager">Manager</option>
+                            <option value="owner">Owner</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="toggle-group">
+                    <span class="toggle-label">Can View Reports</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" class="toggle-checkbox" id="canViewReports" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border-color);">
+                    <p style="font-size: 12px; color: var(--text-light); margin-bottom: 8px;">Required fields marked with *</p>
+                    <p style="font-size: 12px; color: var(--text-light);">
+                        <strong>Role Permissions:</strong><br>
+                        â€¢ Owner: Full system access<br>
+                        â€¢ Manager: Can manage products & view reports<br>
+                        â€¢ Cashier: Basic sales only
+                    </p>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="modal-btn cancel" id="cancelModalBtn">Cancel</button>
+                <button class="modal-btn submit" id="submitUserBtn">Create User</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/users.js"></script>
+</body>
+</html>
+

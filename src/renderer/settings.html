@@ -1,0 +1,321 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickPOS Pro - Settings</title>
+    <link rel="stylesheet" href="../styles/common.css">
+    
+    
+    <link rel="stylesheet" href="../styles/settings.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar expanded" id="sidebar">
+        <div class="hamburger-menu">
+            <button class="hamburger-btn" id="hamburgerBtn">
+                <span id="hamburgerIcon">â˜°</span>
+            </button>
+            <div class="logo" id="logo">QuickPOS</div>
+        </div>
+        
+        <div class="nav-items">
+            <a href="owner_dashboard.html" class="nav-item owner-only">
+                <span class="nav-icon">ðŸ“‹</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+            <a href="sales.html" class="nav-item">
+                <span class="nav-icon">ðŸ’°</span>
+                <span class="nav-text">Make a Sale</span>
+            </a>
+            
+            <a href="categories.html" class="nav-item ">
+                <span class="nav-icon">ðŸ·ï¸</span>
+                <span class="nav-text">Categories</span>
+            </a>
+            <a href="products.html" class="nav-item">
+                <span class="nav-icon">ðŸ“¦</span>
+                <span class="nav-text">Products</span>
+            </a>
+            <a href="inventory.html" class="nav-item ">
+                <span class="nav-icon">ðŸšš</span>
+                <span class="nav-text">Inventory</span>
+            </a>
+            <a href="customers.html" class="nav-item ">
+                <span class="nav-icon">ðŸ‘¤</span>
+                <span class="nav-text">Customers</span>
+            </a>
+            <a href="quotations.html" class="nav-item">
+                <span class="nav-icon">ðŸ“„</span>
+                <span class="nav-text">Quotations</span>
+                
+            </a>
+            <a href="ledger.html" class="nav-item">
+                <span class="nav-icon">ðŸ“’</span>
+                <span class="nav-text">Credit Ledger</span>
+                
+            </a>
+            
+            <a href="reports.html" class="nav-item">
+                <span class="nav-icon">ðŸ“Š</span>
+                <span class="nav-text">Shift Reports</span>
+                
+            </a>
+            
+            <a href="users.html" class="nav-item owner-only">
+                <span class="nav-icon">ðŸ‘¥</span>
+                <span class="nav-text">User Management</span>
+            </a>
+            <a href="settings.html" class="nav-item owner-only active">
+                <span class="nav-icon">âš™ï¸</span>
+                <span class="nav-text">Settings</span>
+            </a>
+            <a href="#" class="nav-item" id="logoutBtn">
+            <span class="nav-icon">ðŸšª</span>
+            <span class="nav-text">Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">System Settings</div>
+            <div class="user-info">
+                <span id="userRole">Administrator</span>
+                <div class="user-avatar">OP</div>
+            </div>
+        </div>
+        
+        <div class="settings-dashboard">
+            <div class="settings-header">
+                <div class="header-title">
+                    <span>âš™ï¸</span> System Configuration
+                </div>
+                <div class="header-controls">
+                    <button class="settings-btn reset-btn" id="resetBtn">
+                        <span>ðŸ”„</span> Reset System
+                    </button>
+                    <button class="settings-btn save-btn" id="saveBtn">
+                        <span>ðŸ’¾</span> Save Settings
+                    </button>
+                </div>
+            </div>
+            
+            <div class="settings-cards">
+                <!-- Store Information Card -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div class="card-icon">ðŸª</div>
+                        <div>
+                            <div class="card-title">Store Information</div>
+                            <div class="card-subtitle">Appears on receipts and reports</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-groups">
+                        <div class="form-group">
+                            <label class="form-label required" for="storeName">
+                                Store Name
+                            </label>
+                            <input type="text" class="form-input" id="storeName" 
+                                   placeholder="Your Store Name" 
+                                   maxlength="50"
+                                   required>
+                            <div class="form-hint">
+                                Will appear at the top of all receipts
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="storeAddress">
+                                Store Address
+                            </label>
+                            <input type="text" class="form-input" id="storeAddress" 
+                                   placeholder="123 Street, City"
+                                   maxlength="100">
+                            <div class="form-hint">
+                                Optional: Address for receipts and invoices
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="storePhone">
+                                Phone Number
+                            </label>
+                            <input type="tel" class="form-input" id="storePhone" 
+                                   placeholder="+94 77 123 4567"
+                                   maxlength="20">
+                            <div class="form-hint">
+                                Customer contact number for receipts
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Version Card -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div class="card-icon">ðŸš€</div>
+                        <div>
+                            <div class="card-title">System Version</div>
+                            <div class="card-subtitle">Choose your POS system features</div>
+                        </div>
+                    </div>
+                    
+                    <div class="version-selector" id="versionSelector">
+                        <div class="version-option" data-version="lite">
+                            <div class="version-icon">âš¡</div>
+                            <div class="version-name">QuickPOS Lite</div>
+                            <div class="version-description">
+                                Basic POS features<br>
+                                No stock management<br>
+                                Fast & lightweight
+                            </div>
+                        </div>
+                        
+                        <div class="version-option" data-version="pro">
+                            <div class="version-icon">ðŸ¢</div>
+                            <div class="version-name">QuickPOS Pro</div>
+                            <div class="version-description">
+                                Full stock management<br>
+                                Advanced reporting<br>
+                                Multi-user support
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-hint warning" id="versionHint" style="margin-top: 16px;">
+                        <strong>Note:</strong> Changing to Pro version will enable stock management features. Some features may require backend setup.
+                    </div>
+                </div>
+                
+                <!-- Security Card -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div class="card-icon">ðŸ”’</div>
+                        <div>
+                            <div class="card-title">Security Settings</div>
+                            <div class="card-subtitle">Manage passwords and access control</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-groups">
+                        <div class="form-group">
+                            <label class="form-label" for="adminPassword">
+                                Admin/Owner Password
+                            </label>
+                            <div class="password-group">
+                                <input type="password" class="form-input" id="adminPassword" 
+                                       placeholder="Enter new admin password"
+                                       minlength="6">
+                                <button type="button" class="password-toggle" data-target="adminPassword">
+                                    ðŸ‘ï¸
+                                </button>
+                            </div>
+                            <div class="form-hint">
+                                Minimum 6 characters. Leave empty to keep current password
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="cashierPassword">
+                                Cashier Password
+                            </label>
+                            <div class="password-group">
+                                <input type="password" class="form-input" id="cashierPassword" 
+                                       placeholder="Enter new cashier password"
+                                       minlength="4">
+                                <button type="button" class="password-toggle" data-target="cashierPassword">
+                                    ðŸ‘ï¸
+                                </button>
+                            </div>
+                            <div class="form-hint">
+                                Minimum 4 characters. Cashiers can only process sales
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Localization Card -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div class="card-icon">ðŸŒ</div>
+                        <div>
+                            <div class="card-title">Localization</div>
+                            <div class="card-subtitle">Regional and currency settings</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-groups">
+                        <div class="form-group">
+                            <label class="form-label required" for="currencySymbol">
+                                Currency Symbol
+                            </label>
+                            <div class="toggle-group">
+                                <div class="toggle-label">
+                                    <span>Use LKR (Sri Lankan Rupees)</span>
+                                    <span class="toggle-description">All prices will be displayed in LKR</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="currencyToggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="form-hint">
+                                Currently supports LKR only. Other currencies may be added in future updates.
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="taxPercentage">
+                                Tax Percentage (%)
+                            </label>
+                            <input type="number" class="form-input" id="taxPercentage" 
+                                   placeholder="0.00"
+                                   min="0"
+                                   max="50"
+                                   step="0.01"
+                                   value="0">
+                            <div class="form-hint">
+                                Set to 0 for tax-exempt. Tax will be calculated on final amount.
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="shiftHours">
+                                Default Shift Hours
+                            </label>
+                            <input type="text" class="form-input" id="shiftHours" 
+                                   placeholder="08:00 - 16:00"
+                                   maxlength="20">
+                            <div class="form-hint">
+                                Used for reports and shift tracking
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer Actions -->
+            <div class="footer-actions">
+                <div class="system-info">
+                    <div>QuickPOS System</div>
+                    <div class="system-version">Version 1.0.0</div>
+                    <div>Â© 2024 QuickPOS Lite. All rights reserved.</div>
+                </div>
+                
+                <div>
+                    <button class="settings-btn reset-btn" id="clearCacheBtn" style="background-color: var(--warning-color);">
+                        <span>ðŸ—‘ï¸</span> Clear Cache
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/settings.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickPOS Pro - Make a Sale (Demo)</title>
+    <link rel="stylesheet" href="../styles/common.css">
+    
+    
+    <link rel="stylesheet" href="../styles/sales.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar expanded" id="sidebar">
+        <div class="hamburger-menu">
+            <button class="hamburger-btn" id="hamburgerBtn"><span id="hamburgerIcon">â˜°</span></button>
+            <div class="logo" id="logo">QuickPOS</div>
+        </div>
+        <div class="nav-items">
+            <a href="owner_dashboard.html" class="nav-item owner-only"><span class="nav-icon">ðŸ“‹</span><span class="nav-text">Dashboard</span></a>
+            <a href="sales.html" class="nav-item active"><span class="nav-icon">ðŸ’°</span><span class="nav-text">Make a Sale</span></a>
+            <a href="categories.html" class="nav-item"><span class="nav-icon">ðŸ·ï¸</span><span class="nav-text">Categories</span></a>
+            <a href="products.html" class="nav-item"><span class="nav-icon">ðŸ“¦</span><span class="nav-text">Products</span></a>
+            <a href="inventory.html" class="nav-item"><span class="nav-icon">ðŸšš</span><span class="nav-text">Inventory</span></a>
+            <a href="customers.html" class="nav-item"><span class="nav-icon">ðŸ‘¤</span><span class="nav-text">Customers</span></a>
+            <a href="quotations.html" class="nav-item"><span class="nav-icon">ðŸ“„</span><span class="nav-text">Quotations</span></a>
+            <a href="ledger.html" class="nav-item "><span class="nav-icon">ðŸ“’</span><span class="nav-text">Credit Ledger</span></a>
+            <a href="reports.html" class="nav-item"><span class="nav-icon">ðŸ“Š</span><span class="nav-text">Shift Reports</span></a>
+
+            <a href="users.html" class="nav-item owner-only"><span class="nav-icon">ðŸ‘¥</span><span class="nav-text">User Management</span></a>
+            
+            <a href="settings.html" class="nav-item owner-only"><span class="nav-icon">âš™ï¸</span><span class="nav-text">Settings</span></a>
+            <a href="login.html" class="nav-item" id="logoutBtn"><span class="nav-icon">ðŸšª</span><span class="nav-text">Logout</span></a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">Make a Sale</div>
+            <div class="user-info">
+                <span style="color:var(--text-light);font-size:14px;">Cashier: John Doe</span>
+                <div class="user-avatar">JD</div>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <!-- Products Section -->
+            <div class="products-section">
+                <div class="section-header">
+                    <div class="section-title">Products</div>
+                    <div class="category-filter">
+                        <button class="category-btn active" data-category="all">All</button>
+                        <button class="category-btn" data-category="cement">Cement</button>
+                        <button class="category-btn" data-category="plumbing">Plumbing</button>
+                        <button class="category-btn" data-category="steel">Steel</button>
+                    </div>
+                </div>
+                <div class="quick-stock-check">
+                    <input type="text" id="stockSearch" placeholder="ðŸ” Quick stock check...">
+                    <span id="stockResult"></span>
+                </div>
+                <div class="products-grid" id="productsGrid"></div>
+            </div>
+
+            <!-- Cart Section -->
+            <div class="cart-section">
+                <div class="cart-header">
+                    <div class="cart-title">Current Sale</div>
+                    <div class="cart-count">Items: <span id="itemCount">0</span></div>
+                </div>
+                
+                <!-- Customer Selection -->
+                <div class="customer-selector">
+                    <div class="customer-search-wrapper">
+                        <span class="customer-search-icon">ðŸ”</span>
+                        <input type="text" class="customer-search-input" id="customerSearch" placeholder="Search customer by name or phone...">
+                        <div class="customer-search-results" id="customerSearchResults"></div>
+                    </div>
+                    <div id="selectedCustomerDisplay">
+                        <div class="walkin-indicator">
+                            <span>ðŸ‘¤</span> Walk-in Customer (credit not available)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cart-items" id="cartItems">
+                    <div class="empty-cart">
+                        <div class="empty-cart-icon">ðŸ›’</div>
+                        <p>Your cart is empty</p>
+                        <p style="font-size:13px;margin-top:8px;">Click products to add</p>
+                    </div>
+                </div>
+                
+                <div class="cart-footer">
+                    <div class="total-row">
+                        <div class="total-label">Total Amount:</div>
+                        <div class="total-amount" id="totalAmount">LKR 0.00</div>
+                    </div>
+                    <div class="payment-buttons">
+                        <button class="payment-btn cash" id="cashPaymentBtn"><span>ðŸ’°</span> CASH</button>
+                        <button class="payment-btn card" id="cardPaymentBtn"><span>ðŸ’³</span> CARD</button>
+                        <button class="payment-btn credit" id="creditPaymentBtn" disabled><span>ðŸ“</span> CREDIT</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customize Modal -->
+    <div class="customize-modal" id="customizeModal">
+        <div class="customize-modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="customizeProductName">Product</div>
+                <button class="close-customize" id="closeCustomizeBtn">&times;</button>
+            </div>
+            <div class="unit-price-display">
+                <span>Unit price</span>
+                <span id="unitPriceDisplay">LKR 0.00</span>
+            </div>
+            <div class="input-group-sm">
+                <label>Quantity (kg/L/units)</label>
+                <input type="number" id="customQty" step="0.01" min="0.01" value="1.00">
+            </div>
+            <div class="price-group-big">
+                <label>ðŸ’° Price (LKR)</label>
+                <input type="number" id="customPrice" step="0.01" min="0" placeholder="0.00">
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="cancelCustomizeBtn">Cancel</button>
+                <button class="modal-btn primary" id="addCustomToCartBtn">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="payment-modal" id="paymentModal">
+        <div class="payment-modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Cash Payment</div>
+                <button class="close-modal" id="closePaymentModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="amount-row">
+                    <span class="amount-label">Total:</span>
+                    <span class="amount-value total" id="modalTotalAmount">LKR 0.00</span>
+                </div>
+                <div class="input-group">
+                    <label>Amount Received (LKR)</label>
+                    <input type="number" class="amount-input" id="amountReceived" step="0.01" min="0" placeholder="0.00">
+                </div>
+                <div class="quick-cash-buttons">
+                    <button class="quick-cash-btn" data-amount="100">+100</button>
+                    <button class="quick-cash-btn" data-amount="500">+500</button>
+                    <button class="quick-cash-btn" data-amount="1000">+1000</button>
+                    <button class="quick-cash-btn" data-amount="5000">+5000</button>
+                </div>
+                <div class="amount-row">
+                    <span class="amount-label">Change:</span>
+                    <span class="amount-value balance" id="balanceAmount">LKR 0.00</span>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="cancelPaymentBtn">Cancel</button>
+                <button class="modal-btn primary" id="finalizePaymentBtn">Complete Sale</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sale Complete Overlay -->
+    <div class="sale-complete-overlay" id="saleCompleteOverlay">
+        <div class="sale-complete-card">
+            <div class="sale-complete-icon">âœ…</div>
+            <div class="sale-complete-title" id="saleCompleteTitle">Sale Complete!</div>
+            <div class="sale-complete-amount" id="saleCompleteAmount">LKR 0.00</div>
+            <div class="sale-complete-message" id="saleCompleteMessage">Receipt printed successfully</div>
+            <button class="close-overlay-btn" id="closeOverlayBtn">Continue</button>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/sales.js"></script>
+</body>
+</html>
+
