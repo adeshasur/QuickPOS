@@ -1,0 +1,98 @@
+/* Filters Bar */
+.filters-bar {
+    background: var(--sidebar-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.filters-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* Search Wrap */
+.search-wrap { position: relative; flex: 1; min-width: 250px; max-width: 400px; }
+.search-input {
+    width: 100%; padding: 10px 15px 10px 40px; border: 1.5px solid var(--border-color);
+    border-radius: 10px; font-size: 14px; background: var(--bg-color); outline: none;
+}
+.search-input:focus { border-color: var(--primary-color); background: #fff; }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light); }
+
+/* Date Tabs */
+.date-tabs { display: flex; background: var(--bg-color); border-radius: 10px; padding: 4px; gap: 4px; }
+.dtab {
+    padding: 8px 16px; border-radius: 8px; border: none; background: none;
+    font-size: 13px; font-weight: 600; color: var(--text-light); cursor: pointer; transition: 0.2s;
+}
+.dtab.active { background: #fff; color: var(--primary-color); box-shadow: var(--shadow); }
+
+.pay-filter {
+    padding: 10px; border: 1.5px solid var(--border-color); border-radius: 10px;
+    font-size: 14px; background: #fff; cursor: pointer;
+}
+
+/* Summary Pills */
+.summary-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 5px; }
+.sum-pill {
+    background: var(--bg-color); border: 1px solid var(--border-color);
+    border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 600; color: var(--text-dark);
+}
+.sum-pill .val { font-weight: 800; color: var(--primary-color); }
+.sum-pill .val.green { color: var(--success-color); }
+
+/* Table Area */
+.table-wrap { flex: 1; overflow-y: auto; background: #fff; }
+table { width: 100%; border-collapse: collapse; min-width: 800px; }
+thead th {
+    background: #fff; padding: 15px 20px; text-align: left; font-size: 12px;
+    font-weight: 700; color: var(--text-light); text-transform: uppercase;
+    border-bottom: 2px solid var(--border-color); position: sticky; top: 0; z-index: 5;
+}
+tbody tr { border-bottom: 1px solid var(--border-color); cursor: pointer; transition: 0.1s; }
+tbody tr:hover { background: var(--hover-color); }
+tbody td { padding: 14px 20px; font-size: 14px; color: var(--text-dark); }
+
+.inv-id { font-weight: 700; color: var(--primary-color); }
+.pay-badge {
+    padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase;
+}
+.pay-badge.cash { background: rgba(45, 106, 79, 0.1); color: var(--success-color); }
+.pay-badge.bank { background: rgba(93, 138, 168, 0.1); color: var(--primary-color); }
+.amount-cell { font-weight: 800; color: var(--success-color); text-align: right; }
+
+/* Action Button */
+.row-btn {
+    width: 35px; height: 35px; border-radius: 8px; border: none; background: var(--bg-color);
+    cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: var(--primary-color);
+}
+.row-btn:hover { background: var(--primary-color); color: #fff; }
+
+/* Receipt Modal Styles */
+.modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 500;
+    display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.2s;
+}
+.modal-bg.active { opacity: 1; visibility: visible; }
+.modal-box {
+    background: #fff; border-radius: 15px; width: 90%; max-width: 400px;
+    max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;
+}
+
+.modal-hdr { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+.modal-body { padding: 20px; overflow-y: auto; flex: 1; font-family: 'Courier New', Courier, monospace; }
+
+/* Receipt Print Elements */
+.receipt-shop { text-align: center; margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px; }
+.receipt-shop-name { font-size: 18px; font-weight: 800; }
+.receipt-meta { font-size: 13px; margin-bottom: 15px; line-height: 1.6; }
+.receipt-item { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+.receipt-total-box { border-top: 1px solid #000; margin-top: 10px; padding-top: 10px; display: flex; justify-content: space-between; font-weight: 800; font-size: 18px; }
+
+@media print {
+    body * { visibility: hidden; }
+    #receiptBody, #receiptBody * { visibility: visible; }
+    #receiptBody { position: absolute; left: 0; top: 0; width: 80mm; }
+}

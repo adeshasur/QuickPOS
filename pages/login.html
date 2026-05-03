@@ -2,9 +2,161 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login - QuickPOS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickPOS Login</title>
+    <link rel="stylesheet" href="../assets/css/common.css">
 </head>
 <body>
-    <h1>Login</h1>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="brand-header">
+                <h1 class="brand-title">
+                    <span class="quick">Quick</span><span class="pos">POS</span><span class="quick"> Hardware</span>
+                </h1>
+                <p class="brand-subtitle">by Fides.M</p>
+            </div>
+            
+            <div class="error-message" id="errorMessage">
+                <span>⚠️</span> Invalid username or password
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username" class="form-label">Username</label>
+                    <div class="input-group">
+                        <input type="text" id="username" class="form-input" placeholder="Enter your username" required autofocus>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                        <button type="button" class="password-toggle" id="passwordToggle">👁️</button>
+                    </div>
+                </div>
+                
+                <div class="quick-fill">
+                    <button type="button" class="quick-btn owner" id="quickAdminBtn">Use Owner Account</button>
+                    <button type="button" class="quick-btn cashier" id="quickStaffBtn">Use Cashier Account</button>
+                </div>
+                
+                <button type="submit" class="login-button" id="loginBtn">
+                    <span>Login</span>
+                    <div class="loading" id="loadingSpinner"></div>
+                </button>
+            </form>
+            
+            <div class="demo-credentials">
+                <div class="demo-title"><span>🔐</span> Demo Accounts</div>
+                <div class="demo-account">
+                    <div class="demo-info"><strong>admin</strong> / 123</div>
+                    <div class="demo-role owner">Owner</div>
+                </div>
+                <div class="demo-account">
+                    <div class="demo-info"><strong>staff</strong> / 456</div>
+                    <div class="demo-role cashier">Cashier</div>
+                </div>
+            </div>
+            
+            <div class="footer-note">
+                Offline-first desktop POS system for Windows PCs •
+                <a href="#" class="footer-link" id="forgotPassword">Forgot Password?</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Valid users database
+        const validUsers = {
+            'admin': { password: '123', name: 'Admin', role: 'owner', displayName: 'Admin User' },
+            'staff': { password: '456', name: 'Staff', role: 'cashier', displayName: 'Cashier User' }
+        };
+
+        // DOM Elements
+        const loginForm = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const passwordToggle = document.getElementById('passwordToggle');
+        const errorMessage = document.getElementById('errorMessage');
+        const loginBtn = document.getElementById('loginBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const quickAdminBtn = document.getElementById('quickAdminBtn');
+        const quickStaffBtn = document.getElementById('quickStaffBtn');
+        const forgotPasswordLink = document.getElementById('forgotPassword');
+
+        // Show/Hide Password
+        passwordToggle.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.textContent = type === 'password' ? '👁️' : '👁️🗨️';
+        });
+
+        // Quick fill buttons
+        quickAdminBtn.addEventListener('click', function() {
+            usernameInput.value = 'admin'; passwordInput.value = '123'; errorMessage.classList.remove('show');
+        });
+
+        quickStaffBtn.addEventListener('click', function() {
+            usernameInput.value = 'staff'; passwordInput.value = '456'; errorMessage.classList.remove('show');
+        });
+
+        // Forgot password
+        forgotPasswordLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('For security, please contact the system administrator to reset your password.\n\nDemo accounts:\n• Owner: admin / 123\n• Cashier: staff / 456');
+        });
+
+        // Login function
+        function loginUser(username, password) {
+            if (!validUsers[username]) return { success: false, message: 'Invalid username' };
+            const user = validUsers[username];
+            if (user.password !== password) return { success: false, message: 'Invalid password' };
+            return { success: true, user: { name: user.displayName, role: user.role, username: username } };
+        }
+
+        // Handle form submission
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            errorMessage.classList.remove('show');
+            loginBtn.disabled = true;
+            loadingSpinner.style.display = 'block';
+            loginBtn.innerHTML = '<div class="loading"></div><span>Logging in...</span>';
+            
+            setTimeout(() => {
+                const result = loginUser(username, password);
+                if (result.success) {
+                    localStorage.setItem('quickpos-user', JSON.stringify({
+                        name: result.user.name, role: result.user.role, username: result.user.username, timestamp: new Date().toISOString()
+                    }));
+                    if (result.user.role === 'owner') {
+                        window.location.href = 'owner_dashboard.html';
+                    } else {
+                        window.location.href = 'sales.html';
+                    }
+                } else {
+                    errorMessage.classList.add('show');
+                    loginBtn.disabled = false;
+                    loadingSpinner.style.display = 'none';
+                    loginBtn.innerHTML = '<span>Login</span><div class="loading"></div>';
+                }
+            }, 800);
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            usernameInput.focus();
+        });
+
+        usernameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') passwordInput.focus();
+        });
+        
+        passwordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') loginForm.dispatchEvent(new Event('submit'));
+        });
+    </script>
 </body>
 </html>

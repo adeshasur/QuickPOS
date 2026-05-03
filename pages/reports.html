@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickPOS Pro - Reports</title>
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/reports.css">
+</head>
+<body>
+    <div class="sidebar expanded" id="sidebar">
+        <div class="hamburger-menu">
+            <button class="hamburger-btn" id="hamburgerBtn"><span id="hamburgerIcon">☰</span></button>
+            <div class="logo" id="logo">QuickPOS</div>
+        </div>
+        <div class="nav-items">
+            <a href="owner_dashboard.html" class="nav-item owner-only"><span class="nav-icon">📋</span><span class="nav-text">Dashboard</span></a>
+            <a href="sales.html" class="nav-item"><span class="nav-icon">💰</span><span class="nav-text">Make a Sale</span></a>
+            <a href="categories.html" class="nav-item"><span class="nav-icon">🏷️</span><span class="nav-text">Categories</span></a>
+            <a href="products.html" class="nav-item"><span class="nav-icon">📦</span><span class="nav-text">Products</span></a>
+            <a href="inventory.html" class="nav-item"><span class="nav-icon">🚚</span><span class="nav-text">Inventory</span></a>
+            <a href="customers.html" class="nav-item"><span class="nav-icon">👤</span><span class="nav-text">Customers</span></a>
+            <a href="quotations.html" class="nav-item"><span class="nav-icon">📄</span><span class="nav-text">Quotations</span></a>
+            <a href="ledger.html" class="nav-item"><span class="nav-icon">📒</span><span class="nav-text">Credit Ledger</span></a>
+            <a href="reports.html" class="nav-item active"><span class="nav-icon">📊</span><span class="nav-text">Shift Reports</span></a>
+            <a href="users.html" class="nav-item owner-only"><span class="nav-icon">👥</span><span class="nav-text">User Management</span></a>
+            <a href="settings.html" class="nav-item owner-only"><span class="nav-icon">⚙️</span><span class="nav-text">Settings</span></a>
+            <a href="#" class="nav-item" id="logoutBtn"><span class="nav-icon">🚪</span><span class="nav-text">Logout</span></a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">Reports & Analytics</div>
+            <div class="user-info">
+                <span id="shiftInfo">Loading...</span>
+                <div class="user-avatar">👤</div>
+            </div>
+        </div>
+        
+        <div class="reports-dashboard">
+            <div class="print-header">
+                <div class="print-title">QuickPOS Pro - Shift Report</div>
+                <div class="print-subtitle" id="printDate"></div>
+                <div class="print-subtitle" id="printShift"></div>
+            </div>
+            
+            <div class="reports-header">
+                <div class="header-title">
+                    <span>📊</span> Daily Shift Report
+                </div>
+                <div class="header-controls">
+                    <button class="report-btn generate-btn" id="generateReportBtn"><span>🔄</span> Generate</button>
+                    <button class="report-btn print-btn" id="printReportBtn"><span>🖨️</span> Print</button>
+                </div>
+            </div>
+            
+            <div class="summary-cards">
+                <div class="summary-card total-sales">
+                    <div class="card-header">
+                        <div class="card-title">Total Sales</div>
+                        <div class="card-icon">💰</div>
+                    </div>
+                    <div class="card-amount" id="totalSalesAmount">LKR 0.00</div>
+                    <div class="card-subtitle">Today's total revenue</div>
+                    <div class="card-details" id="totalSalesDetails">No sales data available</div>
+                </div>
+                
+                <div class="summary-card cash-collected">
+                    <div class="card-header">
+                        <div class="card-title">Cash Collected</div>
+                        <div class="card-icon">💵</div>
+                    </div>
+                    <div class="card-amount" id="cashCollectedAmount">LKR 0.00</div>
+                    <div class="card-subtitle">Total cash payments</div>
+                    <div class="card-details" id="cashCollectedDetails">No cash transactions</div>
+                </div>
+                
+                <div class="summary-card card-payments">
+                    <div class="card-header">
+                        <div class="card-title">Card/Bank Payments</div>
+                        <div class="card-icon">💳</div>
+                    </div>
+                    <div class="card-amount" id="cardPaymentsAmount">LKR 0.00</div>
+                    <div class="card-subtitle">Total card transactions</div>
+                    <div class="card-details" id="cardPaymentsDetails">No card transactions</div>
+                </div>
+            </div>
+            
+            <div class="analysis-grid">
+                <div class="analysis-card">
+                    <div class="section-header">
+                        <div class="section-title"><span>🏆</span> Top Selling Items</div>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-wrapper">
+                            <table class="top-items-table" id="topItemsTable">
+                                <thead>
+                                    <tr><th>Product</th><th>Qty</th><th>Revenue</th></tr>
+                                </thead>
+                                <tbody id="topItemsTableBody">
+                                    <tr id="emptyItemsRow">
+                                        <td colspan="3">
+                                            <div class="empty-state">
+                                                <div class="empty-icon">📦</div>
+                                                <p>No top items data</p>
+                                                <p>Generate report to see top products</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="analysis-card">
+                    <div class="section-header">
+                        <div class="section-title"><span>📦</span> Stock-In History</div>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-wrapper">
+                            <table class="inventory-table" id="inventoryTable">
+                                <thead>
+                                    <tr><th>Date</th><th>Item</th><th>Quantity Added</th></tr>
+                                </thead>
+                                <tbody id="inventoryTableBody">
+                                    <tr id="emptyInventoryRow">
+                                        <td colspan="3">
+                                            <div class="empty-state">
+                                                <div class="empty-icon">📦</div>
+                                                <p>No stock-in history available</p>
+                                                <p>Record inventory additions to see data here</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detailed-reports">
+                <div class="sales-report-card">
+                    <div class="section-header">
+                        <div class="section-title"><span>🛒</span> Sales Report</div>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-wrapper">
+                            <table class="sales-table" id="salesTable">
+                                <thead>
+                                    <tr><th>Date</th><th>Bill ID</th><th>Items Sold</th><th>Total Amount</th></tr>
+                                </thead>
+                                <tbody id="salesTableBody">
+                                    <tr id="emptySalesRow">
+                                        <td colspan="4">
+                                            <div class="empty-state">
+                                                <div class="empty-icon">📊</div>
+                                                <p>No sales data available</p>
+                                                <p>Click "Generate" to load sales data</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="print-footer">
+                <div>Generated by QuickPOS Pro</div>
+                <div>Report ID: <span id="printReportId">---</span></div>
+                <div>Thank you for using QuickPOS!</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/reports.js"></script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickPOS Pro - Quotation (Hardware)</title>
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/quotations.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div class="sidebar expanded" id="sidebar">
+        <div class="hamburger-menu">
+            <button class="hamburger-btn" id="hamburgerBtn"><span id="hamburgerIcon">☰</span></button>
+            <div class="logo" id="logo">QuickPOS</div>
+        </div>
+        <div class="nav-items">
+            <a href="owner_dashboard.html" class="nav-item owner-only"><span class="nav-icon">📋</span><span class="nav-text">Dashboard</span></a>
+            <a href="sales.html" class="nav-item"><span class="nav-icon">💰</span><span class="nav-text">Make a Sale</span></a>
+            <a href="categories.html" class="nav-item"><span class="nav-icon">🏷️</span><span class="nav-text">Categories</span></a>
+            <a href="products.html" class="nav-item"><span class="nav-icon">📦</span><span class="nav-text">Products</span></a>
+            <a href="inventory.html" class="nav-item"><span class="nav-icon">🚚</span><span class="nav-text">Inventory</span></a>
+            <a href="customers.html" class="nav-item"><span class="nav-icon">👤</span><span class="nav-text">Customers</span></a>
+            <a href="quotations.html" class="nav-item active"><span class="nav-icon">📄</span><span class="nav-text">Quotations</span></a>
+            <a href="ledger.html" class="nav-item "><span class="nav-icon">📒</span><span class="nav-text">Credit Ledger</span></a>
+            <a href="reports.html" class="nav-item"><span class="nav-icon">📊</span><span class="nav-text">Shift Reports</span></a>
+            <a href="users.html" class="nav-item owner-only"><span class="nav-icon">👥</span><span class="nav-text">User Management</span></a>
+            <a href="settings.html" class="nav-item owner-only"><span class="nav-icon">⚙️</span><span class="nav-text">Settings</span></a>
+            <a href="#" class="nav-item" id="logoutBtn"><span class="nav-icon">🚪</span><span class="nav-text">Logout</span></a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">Hardware Quotation</div>
+            <div class="user-info">
+                <span id="shiftTime">Loading...</span>
+                <div class="user-avatar">👤</div>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <div class="products-section">
+                <div class="section-header">
+                    <div class="section-title">Hardware Items</div>
+                    <div class="category-filter">
+                        <button class="category-btn active" data-category="all">All</button>
+                        <button class="category-btn" data-category="plumbing">Plumbing</button>
+                        <button class="category-btn" data-category="cement">Cement</button>
+                        <button class="category-btn" data-category="paint">Paint</button>
+                        <button class="category-btn" data-category="steel">Steel</button>
+                    </div>
+                </div>
+                <div class="products-grid" id="productsGrid"></div>
+            </div>
+
+            <div class="quotation-side">
+                <div class="quotation-header">
+                    <div class="quotation-title">Quotation</div>
+                    <div class="quotation-count">Items: <span id="quoteItemCount">0</span></div>
+                </div>
+                <div class="customer-details">
+                    <div class="customer-field">
+                        <label>Customer Name</label>
+                        <input type="text" id="customerName" value="Walk-in Customer">
+                    </div>
+                    <div class="customer-field">
+                        <label>Contact No</label>
+                        <input type="text" id="customerPhone" placeholder="07X XXX XXXX">
+                    </div>
+                    <div class="customer-field">
+                        <label>Valid Until</label>
+                        <input type="date" id="validUntil">
+                    </div>
+                </div>
+                <div class="quotation-items" id="quotationItems">
+                    <div class="empty-quote"><div class="empty-quote-icon">📋</div><p>No items added</p></div>
+                </div>
+                <div class="quotation-footer">
+                    <div class="total-row">
+                        <div class="total-label">Total (LKR):</div>
+                        <div class="total-amount" id="quoteTotal">0.00</div>
+                    </div>
+                    <button class="pdf-button" id="generatePDFBtn"><span>📎</span> Generate PDF Quotation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="customize-modal" id="customizeModal">
+        <div class="customize-modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="customizeProductName">Product</div>
+                <button class="close-customize" id="closeCustomizeBtn">&times;</button>
+            </div>
+            <div class="unit-price-display">
+                <span>Unit price</span>
+                <span id="unitPriceDisplay">LKR 0.00</span>
+            </div>
+            <div class="input-group-sm">
+                <label>Quantity (ft/kg/pieces)</label>
+                <input type="number" id="customQty" step="0.01" min="0.01" value="1.00">
+            </div>
+            <div class="price-group-big">
+                <label>💰 Price (LKR) — edit manually</label>
+                <input type="number" id="customPrice" step="0.01" min="0">
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="cancelCustomizeBtn">Cancel</button>
+                <button class="modal-btn primary" id="addCustomToCartBtn">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="pdf-preview-modal" id="pdfPreviewModal">
+        <button class="pdf-preview-close" id="closePreviewBtn">&times;</button>
+        <div id="pdfPreviewContainer" style="margin-top: 20px;"></div>
+        <div class="pdf-preview-actions">
+            <button class="pdf-action-btn secondary" id="editQuoteBtn">✏️ Edit</button>
+            <button class="pdf-action-btn primary" id="downloadPdfBtn">📥 Download PDF</button>
+        </div>
+    </div>
+
+    <script src="../assets/js/quotations.js"></script>
+</body>
+</html>

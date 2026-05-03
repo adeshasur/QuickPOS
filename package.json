@@ -1,17 +1,17 @@
 {
   "name": "quickpos",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "QuickPOS Hardware Management System",
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "electron ."
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/adeshasur/QuickPOS.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Adheesha",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {

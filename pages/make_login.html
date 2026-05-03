@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickPOS Login - Choice</title>
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/make_login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="brand-header">
+                <h1 class="brand-title">
+                    <span class="quick">Quick</span><span class="pos">POS</span>
+                </h1>
+                <p class="brand-subtitle">by Fides.M</p>
+            </div>
+            
+            <div class="error-message" id="errorMessage">
+                Please fill in all fields and select a role to continue.
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" class="form-input" placeholder="Username" required autofocus>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" class="form-input" placeholder="Password" required>
+                </div>
+                
+                <div class="role-selector">
+                    <div class="role-option">
+                        <input type="radio" id="cashier" name="role" value="cashier" class="role-radio">
+                        <label for="cashier" class="role-label">Cashier</label>
+                    </div>
+                    <div class="role-option">
+                        <input type="radio" id="owner" name="role" value="owner" class="role-radio">
+                        <label for="owner" class="role-label">Owner</label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="login-button">Login</button>
+            </form>
+            
+            <div class="footer-note">
+                Offline-first desktop POS system for Windows PCs
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/make_login.js"></script>
+</body>
+</html>
