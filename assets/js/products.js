@@ -1,24 +1,5 @@
-// Mock categories - should eventually come from SQLite
-let categories = [
-    { id: 1, name: "Groceries" },
-    { id: 2, name: "Beverages" },
-    { id: 3, name: "Dairy" },
-    { id: 4, name: "Vegetables" },
-    { id: 5, name: "Fruits" },
-    { id: 6, name: "Snacks" },
-    { id: 7, name: "Bakery" },
-    { id: 8, name: "Meat & Seafood" },
-    { id: 9, name: "Household" },
-    { id: 10, name: "Personal Care" }
-];
-
-// Mock products
-let products = [
-    { id: 1, barcode: "4791234567890", name: "Ceylon Black Tea 250g", categoryId: 2, basePrice: 550.00, discount: 50, finalPrice: 500.00, currentStock: 28, alertLevel: 10, isWeighted: false, unitType: "pkt", costPrice: 450.00, expiryDate: "2025-12-01" },
-    { id: 2, barcode: "4790000000001", name: "Nadu Raw Rice", categoryId: 1, basePrice: 240.00, discount: 0, finalPrice: 240.00, currentStock: 120, alertLevel: 50, isWeighted: true, unitType: "kg", costPrice: 210.00, expiryDate: "2025-06-15" },
-    { id: 3, barcode: "4790000000002", name: "Full Cream Milk 1L", categoryId: 3, basePrice: 420.00, discount: 20, finalPrice: 400.00, currentStock: 45, alertLevel: 15, isWeighted: false, unitType: "bottle", costPrice: 380.00, expiryDate: "2024-05-20" },
-    { id: 4, barcode: "4790000000003", name: "Fresh Tomatoes", categoryId: 4, basePrice: 180.00, discount: 0, finalPrice: 180.00, currentStock: 15, alertLevel: 20, isWeighted: true, unitType: "kg", costPrice: 140.00, expiryDate: "2024-05-10" }
-];
+let categories = [];
+let products = [];
 
 // DOM elements
 const addProductBtn = document.getElementById('addProductBtn');
@@ -78,10 +59,6 @@ function isLowStock(currentStock, alertLevel) {
     return currentStock <= alertLevel;
 }
 
-function saveProducts() {
-    localStorage.setItem('quickpos-products', JSON.stringify(products));
-}
-
 function renderCategoryDropdowns() {
     while (productCategory.options.length > 1) productCategory.remove(1);
     while (editProductCategory.options.length > 1) editProductCategory.remove(1);
@@ -106,10 +83,10 @@ function renderProductsTable() {
     productsTableBody.innerHTML = '';
     
     products.forEach(product => {
-        const category = categories.find(cat => cat.id === product.categoryId);
+        const category = categories.find(cat => cat.id === product.category_id);
         const categoryName = category ? category.name : 'Uncategorized';
-        const hasDiscount = product.discount > 0;
-        const isLow = isLowStock(product.currentStock, product.alertLevel);
+        const finalPrice = product.selling_price;
+        const isLow = isLowStock(product.current_stock, product.alert_level);
         const isExpired = product.expiryDate && new Date(product.expiryDate) < new Date();
         
         let measurementCell = product.isWeighted 
@@ -122,13 +99,10 @@ function renderProductsTable() {
             <td class="product-name-cell">${product.name}</td>
             <td class="category-cell">${categoryName}</td>
             ${measurementCell}
-            <td class="stock-cell ${isLow ? 'low-stock' : 'normal'}">${product.currentStock} ${isLow ? '<span class="material-symbols-rounded warning s18" style="vertical-align:middle; margin-left:4px;">warning</span>' : ''}</td>
-            <td class="expiry-cell ${isExpired ? 'low-stock' : ''}">${product.expiryDate || 'N/A'} ${isExpired ? '<span class="material-symbols-rounded danger s18" style="vertical-align:middle; margin-left:4px;">event_busy</span>' : ''}</td>
+            <td class="stock-cell ${isLow ? 'low-stock' : 'normal'}">${product.current_stock} ${isLow ? '<span class="material-symbols-rounded warning s18" style="vertical-align:middle; margin-left:4px;">warning</span>' : ''}</td>
+            <td class="expiry-cell ${isExpired ? 'low-stock' : ''}">${product.expiry_date || 'N/A'} ${isExpired ? '<span class="material-symbols-rounded danger s18" style="vertical-align:middle; margin-left:4px;">event_busy</span>' : ''}</td>
             <td class="price-cell">
-                ${hasDiscount ? `
-                    <span class="base-price">${formatCurrency(product.basePrice)}</span>
-                    <span class="final-price">${formatCurrency(product.finalPrice)}</span>
-                ` : `<span class="final-price">${formatCurrency(product.finalPrice)}</span>`}
+                <span class="final-price">${formatCurrency(finalPrice)}</span>
             </td>
             <td class="owner-only actions-cell">
                 <div class="action-buttons">
@@ -174,7 +148,7 @@ function openAddProductModal() {
     setTimeout(() => productBarcode.focus(), 300);
 }
 
-function addProduct(event) {
+async function addProduct(event) {
     event.preventDefault();
     const barcode = productBarcode.value.trim();
     const name = productName.value.trim();
@@ -182,23 +156,25 @@ function addProduct(event) {
     const stock = parseInt(initialStock.value) || 0;
     const alert = parseInt(alertLevel.value) || 10;
     const expiry = expiryDate.value;
-    const base = parseFloat(basePrice.value);
-    const discount = parseFloat(discountAmount.value) || 0;
+    const price = parseFloat(basePrice.value);
     const isWeighted = sellByWeight.checked;
     const unit = unitType.value.trim();
     
-    if (!name || !categoryId || !base || base <= 0 || !barcode) { window.alert('Please fill all required fields'); return; }
-    if (products.some(p => p.barcode === barcode)) { window.alert('Barcode already exists'); return; }
-    if (discount > base) { window.alert('Discount too high'); return; }
+    if (!name || !categoryId || !price || price <= 0 || !barcode) { window.alert('Please fill all required fields'); return; }
     
-    const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-    products.push({
-        id: newId, barcode: barcode, name: name, categoryId: categoryId, basePrice: base, discount: discount,
-        finalPrice: calculateFinalPrice(base, discount), currentStock: stock, alertLevel: alert,
-        isWeighted: isWeighted, unitType: unit, costPrice: base * 0.8, expiryDate: expiry
-    });
-    
-    saveProducts(); renderProductsTable(); addProductModal.classList.remove('active'); window.alert('Product added!');
+    try {
+        await window.api.addProduct({
+            barcode, name, categoryId, 
+            cost: price * 0.8, price, 
+            stock, unit, expiry
+        });
+        addProductModal.classList.remove('active');
+        window.alert('Product added!');
+        init(); // Refresh data
+    } catch (err) {
+        console.error(err);
+        window.alert('Error adding product: ' + err.message);
+    }
 }
 
 function openEditProductModal(productId) {
@@ -208,15 +184,15 @@ function openEditProductModal(productId) {
     editProductId.value = product.id; 
     editProductBarcode.value = product.barcode || '';
     editProductName.value = product.name; 
-    editProductCategory.value = product.categoryId;
-    editCurrentStock.value = product.currentStock; 
-    editAlertLevel.value = product.alertLevel;
-    editExpiryDate.value = product.expiryDate || '';
-    editBasePrice.value = product.basePrice; 
-    editDiscountAmount.value = product.discount;
+    editProductCategory.value = product.category_id;
+    editCurrentStock.value = product.current_stock; 
+    editAlertLevel.value = product.alert_level;
+    editExpiryDate.value = product.expiry_date || '';
+    editBasePrice.value = product.selling_price; 
+    editDiscountAmount.value = 0;
     
-    editSellByWeight.checked = product.isWeighted;
-    editUnitType.disabled = false; editUnitField.classList.remove('disabled'); editUnitType.value = product.unitType || '';
+    editSellByWeight.checked = product.is_weighted;
+    editUnitType.disabled = false; editUnitField.classList.remove('disabled'); editUnitType.value = product.unit_type || '';
     
     updateEditPriceDisplay(); editProductModal.classList.add('active'); setTimeout(() => editProductName.focus(), 300);
 }
@@ -291,27 +267,28 @@ function setupEventListeners() {
     });
 }
 
-function init() {
+async function init() {
     // Initialize Components
     Components.init({
         title: 'Products Management'
     });
 
-    const savedProducts = localStorage.getItem('quickpos-products');
-    if (savedProducts) {
-        const parsed = JSON.parse(savedProducts);
-        if (parsed && parsed.length > 0) products = parsed;
-    } else { saveProducts(); }
-    
-    renderCategoryDropdowns(); renderProductsTable(); setupEventListeners();
+    try {
+        categories = await window.api.getCategories();
+        products = await window.api.getProducts();
+        
+        renderCategoryDropdowns(); 
+        renderProductsTable(); 
+        setupEventListeners();
+    } catch (err) {
+        console.error('Failed to load data:', err);
+    }
     
     const user = JSON.parse(localStorage.getItem('quickpos-user'));
     if (!user) {
         window.location.href = 'login.html';
     } else {
-        // Hide Owner Menus and Action Buttons if Cashier
         if (user.role === 'cashier') {
-            // Hide add/edit/delete buttons for cashier
             if(addProductBtn) addProductBtn.style.display = 'none';
             document.querySelectorAll('.actions-cell').forEach(cell => cell.style.display = 'none');
             const lastHeader = document.querySelector('.products-table th:last-child');

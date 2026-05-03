@@ -1,5 +1,5 @@
-// Sample sales data (simulating database)
-let salesData = JSON.parse(localStorage.getItem('quickpos-dashboard-sales')) || generateSampleData();
+let salesData = [];
+let products = [];
 
 // DOM Elements
 const totalRevenueEl = document.getElementById('totalRevenue');
@@ -87,27 +87,23 @@ function filterDataByRange(range) {
     });
 }
 
-function calculateMetrics(filteredData, range) {
+function calculateMetrics(filteredData) {
     const metrics = {
         totalRevenue: 0, totalItemsSold: 0, transactionCount: filteredData.length,
         customerCount: 0, timePeriodSales: [0, 0, 0], categorySales: {}
     };
     
     filteredData.forEach(sale => {
-        metrics.totalRevenue += sale.total;
-        metrics.customerCount += sale.customerCount || 1;
+        metrics.totalRevenue += sale.total_amount;
+        metrics.customerCount += 1;
         
-        sale.items.forEach(item => {
-            metrics.totalItemsSold += item.quantity;
-            if (item.category) {
-                metrics.categorySales[item.category] = (metrics.categorySales[item.category] || 0) + (item.price * item.quantity);
-            }
-        });
+        // Note: Real items would need a separate join or storage in SQLite
+        // For now, let's assume sale object has some basic info or we fetch items
         
         const saleHour = new Date(sale.timestamp).getHours();
-        if (saleHour >= 4 && saleHour < 12) metrics.timePeriodSales[0] += sale.total;
-        else if (saleHour >= 12 && saleHour < 20) metrics.timePeriodSales[1] += sale.total;
-        else metrics.timePeriodSales[2] += sale.total;
+        if (saleHour >= 4 && saleHour < 12) metrics.timePeriodSales[0] += sale.total_amount;
+        else if (saleHour >= 12 && saleHour < 20) metrics.timePeriodSales[1] += sale.total_amount;
+        else metrics.timePeriodSales[2] += sale.total_amount;
     });
     
     metrics.avgBillAmount = metrics.transactionCount > 0 ? metrics.totalRevenue / metrics.transactionCount : 0;
@@ -115,18 +111,13 @@ function calculateMetrics(filteredData, range) {
 }
 
 function calculateStockVolume() {
-    const products = JSON.parse(localStorage.getItem('quickpos-products')) || [];
     let totalStock = 0;
-    products.forEach(product => { totalStock += product.stock || 0; });
+    products.forEach(product => { totalStock += product.current_stock || 0; });
     return totalStock;
 }
 
 function getLowStockProducts() {
-    const products = JSON.parse(localStorage.getItem('quickpos-products')) || [];
-    return products.filter(product => {
-        const stock = product.stock || 0;
-        return stock > 0 && stock < 5;
-    });
+    return products.filter(product => product.current_stock > 0 && product.current_stock < product.alert_level);
 }
 
 function updateBestCategoryChart(categorySales) {
@@ -174,7 +165,7 @@ function updateReorderList() {
             <div class="reorder-item-icon">📦</div>
             <div class="reorder-item-details">
                 <div class="reorder-item-name">${product.name}</div>
-                <div class="reorder-item-meta">Only ${product.stock} units left • Category: ${product.category || 'General'}</div>
+                <div class="reorder-item-meta">Only ${product.current_stock} ${product.unit_type || 'units'} left • Threshold: ${product.alert_level}</div>
             </div>
             <button class="reorder-item-action">Reorder</button>
         `;
@@ -183,8 +174,8 @@ function updateReorderList() {
 }
 
 function updateSalesOverview(todayData, weekData) {
-    const todayMetrics = calculateMetrics(todayData, 'today');
-    const weekMetrics = calculateMetrics(weekData, 'last7');
+    const todayMetrics = calculateMetrics(todayData);
+    const weekMetrics = calculateMetrics(weekData);
     
     todayTransactionsEl.textContent = todayMetrics.transactionCount;
     weekTransactionsEl.textContent = weekMetrics.transactionCount;
@@ -284,44 +275,49 @@ function updateDashboard(range) {
 }
 
 
-document.addEventListener('DOMContentLoaded', () => {
+async function init() {
     const user = JSON.parse(localStorage.getItem('quickpos-user'));
     if (!user) {
         window.location.href = 'login.html';
         return;
     }
 
-    // Initialize Components
-    const filtersHtml = `
-        <div class="data-filters">
-            <span class="date-range-label">View Data For:</span>
-            <div class="date-range-buttons">
-                <button class="date-range-btn active" data-range="today">Today</button>
-                <button class="date-range-btn" data-range="yesterday">Yesterday</button>
-                <button class="date-range-btn" data-range="last7">Last 7 Days</button>
-                <button class="date-range-btn" data-range="thisMonth">This Month</button>
-                <button class="date-range-btn" data-range="lastMonth">Last Month</button>
-                <button class="custom-range-btn">
-                    <span>📅</span> Custom Range
-                </button>
+    try {
+        products = await window.api.getProducts();
+        salesData = await window.api.getSalesHistory();
+        
+        // Initialize Components
+        const filtersHtml = `
+            <div class="data-filters">
+                <span class="date-range-label">View Data For:</span>
+                <div class="date-range-buttons">
+                    <button class="date-range-btn active" data-range="today">Today</button>
+                    <button class="date-range-btn" data-range="yesterday">Yesterday</button>
+                    <button class="date-range-btn" data-range="last7">Last 7 Days</button>
+                    <button class="date-range-btn" data-range="thisMonth">This Month</button>
+                    <button class="date-range-btn" data-range="lastMonth">Last Month</button>
+                </div>
             </div>
-        </div>
-    `;
+        `;
 
-    Components.init({
-        title: 'Executive Dashboard',
-        extra: filtersHtml
-    });
-
-    // Re-select date range buttons after injection
-    const dateRangeButtons = document.querySelectorAll('.date-range-btn');
-    dateRangeButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.date-range-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            updateDashboard(btn.dataset.range);
+        Components.init({
+            title: 'Executive Dashboard',
+            extra: filtersHtml
         });
-    });
 
-    updateDashboard('today');
-});
+        const dateRangeButtons = document.querySelectorAll('.date-range-btn');
+        dateRangeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.date-range-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                updateDashboard(btn.dataset.range);
+            });
+        });
+
+        updateDashboard('today');
+    } catch (err) {
+        console.error('Dashboard Load Error:', err);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', init);

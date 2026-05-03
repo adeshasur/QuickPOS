@@ -1,24 +1,10 @@
-// ===== DEMO DATA (Supermarket Edition) =====
-const demoProducts = [
-    { id: 1, barcode: "4791234567890", name: "Ceylon Black Tea 250g", price: 500, category: "grocery", stock: 50, isWeighted: false, unitType: "pkt" },
-    { id: 2, barcode: "4790000000001", name: "Nadu Raw Rice", price: 240, category: "grocery", stock: 500, isWeighted: true, unitType: "kg" },
-    { id: 3, barcode: "4790000000002", name: "Full Cream Milk 1L", price: 400, category: "dairy", stock: 45, isWeighted: false, unitType: "bottle" },
-    { id: 4, barcode: "4790000000003", name: "Fresh Tomatoes", price: 180, category: "vegetables", stock: 25, isWeighted: true, unitType: "kg" },
-    { id: 5, barcode: "4790000000004", name: "Orange Juice 500ml", price: 320, category: "beverages", stock: 60, isWeighted: false, unitType: "bottle" },
-    { id: 6, barcode: "4790000000005", name: "Marie Biscuits", price: 120, category: "grocery", stock: 100, isWeighted: false, unitType: "pkt" },
-    { id: 7, barcode: "4790000000006", name: "Carrots", price: 220, category: "vegetables", stock: 30, isWeighted: true, unitType: "kg" }
-];
-
-const demoCustomers = [
-    { id: 1, name: 'Kamal Perera', phone: '0771234567', balance: 5000.00 },
-    { id: 2, name: 'Sunimal Silva', phone: '0719876543', balance: 0.00 },
-    { id: 3, name: 'Hardware Contractor Ltd', phone: '0112233445', balance: 25000.00 },
-    { id: 4, name: 'Nimal Fernando', phone: '0765558888', balance: 1250.50 }
-];
+// App State
+let products = [];
+let customers = [];
 
 // App State
-let products = [...demoProducts];
-let customers = [...demoCustomers];
+let products = [];
+let customers = [];
 let cart = [];
 let currentCategory = "all";
 let productToCustomize = null;
@@ -49,43 +35,42 @@ const saleCompleteOverlay = document.getElementById('saleCompleteOverlay');
 
 const formatCurrency = (amt) => `LKR ${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const calculateCartTotal = () => cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-const getStockBadgeText = (stock) => stock === 0 ? 'OUT' : (stock < 10 ? `Low: ${stock}` : `${stock} avail`);
+const getStockBadgeText = (stock) => stock <= 0 ? 'OUT' : (stock < 10 ? `Low: ${stock}` : `${stock} avail`);
 
 function renderProducts() {
     productsGrid.innerHTML = '';
-    const filtered = currentCategory === "all" ? products : products.filter(p => p.category === currentCategory);
+    const filtered = currentCategory === "all" ? products : products.filter(p => p.category_id == currentCategory);
 
     if (!filtered.length) {
-        productsGrid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px;">No products found</div>`;
+        productsGrid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-light);">No products found in this category</div>`;
         return;
     }
 
     filtered.forEach(product => {
-        const out = product.stock === 0;
+        const out = product.current_stock <= 0;
         const card = document.createElement('div');
         card.className = `product-card ${out ? 'out-of-stock' : ''}`;
         
-        const unitDisplay = product.unitType ? ` (per ${product.unitType})` : '';
-        const stockClass = product.stock === 0 ? 'out' : product.stock < 10 ? 'low' : 'normal';
+        const unitDisplay = product.unit_type ? ` (per ${product.unit_type})` : '';
+        const stockClass = product.current_stock <= 0 ? 'out' : product.current_stock < 10 ? 'low' : 'normal';
 
         card.innerHTML = `
             ${out ? '<div class="out-of-stock-label">OUT</div>' : ''}
             <button class="customize-trigger" onclick="event.stopPropagation(); openCustomizeModal(${product.id})">
-                <span>⚖️</span> 
+                <span class="material-symbols-rounded s20">edit_note</span> 
             </button>
             <div>
                 <div class="product-name">${product.name}${unitDisplay}</div>
-                <div class="product-price">${formatCurrency(product.price)}</div>
+                <div class="product-price">${formatCurrency(product.selling_price)}</div>
             </div>
             <div class="product-stock">
-                <span style="text-transform:uppercase;font-size:11px;">${product.category}</span>
-                <span class="stock-badge ${stockClass}">${getStockBadgeText(product.stock)}</span>
+                <span class="stock-badge ${stockClass}">${getStockBadgeText(product.current_stock)} ${product.unit_type || 'pcs'}</span>
             </div>
         `;
 
         if (!out) {
             card.addEventListener('click', (e) => {
-                if (!e.target.closest('.customize-trigger')) addToCart(product.id, 1, product.price);
+                if (!e.target.closest('.customize-trigger')) addToCart(product.id, 1, product.selling_price);
             });
         }
         productsGrid.appendChild(card);
@@ -97,9 +82,9 @@ window.openCustomizeModal = function(productId) {
     if (!productToCustomize) return;
 
     customizeProductName.textContent = productToCustomize.name;
-    unitPriceDisplay.textContent = formatCurrency(productToCustomize.price);
+    unitPriceDisplay.textContent = formatCurrency(productToCustomize.selling_price);
     customQty.value = '1.00';
-    customPrice.value = productToCustomize.price.toFixed(2);
+    customPrice.value = productToCustomize.selling_price.toFixed(2);
     priceManuallyEdited = false;
     customizeModal.classList.add('active');
 }
@@ -111,17 +96,17 @@ function addToCart(productId, quantity, price) {
     const existing = cart.find(i => i.id === productId && i.price === price);
     
     if (existing) {
-        if (existing.quantity + quantity > product.stock) {
-            alert(`Cannot add more. Stock available: ${product.stock}`);
+        if (existing.quantity + quantity > product.current_stock) {
+            alert(`Cannot add more. Stock available: ${product.current_stock}`);
             return;
         }
         existing.quantity += quantity;
     } else {
-        if (quantity > product.stock) {
-            alert(`Cannot add. Stock available: ${product.stock}`);
+        if (quantity > product.current_stock) {
+            alert(`Cannot add. Stock available: ${product.current_stock}`);
             return;
         }
-        cart.push({ id: product.id, name: product.name, price: price, quantity: quantity, unit: product.unitType || 'pc' });
+        cart.push({ id: product.id, name: product.name, price: price, quantity: quantity, unit: product.unit_type || 'pcs' });
     }
     renderCart();
 }
@@ -167,7 +152,7 @@ window.updateQuantity = function(index, change) {
     const newQty = item.quantity + change;
     
     if (newQty <= 0) cart.splice(index, 1);
-    else if (newQty > product.stock) { alert(`Maximum stock available: ${product.stock}`); return; }
+    else if (newQty > product.current_stock) { alert(`Maximum stock available: ${product.current_stock}`); return; }
     else item.quantity = newQty;
     
     renderCart();
@@ -240,18 +225,45 @@ function processCreditPayment() {
     renderSelectedCustomer();
 }
 
-function completeSale(method, message) {
-    cart.forEach(item => {
-        const product = products.find(p => p.id === item.id);
-        if (product) product.stock -= item.quantity;
-    });
-
-    document.getElementById('saleCompleteTitle').textContent = `${method} Sale Complete!`;
-    document.getElementById('saleCompleteAmount').textContent = formatCurrency(calculateCartTotal());
-    document.getElementById('saleCompleteMessage').textContent = message;
+async function completeSale(method, message) {
+    const user = JSON.parse(localStorage.getItem('quickpos-user'));
+    const total = calculateCartTotal();
+    const billId = 'BILL-' + Date.now();
     
-    saleCompleteOverlay.classList.add('active');
-    cart = []; renderCart(); renderProducts(); paymentModal.classList.remove('active');
+    const saleData = {
+        billId: billId,
+        customerId: selectedCustomer ? selectedCustomer.id : null,
+        total: total,
+        method: method,
+        received: method === 'Cash' ? parseFloat(document.getElementById('amountReceived').value) || total : total,
+        balance: method === 'Cash' ? (parseFloat(document.getElementById('amountReceived').value) || total) - total : 0,
+        cashier: user ? user.name : 'Unknown',
+        items: cart.map(item => ({
+            id: item.id,
+            quantity: item.quantity,
+            price: item.price
+        }))
+    };
+
+    try {
+        await window.api.saveSale(saleData);
+        
+        document.getElementById('saleCompleteTitle').textContent = `${method} Sale Complete!`;
+        document.getElementById('saleCompleteAmount').textContent = formatCurrency(total);
+        document.getElementById('saleCompleteMessage').textContent = message;
+        
+        saleCompleteOverlay.classList.add('active');
+        cart = []; 
+        renderCart(); 
+        
+        // Refresh products to show updated stock
+        products = await window.api.getProducts();
+        renderProducts(); 
+        paymentModal.classList.remove('active');
+    } catch (err) {
+        console.error('Sale Error:', err);
+        alert('Error saving sale: ' + err.message);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -262,12 +274,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Initialize Components
-    Components.init({
-        title: 'Make a Sale'
-    });
+    // Initialize Data
+    async function loadData() {
+        try {
+            products = await window.api.getProducts();
+            // Load categories from API if needed, for now using demo ones or from DB
+            const dbCategories = await window.api.getCategories();
+            if (dbCategories && dbCategories.length > 0) {
+                // Update UI categories if necessary
+            }
+            renderProducts(); 
+            renderCart();
+        } catch (err) {
+            console.error('Error loading data:', err);
+        }
+    }
 
-    renderProducts(); renderCart();
+    loadData();
 
     categoryButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -285,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Exact Barcode Match
         const barcodeMatch = products.find(p => p.barcode === val);
         if (barcodeMatch) {
-            addToCart(barcodeMatch.id, 1, barcodeMatch.price);
+            addToCart(barcodeMatch.id, 1, barcodeMatch.selling_price);
             e.target.value = ''; // Clear for next scan
             stockResult.innerHTML = `<span class="material-symbols-rounded success s18" style="vertical-align:middle;">check_circle</span> Added ${barcodeMatch.name}`;
             setTimeout(() => stockResult.innerHTML = '', 2000);
@@ -294,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Fuzzy Name Search
         const prod = products.find(p => p.name.toLowerCase().includes(val));
-        stockResult.innerHTML = prod ? `${prod.name}: ${getStockBadgeText(prod.stock)}` : 'Not found';
+        stockResult.innerHTML = prod ? `${prod.name}: ${getStockBadgeText(prod.current_stock)}` : 'Not found';
     });
 
     document.addEventListener('click', (e) => {
@@ -315,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     customQty.addEventListener('input', () => {
         if (!productToCustomize || priceManuallyEdited) return;
-        customPrice.value = ((parseFloat(customQty.value) || 0) * productToCustomize.price).toFixed(2);
+        customPrice.value = ((parseFloat(customQty.value) || 0) * productToCustomize.selling_price).toFixed(2);
     });
 
     customPrice.addEventListener('input', () => priceManuallyEdited = true);
