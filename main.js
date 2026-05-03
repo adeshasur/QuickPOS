@@ -17,6 +17,7 @@ function createWindow() {
     });
 
     mainWindow.loadFile(path.join(__dirname, 'pages/login.html'));
+    mainWindow.maximize();
     mainWindow.setMenuBarVisibility(false);
 }
 
