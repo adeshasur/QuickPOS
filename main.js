@@ -83,12 +83,31 @@ ipcMain.handle('get-categories', async () => {
     });
 });
 
-ipcMain.handle('add-category', async (event, name) => {
-    const sql = `INSERT INTO categories (name) VALUES (?)`;
+ipcMain.handle('save-category', async (event, c) => {
     return new Promise((resolve, reject) => {
-        db.run(sql, [name], function(err) {
+        if (c.id) {
+            const sql = `UPDATE categories SET name = ?, description = ? WHERE id = ?`;
+            db.run(sql, [c.name, c.description, c.id], function(err) {
+                if (err) reject(err);
+                else resolve({ success: true });
+            });
+        } else {
+            const sql = `INSERT INTO categories (name, description) VALUES (?, ?)`;
+            db.run(sql, [c.name, c.description], function(err) {
+                if (err) reject(err);
+                else resolve({ success: true, id: this.lastID });
+            });
+        }
+    });
+});
+
+ipcMain.handle('delete-category', async (event, id) => {
+    return new Promise((resolve, reject) => {
+        // Check if products exist in this category first? 
+        // For simplicity we just delete, but in production we should check.
+        db.run("DELETE FROM categories WHERE id = ?", [id], (err) => {
             if (err) reject(err);
-            else resolve({ id: this.lastID });
+            else resolve({ success: true });
         });
     });
 });

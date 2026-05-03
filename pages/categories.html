@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Categories - QuickPOS</title>
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/categories.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+</head>
+<body>
+
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">Product Categories</div>
+            <div class="user-info">
+                <span class="material-symbols-rounded">notifications</span>
+                <div class="user-avatar" id="userInitial">A</div>
+            </div>
+        </div>
+
+        <div style="padding: 24px; flex: 1; overflow-y: auto;">
+            <div class="categories-header">
+                <div>
+                    <h2 style="color: var(--text-dark); margin-bottom: 4px;">Categories List</h2>
+                    <p style="color: var(--text-light); font-size: 14px;">Manage your supermarket product categories</p>
+                </div>
+                <button class="add-category-btn" id="addCategoryBtn">
+                    <span class="material-symbols-rounded">add_circle</span>
+                    Add New Category
+                </button>
+            </div>
+
+            <div class="categories-table-container">
+                <table class="categories-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">ID</th>
+                            <th>Category Name</th>
+                            <th>Description</th>
+                            <th style="width: 120px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoriesTableBody">
+                        <!-- Loaded via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Category Modal -->
+    <div class="modal-overlay" id="categoryModalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Add Category</div>
+                <button class="close-modal" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Category Name</label>
+                    <input type="text" class="form-input" id="catName" placeholder="e.g. Beverages">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description (Optional)</label>
+                    <input type="text" class="form-input" id="catDesc" placeholder="Brief description">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelModalBtn">Cancel</button>
+                <button class="btn-primary" id="saveCategoryBtn">Save Category</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/components.js"></script>
+    <script src="../assets/js/categories.js"></script>
+</body>
+</html>

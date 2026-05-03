@@ -8,7 +8,8 @@ contextBridge.exposeInMainWorld('api', {
     
     // Categories
     getCategories: () => ipcRenderer.invoke('get-categories'),
-    addCategory: (name) => ipcRenderer.invoke('add-category', name),
+    saveCategory: (category) => ipcRenderer.invoke('save-category', category),
+    deleteCategory: (id) => ipcRenderer.invoke('delete-category', id),
     
     // Customers
     getCustomers: () => ipcRenderer.invoke('get-customers'),
