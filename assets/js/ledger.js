@@ -98,9 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let html = '';
         filtered.forEach(bill => {
             const statusClass = bill.status === 'pending' ? '' : 'settled';
-            const actionBtn = bill.status === 'pending' 
-                ? `<button class="collect-btn" data-id="${bill.id}">💰 Collect</button>`
-                : `<span style="color:var(--text-light);font-size:13px;">—</span>`;
             
             html += `<tr>
                 <td>${bill.date}</td>
@@ -110,27 +107,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${formatCurrency(bill.remaining)}</td>
                 <td><span class="status-badge ${statusClass}">${bill.status.toUpperCase()}</span></td>
                 <td>
-                    <div class="action-btns">
-                        ${actionBtn}
-                        <button class="print-icon" title="Print receipt" data-id="${bill.id}" data-customer="${bill.customerName}" data-amount="${bill.remaining}" data-total="${bill.total}">🖨️</button>
+                    <div class="action-buttons">
+                        ${bill.status === 'pending' ? `
+                        <button class="action-btn pay-btn" data-id="${bill.id}" title="Pay Now">
+                            <span class="material-symbols-rounded s18">payments</span>
+                        </button>` : ''}
+                        <button class="action-btn print-btn" data-id="${bill.id}" data-customer="${bill.customerName}" data-total="${bill.total}" data-remaining="${bill.remaining}" title="Print Bill">
+                            <span class="material-symbols-rounded s18">print</span>
+                        </button>
                     </div>
                 </td>
             </tr>`;
         });
         tableBody.innerHTML = html;
 
-        // Attach collect events
-        document.querySelectorAll('.collect-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                openPaymentModal(e.target.dataset.id);
-            });
+        // Attach events
+        document.querySelectorAll('.pay-btn').forEach(btn => {
+            btn.addEventListener('click', () => openPaymentModal(btn.dataset.id));
         });
-        
-        // Attach print events
-        document.querySelectorAll('.print-icon').forEach(icon => {
-            icon.addEventListener('click', (e) => {
-                printReceipt(icon.dataset.id, icon.dataset.customer, parseFloat(icon.dataset.total), parseFloat(icon.dataset.amount));
-            });
+        document.querySelectorAll('.print-btn').forEach(btn => {
+            btn.addEventListener('click', () => printReceipt(btn.dataset.id, btn.dataset.customer, parseFloat(btn.dataset.total), parseFloat(btn.dataset.remaining)));
         });
     }
 

@@ -9,48 +9,48 @@ const Components = (function() {
     const getSidebarTemplate = () => `
         <div class="sidebar expanded" id="sidebar">
             <div class="hamburger-menu">
-                <button class="hamburger-btn" id="hamburgerBtn"><span id="hamburgerIcon">☰</span></button>
+                <button class="hamburger-btn" id="hamburgerBtn"><span class="material-symbols-rounded" id="hamburgerIcon">menu</span></button>
                 <div class="logo" id="logo">QuickPOS</div>
             </div>
             <div class="nav-items">
                 <a href="owner_dashboard.html" class="nav-item owner-only">
-                    <span class="nav-icon">📋</span><span class="nav-text">Dashboard</span>
+                    <span class="material-symbols-rounded nav-icon">dashboard</span><span class="nav-text">Dashboard</span>
                 </a>
                 <a href="sales.html" class="nav-item">
-                    <span class="nav-icon">💰</span><span class="nav-text">Make a Sale</span>
+                    <span class="material-symbols-rounded nav-icon">payments</span><span class="nav-text">Make a Sale</span>
                 </a>
                 <a href="categories.html" class="nav-item">
-                    <span class="nav-icon">🏷️</span><span class="nav-text">Categories</span>
+                    <span class="material-symbols-rounded nav-icon">category</span><span class="nav-text">Categories</span>
                 </a>
                 <a href="products.html" class="nav-item">
-                    <span class="nav-icon">📦</span><span class="nav-text">Products</span>
+                    <span class="material-symbols-rounded nav-icon">inventory_2</span><span class="nav-text">Products</span>
                 </a>
                 <a href="inventory.html" class="nav-item">
-                    <span class="nav-icon">🚚</span><span class="nav-text">Inventory</span>
+                    <span class="material-symbols-rounded nav-icon">local_shipping</span><span class="nav-text">Inventory</span>
                 </a>
                 <a href="customers.html" class="nav-item">
-                    <span class="nav-icon">👤</span><span class="nav-text">Customers</span>
+                    <span class="material-symbols-rounded nav-icon">person</span><span class="nav-text">Customers</span>
                 </a>
                 <a href="quotations.html" class="nav-item">
-                    <span class="nav-icon">📄</span><span class="nav-text">Quotations</span>
+                    <span class="material-symbols-rounded nav-icon">description</span><span class="nav-text">Quotations</span>
                 </a>
                 <a href="ledger.html" class="nav-item">
-                    <span class="nav-icon">📒</span><span class="nav-text">Credit Ledger</span>
+                    <span class="material-symbols-rounded nav-icon">menu_book</span><span class="nav-text">Credit Ledger</span>
                 </a>
                 <a href="sales_reports.html" class="nav-item">
-                    <span class="nav-icon">🧾</span><span class="nav-text">Invoice History</span>
+                    <span class="material-symbols-rounded nav-icon">receipt_long</span><span class="nav-text">Invoice History</span>
                 </a>
                 <a href="reports.html" class="nav-item owner-only">
-                    <span class="nav-icon">📊</span><span class="nav-text">Shift Reports</span>
+                    <span class="material-symbols-rounded nav-icon">analytics</span><span class="nav-text">Shift Reports</span>
                 </a>
                 <a href="users.html" class="nav-item owner-only">
-                    <span class="nav-icon">👥</span><span class="nav-text">Users</span>
+                    <span class="material-symbols-rounded nav-icon">group</span><span class="nav-text">Users</span>
                 </a>
                 <a href="settings.html" class="nav-item owner-only">
-                    <span class="nav-icon">⚙️</span><span class="nav-text">Settings</span>
+                    <span class="material-symbols-rounded nav-icon">settings</span><span class="nav-text">Settings</span>
                 </a>
                 <a href="#" class="nav-item" id="logoutBtn">
-                    <span class="nav-icon">🚪</span><span class="nav-text">Logout</span>
+                    <span class="material-symbols-rounded nav-icon">logout</span><span class="nav-text">Logout</span>
                 </a>
             </div>
         </div>
@@ -100,7 +100,7 @@ const Components = (function() {
             const logo = document.getElementById('logo');
             if(logo) logo.classList.add('collapsed');
             const icon = document.getElementById('hamburgerIcon');
-            if(icon) icon.textContent = '→';
+            if(icon) icon.textContent = 'last_page';
         }
 
         // Global Event Listeners (Hamburger, Logout)
@@ -117,7 +117,7 @@ const Components = (function() {
                 if(lg) lg.classList.toggle('collapsed');
                 
                 const isCollapsed = sb.classList.contains('collapsed');
-                if(hi) hi.textContent = isCollapsed ? '→' : '☰';
+                if(hi) hi.textContent = isCollapsed ? 'last_page' : 'menu';
                 localStorage.setItem('quickpos-sidebar', isCollapsed ? 'collapsed' : 'expanded');
             });
         }

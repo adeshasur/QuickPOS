@@ -6,6 +6,7 @@
     <title>QuickPOS Pro - Quotation (Hardware)</title>
     <link rel="stylesheet" href="../assets/css/common.css">
     <link rel="stylesheet" href="../assets/css/quotations.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
@@ -49,14 +50,14 @@
                     </div>
                 </div>
                 <div class="quotation-items" id="quotationItems">
-                    <div class="empty-quote"><div class="empty-quote-icon">📋</div><p>No items added</p></div>
+                    <div class="empty-quote"><div class="empty-quote-icon"><span class="material-symbols-rounded s48">description</span></div><p>No items added</p></div>
                 </div>
                 <div class="quotation-footer">
                     <div class="total-row">
                         <div class="total-label">Total (LKR):</div>
                         <div class="total-amount" id="quoteTotal">0.00</div>
                     </div>
-                    <button class="pdf-button" id="generatePDFBtn"><span>📎</span> Generate PDF Quotation</button>
+                    <button class="pdf-button" id="generatePDFBtn"><span class="material-symbols-rounded s20" style="vertical-align:middle; margin-right:8px;">picture_as_pdf</span> Generate PDF Quotation</button>
                 </div>
             </div>
         </div>
@@ -66,7 +67,7 @@
         <div class="customize-modal-content">
             <div class="modal-header">
                 <div class="modal-title" id="customizeProductName">Product</div>
-                <button class="close-customize" id="closeCustomizeBtn">&times;</button>
+                <button class="close-customize" id="closeCustomizeBtn"><span class="material-symbols-rounded">close</span></button>
             </div>
             <div class="unit-price-display">
                 <span>Unit price</span>
@@ -77,7 +78,7 @@
                 <input type="number" id="customQty" step="0.01" min="0.01" value="1.00">
             </div>
             <div class="price-group-big">
-                <label>💰 Price (LKR) — edit manually</label>
+                <label><span class="material-symbols-rounded s18" style="vertical-align:middle; margin-right:4px;">payments</span> Price (LKR) — edit manually</label>
                 <input type="number" id="customPrice" step="0.01" min="0">
             </div>
             <div class="modal-actions">
@@ -88,11 +89,11 @@
     </div>
 
     <div class="pdf-preview-modal" id="pdfPreviewModal">
-        <button class="pdf-preview-close" id="closePreviewBtn">&times;</button>
+        <button class="pdf-preview-close" id="closePreviewBtn"><span class="material-symbols-rounded">close</span></button>
         <div id="pdfPreviewContainer" style="margin-top: 20px;"></div>
         <div class="pdf-preview-actions">
-            <button class="pdf-action-btn secondary" id="editQuoteBtn">✏️ Edit</button>
-            <button class="pdf-action-btn primary" id="downloadPdfBtn">📥 Download PDF</button>
+            <button class="pdf-action-btn secondary" id="editQuoteBtn"><span class="material-symbols-rounded s18" style="vertical-align:middle; margin-right:4px;">edit</span> Edit</button>
+            <button class="pdf-action-btn primary" id="downloadPdfBtn"><span class="material-symbols-rounded s18" style="vertical-align:middle; margin-right:4px;">download</span> Download PDF</button>
         </div>
     </div>
 

@@ -22,8 +22,12 @@
                 <td><div class="status-badge status-${user.status}"><span class="status-dot"></span>${user.status}</div></td>
                 <td class="actions-cell">
                     <div class="action-buttons">
-                        <button class="action-btn edit-btn" onclick="editUser(${user.id})">✏️</button>
-                        <button class="action-btn delete-btn" onclick="deleteUser(${user.id})">🗑️</button>
+                        <button class="action-btn edit-btn" onclick="editUser(${user.id})">
+                            <span class="material-symbols-rounded s18">edit</span>
+                        </button>
+                        <button class="action-btn delete-btn" onclick="deleteUser(${user.id})">
+                            <span class="material-symbols-rounded s18">delete</span>
+                        </button>
                     </div>
                 </td>
             </tr>
@@ -69,7 +73,7 @@
         // Initialize Components
         Components.init({
             title: 'Staff Management',
-            topbarRight: `<button class="create-user-btn" id="createUserBtn" style="background:var(--primary-color); color:white; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:8px;"><span>+</span> Create New User</button>`
+            topbarRight: `<button class="create-user-btn" id="createUserBtn" style="background:var(--primary-color); color:white; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:8px;"><span class="material-symbols-rounded">add</span> Create New User</button>`
         });
 
         renderStaffTable();

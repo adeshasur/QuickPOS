@@ -145,7 +145,7 @@
                 const btn = document.createElement('button');
                 btn.className = 'customize-btn';
                 btn.dataset.id = p.id;
-                btn.innerHTML = '<span>⚖️</span> Customize';
+                btn.innerHTML = '<span class="material-symbols-rounded">scale</span> Customize';
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     openCustomizeModal(p);
@@ -171,7 +171,7 @@
     function renderQuotation() {
         if(!quotationItemsDiv) return;
         if (!quoteItems.length) {
-            quotationItemsDiv.innerHTML = '<div class="empty-quote"><div class="empty-quote-icon">📋</div><p>No items added</p><p>Click products to add</p></div>';
+            quotationItemsDiv.innerHTML = '<div class="empty-quote"><div class="empty-quote-icon"><span class="material-symbols-rounded s48">description</span></div><p>No items added</p><p>Click products to add</p></div>';
             if(quoteItemCount) quoteItemCount.textContent = '0';
             if(quoteTotalSpan) quoteTotalSpan.textContent = '0.00';
             return;
@@ -208,7 +208,7 @@
             
             const decBtn = document.createElement('button');
             decBtn.className = 'quantity-btn decrease';
-            decBtn.textContent = '−';
+            decBtn.innerHTML = '<span class="material-symbols-rounded s18">remove</span>';
             decBtn.addEventListener('click', () => updateQuantity(index, -0.1));
             
             const qtySpan = document.createElement('span');
@@ -217,7 +217,7 @@
             
             const incBtn = document.createElement('button');
             incBtn.className = 'quantity-btn increase';
-            incBtn.textContent = '+';
+            incBtn.innerHTML = '<span class="material-symbols-rounded s18">add</span>';
             incBtn.addEventListener('click', () => updateQuantity(index, 0.1));
             
             controlsDiv.appendChild(decBtn);

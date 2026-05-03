@@ -6,6 +6,7 @@
     <title>QuickPOS Pro - Reports</title>
     <link rel="stylesheet" href="../assets/css/common.css">
     <link rel="stylesheet" href="../assets/css/reports.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
 </head>
 <body>
     <div id="sidebar-container"></div>
@@ -22,11 +23,11 @@
             
             <div class="reports-header">
                 <div class="header-title">
-                    <span>📊</span> Daily Shift Report
+                    <span class="material-symbols-rounded">analytics</span> Daily Shift Report
                 </div>
                 <div class="header-controls">
-                    <button class="report-btn generate-btn" id="generateReportBtn"><span>🔄</span> Generate</button>
-                    <button class="report-btn print-btn" id="printReportBtn"><span>🖨️</span> Print</button>
+                    <button class="report-btn generate-btn" id="generateReportBtn"><span class="material-symbols-rounded s18">refresh</span> Generate</button>
+                    <button class="report-btn print-btn" id="printReportBtn"><span class="material-symbols-rounded s18">print</span> Print</button>
                 </div>
             </div>
             
@@ -34,7 +35,7 @@
                 <div class="summary-card total-sales">
                     <div class="card-header">
                         <div class="card-title">Total Sales</div>
-                        <div class="card-icon">💰</div>
+                        <div class="card-icon"><span class="material-symbols-rounded">payments</span></div>
                     </div>
                     <div class="card-amount" id="totalSalesAmount">LKR 0.00</div>
                     <div class="card-subtitle">Today's total revenue</div>
@@ -44,7 +45,7 @@
                 <div class="summary-card cash-collected">
                     <div class="card-header">
                         <div class="card-title">Cash Collected</div>
-                        <div class="card-icon">💵</div>
+                        <div class="card-icon"><span class="material-symbols-rounded">payments</span></div>
                     </div>
                     <div class="card-amount" id="cashCollectedAmount">LKR 0.00</div>
                     <div class="card-subtitle">Total cash payments</div>
@@ -54,7 +55,7 @@
                 <div class="summary-card card-payments">
                     <div class="card-header">
                         <div class="card-title">Card/Bank Payments</div>
-                        <div class="card-icon">💳</div>
+                        <div class="card-icon"><span class="material-symbols-rounded">credit_card</span></div>
                     </div>
                     <div class="card-amount" id="cardPaymentsAmount">LKR 0.00</div>
                     <div class="card-subtitle">Total card transactions</div>
@@ -65,7 +66,7 @@
             <div class="analysis-grid">
                 <div class="analysis-card">
                     <div class="section-header">
-                        <div class="section-title"><span>🏆</span> Top Selling Items</div>
+                        <div class="section-title"><span class="material-symbols-rounded">military_tech</span> Top Selling Items</div>
                     </div>
                     <div class="table-container">
                         <div class="table-wrapper">
@@ -91,7 +92,7 @@
                 
                 <div class="analysis-card">
                     <div class="section-header">
-                        <div class="section-title"><span>📦</span> Stock-In History</div>
+                        <div class="section-title"><span class="material-symbols-rounded">inventory_2</span> Stock-In History</div>
                     </div>
                     <div class="table-container">
                         <div class="table-wrapper">

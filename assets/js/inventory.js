@@ -60,9 +60,9 @@ function getDaysUntilExpiry(expiryDate) {
 }
 
 function getExpiryStatus(daysLeft) {
-    if (daysLeft < 0) return { status: "Expired", class: "expired", icon: "❌" };
-    if (daysLeft <= 30) return { status: "Expiring Soon", class: "expiring", icon: "⚠️" };
-    return { status: "Good", class: "good", icon: "✅" };
+    if (daysLeft < 0) return { status: "Expired", class: "expired", icon: "dangerous" };
+    if (daysLeft <= 30) return { status: "Expiring Soon", class: "expiring", icon: "warning" };
+    return { status: "Good", class: "good", icon: "check_circle" };
 }
 
 // Populate Category Dropdown
@@ -150,7 +150,7 @@ function addStock() {
     document.getElementById('stockExpiryDate').value = '';
     
     renderStockTable();
-    alert(`✅ Added ${quantity} × ${product.name} to inventory!`);
+    alert(`Added ${quantity} × ${product.name} to inventory!`);
 }
 
 // Global function to delete item from HTML onclick
@@ -188,7 +188,7 @@ function renderStockTable() {
     const tbody = document.getElementById('stockTableBody');
     
     if (filteredItems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">📦 No stock items found</div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><span class="material-symbols-rounded" style="vertical-align:middle; margin-right:8px;">inventory_2</span> No stock items found</div></td></tr>`;
         return;
     }
     
@@ -205,13 +205,13 @@ function renderStockTable() {
                 <td>${formatCurrency(item.costPrice)}</td>
                 <td>${formatCurrency(item.sellingPrice)}</td>
                 <td>${formatDate(item.expiryDate)}</td>
-                <td><span class="expiry-badge ${expiryInfo.class}">${expiryInfo.icon} ${expiryInfo.status}</span></td>
+                <td><span class="expiry-badge ${expiryInfo.class}"><span class="material-symbols-rounded" style="font-size:16px; vertical-align:middle;">${expiryInfo.icon}</span> ${expiryInfo.status}</span></td>
                 <td style="${daysLeft < 0 ? 'color: red; font-weight: bold;' : daysLeft <= 30 ? 'color: #F59E0B;' : 'color: green;'}">
                     ${daysLeft < 0 ? 'Expired!' : `${daysLeft} days left`}
                 </td>
                 <td>
                     <button class="update-btn" style="padding: 6px 12px; background-color: #DC2626;" onclick="deleteStockItem(${item.id})">
-                        🗑️ Delete
+                        <span class="material-symbols-rounded" style="font-size:16px; vertical-align:middle;">delete</span>
                     </button>
                 </td>
             </tr>

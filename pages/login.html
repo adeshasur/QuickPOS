@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuickPOS Login</title>
     <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
 </head>
 <body>
     <div class="login-container">
@@ -17,7 +18,7 @@
             </div>
             
             <div class="error-message" id="errorMessage">
-                <span>⚠️</span> Invalid username or password
+                <span class="material-symbols-rounded s18">warning</span> Invalid username or password
             </div>
             
             <form id="loginForm">
@@ -32,7 +33,7 @@
                     <label for="password" class="form-label">Password</label>
                     <div class="input-group">
                         <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
-                        <button type="button" class="password-toggle" id="passwordToggle">👁️</button>
+                        <button type="button" class="password-toggle" id="passwordToggle"><span class="material-symbols-rounded">visibility</span></button>
                     </div>
                 </div>
                 
@@ -48,7 +49,7 @@
             </form>
             
             <div class="demo-credentials">
-                <div class="demo-title"><span>🔐</span> Demo Accounts</div>
+                <div class="demo-title"><span class="material-symbols-rounded">lock</span> Demo Accounts</div>
                 <div class="demo-account">
                     <div class="demo-info"><strong>admin</strong> / 123</div>
                     <div class="demo-role owner">Owner</div>
@@ -89,7 +90,7 @@
         passwordToggle.addEventListener('click', function() {
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
-            this.textContent = type === 'password' ? '👁️' : '👁️🗨️';
+            this.innerHTML = type === 'password' ? '<span class="material-symbols-rounded">visibility</span>' : '<span class="material-symbols-rounded">visibility_off</span>';
         });
 
         // Quick fill buttons

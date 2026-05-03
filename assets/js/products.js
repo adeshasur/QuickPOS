@@ -96,7 +96,7 @@ function renderCategoryDropdowns() {
 
 function renderProductsTable() {
     if (products.length === 0) {
-        productsTableBody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📦</div><p>No products found</p><p>Click "Add Product" to create your first product</p></div></td></tr>`;
+        productsTableBody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon"><span class="material-symbols-rounded s48">inventory_2</span></div><p>No products found</p><p>Click "Add Product" to create your first product</p></div></td></tr>`;
         return;
     }
     
@@ -109,15 +109,15 @@ function renderProductsTable() {
         const isLow = isLowStock(product.currentStock, product.alertLevel);
         
         let measurementCell = product.isWeighted 
-            ? `<td class="measurement-cell"><span class="measurement-badge">⚖️ By Weight</span><span class="unit-badge">${product.unitType}</span></td>`
-            : `<td class="measurement-cell"><span class="measurement-badge">📦 Unit</span></td>`;
+            ? `<td class="measurement-cell"><span class="measurement-badge"><span class="material-symbols-rounded s18" style="vertical-align:middle; margin-right:4px;">scale</span>By Weight</span><span class="unit-badge">${product.unitType}</span></td>`
+            : `<td class="measurement-cell"><span class="measurement-badge"><span class="material-symbols-rounded s18" style="vertical-align:middle; margin-right:4px;">inventory_2</span>Unit</span></td>`;
         
         const row = document.createElement('tr');
         row.innerHTML = `
             <td class="product-name-cell">${product.name}</td>
             <td class="category-cell">${categoryName}</td>
             ${measurementCell}
-            <td class="stock-cell ${isLow ? 'low-stock' : 'normal'}">${product.currentStock} ${isLow ? '⚠️' : ''}</td>
+            <td class="stock-cell ${isLow ? 'low-stock' : 'normal'}">${product.currentStock} ${isLow ? '<span class="material-symbols-rounded warning s18" style="vertical-align:middle;">warning</span>' : ''}</td>
             <td class="alert-level-cell">${product.alertLevel}</td>
             <td class="price-cell">
                 ${hasDiscount ? `
@@ -126,9 +126,15 @@ function renderProductsTable() {
                     <span class="discount-badge">-${formatCurrency(product.discount)}</span>
                 ` : `<span class="final-price">${formatCurrency(product.finalPrice)}</span>`}
             </td>
-            <td class="actions-cell">
-                <button class="action-btn edit-btn" data-id="${product.id}"><span>✏️</span> Edit</button>
-                <button class="action-btn delete-btn" data-id="${product.id}"><span>🗑️</span> Delete</button>
+            <td class="owner-only actions-cell">
+                <div class="action-buttons">
+                    <button class="action-btn edit-btn" data-id="${product.id}">
+                        <span class="material-symbols-rounded s18">edit</span>
+                    </button>
+                    <button class="action-btn delete-btn" data-id="${product.id}">
+                        <span class="material-symbols-rounded s18">delete</span>
+                    </button>
+                </div>
             </td>
         `;
         productsTableBody.appendChild(row);

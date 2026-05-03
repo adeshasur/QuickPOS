@@ -94,11 +94,11 @@
                     <td>${escapeHtml(address)}</td>
                     <td class="balance-cell">${formatCurrency(cust.balance ?? 0)}</td>
                     <td class="action-cell">
-                        <button class="action-btn edit-btn" data-id="${cust.id}">
-                            <span>✏️</span> Edit
+                        <button class="action-btn edit" onclick="openEditModal(${cust.id})">
+                            <span class="material-symbols-rounded s18">edit</span>
                         </button>
-                        <button class="action-btn delete-btn" data-id="${cust.id}">
-                            <span>🗑️</span> Delete
+                        <button class="action-btn delete" onclick="requestDelete(${cust.id})">
+                            <span class="material-symbols-rounded s18">delete</span>
                         </button>
                     </td>
                 </tr>
