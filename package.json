@@ -2,14 +2,26 @@
   "name": "quickpos",
   "version": "1.0.0",
   "description": "",
-  "main": "src/main/main.js",
+  "main": "index.js",
   "scripts": {
-    "start": "electron ."
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adeshasur/QuickPOS.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/adeshasur/QuickPOS/issues"
+  },
+  "homepage": "https://github.com/adeshasur/QuickPOS#readme",
+  "devDependencies": {
+    "electron": "^41.5.0"
   },
   "dependencies": {
-    "sqlite3": "^5.1.7"
-  },
-  "devDependencies": {
-    "electron": "^30.0.0"
+    "sqlite3": "^6.0.1"
   }
 }

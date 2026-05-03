@@ -1,4 +1,6 @@
 node_modules/
-pos_database.sqlite
 .DS_Store
 *.log
+dist/
+release/
+.env
