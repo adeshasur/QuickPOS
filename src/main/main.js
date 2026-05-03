@@ -126,7 +126,7 @@ function createWindow() {
         height: 800,
         minWidth: 800,
         minHeight: 600,
-        icon: path.join(__dirname, '../assets/icon.png'),
+        // icon: path.join(__dirname, '../assets/icon.png'), // Uncomment when you have an icon file
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,

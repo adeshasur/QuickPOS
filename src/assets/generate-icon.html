@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Icon</title>
+</head>
+<body>
+    <canvas id="canvas" width="256" height="256"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Draw a simple POS icon
+        ctx.fillStyle = '#5D8AA8';
+        ctx.fillRect(0, 0, 256, 256);
+        
+        // White text
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 80px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('QP', 128, 128);
+        
+        // Download
+        const link = document.createElement('a');
+        link.download = 'icon.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    </script>
+</body>
+</html>

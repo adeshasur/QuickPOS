@@ -142,6 +142,7 @@ async function initDatabase() {
     for (const sql of queries) {
         await ipcRenderer.dbQuery(sql, []);
     }
+}
     
     // Insert default users if not exist
     const checkUsers = await ipcRenderer.dbQuery('SELECT COUNT(*) as count FROM users', []);
