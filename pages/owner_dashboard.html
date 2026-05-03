@@ -1,149 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickPOS Pro - Owner Dashboard</title>
-    <link rel="stylesheet" href="../assets/css/common.css">
-    <link rel="stylesheet" href="../assets/css/owner_dashboard.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPOS Pro — Owner Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/common.css">
+<link rel="stylesheet" href="../assets/css/owner_dashboard.css">
 </head>
 <body>
-    <div id="sidebar-container"></div>
 
-    <div class="main-content">
-        <div id="topbar-container"></div>
-        
-        <div class="dashboard-content">
-            <div class="insight-cards">
-                <div class="insight-card revenue-card">
-                    <div class="insight-header">
-                        <div class="insight-title">Total Revenue</div>
-                        <div class="insight-icon"><span class="material-symbols-rounded">payments</span></div>
-                    </div>
-                    <div class="insight-value" id="totalRevenue">LKR 0.00</div>
-                    <div class="insight-comparison" id="revenueTrend">
-                        <span class="material-symbols-rounded trend-arrow">trending_flat</span>
-                        <span class="trend-neutral">No comparison data</span>
-                    </div>
-                </div>
-                
-                <div class="insight-card stock-card">
-                    <div class="insight-header">
-                        <div class="insight-title">Stock Volume</div>
-                        <div class="insight-icon"><span class="material-symbols-rounded">inventory_2</span></div>
-                    </div>
-                    <div class="insight-value" id="stockVolume">0</div>
-                    <div class="insight-comparison" id="stockTrend">
-                        <span class="material-symbols-rounded trend-arrow">trending_flat</span>
-                        <span class="trend-neutral">Total items in shop</span>
-                    </div>
-                </div>
-                
-                <div class="insight-card items-sold-card">
-                    <div class="insight-header">
-                        <div class="insight-title">Today's Items Sold</div>
-                        <div class="insight-icon"><span class="material-symbols-rounded">analytics</span></div>
-                    </div>
-                    <div class="insight-value" id="itemsSoldToday">0</div>
-                    <div class="insight-comparison" id="itemsSoldTrend">
-                        <span class="material-symbols-rounded trend-arrow">trending_flat</span>
-                        <span class="trend-neutral">Total quantity sold</span>
-                    </div>
-                </div>
-                
-                <div class="insight-card value-card">
-                    <div class="insight-header">
-                        <div class="insight-title">High-Value Customer</div>
-                        <div class="insight-icon"><span class="material-symbols-rounded">military_tech</span></div>
-                    </div>
-                    <div class="insight-value" id="avgBillAmount">LKR 0.00</div>
-                    <div class="insight-comparison" id="valueTrend">
-                        <span class="material-symbols-rounded trend-arrow">trending_flat</span>
-                        <span class="trend-neutral">Per transaction</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="dashboard-grid">
-                <div class="dashboard-section">
-                    <div class="section-header">
-                        <div class="section-title"><span class="material-symbols-rounded">trending_up</span> Sales Overview</div>
-                    </div>
-                    <div class="section-content">
-                        <div style="margin-bottom: 20px;">
-                            <div style="font-size: 13px; color: var(--text-light); margin-bottom: 10px;">Best Selling Category</div>
-                            <div class="category-chart-container" id="bestCategoryChart"></div>
-                        </div>
-                        <table class="insights-table">
-                            <thead>
-                                <tr><th>Metric</th><th>Today</th><th>This Week</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>Transactions</td><td id="todayTransactions">0</td><td id="weekTransactions">0</td></tr>
-                                <tr><td>Revenue</td><td id="todayRevenue">LKR 0.00</td><td id="weekRevenue">LKR 0.00</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <div class="reorder-section">
-                    <div class="reorder-header">
-                        <div class="reorder-title"><span class="material-symbols-rounded">warning</span> Reorder List (Low Stock Alert)</div>
-                    </div>
-                    <div class="reorder-content">
-                        <div class="reorder-list" id="reorderList"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="dashboard-sections">
-                <div class="dashboard-section">
-                    <div class="section-header">
-                        <div class="section-title"><span class="material-symbols-rounded">inventory_2</span> Most Sold Items</div>
-                    </div>
-                    <div class="section-content">
-                        <table class="insights-table" id="mostSoldItemsTable">
-                            <thead>
-                                <tr><th>Rank</th><th>Product Name</th><th>Qty Sold</th></tr>
-                            </thead>
-                            <tbody id="mostSoldItemsBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <div class="dashboard-section">
-                    <div class="section-header">
-                        <div class="section-title"><span class="material-symbols-rounded">schedule</span> Peak Sales Hours</div>
-                    </div>
-                    <div class="section-content">
-                        <div class="chart-container" id="peakHoursChart"></div>
-                        <div class="chart-legend">
-                            <div class="legend-item">
-                                <div class="legend-color" style="background-color: var(--primary-color);"></div>
-                                <span>Sales Volume</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color" style="background-color: var(--success-color);"></div>
-                                <span>Peak Hour (Staff needed)</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="dashboard-section">
-                <div class="section-header">
-                    <div class="section-title"><span class="material-symbols-rounded">trending_down</span> Slow Moving Items (No sales in 3+ days)</div>
-                </div>
-                <div class="section-content">
-                    <div class="slow-items-list" id="slowItemsList"></div>
-                </div>
-            </div>
-        </div>
+<div id="sidebar-container"></div>
+
+<div class="main-content">
+  <div class="topbar">
+    <div class="tb-title">Executive Dashboard</div>
+    <div class="tb-chip">Live</div>
+    <div class="tb-filters">
+      <button class="filter-btn active" data-range="today">Today</button>
+      <button class="filter-btn" data-range="yesterday">Yesterday</button>
+      <button class="filter-btn" data-range="last7">7 Days</button>
+      <button class="filter-btn" data-range="thisMonth">This Month</button>
+      <button class="filter-btn" data-range="lastMonth">Last Month</button>
+    </div>
+    <div class="tb-right">
+      <div class="tb-icon-btn" title="Notifications">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      </div>
+      <div class="tb-icon-btn" title="Refresh" id="refreshBtn">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      </div>
+      <div class="avatar">AD</div>
+    </div>
+  </div>
+
+  <div class="content" id="dashContent">
+    <div class="kpi-grid">
+      <div class="kpi-card blue">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H7"/></svg></div>
+        <div class="kpi-label"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H7"/></svg>Total Revenue</div>
+        <div class="kpi-val" id="kpiRevenue">LKR 0</div>
+        <div class="kpi-meta" id="kpiRevTrend"><span class="kpi-neu">— No data</span></div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M21 8v8a2 2 0 01-1 1.7l-7 4a2 2 0 01-2 0l-7-4A2 2 0 013 16V8a2 2 0 011-1.7l7-4a2 2 0 012 0l7 4A2 2 0 0121 8z"/></svg></div>
+        <div class="kpi-label"><svg viewBox="0 0 24 24"><path d="M21 8v8a2 2 0 01-1 1.7l-7 4a2 2 0 01-2 0l-7-4A2 2 0 013 16V8a2 2 0 011-1.7l7-4a2 2 0 012 0l7 4A2 2 0 0121 8z"/></svg>Stock Volume</div>
+        <div class="kpi-val" id="kpiStock">0 <span style="font-size:14px;color:var(--text3)">units</span></div>
+        <div class="kpi-meta"><span class="kpi-sub" id="kpiStockLow">— Checking stock…</span></div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <div class="kpi-label"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Items Sold Today</div>
+        <div class="kpi-val" id="kpiItems">0</div>
+        <div class="kpi-meta"><span class="kpi-sub">Total quantity</span></div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 01-10 0z"/><path d="M7 8H5a3 3 0 003 3"/><path d="M17 8h2a3 3 0 01-3 3"/><line x1="12" y1="13" x2="12" y2="18"/><line x1="8" y1="22" x2="16" y2="22"/></svg></div>
+        <div class="kpi-label"><svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 01-10 0z"/></svg>Avg Transaction</div>
+        <div class="kpi-val" id="kpiAvg">LKR 0</div>
+        <div class="kpi-meta"><span class="kpi-sub" id="kpiTxCount">— transactions</span></div>
+      </div>
     </div>
 
-    <script src="../assets/js/components.js"></script>
-    <script src="../assets/js/owner_dashboard.js"></script>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
+            Sales Overview
+          </div>
+          <span class="section-badge badge-blue">Today vs 7D</span>
+        </div>
+        <div class="card-body">
+          <div id="overviewStats">
+            <div class="stat-row">
+              <span class="stat-label">Transactions</span>
+              <div class="stat-vals">
+                <span class="stat-val" id="ovToday0">0</span>
+                <span class="stat-val dim" id="ovWeek0">0</span>
+              </div>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Revenue</span>
+              <div class="stat-vals">
+                <span class="stat-val" id="ovToday1">LKR 0</span>
+                <span class="stat-val dim" id="ovWeek1">LKR 0</span>
+              </div>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Items Sold</span>
+              <div class="stat-vals">
+                <span class="stat-val" id="ovToday2">0</span>
+                <span class="stat-val dim" id="ovWeek2">0</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:16px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:10px;font-weight:500;text-transform:uppercase;letter-spacing:.06em">Category Breakdown</div>
+            <div id="catChart"></div>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:10px">
+            <span style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--text);display:inline-block"></span>Today</span>
+            <span style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--text3);display:inline-block"></span>7 Days</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title" style="color:var(--red)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--red)"><path d="M10.3 3.9l-8.2 14a1 1 0 00.9 1.5h16.4a1 1 0 00.9-1.5l-8.2-14a1 1 0 00-1.8 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Reorder Alerts
+          </div>
+          <span class="section-badge badge-red" id="reorderBadge">0 items</span>
+        </div>
+        <div class="card-body overflow-scroll" id="reorderList">
+          <div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">Checking stock levels…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            Top Products
+          </div>
+          <span class="section-badge badge-green">by qty</span>
+        </div>
+        <div class="card-body" id="topItemsList">
+          <div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">No sales data</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>
+            Peak Hours
+          </div>
+          <span class="section-badge badge-blue">today</span>
+        </div>
+        <div class="card-body">
+          <div id="hourChart" class="hour-chart"></div>
+          <div id="hourLabels" class="hour-labels"></div>
+          <div class="bar-chart-legend" style="margin-top:12px">
+            <div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>Peak period</div>
+            <div class="leg-item"><div class="leg-dot" style="background:var(--surface3)"></div>Low period</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Payment Mix
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="pay-grid" id="payMix">
+            <div class="pay-item">
+              <div class="pay-pct" id="cashPct">0%</div>
+              <div class="pay-label">Cash</div>
+              <div class="pay-bar" style="background:var(--green)"></div>
+            </div>
+            <div class="pay-item">
+              <div class="pay-pct" id="cardPct">0%</div>
+              <div class="pay-label">Card</div>
+              <div class="pay-bar" style="background:var(--accent)"></div>
+            </div>
+          </div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+            <div class="stat-row" style="padding-top:0">
+              <span class="stat-label" style="font-size:12px">Cash Revenue</span>
+              <span class="stat-val" id="cashRev" style="font-size:12px">LKR 0</span>
+            </div>
+            <div class="stat-row" style="padding-bottom:0">
+              <span class="stat-label" style="font-size:12px">Card Revenue</span>
+              <span class="stat-val" id="cardRev" style="font-size:12px">LKR 0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title" style="color:var(--amber)">
+          <svg viewBox="0 0 24 24" style="stroke:var(--amber)"><path d="M12 2v10"/><path d="M12 18h.01"/><circle cx="12" cy="12" r="10"/></svg>
+          Slow Moving Items
+        </div>
+        <span class="section-badge badge-amber">No sales 3+ days</span>
+      </div>
+      <div class="card-body">
+        <div id="slowList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/components.js"></script>
+<script src="../assets/js/owner_dashboard.js"></script>
 </body>
 </html>

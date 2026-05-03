@@ -1,331 +1,292 @@
-// App State
-let products = [];
-let customers = [];
-let cart = [];
-let currentCategory = "all";
-let productToCustomize = null;
-let priceManuallyEdited = false;
-let selectedCustomer = null;
+// ─── DATA ───
+const demoProducts=[
+  {id:1,name:"Samba Rice 5kg",price:1250,category:"groceries",stock:120,isWeighted:false},
+  {id:2,name:"Fresh Milk 1L",price:280,category:"dairy",stock:45,isWeighted:false},
+  {id:3,name:"Coca-Cola 1.5L",price:420,category:"beverages",stock:80,isWeighted:false},
+  {id:4,name:"Munchee Biscuits",price:150,category:"snacks",stock:200,isWeighted:false},
+  {id:5,name:"Carrots (kg)",price:320,category:"vegetables",stock:50,isWeighted:true,unitType:"kg"},
+  {id:6,name:"Chicken Full",price:1450,category:"meat",stock:30,isWeighted:false},
+  {id:7,name:"Sunlight Soap",price:110,category:"personal-care",stock:300,isWeighted:false},
+  {id:8,name:"Harpic 500ml",price:580,category:"household",stock:40,isWeighted:false},
+  {id:9,name:"Dhal 1kg",price:380,category:"groceries",stock:90,isWeighted:false},
+  {id:10,name:"Nestomalt 400g",price:640,category:"groceries",stock:55,isWeighted:false},
+  {id:11,name:"Anchor Butter",price:940,category:"dairy",stock:20,isWeighted:false},
+  {id:12,name:"Sprite 1.5L",price:390,category:"beverages",stock:0,isWeighted:false}
+];
 
-// DOM Elements
-const productsGrid = document.getElementById('productsGrid');
-const cartItemsDiv = document.getElementById('cartItems');
-const itemCountSpan = document.getElementById('itemCount');
-const totalAmountSpan = document.getElementById('totalAmount');
-const categoryButtons = document.querySelectorAll('.category-btn');
-const customerSearch = document.getElementById('customerSearch');
-const customerSearchResults = document.getElementById('customerSearchResults');
-const selectedCustomerDisplay = document.getElementById('selectedCustomerDisplay');
-const creditPaymentBtn = document.getElementById('creditPaymentBtn');
-const stockSearch = document.getElementById('stockSearch');
-const stockResult = document.getElementById('stockResult');
+const demoCustomers=[
+  {id:1,name:"Anura Kumara",phone:"0771234567",balance:150},
+  {id:2,name:"Samanthie Perera",phone:"0719876543",balance:0},
+  {id:3,name:"Wimal Siri",phone:"0765558888",balance:250.50},
+  {id:4,name:"Nalin Bandara",phone:"0114445555",balance:0}
+];
 
-// Modals
-const customizeModal = document.getElementById('customizeModal');
-const customizeProductName = document.getElementById('customizeProductName');
-const unitPriceDisplay = document.getElementById('unitPriceDisplay');
-const customQty = document.getElementById('customQty');
-const customPrice = document.getElementById('customPrice');
-const paymentModal = document.getElementById('paymentModal');
-const saleCompleteOverlay = document.getElementById('saleCompleteOverlay');
+let products=[...demoProducts];
+let cart=[];
+let currentCat="all";
+let productToCustomize=null;
+let priceEdited=false;
+let selectedCustomer=null;
 
-const formatCurrency = (amt) => `LKR ${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-const calculateCartTotal = () => cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-const getStockBadgeText = (stock) => stock <= 0 ? 'OUT' : (stock < 10 ? `Low: ${stock}` : `${stock} avail`);
+const fmt=n=>`LKR ${n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+const cartTotal=()=>cart.reduce((s,i)=>s+i.price*i.quantity,0);
+const stockText=s=>s===0?"OUT":s<10?`Low: ${s}`:`${s}`;
+const stockClass=s=>s===0?"out":s<10?"low":"ok";
 
-async function loadData() {
-    try {
-        products = await window.api.getProducts();
-        customers = await window.api.getCustomers();
-        renderProducts(); 
-        renderCart();
-    } catch (err) {
-        console.error('Error loading data:', err);
+// ─── RENDER PRODUCTS ───
+function renderProducts(){
+  const grid=document.getElementById('productsGrid');
+  const list=currentCat==="all"?products:products.filter(p=>p.category===currentCat);
+  if(!list.length){grid.innerHTML='<div style="color:var(--text3);font-size:15px;padding:30px;grid-column:1/-1;text-align:center;">No products found</div>';return;}
+  grid.innerHTML='';
+  list.forEach(p=>{
+    const out=p.stock===0;
+    const card=document.createElement('div');
+    card.className='product-card'+(out?' out-of-stock':'');
+    card.innerHTML=`
+      ${out?'<div class="out-label">OUT</div>':''}
+      <button class="cust-btn" data-id="${p.id}" title="Customize qty/price"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+      <div class="pc-cat">${p.category.replace('-',' ')}</div>
+      <div class="pc-name">${p.name}${p.unitType?` / ${p.unitType}`:''}</div>
+      <div class="pc-price">${fmt(p.price)}</div>
+      <div class="pc-footer">
+        <span></span>
+        <span class="stock-badge ${stockClass(p.stock)}">${stockText(p.stock)}</span>
+      </div>`;
+    if(!out){
+      card.addEventListener('click',e=>{
+        if(!e.target.closest('.cust-btn')) addToCart(p.id,1,p.price);
+      });
     }
-}
-
-function renderProducts() {
-    if (!productsGrid) return;
-    productsGrid.innerHTML = '';
-    const filtered = currentCategory === "all" ? products : products.filter(p => p.category_id == currentCategory);
-
-    if (!filtered.length) {
-        productsGrid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-light);">No products found in this category</div>`;
-        return;
-    }
-
-    filtered.forEach(product => {
-        const out = product.current_stock <= 0;
-        const card = document.createElement('div');
-        card.className = `product-card ${out ? 'out-of-stock' : ''}`;
-        
-        const unitDisplay = product.unit_type ? ` (per ${product.unit_type})` : '';
-        const stockClass = product.current_stock <= 0 ? 'out' : product.current_stock < 10 ? 'low' : 'normal';
-
-        card.innerHTML = `
-            ${out ? '<div class="out-of-stock-label">OUT</div>' : ''}
-            <button class="customize-trigger" onclick="event.stopPropagation(); openCustomizeModal(${product.id})">
-                <span class="material-symbols-rounded s20">edit_note</span> 
-            </button>
-            <div>
-                <div class="product-name">${product.name}${unitDisplay}</div>
-                <div class="product-price">${formatCurrency(product.selling_price)}</div>
-            </div>
-            <div class="product-stock">
-                <span class="stock-badge ${stockClass}">${getStockBadgeText(product.current_stock)} ${product.unit_type || 'pcs'}</span>
-            </div>
-        `;
-
-        if (!out) {
-            card.addEventListener('click', (e) => {
-                if (!e.target.closest('.customize-trigger')) addToCart(product.id, 1, product.selling_price);
-            });
-        }
-        productsGrid.appendChild(card);
+    card.querySelector('.cust-btn').addEventListener('click',e=>{
+      e.stopPropagation();openCustomize(p.id);
     });
+    grid.appendChild(card);
+  });
 }
 
-window.openCustomizeModal = function(productId) {
-    productToCustomize = products.find(p => p.id === productId);
-    if (!productToCustomize) return;
-
-    customizeProductName.textContent = productToCustomize.name;
-    unitPriceDisplay.textContent = formatCurrency(productToCustomize.selling_price);
-    customQty.value = '1.00';
-    customPrice.value = productToCustomize.selling_price.toFixed(2);
-    priceManuallyEdited = false;
-    customizeModal.classList.add('active');
+// ─── CART ───
+function addToCart(pid,qty,price){
+  const p=products.find(x=>x.id===pid);
+  if(!p)return;
+  const ex=cart.find(i=>i.id===pid&&i.price===price);
+  if(ex){
+    if(ex.quantity+qty>p.stock){alert(`Max stock: ${p.stock}`);return;}
+    ex.quantity=+(ex.quantity+qty).toFixed(2);
+  }else{
+    if(qty>p.stock){alert(`Max stock: ${p.stock}`);return;}
+    cart.push({id:p.id,name:p.name,price,quantity:qty,unit:p.unitType||'pc'});
+  }
+  renderCart();
 }
 
-function addToCart(productId, quantity, price) {
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
-
-    const existing = cart.find(i => i.id === productId && i.price === price);
-    
-    if (existing) {
-        if (existing.quantity + quantity > product.current_stock) {
-            alert(`Cannot add more. Stock available: ${product.current_stock}`);
-            return;
-        }
-        existing.quantity += quantity;
-    } else {
-        if (quantity > product.current_stock) {
-            alert(`Cannot add. Stock available: ${product.current_stock}`);
-            return;
-        }
-        cart.push({ id: product.id, name: product.name, price: price, quantity: quantity, unit: product.unit_type || 'pcs' });
-    }
-    renderCart();
+function renderCart(){
+  const el=document.getElementById('cartItems');
+  if(!cart.length){
+    el.innerHTML=`<div class="empty-cart"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg><p>Cart is empty</p><small>Tap a product to add</small></div>`;
+    document.getElementById('itemCount').textContent='0';
+    document.getElementById('totalAmount').textContent=fmt(0);
+    return;
+  }
+  let total=0,count=0,html='';
+  cart.forEach((item,i)=>{
+    const sub=item.price*item.quantity;total+=sub;count+=item.quantity;
+    html+=`<div class="cart-item">
+      <div class="ci-info">
+        <div class="ci-name">${item.name}</div>
+        <div class="ci-unit">${item.quantity.toFixed(2)} ${item.unit} × ${fmt(item.price)}</div>
+      </div>
+      <div class="ci-controls">
+        <button class="qty-btn" onclick="changeQty(${i},-1)">−</button>
+        <span class="qty-num">${item.quantity.toFixed(2)}</span>
+        <button class="qty-btn" onclick="changeQty(${i},1)">+</button>
+      </div>
+      <div class="ci-total">${fmt(sub)}</div>
+    </div>`;
+  });
+  el.innerHTML=html;
+  document.getElementById('itemCount').textContent=count.toFixed(2);
+  document.getElementById('totalAmount').textContent=fmt(total);
 }
 
-function renderCart() {
-    if (!cartItemsDiv) return;
-    if (!cart.length) {
-        cartItemsDiv.innerHTML = `<div class="empty-cart"><div class="empty-cart-icon">🛒</div><p>Your cart is empty</p><p style="font-size:13px;margin-top:8px;">Click products to add</p></div>`;
-        itemCountSpan.textContent = '0';
-        totalAmountSpan.textContent = formatCurrency(0);
-        return;
-    }
+window.changeQty = function(i,d){
+  const item=cart[i];
+  const p=products.find(x=>x.id===item.id);
+  const nq=+(item.quantity+d).toFixed(2);
+  if(nq<=0){cart.splice(i,1);}
+  else if(nq>p.stock){alert(`Max stock: ${p.stock}`);return;}
+  else item.quantity=nq;
+  renderCart();
+}
 
-    let total = 0; let itemCount = 0; let html = '';
+// ─── CUSTOMER ───
+function renderCustomer(){
+  const el=document.getElementById('custDisplay');
+  const btn=document.getElementById('creditBtn');
+  if(selectedCustomer){
+    const ini=selectedCustomer.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    el.innerHTML=`<div class="selected-cust">
+      <div class="sc-avatar">${ini}</div>
+      <div class="sc-info">
+        <div class="sc-name">${selectedCustomer.name}</div>
+        <div class="sc-bal">Balance: ${fmt(selectedCustomer.balance)}</div>
+      </div>
+      <button class="sc-clear" onclick="clearCustomer()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>`;
+    btn.disabled=false;
+  }else{
+    el.innerHTML=`<div class="walkin-tag"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Walk-in customer — credit unavailable</div>`;
+    btn.disabled=true;
+  }
+}
 
-    cart.forEach((item, index) => {
-        const subtotal = item.price * item.quantity;
-        total += subtotal; itemCount += item.quantity;
+window.clearCustomer = function(){selectedCustomer=null;renderCustomer();}
 
-        html += `
-            <div class="cart-item">
-                <div class="item-info">
-                    <div class="item-name">${item.name}</div>
-                    <div class="item-price-note">${item.quantity.toFixed(2)} ${item.unit} × ${formatCurrency(item.price)}</div>
-                </div>
-                <div class="item-controls">
-                    <button class="quantity-btn" onclick="updateQuantity(${index}, -1)">−</button>
-                    <div class="item-quantity">${item.quantity.toFixed(2)}</div>
-                    <button class="quantity-btn" onclick="updateQuantity(${index}, 1)">+</button>
-                </div>
-                <div class="item-total">${formatCurrency(subtotal)}</div>
-            </div>
-        `;
+// ─── CUSTOMIZE MODAL ───
+window.openCustomize = function(pid){
+  const p=products.find(x=>x.id===pid);
+  if(!p)return;
+  productToCustomize=p;priceEdited=false;
+  document.getElementById('custModalTitle').textContent=p.name;
+  document.getElementById('unitPriceShow').textContent=fmt(p.price);
+  document.getElementById('custQty').value='1.00';
+  document.getElementById('custPrice').value=p.price.toFixed(2);
+  document.getElementById('custModal').classList.add('open');
+}
+
+// ─── SALES ───
+function completeSale(method,msg){
+  cart.forEach(item=>{
+    const p=products.find(x=>x.id===item.id);
+    if(p)p.stock=Math.max(0,p.stock-item.quantity);
+  });
+  const total=cartTotal();
+  document.getElementById('scTitle').textContent=`${method} Sale Complete!`;
+  document.getElementById('scAmount').textContent=fmt(total);
+  document.getElementById('scMsg').textContent=msg;
+  document.getElementById('saleCompleteModal').classList.add('open');
+  cart=[];renderCart();renderProducts();
+  document.getElementById('cashModal').classList.remove('open');
+}
+
+// ─── INIT ───
+document.addEventListener('DOMContentLoaded',()=>{
+  
+  // Set User Info from localStorage
+  const user = JSON.parse(localStorage.getItem('quickpos-user'));
+  if(user) {
+      document.getElementById('cashierNameDisplay').textContent = `${user.role === 'owner' ? 'Owner' : 'Cashier'}: ${user.name}`;
+  }
+
+  renderProducts();renderCart();renderCustomer();
+
+  // Category pills
+  document.getElementById('catPills').addEventListener('click',e=>{
+    const pill=e.target.closest('.cat-pill');
+    if(!pill)return;
+    document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('active'));
+    pill.classList.add('active');
+    currentCat=pill.dataset.cat;
+    renderProducts();
+  });
+
+  // Stock search
+  document.getElementById('stockSearch').addEventListener('input',e=>{
+    const v=e.target.value.toLowerCase().trim();
+    const res=document.getElementById('stockResult');
+    if(!v){res.textContent='';return;}
+    const p=products.find(x=>x.name.toLowerCase().includes(v));
+    res.textContent=p?`${p.name}: ${stockText(p.stock)} in stock`:'Not found';
+  });
+
+  // Customer search
+  const custSearch=document.getElementById('custSearch');
+  const custDrop=document.getElementById('custDropdown');
+  custSearch.addEventListener('input',e=>{
+    const v=e.target.value.toLowerCase().trim();
+    if(!v){custDrop.classList.remove('open');return;}
+    const results=demoCustomers.filter(c=>c.name.toLowerCase().includes(v)||c.phone.includes(v)).slice(0,5);
+    if(!results.length){custDrop.innerHTML='<div class="cust-result" style="justify-content:center;color:var(--text3)">No customers found</div>';custDrop.classList.add('open');return;}
+    custDrop.innerHTML=results.map(c=>`
+      <div class="cust-result" data-id="${c.id}">
+        <div><div class="cust-result-name">${c.name}</div><div class="cust-result-phone">${c.phone}</div></div>
+        <div class="cust-result-bal">${fmt(c.balance)}</div>
+      </div>`).join('');
+    custDrop.classList.add('open');
+    custDrop.querySelectorAll('.cust-result').forEach(row=>{
+      row.addEventListener('click',()=>{
+        selectedCustomer=demoCustomers.find(c=>c.id===+row.dataset.id);
+        custSearch.value='';custDrop.classList.remove('open');
+        renderCustomer();
+      });
     });
+  });
+  document.addEventListener('click',e=>{
+    if(!custSearch.contains(e.target)&&!custDrop.contains(e.target))custDrop.classList.remove('open');
+  });
 
-    cartItemsDiv.innerHTML = html;
-    itemCountSpan.textContent = itemCount.toFixed(2);
-    totalAmountSpan.textContent = formatCurrency(total);
-}
+  // Customize modal
+  document.getElementById('closeCustModal').addEventListener('click',()=>document.getElementById('custModal').classList.remove('open'));
+  document.getElementById('cancelCustModal').addEventListener('click',()=>document.getElementById('custModal').classList.remove('open'));
+  document.getElementById('custQty').addEventListener('input',()=>{
+    if(priceEdited||!productToCustomize)return;
+    const q=parseFloat(document.getElementById('custQty').value)||0;
+    document.getElementById('custPrice').value=(q*productToCustomize.price).toFixed(2);
+  });
+  document.getElementById('custPrice').addEventListener('input',()=>{priceEdited=true;});
+  document.getElementById('addCustToCart').addEventListener('click',()=>{
+    if(!productToCustomize)return;
+    const qty=parseFloat(document.getElementById('custQty').value)||0;
+    const price=parseFloat(document.getElementById('custPrice').value)||0;
+    if(qty<=0){alert('Enter valid quantity');return;}
+    addToCart(productToCustomize.id,qty,price);
+    document.getElementById('custModal').classList.remove('open');
+  });
 
-window.updateQuantity = function(index, change) {
-    const item = cart[index];
-    const product = products.find(p => p.id === item.id);
-    const newQty = item.quantity + change;
-    
-    if (newQty <= 0) cart.splice(index, 1);
-    else if (newQty > product.current_stock) { alert(`Maximum stock available: ${product.current_stock}`); return; }
-    else item.quantity = newQty;
-    
-    renderCart();
-}
+  // Payment buttons
+  document.getElementById('cashBtn').addEventListener('click',()=>{
+    if(!cart.length)return;
+    document.getElementById('cashModalTotal').textContent=fmt(cartTotal());
+    document.getElementById('amtReceived').value='';
+    document.getElementById('changeAmt').textContent=fmt(0);
+    document.getElementById('cashModal').classList.add('open');
+  });
+  document.getElementById('cardBtn').addEventListener('click',()=>{
+    if(!cart.length)return;
+    completeSale('Card','Card payment processed successfully');
+  });
+  document.getElementById('creditBtn').addEventListener('click',()=>{
+    if(!cart.length||!selectedCustomer)return;
+    const total=cartTotal();
+    selectedCustomer.balance+=total;
+    completeSale('Credit',`Added to ${selectedCustomer.name}'s account. New balance: ${fmt(selectedCustomer.balance)}`);
+    renderCustomer();
+  });
 
-function searchCustomers(query) {
-    if (!query.trim()) { customerSearchResults.classList.remove('active'); return; }
-    const searchTerm = query.toLowerCase();
-    const results = customers.filter(c => (c.name && c.name.toLowerCase().includes(searchTerm)) || (c.phone && c.phone.includes(searchTerm))).slice(0, 5);
-
-    if (results.length > 0) {
-        customerSearchResults.innerHTML = results.map(c => `
-            <div class="customer-result-item" onclick="selectCustomer(${c.id})">
-                <div><span class="customer-result-name">${c.name}</span><span class="customer-result-phone">${c.phone}</span></div>
-                <div class="customer-result-balance">${formatCurrency(c.balance || 0)}</div>
-            </div>
-        `).join('');
-        customerSearchResults.classList.add('active');
-    } else {
-        customerSearchResults.innerHTML = '<div class="customer-result-item" style="justify-content:center;color:var(--text-light);padding:20px;">No customers found</div>';
-        customerSearchResults.classList.add('active');
-    }
-}
-
-window.selectCustomer = function(customerId) {
-    const customer = customers.find(c => c.id === customerId);
-    if (customer) {
-        selectedCustomer = customer;
-        renderSelectedCustomer();
-        customerSearch.value = '';
-        customerSearchResults.classList.remove('active');
-    }
-}
-
-function renderSelectedCustomer() {
-    if (!selectedCustomerDisplay) return;
-    if (selectedCustomer) {
-        selectedCustomerDisplay.innerHTML = `
-            <div class="selected-customer-info">
-                <div class="selected-customer-details">
-                    <div class="selected-customer-name">${selectedCustomer.name}</div>
-                    <div class="selected-customer-balance">Current Balance: <span>${formatCurrency(selectedCustomer.balance || 0)}</span></div>
-                </div>
-                <button class="clear-customer-btn" onclick="clearCustomer()" title="Clear selection">✕</button>
-            </div>
-        `;
-        if (creditPaymentBtn) creditPaymentBtn.disabled = false;
-    } else {
-        selectedCustomerDisplay.innerHTML = `<div class="walkin-indicator"><span>👤</span> Walk-in Customer (credit not available)</div>`;
-        if (creditPaymentBtn) creditPaymentBtn.disabled = true;
-    }
-}
-
-window.clearCustomer = function() { selectedCustomer = null; renderSelectedCustomer(); }
-
-async function completeSale(method, message) {
-    const user = JSON.parse(localStorage.getItem('quickpos-user'));
-    const total = calculateCartTotal();
-    const billId = 'BILL-' + Date.now();
-    
-    const saleData = {
-        billId: billId,
-        customerId: selectedCustomer ? selectedCustomer.id : null,
-        total: total,
-        method: method,
-        received: method === 'Cash' ? parseFloat(document.getElementById('amountReceived').value) || total : total,
-        change: method === 'Cash' ? (parseFloat(document.getElementById('amountReceived').value) || total) - total : 0,
-        cashier: user ? user.name : 'Unknown',
-        items: cart.map(item => ({
-            id: item.id,
-            name: item.name,
-            qty: item.quantity,
-            price: item.price
-        }))
-    };
-
-    try {
-        const result = await window.api.saveSale(saleData);
-        if (result.success) {
-            document.getElementById('saleCompleteTitle').textContent = `${method} Sale Complete!`;
-            document.getElementById('saleCompleteAmount').textContent = formatCurrency(total);
-            document.getElementById('saleCompleteMessage').textContent = message;
-            
-            saleCompleteOverlay.classList.add('active');
-            cart = []; 
-            renderCart(); 
-            
-            // Refresh products
-            products = await window.api.getProducts();
-            renderProducts(); 
-            if (paymentModal) paymentModal.classList.remove('active');
-        }
-    } catch (err) {
-        console.error('Sale Error:', err);
-        alert('Error saving sale: ' + err.message);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const user = JSON.parse(localStorage.getItem('quickpos-user'));
-    if (!user) { window.location.href = 'login.html'; return; }
-
-    loadData();
-
-    if (categoryButtons) {
-        categoryButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                currentCategory = btn.dataset.category;
-                categoryButtons.forEach(b => b.classList.toggle('active', b === btn));
-                renderProducts();
-            });
-        });
-    }
-
-    if (customerSearch) customerSearch.addEventListener('input', (e) => searchCustomers(e.target.value));
-    
-    if (stockSearch) {
-        stockSearch.addEventListener('input', (e) => {
-            const val = e.target.value.trim().toLowerCase();
-            if (!val) { stockResult.innerHTML = ''; return; }
-            const barcodeMatch = products.find(p => p.barcode === val);
-            if (barcodeMatch) {
-                addToCart(barcodeMatch.id, 1, barcodeMatch.selling_price);
-                e.target.value = '';
-                stockResult.innerHTML = `<span class="material-symbols-rounded success s18">check_circle</span> Added ${barcodeMatch.name}`;
-                setTimeout(() => stockResult.innerHTML = '', 2000);
-                return;
-            }
-            const prod = products.find(p => p.name.toLowerCase().includes(val));
-            stockResult.innerHTML = prod ? `${prod.name}: ${getStockBadgeText(prod.current_stock)}` : 'Not found';
-        });
-    }
-
-    const finalizePaymentBtn = document.getElementById('finalizePaymentBtn');
-    if (finalizePaymentBtn) {
-        finalizePaymentBtn.addEventListener('click', () => {
-            const total = calculateCartTotal();
-            const received = parseFloat(document.getElementById('amountReceived').value) || 0;
-            if (received < total) { alert('Insufficient amount received'); return; }
-            completeSale('Cash', `Change: ${formatCurrency(received - total)}`);
-        });
-    }
-
-    const cashPaymentBtn = document.getElementById('cashPaymentBtn');
-    if (cashPaymentBtn) cashPaymentBtn.addEventListener('click', () => {
-        if (!cart.length) return;
-        document.getElementById('modalTotalAmount').textContent = formatCurrency(calculateCartTotal());
-        document.getElementById('amountReceived').value = '';
-        document.getElementById('balanceAmount').textContent = formatCurrency(0);
-        paymentModal.classList.add('active');
+  // Cash modal
+  document.getElementById('closeCashModal').addEventListener('click',()=>document.getElementById('cashModal').classList.remove('open'));
+  document.getElementById('cancelCashModal').addEventListener('click',()=>document.getElementById('cashModal').classList.remove('open'));
+  document.getElementById('amtReceived').addEventListener('input',updateChange);
+  document.querySelectorAll('.quick-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const cur=parseFloat(document.getElementById('amtReceived').value)||0;
+      document.getElementById('amtReceived').value=(cur+parseFloat(b.dataset.add)).toFixed(2);
+      updateChange();
     });
+  });
+  function updateChange(){
+    const total=cartTotal();
+    const rec=parseFloat(document.getElementById('amtReceived').value)||0;
+    document.getElementById('changeAmt').textContent=fmt(Math.max(0,rec-total));
+  }
+  document.getElementById('finalizeCash').addEventListener('click',()=>{
+    const total=cartTotal();
+    const rec=parseFloat(document.getElementById('amtReceived').value)||0;
+    if(rec<total){alert('Insufficient amount received');return;}
+    completeSale('Cash',`Change returned: ${fmt(rec-total)}`);
+  });
 
-    const cardPaymentBtn = document.getElementById('cardPaymentBtn');
-    if (cardPaymentBtn) cardPaymentBtn.addEventListener('click', () => {
-        if (!cart.length) return;
-        completeSale('Card', 'Card payment processed');
-    });
+  // Sale complete
+  document.getElementById('scDone').addEventListener('click',()=>document.getElementById('saleCompleteModal').classList.remove('open'));
 
-    if (creditPaymentBtn) creditPaymentBtn.addEventListener('click', () => {
-        if (!cart.length) return;
-        if (!selectedCustomer) { alert('Please select a customer for credit sale'); return; }
-        completeSale('Credit', `Added to ${selectedCustomer.name}'s account.`);
-    });
-
-    const closeOverlayBtn = document.getElementById('closeOverlayBtn');
-    if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', () => saleCompleteOverlay.classList.remove('active'));
 });
