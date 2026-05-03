@@ -13,40 +13,40 @@ const Components = (function() {
                 <div class="logo" id="logo">QuickPOS</div>
             </div>
             <div class="nav-items">
-                <a href="owner_dashboard.html" class="nav-item owner-only" data-page="owner_dashboard.html">
+                <a href="owner_dashboard.html" class="nav-item owner-only">
                     <span class="nav-icon">📋</span><span class="nav-text">Dashboard</span>
                 </a>
-                <a href="sales.html" class="nav-item" data-page="sales.html">
+                <a href="sales.html" class="nav-item">
                     <span class="nav-icon">💰</span><span class="nav-text">Make a Sale</span>
                 </a>
-                <a href="categories.html" class="nav-item" data-page="categories.html">
+                <a href="categories.html" class="nav-item">
                     <span class="nav-icon">🏷️</span><span class="nav-text">Categories</span>
                 </a>
-                <a href="products.html" class="nav-item" data-page="products.html">
+                <a href="products.html" class="nav-item">
                     <span class="nav-icon">📦</span><span class="nav-text">Products</span>
                 </a>
-                <a href="inventory.html" class="nav-item" data-page="inventory.html">
+                <a href="inventory.html" class="nav-item">
                     <span class="nav-icon">🚚</span><span class="nav-text">Inventory</span>
                 </a>
-                <a href="customers.html" class="nav-item" data-page="customers.html">
+                <a href="customers.html" class="nav-item">
                     <span class="nav-icon">👤</span><span class="nav-text">Customers</span>
                 </a>
-                <a href="quotations.html" class="nav-item" data-page="quotations.html">
+                <a href="quotations.html" class="nav-item">
                     <span class="nav-icon">📄</span><span class="nav-text">Quotations</span>
                 </a>
-                <a href="ledger.html" class="nav-item" data-page="ledger.html">
+                <a href="ledger.html" class="nav-item">
                     <span class="nav-icon">📒</span><span class="nav-text">Credit Ledger</span>
                 </a>
-                <a href="sales_reports.html" class="nav-item" data-page="sales_reports.html">
+                <a href="sales_reports.html" class="nav-item">
                     <span class="nav-icon">🧾</span><span class="nav-text">Invoice History</span>
                 </a>
-                <a href="reports.html" class="nav-item owner-only" data-page="reports.html">
+                <a href="reports.html" class="nav-item owner-only">
                     <span class="nav-icon">📊</span><span class="nav-text">Shift Reports</span>
                 </a>
-                <a href="users.html" class="nav-item owner-only" data-page="users.html">
+                <a href="users.html" class="nav-item owner-only">
                     <span class="nav-icon">👥</span><span class="nav-text">Users</span>
                 </a>
-                <a href="settings.html" class="nav-item owner-only" data-page="settings.html">
+                <a href="settings.html" class="nav-item owner-only">
                     <span class="nav-icon">⚙️</span><span class="nav-text">Settings</span>
                 </a>
                 <a href="#" class="nav-item" id="logoutBtn">
@@ -56,10 +56,12 @@ const Components = (function() {
         </div>
     `;
 
-    const getTopbarTemplate = (title, user, extra) => `
+    const getTopbarTemplate = (title, user, topbarRight) => `
         <div class="top-bar">
             <div class="page-title">${title}</div>
-            ${extra || ''}
+            <div class="topbar-right-content" style="margin-left: auto; margin-right: 20px;">
+                ${topbarRight || ''}
+            </div>
             <div class="user-info">
                 <span id="cashierNameDisplay">${user ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}: ${user ? user.name : 'Loading...'}</span>
                 <div class="user-avatar">${user ? user.name.charAt(0).toUpperCase() : 'U'}</div>
@@ -77,7 +79,8 @@ const Components = (function() {
         const currentPage = window.location.pathname.split('/').pop() || 'owner_dashboard.html';
         const navItems = container.querySelectorAll('.nav-item');
         navItems.forEach(item => {
-            if (item.getAttribute('data-page') === currentPage) {
+            const href = item.getAttribute('href');
+            if (href === currentPage) {
                 item.classList.add('active');
             }
         });
@@ -131,19 +134,19 @@ const Components = (function() {
         }
     }
 
-    function initTopbar(title, extra) {
+    function initTopbar(title, topbarRight) {
         const container = document.getElementById('topbar-container');
         if (!container) return;
 
         const user = JSON.parse(localStorage.getItem('quickpos-user'));
-        container.innerHTML = getTopbarTemplate(title, user, extra);
+        container.innerHTML = getTopbarTemplate(title, user, topbarRight);
     }
 
     return {
         init: function(config) {
             initSidebar();
             if (config && config.title) {
-                initTopbar(config.title, config.extra);
+                initTopbar(config.title, config.topbarRight);
             }
         }
     };
