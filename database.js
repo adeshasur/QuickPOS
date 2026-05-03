@@ -72,6 +72,7 @@ db.serialize(() => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         sale_id INTEGER,
         product_id INTEGER,
+        product_name TEXT, -- Added for historical accuracy
         quantity REAL,
         unit_price REAL,
         subtotal REAL,

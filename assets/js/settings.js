@@ -76,8 +76,28 @@
         }
     }
 
+    async function resetSystem() {
+        if (!confirm('⚠️ WARNING: This will reset all system settings and clear local storage. ARE YOU SURE?')) return;
+
+        try {
+            // Preserve the current user session
+            const currentUser = localStorage.getItem('quickpos-user');
+            localStorage.clear();
+            if (currentUser) {
+                localStorage.setItem('quickpos-user', currentUser);
+            }
+            
+            // Redirect to dashboard or reload
+            alert('✅ System settings have been reset.');
+            window.location.href = 'owner_dashboard.html';
+        } catch (err) {
+            alert('Error resetting system: ' + err.message);
+        }
+    }
+
     function setupListeners() {
         if(elements.saveBtn) elements.saveBtn.addEventListener('click', saveSettings);
+        if(elements.resetBtn) elements.resetBtn.addEventListener('click', resetSystem);
 
         if(elements.versionOptions) {
             elements.versionOptions.forEach(opt => {
@@ -97,13 +117,10 @@
             return;
         }
 
+        Components.init({ title: 'System Settings' });
         await loadSettings();
         setupListeners();
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
+    document.addEventListener('DOMContentLoaded', init);
 })();

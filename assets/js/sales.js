@@ -232,6 +232,7 @@ async function completeSale(method, message) {
         cashier: user ? user.name : 'Unknown',
         items: cart.map(item => ({
             id: item.id,
+            name: item.name,
             qty: item.quantity,
             price: item.price
         }))

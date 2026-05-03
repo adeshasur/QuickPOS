@@ -202,10 +202,10 @@ ipcMain.handle('save-sale', async (event, saleData) => {
             stmt.run([saleData.billId, saleData.customerId, saleData.total, saleData.method, saleData.received, saleData.change, saleData.cashier], function(err) {
                 if (err) { db.run("ROLLBACK"); reject(err); return; }
                 const saleId = this.lastID;
-                const itemStmt = db.prepare(`INSERT INTO sale_items (sale_id, product_id, quantity, unit_price, subtotal) VALUES (?, ?, ?, ?, ?)`);
+                const itemStmt = db.prepare(`INSERT INTO sale_items (sale_id, product_id, product_name, quantity, unit_price, subtotal) VALUES (?, ?, ?, ?, ?, ?)`);
                 const stockStmt = db.prepare(`UPDATE products SET current_stock = current_stock - ? WHERE id = ?`);
                 saleData.items.forEach(item => {
-                    itemStmt.run([saleId, item.id, item.qty, item.price, (item.qty * item.price)]);
+                    itemStmt.run([saleId, item.id, item.name, item.qty, item.price, (item.qty * item.price)]);
                     stockStmt.run([item.qty, item.id]);
                 });
                 itemStmt.finalize();
@@ -222,6 +222,14 @@ ipcMain.handle('save-sale', async (event, saleData) => {
 ipcMain.handle('get-sales-history', async () => {
     return new Promise((resolve, reject) => {
         db.all("SELECT * FROM sales ORDER BY timestamp DESC", [], (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows);
+        });
+    });
+});
+ipcMain.handle('get-sale-details', async (event, saleId) => {
+    return new Promise((resolve, reject) => {
+        db.all("SELECT * FROM sale_items WHERE sale_id = ?", [saleId], (err, rows) => {
             if (err) reject(err);
             else resolve(rows);
         });

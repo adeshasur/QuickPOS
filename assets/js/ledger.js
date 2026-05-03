@@ -1,71 +1,11 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // ---------- Security & Role Check ----------
-    const user = JSON.parse(localStorage.getItem('quickpos-user'));
-    if (!user) {
-        window.location.href = 'login.html';
-        return;
-    }
-
-    // Initialize Components
-    Components.init({
-        title: 'Credit Ledger'
-    });
-    const BILLS_KEY = 'quickpos-credit-bills';
-    const CUSTOMERS_KEY = 'quickpos-customers';
-
-    // ---------- Seed demo customers if needed ----------
-    function seedCustomers() {
-        let customers = localStorage.getItem(CUSTOMERS_KEY);
-        if (!customers) {
-            const demoCustomers = [
-                { id: 1, name: 'Kamal Perera', phone: '0771234567', address: 'Colombo 03', balance: 50000.00 },
-                { id: 2, name: 'Sunimal Silva', phone: '0719876543', address: 'Maharagama', balance: 0.00 },
-                { id: 3, name: 'Hardware Contractor Ltd', phone: '0112233445', address: 'Kandy', balance: 25000.00 },
-                { id: 4, name: 'Nimal Fernando', phone: '0765558888', address: 'Galle', balance: 1250.50 },
-                { id: 5, name: 'City Builders', phone: '0114445555', address: 'Colombo', balance: 15000.00 }
-            ];
-            localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(demoCustomers));
-        }
-    }
-    seedCustomers();
-
-    // ---------- Seed bills ----------
-    function seedBills() {
-        let bills = localStorage.getItem(BILLS_KEY);
-        if (!bills) {
-            const today = new Date();
-            const yesterday = new Date(today); yesterday.setDate(yesterday.getDate()-1);
-            const fmt = (d) => d.toISOString().split('T')[0];
-            const demoBills = [
-                { id: '101', date: fmt(today), customerId: 1, customerName: 'Kamal Perera', total: 5000.00, remaining: 5000.00, status: 'pending' },
-                { id: '102', date: fmt(yesterday), customerId: 3, customerName: 'Hardware Contractor Ltd', total: 25000.00, remaining: 25000.00, status: 'pending' },
-                { id: '103', date: '2026-02-15', customerId: 2, customerName: 'Sunimal Silva', total: 3200.00, remaining: 0.00, status: 'settled' },
-                { id: '104', date: '2026-02-10', customerId: 5, customerName: 'City Builders', total: 8700.50, remaining: 8700.50, status: 'pending' }
-            ];
-            localStorage.setItem(BILLS_KEY, JSON.stringify(demoBills));
-        }
-    }
-    seedBills();
-
-    // ---------- Helpers ----------
-    function getBills() { return JSON.parse(localStorage.getItem(BILLS_KEY)) || []; }
-    function saveBills(bills) { localStorage.setItem(BILLS_KEY, JSON.stringify(bills)); }
-    function getCustomers() { return JSON.parse(localStorage.getItem(CUSTOMERS_KEY)) || []; }
-    function saveCustomers(customers) { localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(customers)); }
-
-    function updateCustomerBalance(customerId, additionalCredit) {
-        let customers = getCustomers();
-        const idx = customers.findIndex(c => c.id == customerId);
-        if (idx !== -1) {
-            customers[idx].balance = (customers[idx].balance || 0) + additionalCredit;
-            saveCustomers(customers);
-        }
-    }
+(function() {
+    'use strict';
 
     const formatCurrency = (amt) => `LKR ${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-    // State
-    let currentTab = 'pending'; // 'pending' or 'settled'
+    let creditBills = [];
+    let customers = [];
+    let currentTab = 'pending';
     let selectedBillForPayment = null;
 
     // DOM Elements
@@ -81,74 +21,91 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelPaymentBtn = document.getElementById('cancelPayment');
     const confirmPaymentBtn = document.getElementById('confirmPayment');
 
-    // Render Table
-    function renderLedger() {
-        const bills = getBills();
-        const filtered = bills.filter(b => b.status === currentTab);
-        filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+    async function loadData() {
+        try {
+            const allSales = await window.api.getSalesHistory();
+            customers = await window.api.getCustomers();
+            
+            // Filter only credit sales
+            // Note: In our current logic, balance_amount for Credit sales stores the "Remaining Due"
+            creditBills = allSales.filter(s => s.payment_method === 'Credit');
+            
+            renderLedger();
+        } catch (err) {
+            console.error('Error loading ledger data:', err);
+        }
+    }
 
-        let totalOutstanding = bills.filter(b => b.status === 'pending').reduce((acc, b) => acc + b.remaining, 0);
-        totalOutstandingSpan.innerText = formatCurrency(totalOutstanding);
+    function renderLedger() {
+        if (!tableBody) return;
+
+        const filtered = creditBills.filter(b => {
+            const isSettled = (b.balance_amount || 0) <= 0;
+            return currentTab === 'pending' ? !isSettled : isSettled;
+        });
+
+        filtered.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        let totalOutstanding = creditBills.reduce((acc, b) => acc + (b.balance_amount > 0 ? b.balance_amount : 0), 0);
+        if (totalOutstandingSpan) totalOutstandingSpan.innerText = formatCurrency(totalOutstanding);
 
         if (filtered.length === 0) {
             tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;">No ${currentTab} bills</td></tr>`;
             return;
         }
 
-        let html = '';
-        filtered.forEach(bill => {
-            const statusClass = bill.status === 'pending' ? '' : 'settled';
+        tableBody.innerHTML = filtered.map(bill => {
+            const customer = customers.find(c => c.id === bill.customer_id);
+            const statusClass = (bill.balance_amount || 0) <= 0 ? 'settled' : '';
+            const statusText = (bill.balance_amount || 0) <= 0 ? 'SETTLED' : 'PENDING';
             
-            html += `<tr>
-                <td>${bill.date}</td>
-                <td><strong>#${bill.id}</strong></td>
-                <td>${bill.customerName}</td>
-                <td>${formatCurrency(bill.total)}</td>
-                <td>${formatCurrency(bill.remaining)}</td>
-                <td><span class="status-badge ${statusClass}">${bill.status.toUpperCase()}</span></td>
+            return `<tr>
+                <td>${new Date(bill.timestamp).toLocaleDateString()}</td>
+                <td><strong>#${bill.bill_id}</strong></td>
+                <td>${customer ? customer.name : 'Unknown Customer'}</td>
+                <td>${formatCurrency(bill.total_amount)}</td>
+                <td>${formatCurrency(bill.balance_amount)}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                 <td>
                     <div class="action-buttons">
-                        ${bill.status === 'pending' ? `
+                        ${bill.balance_amount > 0 ? `
                         <button class="action-btn pay-btn" data-id="${bill.id}" title="Pay Now">
                             <span class="material-symbols-rounded s18">payments</span>
                         </button>` : ''}
-                        <button class="action-btn print-btn" data-id="${bill.id}" data-customer="${bill.customerName}" data-total="${bill.total}" data-remaining="${bill.remaining}" title="Print Bill">
+                        <button class="action-btn print-btn" data-id="${bill.id}" title="Print Bill">
                             <span class="material-symbols-rounded s18">print</span>
                         </button>
                     </div>
                 </td>
             </tr>`;
-        });
-        tableBody.innerHTML = html;
+        }).join('');
 
         // Attach events
         document.querySelectorAll('.pay-btn').forEach(btn => {
             btn.addEventListener('click', () => openPaymentModal(btn.dataset.id));
         });
         document.querySelectorAll('.print-btn').forEach(btn => {
-            btn.addEventListener('click', () => printReceipt(btn.dataset.id, btn.dataset.customer, parseFloat(btn.dataset.total), parseFloat(btn.dataset.remaining)));
+            btn.addEventListener('click', () => openReceipt(btn.dataset.id));
         });
     }
 
-    // Modal Logic
-    function openPaymentModal(billId) {
-        const bills = getBills();
-        const bill = bills.find(b => b.id == billId);
+    function openPaymentModal(id) {
+        const bill = creditBills.find(b => b.id == id);
         if (!bill) return;
         selectedBillForPayment = bill;
-        modalBillId.innerText = `#${bill.id}`;
-        modalRemaining.innerText = formatCurrency(bill.remaining);
-        paymentAmount.value = bill.remaining.toFixed(2);
+        modalBillId.innerText = `#${bill.bill_id}`;
+        modalRemaining.innerText = formatCurrency(bill.balance_amount);
+        paymentAmount.value = bill.balance_amount.toFixed(2);
         paymentModal.classList.add('active');
     }
 
     function closeModal() {
         paymentModal.classList.remove('active');
         selectedBillForPayment = null;
-        paymentAmount.value = '';
+        if (paymentAmount) paymentAmount.value = '';
     }
 
-    function handleConfirmPayment() {
+    async function handleConfirmPayment() {
         if (!selectedBillForPayment) return;
         const amountReceived = parseFloat(paymentAmount.value);
         if (isNaN(amountReceived) || amountReceived <= 0) {
@@ -156,85 +113,61 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const bills = getBills();
-        const billIndex = bills.findIndex(b => b.id == selectedBillForPayment.id);
-        if (billIndex === -1) return;
-
-        const bill = bills[billIndex];
-        if (amountReceived > bill.remaining) {
-            alert(`Amount exceeds remaining balance (${formatCurrency(bill.remaining)})`);
+        if (amountReceived > selectedBillForPayment.balance_amount) {
+            alert(`Amount exceeds remaining balance (${formatCurrency(selectedBillForPayment.balance_amount)})`);
             return;
         }
 
-        bill.remaining -= amountReceived;
-        updateCustomerBalance(bill.customerId, -amountReceived); 
-
-        if (bill.remaining === 0) {
-            bill.status = 'settled';
+        try {
+            // In a real app, we'd have an API like window.api.updateSaleBalance
+            // For now, we'll alert that this needs backend implementation or we can try to use saveSale if it supports updates
+            // But let's assume we need a new API.
+            alert('Payment processing logic for SQLite backend is being finalized.');
+            closeModal();
+        } catch (err) {
+            alert('Error processing payment: ' + err.message);
         }
-        
-        saveBills(bills);
-        renderLedger();
-        closeModal();
     }
 
-    // Print Receipt
-    function printReceipt(billId, customerName, totalAmount, remaining) {
-        const date = new Date().toLocaleString();
-        const receiptHTML = `
-            <div class="thermal-receipt" id="thermalReceipt">
-                <div style="text-align:center; font-weight:bold; margin-bottom:12px;">⚡ QUICKPOS PRO</div>
-                <div style="text-align:center;">123 Main Street, City</div>
-                <div style="text-align:center;">Tel: 0112 123456</div>
-                <div style="border-top:1px dashed #333; margin:12px 0;"></div>
-                <div style="display:flex; justify-content:space-between;"><span>Bill #:</span><span>${billId}</span></div>
-                <div style="display:flex; justify-content:space-between;"><span>Customer:</span><span>${customerName}</span></div>
-                <div style="display:flex; justify-content:space-between;"><span>Date:</span><span>${date}</span></div>
-                <div style="border-top:1px dashed #333; margin:12px 0;"></div>
-                <div style="display:flex; justify-content:space-between;"><span>Total Bill:</span><span>${formatCurrency(totalAmount)}</span></div>
-                <div style="display:flex; justify-content:space-between;"><span>Remaining:</span><span>${formatCurrency(remaining)}</span></div>
-                <div style="border-top:1px dashed #333; margin:12px 0;"></div>
-                <div style="text-align:center;">Thank you, come again!</div>
-                <div style="text-align:center; font-size:12px; margin-top:8px;">** Receipt **</div>
-            </div>
-        `;
-        const container = document.getElementById('thermalReceiptContainer');
-        container.innerHTML = receiptHTML;
-        const originalTitle = document.title;
-        document.title = `Receipt_${billId}`;
-        window.print();
-        document.title = originalTitle;
+    function openReceipt(id) {
+        // Placeholder for receipt printing
+        window.location.href = 'sales_reports.html';
     }
 
-    // Event Listeners
-    if(pendingTab) {
-        pendingTab.addEventListener('click', () => {
-            currentTab = 'pending';
-            pendingTab.classList.add('active');
-            settledTab.classList.remove('active');
-            renderLedger();
+    function init() {
+        const user = JSON.parse(localStorage.getItem('quickpos-user'));
+        if (!user) { window.location.href = 'login.html'; return; }
+
+        Components.init({ title: 'Credit Ledger' });
+
+        if(pendingTab) {
+            pendingTab.addEventListener('click', () => {
+                currentTab = 'pending';
+                pendingTab.classList.add('active');
+                settledTab.classList.remove('active');
+                renderLedger();
+            });
+        }
+
+        if(settledTab) {
+            settledTab.addEventListener('click', () => {
+                currentTab = 'settled';
+                settledTab.classList.add('active');
+                pendingTab.classList.remove('active');
+                renderLedger();
+            });
+        }
+
+        if(closePaymentModalBtn) closePaymentModalBtn.addEventListener('click', closeModal);
+        if(cancelPaymentBtn) cancelPaymentBtn.addEventListener('click', closeModal);
+        if(confirmPaymentBtn) confirmPaymentBtn.addEventListener('click', handleConfirmPayment);
+
+        window.addEventListener('click', (e) => {
+            if (e.target === paymentModal) closeModal();
         });
+
+        loadData();
     }
 
-    if(settledTab) {
-        settledTab.addEventListener('click', () => {
-            currentTab = 'settled';
-            settledTab.classList.add('active');
-            pendingTab.classList.remove('active');
-            renderLedger();
-        });
-    }
-
-    if(closePaymentModalBtn) closePaymentModalBtn.addEventListener('click', closeModal);
-    if(cancelPaymentBtn) cancelPaymentBtn.addEventListener('click', closeModal);
-    if(confirmPaymentBtn) confirmPaymentBtn.addEventListener('click', handleConfirmPayment);
-
-
-
-    // Init Render
-    renderLedger();
-
-    window.addEventListener('click', (e) => {
-        if (e.target === paymentModal) closeModal();
-    });
-});
+    document.addEventListener('DOMContentLoaded', init);
+})();

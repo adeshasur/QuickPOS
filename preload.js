@@ -27,6 +27,7 @@ contextBridge.exposeInMainWorld('api', {
     // Sales (බිල්)
     saveSale: (saleData) => ipcRenderer.invoke('save-sale', saleData),
     getSalesHistory: () => ipcRenderer.invoke('get-sales-history'),
+    getSaleDetails: (saleId) => ipcRenderer.invoke('get-sale-details', saleId),
 
     // Security & Logic
     loginAuth: (creds) => ipcRenderer.invoke('login-auth', creds),
