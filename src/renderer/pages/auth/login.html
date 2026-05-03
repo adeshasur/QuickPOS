@@ -3,49 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickPOS Pro — Access Portal</title>
-    <link rel="stylesheet" href="../../assets/css/global.css">
-    <link rel="stylesheet" href="../../assets/css/components.css">
+    <title>QuickPOS — Login</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { align-items: center; justify-content: center; position: relative; }
-        body::before { content: ''; position: absolute; width: 400px; height: 400px; background: var(--accent); filter: blur(150px); opacity: 0.15; top: -100px; right: -100px; z-index: -1; }
-        .login-card { background: rgba(17, 24, 39, 0.8); backdrop-filter: blur(20px); border: 1px solid var(--border); width: 100%; max-width: 420px; padding: 48px; border-radius: 28px; text-align: center; }
-        .logo { font-size: 28px; font-weight: 800; margin-bottom: 32px; letter-spacing: -0.03em; }
-        .logo .blue { color: var(--accent2); }
-        .role-selector { display: flex; background: var(--surface2); padding: 4px; border-radius: 14px; margin-bottom: 24px; border: 1px solid var(--border); }
-        .role-btn { flex: 1; padding: 10px; border: none; background: transparent; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--text2); }
-        .role-btn.active { background: var(--accent); color: #fff; box-shadow: 0 4px 12px var(--accent-glow); }
-        .input-group { text-align: left; margin-bottom: 20px; }
-        .input-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; }
-        .btn-login { width: 100%; padding: 14px; background: var(--accent); color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; }
-        .toast-container { position: fixed; top: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; }
-        .toast { background: var(--surface); border: 1px solid var(--border); padding: 16px 24px; border-radius: 16px; transform: translateX(120%); transition: transform 0.4s; display: flex; align-items: center; gap: 12px; }
+        :root {
+            --primary-blue: #000080;
+            --primary-orange: #FF8C00;
+            --bg-light: #F8F9FA;
+            --text-dark: #2D3436;
+            --text-gray: #636E72;
+            --border-light: #E0E0E0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-light);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dark);
+        }
+
+        .login-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 440px;
+            padding: 50px 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 40px;
+            letter-spacing: -0.5px;
+        }
+        .logo .blue { color: var(--primary-blue); }
+        .logo .orange { color: var(--primary-orange); }
+
+        h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #1e293b; }
+        .subheading { font-size: 14px; color: var(--text-gray); margin-bottom: 32px; }
+
+        .role-selector {
+            display: flex;
+            background: #F1F3F5;
+            padding: 5px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+        }
+        .role-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-gray);
+        }
+        .role-btn.active {
+            background: var(--primary-blue);
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 0, 128, 0.2);
+        }
+
+        .input-group { text-align: left; margin-bottom: 24px; }
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+        }
+        .input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #F8F9FA;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .input:focus { border-color: var(--primary-blue); }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary-orange);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .btn-login:hover { background: #E67E00; }
+        .btn-login:active { transform: scale(0.98); }
+
+        .forgot-password {
+            display: block;
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--text-gray);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .forgot-password:hover { text-decoration: underline; }
+
+        .toast-container { 
+            position: fixed; 
+            top: 24px; 
+            right: 24px; 
+            z-index: 1000; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            pointer-events: none;
+        }
+        .toast {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 16px 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: translateX(120%);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            min-width: 280px;
+            border: 1px solid rgba(0,0,0,0.05);
+            pointer-events: auto;
+        }
         .toast.show { transform: translateX(0); }
+        
+        .toast-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        
+        .toast-error { border-left: 5px solid #ff4757; }
+        .toast-error .toast-icon { background: rgba(255, 71, 87, 0.1); color: #ff4757; }
+        
+        .toast-success { border-left: 5px solid #2ed573; }
+        .toast-success .toast-icon { background: rgba(46, 213, 115, 0.1); color: #2ed573; }
+
+        @keyframes progress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(0,0,0,0.05);
+            width: 100%;
+            border-radius: 0 0 0 16px;
+        }
+        .toast.show .toast-progress::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 100%;
+            background: inherit;
+            animation: progress 3s linear forwards;
+        }
+        .toast-success .toast-progress::after { background: #2ed573; }
+        .toast-error .toast-progress::after { background: #ff4757; }
     </style>
 </head>
 <body>
     <div class="login-card">
-        <div class="logo"><span class="blue">Quick</span>POS</div>
-        <h2>System Login</h2>
-        <p class="tb-sub" style="margin-bottom:32px">Access your retail management suite</p>
+        <div class="logo"><span class="blue">Quick</span><span class="orange">POS</span></div>
+        <h1>Welcome Back</h1>
+        <p class="subheading">Please enter your credentials to continue</p>
+        
         <div class="role-selector">
             <button id="cashierBtn" class="role-btn active" onclick="setRole('Cashier')">Cashier</button>
             <button id="ownerBtn" class="role-btn" onclick="setRole('Owner')">Owner</button>
         </div>
+
         <div class="input-group">
             <label>Username</label>
-            <input type="text" id="username" class="input" style="width:100%" placeholder="e.g. admin" autocomplete="username">
+            <input type="text" id="username" class="input" placeholder="Username" autocomplete="username">
         </div>
         <div class="input-group">
-            <label>Security Password</label>
-            <input type="password" id="password" class="input" style="width:100%" placeholder="Enter your password" autocomplete="current-password">
+            <label>Password</label>
+            <input type="password" id="password" class="input" placeholder="••••••••" autocomplete="current-password">
         </div>
-        <button class="btn-login" id="loginBtn">Authorize Access</button>
-        <a href="#" class="tb-sub" style="display:block; margin-top:24px; text-decoration:none">Need help accessing? Contact Administrator</a>
+
+        <button class="btn-login" id="loginBtn">Secure Login</button>
+        
+        <a href="#" class="forgot-password">Forgot Password?</a>
     </div>
+
     <div id="toast-container" class="toast-container"></div>
+
     <script>
         const { ipcRenderer } = require('electron');
         let selectedRole = 'Cashier';
@@ -53,11 +227,23 @@
         function showToast(message, type = 'error') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.innerHTML = `<span>${type === 'success' ? '✓' : '✗'}</span> ${message}`;
+            toast.className = `toast ${type === 'success' ? 'toast-success' : 'toast-error'}`;
+            
+            const icon = type === 'success' ? '✓' : '✕';
+            
+            toast.innerHTML = `
+                <div class="toast-icon">${icon}</div>
+                <div class="toast-content">${message}</div>
+                <div class="toast-progress"></div>
+            `;
+            
             container.appendChild(toast);
             setTimeout(() => toast.classList.add('show'), 10);
-            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3000);
+            
+            setTimeout(() => { 
+                toast.classList.remove('show'); 
+                setTimeout(() => toast.remove(), 500); 
+            }, 3000);
         }
 
         function setRole(role) {
@@ -74,18 +260,31 @@
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             if (!username || !password) { showToast('Please fill in all fields'); return; }
+            
             const btn = document.getElementById('loginBtn');
-            btn.innerText = 'Verifying...'; btn.disabled = true;
+            const originalText = btn.innerText;
+            btn.innerText = 'Verifying...'; 
+            btn.disabled = true;
+            
             ipcRenderer.send('login-attempt', { username, password, role: selectedRole });
         });
 
         ipcRenderer.on('login-response', (event, response) => {
             const btn = document.getElementById('loginBtn');
-            btn.innerText = 'Authorize Access'; btn.disabled = false;
+            
             if (response.success) {
+                showToast('Login Successful! Redirecting...', 'success');
                 localStorage.setItem('quickpos-user', JSON.stringify(response.user));
-                window.location.href = '../dashboard/dashboard.html';
-            } else { showToast(response.message); }
+                
+                // Delay redirect to allow toast to be seen
+                setTimeout(() => {
+                    window.location.href = '../dashboard/dashboard.html';
+                }, 1500);
+            } else { 
+                btn.innerText = 'Secure Login'; 
+                btn.disabled = false;
+                showToast(response.message || 'Login Failed', 'error'); 
+            }
         });
     </script>
 </body>
