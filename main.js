@@ -143,9 +143,3 @@ app.whenReady().then(createWindow);
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
 });
-hen(createWindow);
-
-// Windows ඔක්කොම වහපු ගමන් app එක quit වෙන්න
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') app.quit();
-});
