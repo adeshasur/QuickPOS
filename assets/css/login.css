@@ -46,10 +46,10 @@ body {
 }
 
 .brand-logo {
-    font-size: 48px;
-    font-weight: 900;
-    letter-spacing: -1.5px;
-    margin-bottom: 2px;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 30px;
     line-height: 1;
 }
 
@@ -58,11 +58,11 @@ body {
 
 .welcome-title {
     text-align: center;
-    font-size: 32px;
+    font-size: 38px;
     line-height: 1.1;
     font-weight: 800;
     color: var(--text);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .welcome-subtitle {
