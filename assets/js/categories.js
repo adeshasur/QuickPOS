@@ -103,6 +103,7 @@
       window.location.href = 'login.html';
       return;
     }
+    Components.init({ title: 'Categories' });
 
     bindEvents();
     try {

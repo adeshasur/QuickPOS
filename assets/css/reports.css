@@ -1,4 +1,4 @@
-/* Reports Dashboard */
+﻿/* Reports Dashboard */
 .reports-dashboard {
     flex: 1;
     display: flex;
@@ -240,4 +240,62 @@
 @media (max-width: 480px) {
     .header-controls { flex-direction: column; width: 100%; }
     .report-btn { width: 100%; justify-content: center; }
+}
+
+/* === Unified UI Pack === */
+.main-content { background: var(--bg-gradient, var(--bg-color)); }
+.topbar {
+  min-height: 70px !important;
+  background: rgba(255,255,255,0.92) !important;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow) !important;
+  padding: 0 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+}
+.tb-title {
+  font-size: 28px !important;
+  line-height: 1 !important;
+  font-weight: 800 !important;
+  color: var(--text-dark) !important;
+  letter-spacing: 0.2px;
+}
+.tb-right { margin-left: auto !important; display:flex !important; align-items:center !important; gap:12px !important; }
+.tb-sub, .tb-shift, .cashier-tag, .tb-role {
+  font-size: 13px !important;
+  color: var(--text-light) !important;
+  background: #f3f7f2 !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 999px !important;
+  padding: 6px 12px !important;
+  font-weight: 600 !important;
+}
+.avatar {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #2f7a45, #1f6f54) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+.page-header, .toolbar, .filters-bar, .section-header, .reports-header {
+  background: rgba(255,255,255,0.85) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 14px !important;
+  padding: 14px 16px !important;
+  box-shadow: 0 5px 12px rgba(33,58,33,0.06) !important;
+}
+.table-wrap, .table-card, .stock-history-section, .ledger-container, .reports-dashboard, .settings-body, .quotation-side, .products-section {
+  border-radius: 14px !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 8px 18px rgba(33,58,33,0.07) !important;
+}
+.add-btn, .save-topbar-btn, .reset-topbar-btn, .report-btn, .pdf-button {
+  border-radius: 10px !important;
+  font-weight: 700 !important;
 }

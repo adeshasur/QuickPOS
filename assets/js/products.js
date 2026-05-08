@@ -190,7 +190,7 @@
       window.location.href = 'login.html';
       return;
     }
-    document.getElementById('userRoleDisplay').textContent = `${user.role === 'owner' ? 'Owner' : 'Cashier'}: ${user.name || 'User'}`;
+    Components.init({ title: 'Products' });
 
     bindEvents();
     try {

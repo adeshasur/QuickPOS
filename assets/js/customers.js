@@ -127,7 +127,7 @@
       window.location.href = 'login.html';
       return;
     }
-    document.getElementById('shiftDisplay').textContent = `Shift: ${localStorage.getItem('quickpos-shift-time') || '08:00 - 16:00'}`;
+    Components.init({ title: 'Customer Management' });
 
     bindEvents();
     try {

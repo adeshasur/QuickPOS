@@ -539,7 +539,7 @@
 
         // Initialize Components
         Components.init({
-            title: 'Hardware Quotation'
+            title: 'Quotations'
         });
         
         renderProducts();
