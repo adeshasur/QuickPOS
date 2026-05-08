@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,500,0,0');
 
 :root {
@@ -276,3 +276,122 @@ body.sidebar-collapsed #sidebar-container {
     }
 }
 
+
+/* === Global Blue/Orange Theme Override === */
+:root {
+  --primary-color: #1113b8;
+  --success-color: #1f7a38;
+  --warning-color: #ff9500;
+  --accent-orange: #ff9500;
+  --text-dark: #0f172a;
+  --text-light: #64748b;
+  --border-color: #dbe3ef;
+  --hover-color: #eef2ff;
+}
+
+body {
+  background: #f3f3f6 !important;
+}
+
+.topbar,
+.page-header,
+.toolbar,
+.filters-bar,
+.section-header,
+.reports-header,
+.stat-card,
+.table-wrap,
+.table-card,
+.stock-history-section,
+.ledger-container,
+.reports-dashboard,
+.settings-body,
+.quotation-side,
+.products-section,
+.card,
+.modal-box {
+  border-color: var(--border-color) !important;
+}
+
+.tb-title,
+.page-heading,
+.section-title,
+.card-title,
+.quotation-title,
+.stat-val,
+.total-label {
+  color: var(--text-dark) !important;
+}
+
+.tb-sub,
+.tb-shift,
+.cashier-tag,
+.tb-role,
+.page-sub,
+.stat-lbl,
+.field-hint,
+.footer-note {
+  color: var(--text-light) !important;
+}
+
+.nav-item.active,
+.cat-pill.active,
+.filter-btn.active,
+.role-btn.active,
+.dtab.active,
+.kpi-card.blue::before,
+.badge-blue,
+.pay-btn.card,
+.mact-btn.confirm,
+.modal-btn.primary,
+.add-btn,
+.save-topbar-btn,
+.report-btn.generate-btn,
+.pdf-button,
+.sc-done {
+  background: #1113b8 !important;
+  border-color: #1113b8 !important;
+  color: #fff !important;
+}
+
+.nav-item.active .nav-icon,
+.kpi-icon,
+.stat-icon-wrap.blue,
+.count-badge,
+.sum-pill .val,
+.inv-id,
+.brand-title .quick {
+  color: #1113b8 !important;
+}
+
+.pay-btn.credit,
+.login-button,
+.reset-topbar-btn,
+.report-btn.print-btn,
+.badge-amber,
+.price-disc,
+.stock-badge.low,
+.walkin-tag .highlight {
+  background: #ff9500 !important;
+  border-color: #ff9500 !important;
+  color: #fff !important;
+}
+
+.brand-title .pos {
+  color: #ff9500 !important;
+}
+
+.total-amount,
+.amount-cell,
+.price-final,
+.sc-title,
+.pay-btn.cash,
+.badge-green,
+.stock-ok,
+.kpi-card.green::before {
+  color: #1f7a38 !important;
+}
+
+button:hover {
+  filter: brightness(1.03);
+}

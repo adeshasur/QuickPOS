@@ -1,4 +1,4 @@
-﻿const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -14,6 +14,8 @@ function createWindow() {
         height: 720,
         minWidth: 1000,
         minHeight: 600,
+        show: false,
+        backgroundColor: '#f3f3f6',
         icon: path.join(__dirname, 'assets/images/icon.png'),
         webPreferences: {
             nodeIntegration: false,
@@ -23,8 +25,12 @@ function createWindow() {
     });
 
     mainWindow.loadFile(path.join(__dirname, 'pages/login.html'));
-    mainWindow.maximize();
     mainWindow.setMenuBarVisibility(false);
+
+    mainWindow.once('ready-to-show', () => {
+        mainWindow.maximize();
+        mainWindow.show();
+    });
 }
 
 const runAsync = (sql, params = []) => new Promise((resolve, reject) => {
@@ -50,6 +56,20 @@ const allAsync = (sql, params = []) => new Promise((resolve, reject) => {
         else resolve(rows);
     });
 });
+
+async function getNextBillId() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const dayKey = `${y}${m}${d}`;
+    const counterKey = `bill_counter_${dayKey}`;
+    const row = await getAsync('SELECT value FROM settings WHERE key = ?', [counterKey]);
+    const current = Number(row?.value || 0);
+    const next = current + 1;
+    await runAsync('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [counterKey, String(next)]);
+    return `INV-${dayKey}-${String(next).padStart(4, '0')}`;
+}
 
 const closeDbAsync = () => new Promise((resolve, reject) => {
     db.close((err) => {
@@ -255,10 +275,12 @@ ipcMain.handle('save-sale', async (event, saleData) => withTransaction(async () 
         if (Number(product.current_stock) < Number(item.qty)) throw new Error(`Insufficient stock for ${product.name}`);
     }
 
+    const finalBillId = saleData.billId || await getNextBillId();
+
     const saleInsert = await runAsync(
         `INSERT INTO sales (bill_id, customer_id, total_amount, payment_method, received_amount, balance_amount, cashier_name)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [saleData.billId, saleData.customerId, saleData.total, saleData.method, saleData.received, saleData.balanceDue, saleData.cashier]
+        [finalBillId, saleData.customerId, saleData.total, saleData.method, saleData.received, saleData.balanceDue, saleData.cashier]
     );
 
     for (const item of saleData.items) {
@@ -281,7 +303,7 @@ ipcMain.handle('save-sale', async (event, saleData) => withTransaction(async () 
         await runAsync('UPDATE customers SET balance = COALESCE(balance, 0) + ? WHERE id = ?', [saleData.balanceDue, saleData.customerId]);
     }
 
-    return { success: true, id: saleInsert.lastID };
+    return { success: true, id: saleInsert.lastID, billId: finalBillId };
 }));
 
 ipcMain.handle('record-credit-payment', async (event, paymentData) => withTransaction(async () => {

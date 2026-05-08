@@ -177,7 +177,7 @@
     const balanceDue = method === 'Credit' ? total : 0;
 
     const payload = {
-      billId: `INV-${Date.now()}`,
+      billId: null,
       customerId: selectedCustomer ? selectedCustomer.id : null,
       total,
       method,
@@ -187,14 +187,16 @@
       items: cart.map((item) => ({ id: item.id, name: item.name, qty: item.quantity, price: item.price }))
     };
 
-    await window.api.saveSale(payload);
+    const saved = await window.api.saveSale(payload);
 
     const title = document.getElementById('scTitle');
     const amount = document.getElementById('scAmount');
     const msg = document.getElementById('scMsg');
     title.textContent = `${method} Sale Complete!`;
     amount.textContent = fmt(total);
-    msg.textContent = method === 'Cash' ? `Change returned: ${fmt(Number(receivedAmount) - total)}` : 'Sale saved successfully';
+    msg.textContent = method === 'Cash'
+      ? `Invoice ${saved.billId} - Change returned: ${fmt(Number(receivedAmount) - total)}`
+      : `Invoice ${saved.billId} saved successfully`;
 
     cart = [];
     document.getElementById('cashModal').classList.remove('open');

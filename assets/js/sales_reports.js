@@ -86,22 +86,30 @@
         const receiptBody = $('receiptBody');
         const receiptModal = $('receiptModal');
         if(receiptBody && receiptModal) {
+            const paid = Number(s.received_amount || 0);
+            const due = Number(s.balance_amount || 0);
+            const total = Number(s.total_amount || 0);
             receiptBody.innerHTML = `
                 <div class="receipt-shop">
                     <div class="receipt-shop-name">QuickPOS Hardware</div>
                     <div class="receipt-shop-sub">Official Sales Receipt</div>
                 </div>
                 <div class="receipt-meta">
-                    <div>Invoice: ${s.bill_id}</div>
-                    <div>Date: ${new Date(s.timestamp).toLocaleString()}</div>
-                    <div>Payment: ${s.payment_method}</div>
-                    <div>Cashier: ${s.cashier_name}</div>
+                    <div><strong>Invoice:</strong> ${s.bill_id}</div>
+                    <div><strong>Date:</strong> ${new Date(s.timestamp).toLocaleString()}</div>
+                    <div><strong>Payment:</strong> ${s.payment_method}</div>
+                    <div><strong>Cashier:</strong> ${s.cashier_name || 'N/A'}</div>
                 </div>
                 <div class="receipt-items" id="receiptItemsList">
                     <div style="text-align:center; padding:10px;">Loading items...</div>
                 </div>
-                <div class="receipt-total-box"><span>TOTAL</span><span>${fmtLKR(s.total_amount)}</span></div>
-                <div style="text-align:center; margin-top:20px; font-size:12px;">Thank you for your business!</div>
+                <div class="receipt-total-box"><span>TOTAL</span><span>${fmtLKR(total)}</span></div>
+                <div class="receipt-meta" style="margin-top:8px;">
+                    <div><strong>Received:</strong> ${fmtLKR(paid)}</div>
+                    <div><strong>Balance Due:</strong> ${fmtLKR(due)}</div>
+                    <div><strong>Status:</strong> ${due > 0 ? 'PARTIALLY PAID' : 'PAID'}</div>
+                </div>
+                <div style="text-align:center; margin-top:16px; font-size:12px;">Thank you for shopping with QuickPOS!</div>
             `;
             receiptModal.classList.add('active');
 

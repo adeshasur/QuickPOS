@@ -45,7 +45,7 @@
           <a href="sales.html" class="nav-item ${activePage === 'sales.html' ? 'active' : ''}"><span class="nav-icon">⟡</span><span class="nav-text">Make a Sale</span></a>
           <a href="categories.html" class="nav-item ${activePage === 'categories.html' ? 'active' : ''}"><span class="nav-icon">◧</span><span class="nav-text">Categories</span></a>
           <a href="products.html" class="nav-item ${activePage === 'products.html' ? 'active' : ''}"><span class="nav-icon">◫</span><span class="nav-text">Products</span></a>
-          <a href="inventory.html" class="nav-item ${activePage === 'inventory.html' ? 'active' : ''}"><span class="nav-icon">⌘</span><span class="nav-text">Inventory</span></a>
+          <a href="inventory.html" class="nav-item ${activePage === 'inventory.html' ? 'active' : ''}"><span class="nav-icon">⌘</span><span class="nav-text">Inventory <span id="lowStockBadge" style="display:none;margin-left:6px;padding:1px 7px;border-radius:999px;background:#d64545;color:#fff;font-size:11px;font-weight:700;"></span></span></a>
           <a href="customers.html" class="nav-item ${activePage === 'customers.html' ? 'active' : ''}"><span class="nav-icon">◉</span><span class="nav-text">Customers</span></a>
           <a href="quotations.html" class="nav-item ${activePage === 'quotations.html' ? 'active' : ''}"><span class="nav-icon">≡</span><span class="nav-text">Quotations</span></a>
           <a href="ledger.html" class="nav-item ${activePage === 'ledger.html' ? 'active' : ''}"><span class="nav-icon">▤</span><span class="nav-text">Credit Ledger</span></a>
@@ -106,6 +106,17 @@
           window.location.href = 'login.html';
         }
       });
+    }
+
+    if (window.api?.getProducts) {
+      window.api.getProducts().then((products) => {
+        const low = (products || []).filter((p) => Number(p.current_stock || 0) > 0 && Number(p.current_stock || 0) <= Number(p.alert_level || 0)).length;
+        const badge = document.getElementById('lowStockBadge');
+        if (badge && low > 0) {
+          badge.textContent = String(low);
+          badge.style.display = 'inline-block';
+        }
+      }).catch(() => {});
     }
   });
 })();
