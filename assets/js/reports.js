@@ -95,9 +95,14 @@
 
     async function init() {
         const user = JSON.parse(localStorage.getItem('quickpos-user'));
-        if (!user || user.role !== 'owner') {
-            alert('Access Denied: Owner Only');
-            window.location.href = user ? 'owner_dashboard.html' : 'login.html';
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        if (user.role !== 'owner' && !user.canViewReports) {
+            alert('Access Denied: Reports permission required');
+            window.location.href = user.role === 'owner' ? 'owner_dashboard.html' : 'sales.html';
             return;
         }
 

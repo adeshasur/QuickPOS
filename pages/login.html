@@ -56,7 +56,7 @@
                     <div class="demo-role owner">Owner</div>
                 </div>
                 <div class="demo-account">
-                    <div class="demo-info"><strong>staff</strong> / 456</div>
+                    <div class="demo-info"><strong>staff</strong> / 123</div>
                     <div class="demo-role cashier">Cashier</div>
                 </div>
             </div>
@@ -123,6 +123,7 @@
                         localStorage.setItem('quickpos-user', JSON.stringify({
                             name: result.user.name, 
                             role: result.user.role, 
+                            canViewReports: !!result.user.canViewReports,
                             username: username, 
                             timestamp: new Date().toISOString()
                         }));

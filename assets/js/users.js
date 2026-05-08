@@ -46,6 +46,7 @@
         document.getElementById('userName').value = user.name;
         document.getElementById('userUsername').value = user.username;
         document.getElementById('userRole').value = user.role;
+        document.getElementById('canViewReports').checked = Number(user.can_view_reports || 0) === 1;
         document.getElementById('userPassword').value = ''; // Don't show password
         
         if(submitUserBtn) {
@@ -71,13 +72,14 @@
         const username = document.getElementById('userUsername').value.trim();
         const password = document.getElementById('userPassword').value.trim();
         const role = document.getElementById('userRole').value;
+        const canViewReports = document.getElementById('canViewReports').checked;
 
         if (!name || !username) {
             alert('Name and Username are required');
             return;
         }
 
-        const userData = { name, username, role };
+        const userData = { name, username, role, canViewReports };
         if (password) userData.password = password;
 
         if (submitUserBtn.dataset.mode === 'edit') {
@@ -114,6 +116,7 @@
                 document.getElementById('userName').value = '';
                 document.getElementById('userUsername').value = '';
                 document.getElementById('userPassword').value = '';
+                document.getElementById('canViewReports').checked = false;
                 if(submitUserBtn) submitUserBtn.dataset.mode = 'create';
                 if(userModalOverlay) userModalOverlay.classList.add('active');
             });

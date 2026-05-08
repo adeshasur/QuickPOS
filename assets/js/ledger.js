@@ -1,4 +1,4 @@
-(function() {
+﻿(function() {
     'use strict';
 
     const formatCurrency = (amt) => `LKR ${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -122,7 +122,9 @@
             // In a real app, we'd have an API like window.api.updateSaleBalance
             // For now, we'll alert that this needs backend implementation or we can try to use saveSale if it supports updates
             // But let's assume we need a new API.
-            alert('Payment processing logic for SQLite backend is being finalized.');
+            const result = await window.api.recordCreditPayment({ saleId: selectedBillForPayment.id, amount: amountReceived });
+            selectedBillForPayment.balance_amount = result.remainingBalance;
+            await loadData();
             closeModal();
         } catch (err) {
             alert('Error processing payment: ' + err.message);
@@ -171,3 +173,4 @@
 
     document.addEventListener('DOMContentLoaded', init);
 })();
+

@@ -319,7 +319,7 @@
               <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               Storage
             </div>
-            <div class="sys-info-row"><span class="sys-info-label">Storage Type</span><span class="sys-info-val">localStorage</span></div>
+            <div class="sys-info-row"><span class="sys-info-label">Storage Type</span><span class="sys-info-val">SQLite</span></div>
             <div class="sys-info-row"><span class="sys-info-label">Products</span><span class="sys-info-val" id="sysProducts">—</span></div>
             <div class="sys-info-row"><span class="sys-info-label">Sales Records</span><span class="sys-info-val" id="sysSales">—</span></div>
             <div class="sys-info-row"><span class="sys-info-label">Customers</span><span class="sys-info-val" id="sysCustomers">—</span></div>
@@ -336,10 +336,17 @@
         <div class="settings-grid single" style="align-content:start">
           <div class="danger-card">
             <div class="danger-card-info">
-              <div class="danger-card-title">Clear Application Cache</div>
-              <div class="danger-card-desc">Removes temporary data. Your sales and products will not be affected.</div>
+              <div class="danger-card-title">Create Database Backup</div>
+              <div class="danger-card-desc">Export a full SQLite backup file you can store safely.</div>
             </div>
-            <button class="danger-action-btn amber" id="clearCacheBtn">Clear Cache</button>
+            <button class="danger-action-btn amber" id="backupBtn">Backup Now</button>
+          </div>
+          <div class="danger-card">
+            <div class="danger-card-info">
+              <div class="danger-card-title">Restore Database Backup</div>
+              <div class="danger-card-desc">Load a previous backup and restart the app safely.</div>
+            </div>
+            <button class="danger-action-btn" id="restoreBtn">Restore Backup</button>
           </div>
           <div class="danger-card">
             <div class="danger-card-info">
