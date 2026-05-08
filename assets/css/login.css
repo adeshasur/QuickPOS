@@ -45,22 +45,16 @@ body {
     margin-bottom: 20px;
 }
 
-.brand-icon {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-    margin-bottom: 0;
-}
-
-.brand-title {
-    font-size: 38px;
-    line-height: 1;
+.brand-logo {
+    font-size: 48px;
     font-weight: 900;
-    letter-spacing: -0.5px;
+    letter-spacing: -1.5px;
+    margin-bottom: 2px;
+    line-height: 1;
 }
 
-.brand-title .quick { color: var(--blue); }
-.brand-title .pos { color: var(--orange); }
+.brand-logo .quick { color: var(--blue); }
+.brand-logo .pos { color: var(--orange); }
 
 .welcome-title {
     text-align: center;
