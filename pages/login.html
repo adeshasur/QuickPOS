@@ -11,14 +11,17 @@
     <div class="login-container">
         <div class="login-card">
             <div class="brand-header">
-                <h1 class="brand-logo"><span class="quick">Quick</span><span class="pos">POS</span></h1>
+                <h1 class="brand-logo">
+                    <span class="quick">Quick</span><span class="pos">POS</span> <span class="super">Supermarket</span>
+                </h1>
+                <p class="brand-subtitle">by Fides.M</p>
             </div>
-
+            
             <h2 class="welcome-title">Welcome Back</h2>
             <p class="welcome-subtitle">Please enter your credentials to continue</p>
 
             <div class="error-message" id="errorMessage">
-                <span class="material-symbols-rounded s18">warning</span> Invalid username or password
+                <span class="material-symbols-rounded">warning</span> Invalid username or password
             </div>
 
             <div class="role-toggle" id="roleToggle">
@@ -27,34 +30,36 @@
             </div>
 
             <div class="quick-access">
-                <button type="button" class="quick-btn owner" id="quickOwner">Use Owner Account</button>
-                <button type="button" class="quick-btn cashier" id="quickCashier">Use Cashier Account</button>
+                <button type="button" class="quick-btn owner" id="quickAdminBtn">Use Owner Account</button>
+                <button type="button" class="quick-btn cashier" id="quickStaffBtn">Use Cashier Account</button>
             </div>
-
+            
             <form id="loginForm">
                 <div class="form-group">
                     <label for="username" class="form-label">Username</label>
-                    <input type="text" id="username" class="form-input" placeholder="Username" required autofocus>
+                    <input type="text" id="username" class="form-input" placeholder="Enter your username" required autofocus>
                 </div>
-
+                
                 <div class="form-group">
                     <label for="password" class="form-label">Password</label>
                     <div class="input-group">
-                        <input type="password" id="password" class="form-input" placeholder="Password" required>
-                        <button type="button" class="password-toggle" id="passwordToggle"><span class="material-symbols-rounded">visibility</span></button>
+                        <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                        <button type="button" class="password-toggle" id="passwordToggle">
+                            <span class="material-symbols-rounded">visibility</span>
+                        </button>
                     </div>
                 </div>
-
+                
                 <button type="submit" class="login-button" id="loginBtn">
-                    <span>Secure Login</span>
+                    <span>Login</span>
                     <div class="loading" id="loadingSpinner"></div>
                 </button>
             </form>
-
+            
             <div class="demo-card">
                 <div class="demo-header">
                     <span class="material-symbols-rounded">key</span>
-                    <span>Demo Credentials</span>
+                    <span>Demo Accounts</span>
                 </div>
                 <div class="demo-item">
                     <div class="demo-info">
@@ -69,14 +74,16 @@
                     </div>
                 </div>
             </div>
-
+            
             <div class="footer-note">
+                Offline-first desktop POS system for Windows PCs •
                 <a href="#" class="footer-link" id="forgotPassword">Forgot Password?</a>
             </div>
         </div>
     </div>
 
     <script>
+        // DOM Elements
         const loginForm = document.getElementById('loginForm');
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
@@ -84,12 +91,13 @@
         const errorMessage = document.getElementById('errorMessage');
         const loginBtn = document.getElementById('loginBtn');
         const roleToggle = document.getElementById('roleToggle');
+        const quickAdminBtn = document.getElementById('quickAdminBtn');
+        const quickStaffBtn = document.getElementById('quickStaffBtn');
         const forgotPasswordLink = document.getElementById('forgotPassword');
-        const quickOwner = document.getElementById('quickOwner');
-        const quickCashier = document.getElementById('quickCashier');
 
         let selectedRole = 'cashier';
 
+        // Role Selection
         roleToggle.addEventListener('click', (e) => {
             const btn = e.target.closest('.role-btn');
             if (!btn) return;
@@ -104,31 +112,35 @@
             errorMessage.classList.remove('show');
         }
 
-        quickOwner.addEventListener('click', () => {
+        // Show/Hide Password
+        passwordToggle.addEventListener('click', function() {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            this.innerHTML = type === 'password' 
+                ? '<span class="material-symbols-rounded">visibility</span>' 
+                : '<span class="material-symbols-rounded">visibility_off</span>';
+        });
+
+        // Quick fill buttons
+        quickAdminBtn.addEventListener('click', function() {
             usernameInput.value = 'admin';
             passwordInput.value = '123';
             setRole('owner');
         });
 
-        quickCashier.addEventListener('click', () => {
+        quickStaffBtn.addEventListener('click', function() {
             usernameInput.value = 'staff';
             passwordInput.value = '456';
             setRole('cashier');
         });
 
-        passwordToggle.addEventListener('click', function() {
-            const type = passwordInput.type === 'password' ? 'text' : 'password';
-            passwordInput.type = type;
-            this.innerHTML = type === 'password'
-                ? '<span class="material-symbols-rounded">visibility</span>'
-                : '<span class="material-symbols-rounded">visibility_off</span>';
-        });
-
+        // Forgot password
         forgotPasswordLink.addEventListener('click', function(e) {
             e.preventDefault();
-            alert('For password reset, contact your system administrator.');
+            alert('For security, please contact the system administrator to reset your password.\n\nDemo accounts:\n• Owner: admin / 123\n• Cashier: staff / 456');
         });
 
+        // Handle form submission
         loginForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             const username = usernameInput.value.trim();
@@ -157,7 +169,7 @@
                 alert('Login error: ' + err.message);
             } finally {
                 loginBtn.disabled = false;
-                loginBtn.innerHTML = '<span>Secure Login</span><div class="loading" id="loadingSpinner"></div>';
+                loginBtn.innerHTML = '<span>Login</span><div class="loading"></div>';
             }
         });
 
