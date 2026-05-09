@@ -258,12 +258,7 @@
       `;
       topbar.insertBefore(filters, topbar.querySelector('.tb-right'));
 
-      const refreshBtn = document.createElement('div');
-      refreshBtn.className = 'tb-icon-btn';
-      refreshBtn.id = 'refreshBtn';
-      refreshBtn.title = 'Refresh';
-      refreshBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>';
-      topbar.querySelector('.tb-right').insertBefore(refreshBtn, topbar.querySelector('.tb-right').firstChild);
+      topbar.insertBefore(filters, topbar.querySelector('.tb-right'));
     }
 
     const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
@@ -298,7 +293,9 @@
       });
     });
 
-    document.getElementById('refreshBtn')?.addEventListener('click', () => {
+    document.addEventListener('quickpos:refresh', async () => {
+      console.log('Dashboard refreshing data...');
+      await loadData();
       const active = document.querySelector('.filter-btn.active');
       updateDashboard(active ? active.dataset.range : 'today');
     });

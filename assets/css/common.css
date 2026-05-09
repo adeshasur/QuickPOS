@@ -119,6 +119,30 @@ body.dashboard-body {
     color: var(--primary);
     background: #eef2ff;
 }
+.tb-refresh {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 10px;
+    background: var(--surface2);
+}
+.tb-refresh:hover {
+    color: var(--primary);
+    background: #eef2ff;
+    transform: rotate(180deg);
+}
+.tb-refresh.syncing i {
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
 .notif-badge {
     position: absolute;
     top: -4px;

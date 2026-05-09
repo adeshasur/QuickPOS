@@ -69,6 +69,32 @@
         t.classList.remove('show');
         setTimeout(() => t.remove(), 500);
       }, 5000);
+    },
+
+    async refreshApp() {
+      const btn = document.getElementById('topbarRefreshBtn');
+      if (btn) btn.classList.add('syncing');
+
+      try {
+        // Refresh notifications
+        await this.refresh();
+
+        // Check if current page has a specific loadData or refresh function
+        // Most of our pages expose their loadData or init functions or we can trigger a custom event
+        const event = new CustomEvent('quickpos:refresh');
+        document.dispatchEvent(event);
+
+        console.log('App refreshed successfully');
+        
+        // Brief delay to show animation
+        setTimeout(() => {
+          if (btn) btn.classList.remove('syncing');
+        }, 600);
+      } catch (err) {
+        console.error('Refresh error:', err);
+        if (btn) btn.classList.remove('syncing');
+        this.showToast('Failed to sync data', 'warning');
+      }
     }
   };
 
@@ -91,5 +117,11 @@
   // Auto-refresh on load
   document.addEventListener('DOMContentLoaded', () => {
     Notifications.refresh();
+
+    // Start Auto-Sync every 60 seconds
+    setInterval(() => {
+      console.log('Auto-syncing...');
+      Notifications.refresh();
+    }, 60000);
   });
 })();

@@ -86,7 +86,23 @@
     } else {
       cart.push({ id: p.id, name: p.name, price, quantity: qty, unit: p.unit_type || 'pc' });
     }
+    saveCart();
     renderCart();
+  }
+
+  function saveCart() {
+    localStorage.setItem('quickpos-current-cart', JSON.stringify(cart));
+  }
+
+  function loadCart() {
+    const saved = localStorage.getItem('quickpos-current-cart');
+    if (saved) {
+      try {
+        cart = JSON.parse(saved);
+      } catch (e) {
+        cart = [];
+      }
+    }
   }
 
   function renderCart() {
@@ -137,6 +153,7 @@
       item.quantity = newQty;
     }
 
+    saveCart();
     renderCart();
   };
 
@@ -199,6 +216,7 @@
       : `Invoice ${saved.billId} saved successfully`;
 
     cart = [];
+    saveCart();
     document.getElementById('cashModal').classList.remove('open');
     document.getElementById('saleCompleteModal').classList.add('open');
 
@@ -378,6 +396,14 @@
     Components.init({ title: 'Make a Sale' });
 
     wireEvents();
+    loadCart();
+
+    // Listen for refresh event
+    document.addEventListener('quickpos:refresh', async () => {
+      console.log('Sales page refreshing data...');
+      await loadData();
+    });
+
     try {
       await loadData();
       renderCart();

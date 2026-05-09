@@ -12,6 +12,9 @@
           <div class="topbar">
             <div class="tb-title">${title}</div>
             <div class="tb-right">
+              <div class="tb-refresh" id="topbarRefreshBtn" title="Sync Data">
+                <i class="fa-solid fa-arrows-rotate"></i>
+              </div>
               <div class="notif-wrapper">
                 <div class="tb-notifications" id="notifBell" title="Low Stock Alerts">
                   <i class="fa-solid fa-bell"></i>
@@ -41,6 +44,17 @@
           });
           document.addEventListener('click', () => dropdown.classList.remove('open'));
           dropdown.addEventListener('click', (e) => e.stopPropagation());
+        }
+
+        const refreshBtn = document.getElementById('topbarRefreshBtn');
+        if (refreshBtn) {
+          refreshBtn.addEventListener('click', () => {
+            if (window.Notifications && window.Notifications.refreshApp) {
+              window.Notifications.refreshApp();
+            } else {
+              location.reload();
+            }
+          });
         }
 
         // Notifications logic is now handled in notifications.js
