@@ -218,7 +218,38 @@
 
 
   document.addEventListener('DOMContentLoaded', async () => {
-    // Welcome message logic
+    // Initialize standard components
+    Components.init({ title: 'Executive Dashboard' });
+
+    // Inject dashboard specific topbar elements
+    const topbar = document.querySelector('.topbar');
+    if (topbar) {
+      const chip = document.createElement('div');
+      chip.className = 'tb-chip';
+      chip.id = 'topClock';
+      chip.textContent = '00:00:00 AM';
+      topbar.insertBefore(chip, topbar.querySelector('.tb-right'));
+
+      const filters = document.createElement('div');
+      filters.className = 'tb-filters';
+      filters.id = 'topbarFilters';
+      filters.innerHTML = `
+        <button class="filter-btn active" data-range="today">Today</button>
+        <button class="filter-btn" data-range="yesterday">Yesterday</button>
+        <button class="filter-btn" data-range="last7">7 Days</button>
+        <button class="filter-btn" data-range="thisMonth">This Month</button>
+        <button class="filter-btn" data-range="lastMonth">Last Month</button>
+      `;
+      topbar.insertBefore(filters, topbar.querySelector('.tb-right'));
+
+      const refreshBtn = document.createElement('div');
+      refreshBtn.className = 'tb-icon-btn';
+      refreshBtn.id = 'refreshBtn';
+      refreshBtn.title = 'Refresh';
+      refreshBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>';
+      topbar.querySelector('.tb-right').insertBefore(refreshBtn, topbar.querySelector('.tb-right').firstChild);
+    }
+
     const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
     const welcomeMsg = document.getElementById('welcomeMsg');
     const welcomeUserName = document.getElementById('welcomeUserName');

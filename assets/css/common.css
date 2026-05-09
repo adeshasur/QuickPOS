@@ -98,5 +98,186 @@ body.dashboard-body {
     background: var(--text3);
 }
 
-/* Import Sidebar explicitly in common if needed, or link it in HTML */
-/* @import url('sidebar.css'); */
+/* === Notifications & Topbar Global === */
+.notif-wrapper {
+    position: relative;
+}
+.tb-notifications {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text2);
+    transition: all 0.2s;
+    border-radius: 10px;
+    background: var(--surface2);
+}
+.tb-notifications:hover {
+    color: var(--primary);
+    background: #eef2ff;
+}
+.notif-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--surface);
+    animation: pulse-notif 2s infinite;
+}
+
+/* Dropdown */
+.notif-dropdown {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 300px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(15, 23, 42, 0.15);
+    display: none;
+    flex-direction: column;
+    z-index: 1001;
+    overflow: hidden;
+}
+.notif-dropdown.open {
+    display: flex;
+}
+.nd-header {
+    padding: 14px 18px;
+    font-weight: 700;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+    background: #f8fafc;
+}
+.nd-body {
+    max-height: 350px;
+    overflow-y: auto;
+}
+.nd-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.nd-item:hover {
+    background: #f8fafc;
+}
+.nd-item-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+.nd-item-info {
+    flex: 1;
+}
+.nd-item-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 2px;
+}
+.nd-item-stock {
+    font-size: 11px;
+    color: var(--text-light);
+}
+.nd-empty {
+    padding: 30px;
+    text-align: center;
+    color: var(--text3);
+    font-size: 13px;
+}
+.nd-footer {
+    padding: 12px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary);
+    background: #f1f5f9;
+    cursor: pointer;
+}
+.nd-footer:hover {
+    text-decoration: underline;
+}
+
+.nd-item-tag {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #ef4444;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+}
+.nd-item-stock {
+    font-size: 11px;
+    color: var(--text-light);
+    line-height: 1.4;
+}
+
+/* Toast Notifications */
+.toast-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 9999;
+    pointer-events: none;
+}
+.toast {
+    background: #1e293b;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transform: translateX(120%);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-left: 4px solid var(--primary);
+    min-width: 300px;
+    pointer-events: auto;
+}
+.toast.show {
+    transform: translateX(0);
+}
+.toast.warning {
+    border-left-color: var(--warning);
+}
+.toast i {
+    font-size: 18px;
+}
+.toast.warning i {
+    color: var(--warning);
+}
+
+@keyframes pulse-notif {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}

@@ -17,32 +17,7 @@
 <div id="sidebar-container"></div>
 
 <div class="main-content">
-  <div class="topbar">
-    <div class="tb-title">Executive Dashboard</div>
-    <div class="tb-chip" id="topClock">00:00:00 AM</div>
-    <div class="tb-welcome" id="welcomeMsg">
-      <div class="welcome-text">
-        <i class="fa-solid fa-hand-wave"></i> Welcome back, <span id="welcomeUserName">Admin</span>!
-      </div>
-    </div>
-    <div class="tb-filters" id="topbarFilters">
-
-      <button class="filter-btn active" data-range="today">Today</button>
-      <button class="filter-btn" data-range="yesterday">Yesterday</button>
-      <button class="filter-btn" data-range="last7">7 Days</button>
-      <button class="filter-btn" data-range="thisMonth">This Month</button>
-      <button class="filter-btn" data-range="lastMonth">Last Month</button>
-    </div>
-    <div class="tb-right">
-      <div class="tb-icon-btn" title="Notifications">
-        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-      </div>
-      <div class="tb-icon-btn" title="Refresh" id="refreshBtn">
-        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-      </div>
-      <div class="avatar">AD</div>
-    </div>
-  </div>
+  <div id="topbar-container"></div>
 
   <div class="content" id="dashContent">
     <div class="kpi-grid">
@@ -209,6 +184,7 @@
   </div>
 </div>
 
+<script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/owner_dashboard.js"></script>
 </body>

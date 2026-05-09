@@ -12,11 +12,40 @@
           <div class="topbar">
             <div class="tb-title">${title}</div>
             <div class="tb-right">
+              <div class="notif-wrapper">
+                <div class="tb-notifications" id="notifBell" title="Low Stock Alerts">
+                  <i class="fa-solid fa-bell"></i>
+                  <span class="notif-badge" id="topbarNotifBadge" style="display:none;">0</span>
+                </div>
+                <div class="notif-dropdown" id="notifDropdown">
+                  <div class="nd-header">Notifications</div>
+                  <div class="nd-body" id="notifList">
+                    <div class="nd-empty">No new notifications</div>
+                  </div>
+                  <div class="nd-footer" onclick="location.href='inventory.html'">View All Inventory</div>
+                </div>
+              </div>
               <span class="tb-sub">${user.role === 'owner' ? 'Owner' : 'Cashier'}: ${user.name || 'User'}</span>
               <div class="avatar">${String(user.name || 'U').slice(0, 2).toUpperCase()}</div>
             </div>
           </div>
+          <div id="toast-container" class="toast-container"></div>
         `;
+
+        // Bind events after HTML is set
+        const bell = document.getElementById('notifBell');
+        const dropdown = document.getElementById('notifDropdown');
+        if (bell && dropdown) {
+          bell.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('open');
+          });
+          document.addEventListener('click', () => dropdown.classList.remove('open'));
+          dropdown.addEventListener('click', (e) => e.stopPropagation());
+        }
+
+        // Notifications logic is now handled in notifications.js
+        if (window.Notifications) window.Notifications.refresh();
       }
     }
   };
@@ -27,7 +56,7 @@
     const sidebarContainer = document.getElementById('sidebar-container');
     if (!sidebarContainer) return;
 
-    // Apply layout class immediately
+    const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
     document.body.classList.add('dashboard-body');
 
     sidebarContainer.innerHTML = `
@@ -50,14 +79,7 @@
           <a href="users.html" class="menu-item owner-only" data-page="users"><i class="fa-solid fa-user-gear"></i> Users</a>
           <a href="settings.html" class="menu-item owner-only" data-page="settings"><i class="fa-solid fa-cog"></i> Settings</a>
         </div>
-        <div class="user-card">
-          <div class="user-top">
-            <div class="avatar" id="sidebarAvatar">U</div>
-            <div class="user-info">
-              <div class="user-name" id="sidebarUserName">User</div>
-              <div class="user-role" id="sidebarUserRole">Role</div>
-            </div>
-          </div>
+        <div style="padding: 20px 0;">
           <button class="logout-btn" id="sidebarLogoutBtn">
             <i class="fa-solid fa-right-from-bracket"></i> Logout
           </button>
@@ -66,61 +88,30 @@
     `;
 
     if (user.role === 'cashier') {
-      document.querySelectorAll('.owner-only').forEach((el) => {
-        el.style.display = 'none';
-      });
+      document.querySelectorAll('.owner-only').forEach((el) => el.style.display = 'none');
       if (!user.canViewReports) {
-        document.querySelectorAll('.reports-allowed').forEach((el) => {
-          el.style.display = 'none';
-        });
+        document.querySelectorAll('.reports-allowed').forEach((el) => el.style.display = 'none');
       }
-    }
-
-    // Initialize sidebar logic (copied from sidebar.js for integration)
-    const userNameEl = document.getElementById('sidebarUserName');
-    const userRoleEl = document.getElementById('sidebarUserRole');
-    const avatarEl = document.getElementById('sidebarAvatar');
-
-    if (user && userNameEl) userNameEl.textContent = user.name || 'User';
-    if (user && userRoleEl) {
-        userRoleEl.textContent = user.role === 'owner' ? 'Supermarket Owner' : 'Cashier';
-    }
-    if (user && avatarEl && user.name) {
-        avatarEl.textContent = user.name.charAt(0).toUpperCase();
-        if (user.role === 'cashier') {
-            avatarEl.style.background = 'linear-gradient(135deg, #1D2DBF, #4054ff)';
-        }
     }
 
     const menuItems = document.querySelectorAll('.menu-item');
     const currentPage = window.location.pathname.split("/").pop().replace('.html', '');
-
     menuItems.forEach(item => {
         item.classList.remove('active');
-        if (item.dataset.page && currentPage.includes(item.dataset.page)) {
-            item.classList.add('active');
-        }
+        if (item.dataset.page && currentPage.includes(item.dataset.page)) item.classList.add('active');
     });
 
     const logoutBtn = document.getElementById('sidebarLogoutBtn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('quickpos-user');
-                window.location.href = 'login.html';
-            }
-        });
+      logoutBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to logout?')) {
+          localStorage.removeItem('quickpos-user');
+          window.location.href = 'login.html';
+        }
+      });
     }
 
-    if (window.api?.getProducts) {
-      window.api.getProducts().then((products) => {
-        const low = (products || []).filter((p) => Number(p.current_stock || 0) > 0 && Number(p.current_stock || 0) <= Number(p.alert_level || 0)).length;
-        const badge = document.getElementById('lowStockBadge');
-        if (badge && low > 0) {
-          badge.textContent = String(low);
-          badge.style.display = 'inline-block';
-        }
-      }).catch(() => {});
-    }
+    // Notifications logic is now handled in notifications.js
+    if (window.Notifications) window.Notifications.refresh();
   });
 })();

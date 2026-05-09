@@ -374,6 +374,9 @@
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize standard components
+    Components.init({ title: 'Make a Sale' });
+
     wireEvents();
     try {
       await loadData();
