@@ -177,8 +177,8 @@ db.serialize(() => {
                             createSale(i, date, daysAgo);
                         }
 
-                        for (let i = 200; i < 230; i++) {
-                            const hour = 8 + Math.floor(Math.random() * 14);
+                        for (let i = 200; i < 280; i++) {
+                            const hour = 8 + Math.floor(Math.random() * 15); // Spread across 8am to 11pm
                             const date = new Date(now);
                             date.setHours(hour, Math.floor(Math.random() * 60), 0);
                             createSale(i, date, 0);

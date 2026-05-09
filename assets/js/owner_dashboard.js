@@ -65,14 +65,30 @@
     const labelsEl = document.getElementById('hourLabels');
     if (!el || !labelsEl) return;
 
-    const max = Math.max(...m.hourSales, 1);
-    const hoursToRender = [0, 6, 12, 18, 23];
+    const businessHours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+    const hourSales = businessHours.map(h => m.hourSales[h] || 0);
+    const max = Math.max(...hourSales, 1);
+    const hoursToRender = [8, 11, 14, 17, 20];
     
-    el.innerHTML = m.hourSales.map((val, h) => {
-      const pct = (val / max) * 100;
-      const isPeak = val === max && val > 0;
-      return `<div class="hbar ${isPeak ? 'peak' : ''}" style="height:${pct}%"><div class="hbar-tip">${h}:00 - ${fmt(val)}</div></div>`;
-    }).join('');
+    el.innerHTML = `
+      <div class="chart-grid">
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+      </div>
+      <div class="chart-bars">
+        ${businessHours.map((h, idx) => {
+          const val = m.hourSales[h] || 0;
+          const pct = (val / max) * 100;
+          const isPeak = val === max && val > 0;
+          const visualPct = Math.max(pct, 8); 
+          return `
+            <div class="hbar ${isPeak ? 'peak' : ''} ${val === 0 ? 'low-activity' : ''}" style="height:${visualPct}%">
+              <div class="hbar-tip">${h}:00 - ${fmt(val)}</div>
+            </div>`;
+        }).join('')}
+      </div>
+    `;
 
     labelsEl.innerHTML = hoursToRender.map(h => `<div class="hl">${h}h</div>`).join('<div style="flex:1"></div>');
   }

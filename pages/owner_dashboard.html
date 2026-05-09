@@ -50,8 +50,8 @@
     <div class="grid-2">
       <div class="card">
         <div class="card-header">
-          <div class="card-title">
-            <svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
+          <div class="card-title" style="color:var(--primary)">
+            <i class="fa-solid fa-chart-line"></i>
             Sales Overview
           </div>
           <span class="section-badge badge-blue">Today vs 7D</span>
@@ -94,7 +94,7 @@
       <div class="card">
         <div class="card-header">
           <div class="card-title" style="color:var(--red)">
-            <svg viewBox="0 0 24 24" style="stroke:var(--red)"><path d="M10.3 3.9l-8.2 14a1 1 0 00.9 1.5h16.4a1 1 0 00.9-1.5l-8.2-14a1 1 0 00-1.8 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <i class="fa-solid fa-triangle-exclamation"></i>
             Reorder Alerts
           </div>
           <span class="section-badge badge-red" id="reorderBadge">0 items</span>
@@ -108,8 +108,8 @@
     <div class="grid-3">
       <div class="card">
         <div class="card-header">
-          <div class="card-title">
-            <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          <div class="card-title" style="color:var(--success)">
+            <i class="fa-solid fa-crown"></i>
             Top Products
           </div>
           <span class="section-badge badge-green">by qty</span>
@@ -121,8 +121,8 @@
 
       <div class="card">
         <div class="card-header">
-          <div class="card-title">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>
+          <div class="card-title" style="color:var(--primary)">
+            <i class="fa-solid fa-clock-rotate-left"></i>
             Peak Hours
           </div>
           <span class="section-badge badge-blue">today</span>
@@ -131,16 +131,16 @@
           <div id="hourChart" class="hour-chart"></div>
           <div id="hourLabels" class="hour-labels"></div>
           <div class="bar-chart-legend">
-            <div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>Peak period</div>
-            <div class="leg-item"><div class="leg-dot" style="background:var(--surface3)"></div>Low period</div>
+            <div class="leg-item"><div class="leg-dot" style="background:var(--primary)"></div>Peak period</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#e2e8f0; border:1px solid var(--border)"></div>Low period</div>
           </div>
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <div class="card-title">
-            <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          <div class="card-title" style="color:var(--purple)">
+            <i class="fa-solid fa-credit-card"></i>
             Payment Mix
           </div>
         </div>
@@ -172,7 +172,7 @@
     <div class="card">
       <div class="card-header">
         <div class="card-title" style="color:var(--amber)">
-          <svg viewBox="0 0 24 24" style="stroke:var(--amber)"><path d="M12 2v10"/><path d="M12 18h.01"/><circle cx="12" cy="12" r="10"/></svg>
+          <i class="fa-solid fa-hourglass-half"></i>
           Slow Moving Items
         </div>
         <span class="section-badge badge-amber">No sales 3+ days</span>
