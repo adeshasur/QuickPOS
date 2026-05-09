@@ -1,13 +1,54 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,500,0,0');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
 
-
+/* === Unified Design System === */
+:root {
+    /* Base colors - Brand Blue/Orange Theme */
+    --primary: #1D2DBF;
+    --primary-dark: #16239a;
+    --accent: #FF9800;
+    --accent-light: #ffb11a;
+    
+    /* Status colors */
+    --success: #10b981;
+    --success-light: #ecfdf5;
+    --warning: #f59e0b;
+    --warning-light: #fffbeb;
+    --danger: #ef4444;
+    --danger-light: #fef2f2;
+    
+    /* Neutrals */
+    --bg: #f8fafc;
+    --bg-gradient: radial-gradient(circle at top left, rgba(29,45,191,0.05), transparent 40%), radial-gradient(circle at bottom right, rgba(255,152,0,0.05), transparent 40%), #f8fafc;
+    --surface: #ffffff;
+    --surface2: #f1f5f9;
+    --border: #e2e8f0;
+    --border2: #cbd5e1;
+    
+    /* Text */
+    --text: #0f172a;
+    --text2: #475569;
+    --text3: #94a3b8;
+    --text-light: #64748b;
+    
+    /* Misc */
+    --shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+    --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.02);
+    --radius: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 24px;
+    
+    /* Font */
+    --font: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
+}
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+    font-family: var(--font);
 }
 
 body {
@@ -15,162 +56,21 @@ body {
     color: var(--text);
     margin: 0;
     padding: 0;
+    overflow: hidden;
 }
 
 body.dashboard-body {
     display: flex;
     height: 100vh;
     width: 100vw;
-    overflow: hidden;
 }
 
 #sidebar-container {
-    width: 252px;
-    min-width: 252px;
+    width: 280px;
+    min-width: 280px;
     height: 100vh;
     flex-shrink: 0;
-    transition: width 0.25s ease;
-}
-
-body.sidebar-collapsed #sidebar-container {
-    width: 76px;
-    min-width: 76px;
-}
-
-.sidebar {
-    background: linear-gradient(180deg, #ffffff 0%, #f9fcf8 100%);
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--shadow);
-    z-index: 100;
-    height: 100vh;
-    width: 252px;
-    min-width: 252px;
-    flex-shrink: 0;
-    position: fixed;
-    left: 0;
-    top: 0;
-    border-right: 1px solid var(--border);
-    transition: width 0.25s ease;
-}
-
-.sidebar.collapsed {
-    width: 76px;
-}
-
-.hamburger-menu {
-    padding: 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--border);
-    min-height: 74px;
-}
-
-.hamburger-btn {
-    background: #f2f6f2;
-    border: 1px solid var(--border);
-    font-size: 18px;
-    color: var(--primary);
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 10px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.hamburger-btn:hover {
-    background: var(--primary-light);
-    border-color: #c7dac9;
-}
-
-.logo {
-    font-weight: 800;
-    color: var(--primary-dark);
-    font-size: 22px;
-    letter-spacing: 0.3px;
-    white-space: nowrap;
-    overflow: hidden;
-    transition: opacity 0.25s ease;
-}
-
-.sidebar.collapsed .logo {
-    opacity: 0;
-    width: 0;
-    pointer-events: none;
-}
-
-.nav-items {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex: 1;
-    padding: 14px 10px 12px;
-    overflow-y: auto;
-}
-
-.nav-item {
-    display: flex;
-    align-items: center;
-    padding: 11px 12px;
-    color: var(--text2);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    cursor: pointer;
-    border-radius: 12px;
-    border: 1px solid transparent;
-}
-
-.nav-item:hover {
-    background: var(--surface2);
-    color: var(--primary);
-    border-color: #d6e4d6;
-}
-
-.nav-item.active {
-    background: var(--primary-light);
-    color: var(--primary-dark);
-    border-color: #cce1d0;
-    font-weight: 700;
-}
-
-.nav-icon {
-    min-width: 34px;
-    width: 34px;
-    height: 34px;
-    border-radius: 9px;
-    background: #f3f7f3;
-    border: 1px solid #e3ece3;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 17px;
-    line-height: 1;
-    color: var(--primary);
-}
-
-.nav-item.active .nav-icon {
-    background: #dff0e3;
-    border-color: #bfd8c5;
-}
-
-.nav-text {
-    margin-left: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    transition: opacity 0.25s ease;
-}
-
-.sidebar.collapsed .nav-text {
-    opacity: 0;
-    width: 0;
-    margin-left: 0;
-    pointer-events: none;
+    background: transparent;
 }
 
 .main-content {
@@ -179,132 +79,24 @@ body.sidebar-collapsed #sidebar-container {
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
+    position: relative;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
     background: transparent;
 }
-
-.top-bar {
-    height: 70px;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    box-shadow: var(--shadow);
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
+::-webkit-scrollbar-thumb {
+    background: var(--border2);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text3);
 }
 
-.page-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--text);
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.user-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(145deg, #3b9153, #1f6f54);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 700;
-}
-
-@media (max-width: 1280px) {
-    #sidebar-container,
-    .sidebar {
-        width: 220px;
-        min-width: 220px;
-    }
-}
-
-@media (max-width: 1024px) {
-    #sidebar-container,
-    .sidebar {
-        width: 76px;
-        min-width: 76px;
-    }
-
-    .nav-text,
-    .logo {
-        display: none;
-    }
-
-    .nav-item {
-        justify-content: center;
-        padding: 10px 0;
-    }
-
-    .nav-icon {
-        margin: 0;
-    }
-}
-
-@media (max-height: 700px) {
-    .top-bar {
-        height: 60px;
-    }
-
-    .nav-item {
-        padding-top: 8px;
-        padding-bottom: 8px;
-    }
-}
-
-
-/* === Unified Design System === */
-:root {
-    /* Base colors - Green theme */
-    --primary: #1f6f54;
-    --primary-dark: #2f7a45;
-    --primary-light: #e9f5ec;
-    --primary-glow: rgba(31, 111, 84, 0.15);
-    
-    /* Status colors */
-    --success: #1f7a38;
-    --success-light: #d8f3e6;
-    --warning: #b96e1b;
-    --warning-light: #fef3e2;
-    --danger: #d64545;
-    --danger-light: #fef2f2;
-    
-    /* Neutrals */
-    --bg: #f4f7f2;
-    --bg-gradient: radial-gradient(circle at 10% 10%, #ffffff 0%, #f4f7f2 40%, #eef3ea 100%);
-    --surface: #ffffff;
-    --surface2: #f7faf7;
-    --border: #dbe5d8;
-    --border2: #c7dac9;
-    
-    /* Text */
-    --text: #1f2d1f;
-    --text2: #617065;
-    --text3: #829180;
-    
-    /* Misc */
-    --shadow: 0 6px 14px rgba(33, 58, 33, 0.08);
-    --shadow-sm: 0 2px 4px rgba(33, 58, 33, 0.04);
-    --radius: 10px;
-    --radius-lg: 14px;
-    --radius-xl: 20px;
-    
-    /* Font */
-    --font: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
-    --mono: 'DM Mono', monospace;
-    
-    /* Additional colors */
-    --purple: #805AD5;
-    --cyan: #319795;
-    
-    /* Surface variants */
-    --surface3: #EDF2F7;
-}
+/* Import Sidebar explicitly in common if needed, or link it in HTML */
+/* @import url('sidebar.css'); */

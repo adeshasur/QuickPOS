@@ -4,20 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QuickPOS Pro — Owner Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/common.css">
-<link rel="stylesheet" href="../assets/css/owner_dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/sidebar.css">
+    <link rel="stylesheet" href="../assets/css/owner_dashboard.css">
 </head>
-<body>
+<body class="dashboard-body">
 
 <div id="sidebar-container"></div>
 
 <div class="main-content">
   <div class="topbar">
     <div class="tb-title">Executive Dashboard</div>
-    <div class="tb-chip">Live</div>
-    <div class="tb-filters">
+    <div class="tb-chip" id="topClock">00:00:00 AM</div>
+    <div class="tb-welcome" id="welcomeMsg">
+      <div class="welcome-text">
+        <i class="fa-solid fa-hand-wave"></i> Welcome back, <span id="welcomeUserName">Admin</span>!
+      </div>
+    </div>
+    <div class="tb-filters" id="topbarFilters">
+
       <button class="filter-btn active" data-range="today">Today</button>
       <button class="filter-btn" data-range="yesterday">Yesterday</button>
       <button class="filter-btn" data-range="last7">7 Days</button>
@@ -39,27 +48,27 @@
     <div class="kpi-grid">
       <div class="kpi-card blue">
         <div class="kpi-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H7"/></svg></div>
-        <div class="kpi-label"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H7"/></svg>Total Revenue</div>
+        <div class="kpi-label"><i class="fa-solid fa-money-bill-trend-up"></i> Total Revenue</div>
         <div class="kpi-val" id="kpiRevenue">LKR 0</div>
-        <div class="kpi-meta" id="kpiRevTrend"><span class="kpi-neu">— No data</span></div>
+        <div class="kpi-meta" id="kpiRevTrend"></div>
       </div>
       <div class="kpi-card green">
         <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M21 8v8a2 2 0 01-1 1.7l-7 4a2 2 0 01-2 0l-7-4A2 2 0 013 16V8a2 2 0 011-1.7l7-4a2 2 0 012 0l7 4A2 2 0 0121 8z"/></svg></div>
-        <div class="kpi-label"><svg viewBox="0 0 24 24"><path d="M21 8v8a2 2 0 01-1 1.7l-7 4a2 2 0 01-2 0l-7-4A2 2 0 013 16V8a2 2 0 011-1.7l7-4a2 2 0 012 0l7 4A2 2 0 0121 8z"/></svg>Stock Volume</div>
+        <div class="kpi-label"><i class="fa-solid fa-boxes-stacked"></i> Stock Volume</div>
         <div class="kpi-val" id="kpiStock">0 <span style="font-size:14px;color:var(--text3)">units</span></div>
-        <div class="kpi-meta"><span class="kpi-sub" id="kpiStockLow">— Checking stock…</span></div>
+        <div class="kpi-meta"><span class="kpi-sub" id="kpiStockLow"></span></div>
       </div>
       <div class="kpi-card amber">
         <div class="kpi-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
-        <div class="kpi-label"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Items Sold Today</div>
+        <div class="kpi-label"><i class="fa-solid fa-cart-arrow-down"></i> Items Sold Today</div>
         <div class="kpi-val" id="kpiItems">0</div>
         <div class="kpi-meta"><span class="kpi-sub">Total quantity</span></div>
       </div>
       <div class="kpi-card purple">
         <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 01-10 0z"/><path d="M7 8H5a3 3 0 003 3"/><path d="M17 8h2a3 3 0 01-3 3"/><line x1="12" y1="13" x2="12" y2="18"/><line x1="8" y1="22" x2="16" y2="22"/></svg></div>
-        <div class="kpi-label"><svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 01-10 0z"/></svg>Avg Transaction</div>
+        <div class="kpi-label"><i class="fa-solid fa-receipt"></i> Avg Transaction</div>
         <div class="kpi-val" id="kpiAvg">LKR 0</div>
-        <div class="kpi-meta"><span class="kpi-sub" id="kpiTxCount">— transactions</span></div>
+        <div class="kpi-meta"><span class="kpi-sub" id="kpiTxCount">0 transactions</span></div>
       </div>
     </div>
 

@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   'use strict';
 
   let products = [];
@@ -206,6 +206,19 @@
     renderCart();
   }
 
+  function renderCategories(rows) {
+    const el = document.getElementById('catPills');
+    if (!el) return;
+    el.innerHTML = '<button class="cat-pill active" data-cat="all">All</button>';
+    rows.forEach((c) => {
+      const btn = document.createElement('button');
+      btn.className = 'cat-pill';
+      btn.dataset.cat = normalizeCategory(c.name);
+      btn.textContent = c.name;
+      el.appendChild(btn);
+    });
+  }
+
   async function loadData() {
     const [categoryRows, productRows, customerRows] = await Promise.all([
       window.api.getCategories(),
@@ -220,9 +233,11 @@
       categoryKey: normalizeCategory(categoryById.get(p.category_id)?.name || 'general')
     }));
     customers = customerRows;
+    renderCategories(categoryRows);
     renderProducts();
     renderCustomer();
   }
+
 
   function wireEvents() {
     const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');

@@ -3,18 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /* =========================
        USERS
     ========================= */
-    const users = {
-        admin:{
-            password:"123",
-            role:"owner",
-            name:"Admin User"
-        },
-        staff:{
-            password:"456",
-            role:"cashier",
-            name:"Cashier User"
-        }
-    };
+
 
     /* =========================
        DOM
@@ -66,35 +55,50 @@ document.addEventListener('DOMContentLoaded', () => {
     /* =========================
        LOGIN
     ========================= */
-    loginForm.addEventListener("submit", (e) => {
+    loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const user = username.value.trim();
-        const pass = password.value.trim();
+        const userVal = username.value.trim();
+        const passVal = password.value.trim();
+        const role = ownerBtn.classList.contains("active") ? "owner" : "cashier";
 
         errorBox.classList.remove("show");
 
-        if(!users[user] || users[user].password !== pass) {
+        try {
+            const response = await window.api.loginAuth({ 
+                username: userVal, 
+                password: passVal, 
+                role: role 
+            });
+
+            if (!response.success) {
+                errorBox.textContent = response.message || 'Invalid credentials';
+                errorBox.classList.add("show");
+                return;
+            }
+
+            const userData = {
+                username: userVal,
+                role: response.user.role,
+                name: response.user.name,
+                canViewReports: response.user.canViewReports,
+                loginTime: new Date().toISOString()
+            };
+
+            localStorage.setItem("quickpos-user", JSON.stringify(userData));
+            console.log("LOGIN SUCCESS", userData);
+
+            /* REDIRECT */
+            if (response.user.role === "owner") {
+                window.location.href = "owner_dashboard.html";
+            } else {
+                window.location.href = "sales.html";
+            }
+        } catch (err) {
+            errorBox.textContent = 'Connection error: ' + err.message;
             errorBox.classList.add("show");
-            return;
-        }
-
-        const userData = {
-            username: user,
-            role: users[user].role,
-            name: users[user].name,
-            loginTime: new Date().toISOString()
-        };
-
-        localStorage.setItem("quickpos-user", JSON.stringify(userData));
-        console.log("LOGIN SUCCESS", userData);
-
-        /* REDIRECT */
-        if(users[user].role === "owner"){
-            window.location.href = "owner_dashboard.html";
-        } else {
-            window.location.href = "sales.html";
         }
     });
+
 
 });

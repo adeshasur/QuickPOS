@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   'use strict';
 
   const fmt = (n) => `LKR ${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -46,15 +46,60 @@
       else m.card += Number(s.total_amount || 0);
       const hour = new Date(s.timestamp).getHours();
       m.hourSales[hour] += Number(s.total_amount || 0);
-
+  
       const items = saleItemsMap.get(s.id) || [];
       items.forEach((i) => {
         m.items += Number(i.quantity || 0);
-        m.catSales.General = (m.catSales.General || 0) + Number(i.subtotal || 0);
+        const p = products.find(x => x.id === i.product_id);
+        const catName = p ? categoryMap.get(p.category_id) : 'General';
+        m.catSales[catName] = (m.catSales[catName] || 0) + Number(i.subtotal || 0);
       });
     });
     m.avg = m.tx > 0 ? m.revenue / m.tx : 0;
     return m;
+  }
+
+
+  function renderHourChart(m) {
+    const el = document.getElementById('hourChart');
+    const labelsEl = document.getElementById('hourLabels');
+    if (!el || !labelsEl) return;
+
+    const max = Math.max(...m.hourSales, 1);
+    const hoursToRender = [0, 6, 12, 18, 23];
+    
+    el.innerHTML = m.hourSales.map((val, h) => {
+      const pct = (val / max) * 100;
+      const isPeak = val === max && val > 0;
+      return `<div class="hbar ${isPeak ? 'peak' : ''}" style="height:${pct}%"><div class="hbar-tip">${h}:00 - ${fmt(val)}</div></div>`;
+    }).join('');
+
+    labelsEl.innerHTML = hoursToRender.map(h => `<div class="hl">${h}h</div>`).join('<div style="flex:1"></div>');
+  }
+
+  function renderCatChart(m) {
+    const el = document.getElementById('catChart');
+    if (!el) return;
+
+    const cats = Object.entries(m.catSales).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const max = Math.max(...cats.map(c => c[1]), 1);
+
+    if (cats.length === 0) {
+      el.innerHTML = '<div style="text-align:center;padding:10px;color:var(--text3);font-size:12px">No category data</div>';
+      return;
+    }
+
+    el.innerHTML = cats.map(([name, val], i) => {
+      const pct = (val / max) * 100;
+      const colors = ['#1D2DBF', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+      return `
+        <div class="cat-row">
+          <div class="cat-name">${name}</div>
+          <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${pct}%;background:${colors[i % colors.length]}"></div></div>
+          <div class="cat-val">${fmt(val)}</div>
+        </div>
+      `;
+    }).join('');
   }
 
   function updateDashboard(range) {
@@ -87,6 +132,19 @@
     document.getElementById('cardPct').textContent = m.revenue ? `${Math.round((m.card / m.revenue) * 100)}%` : '0%';
     document.getElementById('cashRev').textContent = fmtK(m.cash);
     document.getElementById('cardRev').textContent = fmtK(m.card);
+    
+    // Update payment progress bars
+    const cashFill = document.getElementById('cashFill');
+    const cardFill = document.getElementById('cardFill');
+    if (cashFill && cardFill) {
+      const total = m.revenue || 1;
+      cashFill.style.width = `${(m.cash / total) * 100}%`;
+      cardFill.style.width = `${(m.card / total) * 100}%`;
+    }
+
+    renderHourChart(m);
+    renderCatChart(m);
+    renderSlowItems();
 
     const lowItems = products.filter((p) => Number(p.current_stock || 0) <= Number(p.alert_level || 0));
     document.getElementById('reorderBadge').textContent = `${lowItems.length} items`;
@@ -100,21 +158,92 @@
         productQty.set(i.product_name || `Item ${i.product_id}`, (productQty.get(i.product_name || `Item ${i.product_id}`) || 0) + Number(i.quantity || 0));
       });
     });
-    const top = [...productQty.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const top = [...productQty.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
     document.getElementById('topItemsList').innerHTML = top.length
-      ? top.map(([name, qty], i) => `<div class="top-item"><span class="rank">${i + 1}</span><div class="item-info"><div class="item-name">${name}</div></div><div class="item-qty">${qty} qty</div></div>`).join('')
-      : '<div style="text-align:center;padding:30px 0;color:var(--text3)">No sales data</div>';
+      ? top.map(([name, qty], i) => `
+          <div class="top-item">
+            <span class="rank r${i < 3 ? i + 1 : ''}">${i + 1}</span>
+            <div class="item-info">
+              <div class="item-name">${name}</div>
+            </div>
+            <div class="item-qty">${qty} <span style="font-size:10px;color:var(--text3)">sold</span></div>
+          </div>
+        `).join('')
+      : '<div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">No sales found for this period</div>';
   }
 
+
+  function renderSlowItems() {
+    const el = document.getElementById('slowList');
+    if (!el) return;
+
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+    // Find products that haven't appeared in any sale in the last 3 days
+    const recentSales = sales.filter(s => new Date(s.timestamp) > threeDaysAgo);
+    const recentProductIds = new Set();
+    recentSales.forEach(s => {
+      (saleItemsMap.get(s.id) || []).forEach(i => recentProductIds.add(Number(i.product_id)));
+    });
+
+    const slow = products.filter(p => !recentProductIds.has(Number(p.id))).slice(0, 8);
+    
+    el.innerHTML = slow.length
+      ? slow.map(p => `
+          <div class="slow-item">
+            <span class="slow-badge">3+ Days</span>
+            <div class="slow-name">${p.name}</div>
+            <div style="font-size:12px;color:var(--text3)">Stock: ${p.current_stock}</div>
+          </div>
+        `).join('')
+      : '<div style="text-align:center;width:100%;padding:20px;color:var(--text3)">All items are moving well</div>';
+  }
+
+
+
+  let categories = [];
+  let categoryMap = new Map();
+
   async function loadData() {
-    sales = await window.api.getSalesHistory();
-    products = await window.api.getProducts();
+    [sales, products, categories] = await Promise.all([
+      window.api.getSalesHistory(),
+      window.api.getProducts(),
+      window.api.getCategories()
+    ]);
+    categoryMap = new Map(categories.map(c => [c.id, c.name]));
     const details = await Promise.all(sales.map((s) => window.api.getSaleDetails(s.id)));
     saleItemsMap = new Map(sales.map((s, idx) => [s.id, details[idx] || []]));
   }
 
+
   document.addEventListener('DOMContentLoaded', async () => {
+    // Welcome message logic
+    const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
+    const welcomeMsg = document.getElementById('welcomeMsg');
+    const welcomeUserName = document.getElementById('welcomeUserName');
+    const topbarFilters = document.getElementById('topbarFilters');
+
+    if (user && user.name && welcomeMsg && topbarFilters) {
+      welcomeUserName.textContent = user.name;
+      welcomeMsg.style.display = 'flex';
+      topbarFilters.style.display = 'none';
+
+      // Set avatar initials
+      const avatar = document.querySelector('.topbar .avatar');
+      if (avatar) {
+        avatar.textContent = String(user.name).split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+      }
+
+      setTimeout(() => {
+        welcomeMsg.style.display = 'none';
+        topbarFilters.style.display = 'flex';
+      }, 5000);
+    }
+
+
     document.querySelectorAll('.filter-btn').forEach((btn) => {
+
       btn.addEventListener('click', () => {
         document.querySelectorAll('.filter-btn').forEach((b) => b.classList.remove('active'));
         btn.classList.add('active');
@@ -127,7 +256,19 @@
       updateDashboard(active ? active.dataset.range : 'today');
     });
 
+    function startClock() {
+      const el = document.getElementById('topClock');
+      if (!el) return;
+      const update = () => {
+        const now = new Date();
+        el.textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+      };
+      update();
+      setInterval(update, 1000);
+    }
+
     try {
+      startClock();
       await loadData();
       updateDashboard('today');
     } catch (err) {
