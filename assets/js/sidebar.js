@@ -28,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentPage = window.location.pathname.split("/").pop().replace('.html', '');
 
     menuItems.forEach(item => {
-        // Remove active class from all
         item.classList.remove('active');
         
         // Add active class if data-page matches current URL

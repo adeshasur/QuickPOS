@@ -2,7 +2,7 @@
   'use strict';
 
   const fmt = (n) => `LKR ${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  const fmtK = (n) => (Number(n) >= 1000 ? `LKR ${(Number(n) / 1000).toFixed(1)}k` : fmt(n));
+  const fmtK = (n) => fmt(n);
 
   let sales = [];
   let saleItemsMap = new Map();
