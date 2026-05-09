@@ -5,6 +5,7 @@
   let customers = [];
   let cart = [];
   let currentCat = 'all';
+  let currentSearch = '';
   let selectedCustomer = null;
   let productToCustomize = null;
   let priceEdited = false;
@@ -35,7 +36,14 @@
     const grid = document.getElementById('productsGrid');
     if (!grid) return;
 
-    const list = currentCat === 'all' ? products : products.filter((p) => p.categoryKey === currentCat);
+    let list = products;
+    if (currentCat !== 'all') {
+      list = list.filter((p) => p.categoryKey === currentCat);
+    }
+    if (currentSearch) {
+      list = list.filter((p) => p.name.toLowerCase().includes(currentSearch));
+    }
+
     if (!list.length) {
       grid.innerHTML = '<div style="color:var(--text3);font-size:15px;padding:30px;grid-column:1/-1;text-align:center;">No products found</div>';
       return;
@@ -273,14 +281,8 @@
 
     const search = document.getElementById('stockSearch');
     search.addEventListener('input', (e) => {
-      const val = e.target.value.toLowerCase().trim();
-      const result = document.getElementById('stockResult');
-      if (!val) {
-        result.textContent = '';
-        return;
-      }
-      const p = products.find((x) => x.name.toLowerCase().includes(val));
-      result.textContent = p ? `${p.name}: ${stockText(Number(p.current_stock))} in stock` : 'Not found';
+      currentSearch = e.target.value.toLowerCase().trim();
+      renderProducts();
     });
 
     const custSearch = document.getElementById('custSearch');
