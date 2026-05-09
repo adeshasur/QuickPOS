@@ -77,12 +77,12 @@
 .bar:hover{opacity: 0.8;}
 .bar-tip{position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;background:var(--surface);padding:4px 8px;border-radius:4px;border:1px solid var(--border);box-shadow:0 2px 4px rgba(0,0,0,0.1);pointer-events:none;opacity:0;transition:opacity .15s}
 .bar:hover .bar-tip{opacity:1}
-.bar-chart-legend{display:flex;gap:16px;margin-top:8px;padding-top:14px;border-top:1px dashed var(--border)}
+.bar-chart-legend{display:flex;gap:16px;margin-top:auto;padding-top:10px;border-top:1px dashed var(--border)}
 .leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);font-weight:500;}
 .leg-dot{width:10px;height:10px;border-radius:3px}
 
 /* â”€â”€â”€ HOURLY CHART â”€â”€â”€ */
-.hour-chart{display:flex;align-items:flex-end;gap:4px;height:70px;margin:8px 0}
+.hour-chart{display:flex;align-items:flex-end;gap:4px;height:80px;margin:20px 0 8px 0}
 .hbar{border-radius:4px 4px 0 0;background:var(--surface3);flex:1;cursor:pointer;position:relative;transition:all .2s}
 .hbar.peak{background:var(--primary)}
 .hbar:hover{background:var(--primary-dark);opacity:0.9;}
