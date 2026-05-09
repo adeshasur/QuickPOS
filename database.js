@@ -65,6 +65,7 @@ db.serialize(() => {
         payment_method TEXT,
         received_amount REAL,
         balance_amount REAL,
+        ref_no TEXT,
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
         cashier_name TEXT,
         FOREIGN KEY (customer_id) REFERENCES customers (id)
@@ -130,64 +131,13 @@ db.serialize(() => {
             );
         });
 
-        // Sample Sales (CLEAN RESET for perfect demo data)
-        db.get('SELECT COUNT(*) as count FROM sales', (err, row) => {
-            if (!err && row.count < 1000) { 
-                console.log('Resetting sample data for perfect dashboard patterns...');
-                db.serialize(() => {
-                    db.run('DELETE FROM sale_items');
-                    db.run('DELETE FROM sales');
-                    
-                    db.all('SELECT id, name, selling_price FROM products', (err, productRows) => {
-                        if (err || !productRows.length) return;
-                        
-                        const now = new Date();
-                        const createSale = (idx, d, days) => {
-                            const timestamp = d.toISOString();
-                            const method = Math.random() > 0.3 ? 'Cash' : 'Card';
-                            const billId = `INV-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(idx).padStart(4,'0')}`;
-                            const numItems = 1 + Math.floor(Math.random() * 3);
-                            const items = [];
-                            let total = 0;
-                            for (let j = 0; j < numItems; j++) {
-                                let p = (days < 10) ? productRows[Math.floor(Math.random() * 8)] : productRows[Math.floor(Math.random() * productRows.length)];
-                                const qty = 1 + Math.floor(Math.random() * 2);
-                                const sub = qty * p.selling_price;
-                                items.push({ id: p.id, name: p.name, qty, price: p.selling_price, sub });
-                                total += sub;
-                            }
-                            db.run(`INSERT INTO sales (bill_id, total_amount, payment_method, received_amount, balance_amount, timestamp, cashier_name)
-                                    VALUES (?, ?, ?, ?, ?, ?, 'Administrator')`, 
-                                    [billId, total, method, total + (method === 'Cash' ? 100 : 0), (method === 'Cash' ? 100 : 0), timestamp], function() {
-                                const saleId = this.lastID;
-                                if (saleId) {
-                                    items.forEach(item => {
-                                        db.run(`INSERT INTO sale_items (sale_id, product_id, product_name, quantity, unit_price, subtotal)
-                                                VALUES (?, ?, ?, ?, ?, ?)`, [saleId, item.id, item.name, item.qty, item.price, item.sub]);
-                                    });
-                                }
-                            });
-                        };
-
-                        for (let i = 0; i < 150; i++) {
-                            const daysAgo = Math.floor(Math.random() * 20);
-                            const hour = 8 + Math.floor(Math.random() * 12);
-                            const date = new Date(now.getTime() - (daysAgo * 86400000));
-                            date.setHours(hour, Math.floor(Math.random() * 60), 0);
-                            createSale(i, date, daysAgo);
-                        }
-
-                        for (let i = 200; i < 280; i++) {
-                            const hour = 8 + Math.floor(Math.random() * 15); // Spread across 8am to 11pm
-                            const date = new Date(now);
-                            date.setHours(hour, Math.floor(Math.random() * 60), 0);
-                            createSale(i, date, 0);
-                        }
-                    }); // end db.all
-                }); // end db.serialize
-            } // end if
-        }); // end db.get
+        // Sample Sales logic removed to prevent data loss for the user.
+        // Data will now persist correctly.
     }); // end outer db.all
+
+    db.run("ALTER TABLE sales ADD COLUMN ref_no TEXT", (err) => {
+        // Ignore error if column already exists
+    });
 }); // end outer db.serialize
 
 

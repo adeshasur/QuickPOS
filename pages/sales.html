@@ -70,12 +70,16 @@
         </div>
         <div class="pay-btns">
           <button class="pay-btn cash" id="cashBtn">
-            <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
             CASH
           </button>
           <button class="pay-btn card" id="cardBtn">
-            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
             CARD
+          </button>
+          <button class="pay-btn print-draft" id="printDraftBtn">
+            <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            PRINT
           </button>
           <button class="pay-btn credit" id="creditBtn" disabled>
             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
@@ -149,15 +153,48 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="cardModal">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-top">
+      <div class="modal-title">Card Payment</div>
+      <button class="modal-close" id="closeCardModal"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="pay-row">
+        <span class="pay-row-label">Total amount</span>
+        <span class="pay-row-val total" id="cardModalTotal">LKR 0.00</span>
+      </div>
+      <div class="divider"></div>
+      <div class="field-group" style="margin-top:12px">
+        <label class="field-label">Card Reference Number (Optional)</label>
+        <input class="field-input" type="text" id="cardRefNo" placeholder="Scan or type reference number">
+        <span class="field-hint">e.g., Transaction ID from the machine</span>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="mact-btn cancel" id="cancelCardModal">Cancel</button>
+      <button class="mact-btn confirm" id="finalizeCard">Complete Sale</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="saleCompleteModal">
   <div class="sale-complete-box">
     <div class="sc-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
     <div class="sc-title" id="scTitle">Sale Complete!</div>
     <div class="sc-amount" id="scAmount">LKR 0.00</div>
-    <div class="sc-msg" id="scMsg">Receipt printed</div>
-    <button class="sc-done" id="scDone">Continue</button>
+    <div class="sc-msg" id="scMsg">Invoice saved successfully</div>
+    <div class="sc-actions">
+      <button class="sc-print" id="printReceiptBtn">
+        <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print Receipt
+      </button>
+      <button class="sc-done" id="scDone">Continue</button>
+    </div>
   </div>
 </div>
+
+<div id="print-area" style="display:none"></div>
 
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/components.js"></script>

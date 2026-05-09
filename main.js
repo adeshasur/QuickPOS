@@ -183,8 +183,8 @@ ipcMain.handle('get-products', async () => allAsync('SELECT * FROM products'));
 
 ipcMain.handle('update-product', async (event, p) => {
     await runAsync(
-        'UPDATE products SET name = ?, category_id = ?, cost_price = ?, selling_price = ?, alert_level = ?, unit_type = ?, is_weighted = ? WHERE id = ?',
-        [p.name, p.categoryId, p.cost, p.price, p.alertLevel, p.unitType, p.isWeighted ? 1 : 0, p.id]
+        'UPDATE products SET barcode = ?, name = ?, category_id = ?, cost_price = ?, selling_price = ?, alert_level = ?, unit_type = ?, is_weighted = ? WHERE id = ?',
+        [p.barcode, p.name, p.categoryId, p.cost, p.price, p.alertLevel, p.unitType, p.isWeighted ? 1 : 0, p.id]
     );
     return { success: true };
 });
@@ -278,9 +278,9 @@ ipcMain.handle('save-sale', async (event, saleData) => withTransaction(async () 
     const finalBillId = saleData.billId || await getNextBillId();
 
     const saleInsert = await runAsync(
-        `INSERT INTO sales (bill_id, customer_id, total_amount, payment_method, received_amount, balance_amount, cashier_name)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [finalBillId, saleData.customerId, saleData.total, saleData.method, saleData.received, saleData.balanceDue, saleData.cashier]
+        `INSERT INTO sales (bill_id, customer_id, total_amount, payment_method, received_amount, balance_amount, ref_no, cashier_name)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [finalBillId, saleData.customerId, saleData.total, saleData.method, saleData.received, saleData.balanceDue, saleData.refNo, saleData.cashier]
     );
 
     for (const item of saleData.items) {

@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   'use strict';
 
   let categories = [];
@@ -44,7 +44,12 @@
       const low = Number(p.current_stock || 0) <= Number(p.alert_level || 0);
       const discount = Math.max(0, Number(p.cost_price || 0) - Number(p.selling_price || 0));
       return `<tr>
-        <td class="td-name">${p.name}</td>
+        <td class="td-name">
+          <div class="name-box">
+            <span class="p-name-main">${p.name}</span>
+            <span class="p-barcode-sub">${p.barcode || '-'}</span>
+          </div>
+        </td>
         <td class="td-cat">${cat ? cat.name : '-'}</td>
         <td>${p.is_weighted ? `<span class="badge weight">By Weight</span><span class="badge unit-type">${p.unit_type || '-'}</span>` : '<span class="badge unit">Unit</span>'}</td>
         <td>${low ? `<span class="stock-low">${p.current_stock}</span>` : `<span class="stock-ok">${p.current_stock}</span>`}</td>
@@ -74,7 +79,7 @@
 
   function bindEvents() {
     document.getElementById('addProductBtn').addEventListener('click', () => {
-      ['addName', 'addCat', 'addUnit', 'addBasePrice'].forEach((id) => (document.getElementById(id).value = ''));
+      ['addBarcode', 'addName', 'addCat', 'addUnit', 'addBasePrice'].forEach((id) => (document.getElementById(id).value = ''));
       document.getElementById('addWeighted').checked = false;
       document.getElementById('addUnit').disabled = true;
       document.getElementById('addUnitRow').classList.add('disabled');
@@ -86,6 +91,7 @@
     });
 
     document.getElementById('saveAddBtn').addEventListener('click', async () => {
+      const barcode = document.getElementById('addBarcode').value.trim();
       const name = document.getElementById('addName').value.trim();
       const categoryId = Number(document.getElementById('addCat').value);
       const isWeighted = document.getElementById('addWeighted').checked;
@@ -98,7 +104,7 @@
       if (isWeighted && !unitType) return alert('Unit type is required for weighted items.');
 
       await window.api.addProduct({
-        barcode: `P-${Date.now()}`,
+        barcode: barcode || `P-${Date.now()}`,
         name,
         categoryId,
         cost: basePrice,
@@ -119,6 +125,7 @@
         const p = products.find((x) => x.id === Number(edit.dataset.id));
         if (!p) return;
         document.getElementById('editId').value = p.id;
+        document.getElementById('editBarcode').value = p.barcode || '';
         document.getElementById('editName').value = p.name;
         document.getElementById('editCat').value = p.category_id;
         document.getElementById('editStock').value = p.current_stock;
@@ -141,6 +148,7 @@
 
     document.getElementById('saveEditBtn').addEventListener('click', async () => {
       const id = Number(document.getElementById('editId').value);
+      const barcode = document.getElementById('editBarcode').value.trim();
       const name = document.getElementById('editName').value.trim();
       const categoryId = Number(document.getElementById('editCat').value);
       const isWeighted = document.getElementById('editWeighted').checked;
@@ -154,6 +162,7 @@
 
       await window.api.updateProduct({
         id,
+        barcode,
         name,
         categoryId,
         cost: basePrice,

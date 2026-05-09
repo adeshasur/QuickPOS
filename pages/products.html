@@ -70,9 +70,16 @@
       <button class="modal-close" id="closeAddModal"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body">
-      <div class="field-group">
-        <label class="field-label" for="addName">Product Name <span class="req">*</span></label>
-        <input class="field-input" type="text" id="addName" placeholder="e.g., Nadu Rice, Coconut Oil" maxlength="80">
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="addBarcode">Barcode</label>
+          <input class="field-input" type="text" id="addBarcode" placeholder="Scan or type barcode">
+          <span class="field-hint">Optional for barcode scanning</span>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="addName">Product Name <span class="req">*</span></label>
+          <input class="field-input" type="text" id="addName" placeholder="e.g., Nadu Rice" maxlength="80">
+        </div>
       </div>
       <div class="field-group">
         <label class="field-label" for="addCat">Category <span class="req">*</span></label>
@@ -148,10 +155,15 @@
       <button class="modal-close" id="closeEditModal"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body">
-      <input type="hidden" id="editId">
-      <div class="field-group">
-        <label class="field-label" for="editName">Product Name <span class="req">*</span></label>
-        <input class="field-input" type="text" id="editName" maxlength="80">
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="editBarcode">Barcode</label>
+          <input class="field-input" type="text" id="editBarcode" placeholder="Barcode">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="editName">Product Name <span class="req">*</span></label>
+          <input class="field-input" type="text" id="editName" maxlength="80">
+        </div>
       </div>
       <div class="field-group">
         <label class="field-label" for="editCat">Category <span class="req">*</span></label>

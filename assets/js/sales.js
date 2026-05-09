@@ -9,6 +9,7 @@
   let selectedCustomer = null;
   let productToCustomize = null;
   let priceEdited = false;
+  let lastSale = null;
 
   const fmt = (n) => `LKR ${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -196,7 +197,7 @@
     document.getElementById('custModal').classList.add('open');
   }
 
-  async function completeSale(method, receivedAmount) {
+  async function completeSale(method, receivedAmount, refNo) {
     const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
     const total = cartTotal();
     const balanceDue = method === 'Credit' ? total : 0;
@@ -208,11 +209,21 @@
       method,
       received: Number(receivedAmount || 0),
       balanceDue,
+      refNo: refNo || null,
       cashier: user.name || 'Unknown',
       items: cart.map((item) => ({ id: item.id, name: item.name, qty: item.quantity, price: item.price }))
     };
 
     const saved = await window.api.saveSale(payload);
+
+    payload.billId = saved.billId;
+    payload.timestamp = new Date().toISOString();
+    lastSale = payload;
+
+    // Auto-Print the bill
+    setTimeout(() => {
+      triggerPrint(lastSale);
+    }, 500);
 
     const title = document.getElementById('scTitle');
     const amount = document.getElementById('scAmount');
@@ -226,6 +237,7 @@
     cart = [];
     saveCart();
     document.getElementById('cashModal').classList.remove('open');
+    document.getElementById('cardModal').classList.remove('open');
     document.getElementById('saleCompleteModal').classList.add('open');
 
     await loadData();
@@ -369,14 +381,29 @@
       document.getElementById('cashModal').classList.add('open');
     });
 
-    document.getElementById('cardBtn').addEventListener('click', async () => {
+    document.getElementById('cardBtn').addEventListener('click', () => {
       if (!cart.length) return;
+      document.getElementById('cardModalTotal').textContent = fmt(cartTotal());
+      document.getElementById('cardRefNo').value = '';
+      document.getElementById('cardModal').classList.add('open');
+      setTimeout(() => document.getElementById('cardRefNo').focus(), 300);
+    });
+
+    document.getElementById('finalizeCard').addEventListener('click', async () => {
+      const ref = document.getElementById('cardRefNo').value.trim();
       try {
-        await completeSale('Card', cartTotal());
+        await completeSale('Card', cartTotal(), ref);
       } catch (err) {
         alert(`Failed to save sale: ${err.message}`);
       }
     });
+
+    document.getElementById('cardRefNo').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('finalizeCard').click();
+    });
+
+    document.getElementById('closeCardModal').addEventListener('click', () => document.getElementById('cardModal').classList.remove('open'));
+    document.getElementById('cancelCardModal').addEventListener('click', () => document.getElementById('cardModal').classList.remove('open'));
 
     document.getElementById('creditBtn').addEventListener('click', async () => {
       if (!cart.length || !selectedCustomer) return;
@@ -385,6 +412,45 @@
       } catch (err) {
         alert(`Failed to save credit sale: ${err.message}`);
       }
+    });
+
+    document.getElementById('printDraftBtn').addEventListener('click', () => {
+      if (!cart.length) return;
+      const area = document.getElementById('print-area');
+      const total = cartTotal();
+      const itemsHtml = cart.map(i => `
+        <div class="receipt-item">
+          <span>${i.name} x ${i.quantity}</span>
+          <span>${fmt(i.price * i.quantity)}</span>
+        </div>
+      `).join('');
+
+      area.innerHTML = `
+        <div class="receipt">
+          <div class="receipt-header">
+            <div class="receipt-title">QuickPOS Pro</div>
+            <div style="font-size:14px; font-weight:bold; margin-top:5px;">*** ESTIMATE ONLY ***</div>
+          </div>
+          <div class="receipt-line"></div>
+          <div class="receipt-item">
+            <span>Date:</span>
+            <span>${new Date().toLocaleString()}</span>
+          </div>
+          <div class="receipt-line"></div>
+          ${itemsHtml}
+          <div class="receipt-line"></div>
+          <div class="receipt-total">
+            <span>TOTAL</span>
+            <span>${fmt(total)}</span>
+          </div>
+          <div class="receipt-line"></div>
+          <div class="receipt-footer">
+            Draft Receipt<br>
+            Not a Tax Invoice
+          </div>
+        </div>
+      `;
+      window.print();
     });
 
     document.getElementById('closeCashModal').addEventListener('click', () => document.getElementById('cashModal').classList.remove('open'));
@@ -419,6 +485,71 @@
     document.getElementById('scDone').addEventListener('click', () => {
       document.getElementById('saleCompleteModal').classList.remove('open');
     });
+
+    document.getElementById('printReceiptBtn').addEventListener('click', () => {
+      triggerPrint(lastSale);
+    });
+
+    document.getElementById('printDraftBtn').addEventListener('click', () => {
+      if (!cart.length) return;
+      const total = cartTotal();
+      const draftData = {
+        billId: 'DRAFT',
+        timestamp: new Date().toISOString(),
+        method: 'DRAFT',
+        total: total,
+        items: cart.map(i => ({ name: i.name, qty: i.quantity, price: i.price })),
+        isDraft: true
+      };
+      triggerPrint(draftData);
+    });
+  }
+
+  function triggerPrint(saleData) {
+    if (!saleData) return;
+    const area = document.getElementById('print-area');
+    const itemsHtml = saleData.items.map(i => `
+      <div class="receipt-item">
+        <span>${i.name} x ${i.qty || i.quantity}</span>
+        <span>${fmt(i.price * (i.qty || i.quantity))}</span>
+      </div>
+    `).join('');
+
+    area.innerHTML = `
+      <div class="receipt">
+        <div class="receipt-header">
+          <div class="receipt-title">QuickPOS Pro</div>
+          ${saleData.isDraft ? '<div style="font-size:14px; font-weight:bold; margin-top:5px;">*** ESTIMATE ONLY ***</div>' : ''}
+          <div>No. 123, Galle Road, Colombo</div>
+          <div>Tel: 011 234 5678</div>
+        </div>
+        <div class="receipt-line"></div>
+        <div class="receipt-item">
+          <span>Date:</span>
+          <span>${new Date(saleData.timestamp).toLocaleString()}</span>
+        </div>
+        <div class="receipt-item">
+          <span>Invoice:</span>
+          <span>${saleData.billId}</span>
+        </div>
+        <div class="receipt-item">
+          <span>Payment:</span>
+          <span>${saleData.method}</span>
+        </div>
+        <div class="receipt-line"></div>
+        ${itemsHtml}
+        <div class="receipt-line"></div>
+        <div class="receipt-total">
+          <span>TOTAL</span>
+          <span>${fmt(saleData.total)}</span>
+        </div>
+        <div class="receipt-line"></div>
+        <div class="receipt-footer">
+          ${saleData.isDraft ? 'Draft Receipt<br>Not a Tax Invoice' : 'Thank you for your business!<br>Powered by Antigravity'}
+        </div>
+      </div>
+    `;
+    window.print();
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
