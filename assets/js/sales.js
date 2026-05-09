@@ -280,9 +280,37 @@
     });
 
     const search = document.getElementById('stockSearch');
+    search.focus(); // Auto-focus for barcode scanning
+
     search.addEventListener('input', (e) => {
       currentSearch = e.target.value.toLowerCase().trim();
       renderProducts();
+    });
+
+    search.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const val = search.value.toLowerCase().trim();
+        if (!val) return;
+
+        // 1. Try exact barcode match
+        let p = products.find(x => String(x.barcode || '').toLowerCase() === val);
+        
+        // 2. Try exact name match
+        if (!p) p = products.find(x => x.name.toLowerCase() === val);
+
+        // 3. Try first match in current grid
+        if (!p) {
+          const list = products.filter(x => x.name.toLowerCase().includes(val));
+          if (list.length > 0) p = list[0];
+        }
+
+        if (p) {
+          addToCart(p.id, 1, p.selling_price);
+          search.value = '';
+          currentSearch = '';
+          renderProducts();
+        }
+      }
     });
 
     const custSearch = document.getElementById('custSearch');
