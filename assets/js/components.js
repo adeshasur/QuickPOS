@@ -25,7 +25,7 @@
                   <div class="nd-footer" onclick="location.href='inventory.html'">View All Inventory</div>
                 </div>
               </div>
-              <span class="tb-sub">${user.role === 'owner' ? 'Owner' : 'Cashier'}: ${user.name || 'User'}</span>
+              <span class="tb-sub">${user.name || 'User'}</span>
               <div class="avatar">${String(user.name || 'U').slice(0, 2).toUpperCase()}</div>
             </div>
           </div>
