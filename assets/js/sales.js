@@ -131,13 +131,13 @@
       total += sub;
       count += Number(item.quantity);
       return `<div class="cart-item">
-        <div class="ci-info"><div class="ci-name">${item.name}</div><div class="ci-unit">${Number(item.quantity).toFixed(2)} ${item.unit} x ${fmt(item.price)}</div></div>
-        <div class="ci-controls"><button class="qty-btn" onclick="changeQty(${i},-1)">-</button><span class="qty-num">${Number(item.quantity).toFixed(2)}</span><button class="qty-btn" onclick="changeQty(${i},1)">+</button></div>
+        <div class="ci-info"><div class="ci-name">${item.name}</div><div class="ci-unit">${Number(item.quantity) % 1 === 0 ? Number(item.quantity) : Number(item.quantity).toFixed(2)} ${item.unit} x ${fmt(item.price)}</div></div>
+        <div class="ci-controls"><button class="qty-btn" onclick="changeQty(${i},-1)">-</button><span class="qty-num">${Number(item.quantity) % 1 === 0 ? Number(item.quantity) : Number(item.quantity).toFixed(2)}</span><button class="qty-btn" onclick="changeQty(${i},1)">+</button></div>
         <div class="ci-total">${fmt(sub)}</div>
       </div>`;
     }).join('');
 
-    document.getElementById('itemCount').textContent = count.toFixed(2);
+    document.getElementById('itemCount').textContent = count % 1 === 0 ? count : count.toFixed(2);
     document.getElementById('totalAmount').textContent = fmt(total);
   }
 
