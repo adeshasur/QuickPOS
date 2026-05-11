@@ -334,23 +334,57 @@ ipcMain.handle('get-printers', async (event) => {
 });
 
 ipcMain.handle('print-receipt-silent', async (event, options = {}) => {
-    console.log('[PRINT DEBUG] Main process received print request', options);
-    const win = BrowserWindow.fromWebContents(event.sender);
-    
+    const deviceLabel = options.deviceName || 'system default';
+    console.log(`[PRINT] Request received. Printer: ${deviceLabel}`);
+
     return new Promise((resolve) => {
-        console.log('[PRINT DEBUG] Starting webContents.print...');
-        win.webContents.print({
-            silent: true,
-            printBackground: true,
-            margins: { marginType: 'none' },
-            ...options
-        }, (success, failureReason) => {
-            console.log(`[PRINT DEBUG] Print finished. Success: ${success}, Reason: ${failureReason}`);
-            if (!success) {
-                console.error(`[PRINT ERROR] Details: ${failureReason}`);
+        // Dedicated hidden window — no CSS interference from the main POS UI
+        const printWin = new BrowserWindow({
+            show: false,
+            width: 400,
+            height: 1200,
+            webPreferences: {
+                nodeIntegration: false,
+                contextIsolation: true
             }
-            resolve({ success, failureReason });
         });
+
+        printWin.loadURL('about:blank');
+
+        printWin.webContents.once('did-finish-load', () => {
+            const htmlToWrite = options.html || '<html><body><p>No receipt content</p></body></html>';
+            printWin.webContents.executeJavaScript(
+                `document.open('text/html','replace'); document.write(${JSON.stringify(htmlToWrite)}); document.close(); true;`
+            ).then(() => {
+                setTimeout(() => {
+                    console.log('[PRINT] Sending to printer...');
+                    const printOptions = {
+                        silent: true,
+                        printBackground: true,
+                        margins: { marginType: 'none' }
+                    };
+                    if (options.deviceName) printOptions.deviceName = options.deviceName;
+
+                    printWin.webContents.print(printOptions, (success, failureReason) => {
+                        console.log(`[PRINT] Done. Success: ${success}${failureReason ? ', Reason: ' + failureReason : ''}`);
+                        if (!printWin.isDestroyed()) printWin.close();
+                        resolve({ success, failureReason });
+                    });
+                }, 800);
+            }).catch((err) => {
+                console.error('[PRINT ERROR] Failed to write receipt HTML:', err.message);
+                if (!printWin.isDestroyed()) printWin.close();
+                resolve({ success: false, failureReason: err.message });
+            });
+        });
+
+        // Safety timeout
+        setTimeout(() => {
+            if (!printWin.isDestroyed()) {
+                printWin.close();
+                resolve({ success: false, failureReason: 'Print timeout' });
+            }
+        }, 20000);
     });
 });
 
