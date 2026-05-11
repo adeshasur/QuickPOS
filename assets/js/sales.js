@@ -382,12 +382,18 @@
       setTimeout(() => document.getElementById('cardRefNo').focus(), 300);
     });
 
-    document.getElementById('finalizeCard').addEventListener('click', async () => {
+    document.getElementById('finalizeCard').addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      if (btn.disabled) return; // Block double-click
+      btn.disabled = true;
+      btn.textContent = 'Processing...';
       const ref = document.getElementById('cardRefNo').value.trim();
       try {
         await completeSale('Card', cartTotal(), ref);
       } catch (err) {
         alert(`Failed to save sale: ${err.message}`);
+        btn.disabled = false;
+        btn.textContent = 'Complete Sale';
       }
     });
 
@@ -427,14 +433,24 @@
       });
     });
 
-    document.getElementById('finalizeCash').addEventListener('click', async () => {
+    document.getElementById('finalizeCash').addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      if (btn.disabled) return; // Block double-click
+      btn.disabled = true;
+      btn.textContent = 'Processing...';
       const total = cartTotal();
       const rec = parseFloat(document.getElementById('amtReceived').value) || 0;
-      if (rec < total) return alert('Insufficient amount received');
+      if (rec < total) {
+        btn.disabled = false;
+        btn.textContent = 'Complete Sale';
+        return alert('Insufficient amount received');
+      }
       try {
         await completeSale('Cash', rec);
       } catch (err) {
         alert(`Failed to save sale: ${err.message}`);
+        btn.disabled = false;
+        btn.textContent = 'Complete Sale';
       }
     });
 
