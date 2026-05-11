@@ -1,4 +1,4 @@
-﻿const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
     // Products
@@ -37,7 +37,8 @@ contextBridge.exposeInMainWorld('api', {
     loginAuth: (creds) => ipcRenderer.invoke('login-auth', creds),
     backupDatabase: () => ipcRenderer.invoke('backup-database'),
     restoreDatabase: () => ipcRenderer.invoke('restore-database'),
-    getExpiredItems: () => ipcRenderer.invoke('get-expired-items')
+    getExpiredItems: () => ipcRenderer.invoke('get-expired-items'),
+    printReceiptSilent: () => ipcRenderer.invoke('print-receipt-silent')
 });
 
 

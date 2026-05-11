@@ -328,6 +328,18 @@ ipcMain.handle('record-credit-payment', async (event, paymentData) => withTransa
 ipcMain.handle('get-sales-history', async () => allAsync('SELECT * FROM sales ORDER BY timestamp DESC'));
 ipcMain.handle('get-sale-details', async (event, saleId) => allAsync('SELECT * FROM sale_items WHERE sale_id = ?', [saleId]));
 
+ipcMain.handle('print-receipt-silent', async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    win.webContents.print({
+        silent: true,
+        printBackground: true,
+        margins: { marginType: 'none' }
+    }, (success, failureReason) => {
+        if (!success) console.log(`Print failed: ${failureReason}`);
+    });
+    return { success: true };
+});
+
 app.whenReady().then(async () => {
     const plainUsers = await allAsync("SELECT id, password FROM users WHERE password NOT LIKE 'pbkdf2$%'");
     for (const u of plainUsers) {

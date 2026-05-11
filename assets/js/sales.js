@@ -552,7 +552,7 @@
         </div>
       </div>
     `;
-    window.print();
+    window.api.printReceiptSilent();
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
