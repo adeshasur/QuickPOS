@@ -414,44 +414,7 @@
       }
     });
 
-    document.getElementById('printDraftBtn').addEventListener('click', () => {
-      if (!cart.length) return;
-      const area = document.getElementById('print-area');
-      const total = cartTotal();
-      const itemsHtml = cart.map(i => `
-        <div class="receipt-item">
-          <span>${i.name} x ${i.quantity}</span>
-          <span>${fmt(i.price * i.quantity)}</span>
-        </div>
-      `).join('');
 
-      area.innerHTML = `
-        <div class="receipt">
-          <div class="receipt-header">
-            <div class="receipt-title">QuickPOS Pro</div>
-            <div style="font-size:14px; font-weight:bold; margin-top:5px;">*** ESTIMATE ONLY ***</div>
-          </div>
-          <div class="receipt-line"></div>
-          <div class="receipt-item">
-            <span>Date:</span>
-            <span>${new Date().toLocaleString()}</span>
-          </div>
-          <div class="receipt-line"></div>
-          ${itemsHtml}
-          <div class="receipt-line"></div>
-          <div class="receipt-total">
-            <span>TOTAL</span>
-            <span>${fmt(total)}</span>
-          </div>
-          <div class="receipt-line"></div>
-          <div class="receipt-footer">
-            Draft Receipt<br>
-            Not a Tax Invoice
-          </div>
-        </div>
-      `;
-      window.print();
-    });
 
     document.getElementById('closeCashModal').addEventListener('click', () => document.getElementById('cashModal').classList.remove('open'));
     document.getElementById('cancelCashModal').addEventListener('click', () => document.getElementById('cashModal').classList.remove('open'));
@@ -508,44 +471,85 @@
   function triggerPrint(saleData) {
     if (!saleData) return;
     const area = document.getElementById('print-area');
+    
     const itemsHtml = saleData.items.map(i => `
-      <div class="receipt-item">
-        <span>${i.name} x ${i.qty || i.quantity}</span>
-        <span>${fmt(i.price * (i.qty || i.quantity))}</span>
-      </div>
+      <tr>
+        <td class="rt-qty">${Number(i.qty || i.quantity) % 1 === 0 ? (i.qty || i.quantity) : Number(i.qty || i.quantity).toFixed(2)}</td>
+        <td class="rt-desc">${i.name}</td>
+        <td class="rt-price">${(Number(i.price) * Number(i.qty || i.quantity)).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+      </tr>
     `).join('');
+
+    const changeReturned = saleData.received ? Math.max(0, saleData.received - saleData.total) : 0;
 
     area.innerHTML = `
       <div class="receipt">
         <div class="receipt-header">
-          <div class="receipt-title">QuickPOS Pro</div>
-          ${saleData.isDraft ? '<div style="font-size:14px; font-weight:bold; margin-top:5px;">*** ESTIMATE ONLY ***</div>' : ''}
-          <div>No. 123, Galle Road, Colombo</div>
-          <div>Tel: 011 234 5678</div>
+          <div class="receipt-logo">QuickPOS Supermarket</div>
+          <div class="receipt-info">
+            No. 45/A, Galle Road, Colombo 03<br>
+            Tel: 011 234 5678 | 077 123 4567<br>
+            ${saleData.isDraft ? '<strong style="font-size:14px; display:block; margin-top:5px;">*** ESTIMATE ONLY ***</strong>' : 'VAT Reg No: 123456789-7000'}
+          </div>
         </div>
-        <div class="receipt-line"></div>
-        <div class="receipt-item">
-          <span>Date:</span>
-          <span>${new Date(saleData.timestamp).toLocaleString()}</span>
+
+        <div class="receipt-divider"></div>
+
+        <div class="receipt-meta">
+          <div>Date: ${new Date(saleData.timestamp).toLocaleDateString()}</div>
+          <div>Time: ${new Date(saleData.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+          <div>${saleData.isDraft ? 'Estimate:' : 'Invoice:'} <strong>${saleData.billId}</strong></div>
+          <div>Staff: ${saleData.cashier || (JSON.parse(localStorage.getItem('quickpos-user') || '{}').name) || 'Sunil Perera'}</div>
         </div>
-        <div class="receipt-item">
-          <span>Invoice:</span>
-          <span>${saleData.billId}</span>
+
+        <div class="receipt-divider"></div>
+
+        <table class="receipt-table">
+          <thead>
+            <tr>
+              <th style="text-align:left">Qty</th>
+              <th style="text-align:left">Description</th>
+              <th style="text-align:right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
+
+        <div class="receipt-divider"></div>
+
+        <div class="receipt-totals">
+          <div class="total-row grand-total">
+            <span>NET TOTAL</span>
+            <span>LKR ${saleData.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+          </div>
         </div>
-        <div class="receipt-item">
-          <span>Payment:</span>
-          <span>${saleData.method}</span>
-        </div>
-        <div class="receipt-line"></div>
-        ${itemsHtml}
-        <div class="receipt-line"></div>
-        <div class="receipt-total">
-          <span>TOTAL</span>
-          <span>${fmt(saleData.total)}</span>
-        </div>
-        <div class="receipt-line"></div>
+
+        ${!saleData.isDraft ? `
+          <div class="payment-info">
+            <div class="total-row">
+              <span>Paid via ${saleData.method}</span>
+              <span>${(saleData.received || saleData.total).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+            </div>
+            ${saleData.method === 'Cash' ? `
+              <div class="total-row">
+                <span>Change Returned</span>
+                <span>${changeReturned.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+              </div>
+            ` : ''}
+          </div>
+        ` : ''}
+
         <div class="receipt-footer">
-          ${saleData.isDraft ? 'Draft Receipt<br>Not a Tax Invoice' : 'Thank you for your business!<br>Powered by Antigravity'}
+          <div class="footer-msg">ස්තූතියි! නැවත එන්න.</div>
+          <div class="footer-msg">Thank You! Come Again.</div>
+          <div class="footer-sub">
+            ${saleData.isDraft ? 'This is a draft receipt and not a valid tax invoice.' : 'Software by Antigravity Pro'}
+          </div>
+          <div class="barcode-placeholder">
+            ${saleData.billId === 'DRAFT' ? 'DRAFT' : '*' + saleData.billId + '*'}
+          </div>
         </div>
       </div>
     `;
