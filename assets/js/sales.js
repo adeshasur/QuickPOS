@@ -472,13 +472,21 @@
     if (!saleData) return;
     const area = document.getElementById('print-area');
     
-    const itemsHtml = saleData.items.map(i => `
-      <tr>
-        <td class="rt-qty">${Number(i.qty || i.quantity) % 1 === 0 ? (i.qty || i.quantity) : Number(i.qty || i.quantity).toFixed(2)}</td>
-        <td class="rt-desc">${i.name}</td>
-        <td class="rt-price">${(Number(i.price) * Number(i.qty || i.quantity)).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-      </tr>
-    `).join('');
+    const itemsHtml = saleData.items.map(i => {
+      const qty = Number(i.qty || i.quantity);
+      const formattedQty = qty % 1 === 0 ? qty : qty.toFixed(2);
+      const itemTotal = (Number(i.price) * qty).toLocaleString('en-US', { minimumFractionDigits: 2 });
+      
+      return `
+        <tr class="rt-item-row">
+          <td colspan="2">${i.name}</td>
+          <td class="rt-price">${itemTotal}</td>
+        </tr>
+        <tr class="rt-detail-row">
+          <td colspan="3">${formattedQty} ${i.unit || ''} x ${Number(i.price).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+        </tr>
+      `;
+    }).join('');
 
     const changeReturned = saleData.received ? Math.max(0, saleData.received - saleData.total) : 0;
 
@@ -489,35 +497,26 @@
           <div class="receipt-info">
             No. 45/A, Galle Road, Colombo 03<br>
             Tel: 011 234 5678 | 077 123 4567<br>
-            ${saleData.isDraft ? '<strong style="font-size:14px; display:block; margin-top:5px;">*** ESTIMATE ONLY ***</strong>' : 'VAT Reg No: 123456789-7000'}
           </div>
         </div>
 
         <div class="receipt-divider"></div>
 
         <div class="receipt-meta">
-          <div>Date: ${new Date(saleData.timestamp).toLocaleDateString()}</div>
-          <div>Time: ${new Date(saleData.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-          <div>${saleData.isDraft ? 'Estimate:' : 'Invoice:'} <strong>${saleData.billId}</strong></div>
-          <div>Staff: ${saleData.cashier || (JSON.parse(localStorage.getItem('quickpos-user') || '{}').name) || 'Sunil Perera'}</div>
+          <div>${saleData.isDraft ? '<strong>*** ESTIMATE ***</strong>' : '<strong>TAX INVOICE</strong>'}</div>
+          <div>Date: ${new Date(saleData.timestamp).toLocaleDateString()} | Time: ${new Date(saleData.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+          <div>No: <strong>${saleData.billId}</strong> | Staff: ${saleData.cashier || (JSON.parse(localStorage.getItem('quickpos-user') || '{}').name) || 'Sunil Perera'}</div>
         </div>
 
         <div class="receipt-divider"></div>
 
         <table class="receipt-table">
-          <thead>
-            <tr>
-              <th style="text-align:left">Qty</th>
-              <th style="text-align:left">Description</th>
-              <th style="text-align:right">Amount</th>
-            </tr>
-          </thead>
           <tbody>
             ${itemsHtml}
           </tbody>
         </table>
 
-        <div class="receipt-divider"></div>
+        <div class="receipt-divider double"></div>
 
         <div class="receipt-totals">
           <div class="total-row grand-total">
@@ -534,7 +533,7 @@
             </div>
             ${saleData.method === 'Cash' ? `
               <div class="total-row">
-                <span>Change Returned</span>
+                <span>Change</span>
                 <span>${changeReturned.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
               </div>
             ` : ''}
@@ -545,7 +544,7 @@
           <div class="footer-msg">ස්තූතියි! නැවත එන්න.</div>
           <div class="footer-msg">Thank You! Come Again.</div>
           <div class="footer-sub">
-            ${saleData.isDraft ? 'This is a draft receipt and not a valid tax invoice.' : 'Software by Antigravity Pro'}
+            ${saleData.isDraft ? 'Draft Receipt - Not a Tax Invoice' : 'Software by Antigravity Pro'}
           </div>
           <div class="barcode-placeholder">
             ${saleData.billId === 'DRAFT' ? 'DRAFT' : '*' + saleData.billId + '*'}
