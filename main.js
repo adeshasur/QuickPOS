@@ -328,15 +328,27 @@ ipcMain.handle('record-credit-payment', async (event, paymentData) => withTransa
 ipcMain.handle('get-sales-history', async () => allAsync('SELECT * FROM sales ORDER BY timestamp DESC'));
 ipcMain.handle('get-sale-details', async (event, saleId) => allAsync('SELECT * FROM sale_items WHERE sale_id = ?', [saleId]));
 
-ipcMain.handle('print-receipt-silent', async (event) => {
+ipcMain.handle('get-printers', async (event) => {
     const win = BrowserWindow.fromWebContents(event.sender);
+    return win.webContents.getPrintersAsync();
+});
+
+ipcMain.handle('print-receipt-silent', async (event, options = {}) => {
+    console.log('[PRINT DEBUG] Main process received print request', options);
+    const win = BrowserWindow.fromWebContents(event.sender);
+    
     return new Promise((resolve) => {
+        console.log('[PRINT DEBUG] Starting webContents.print...');
         win.webContents.print({
             silent: true,
             printBackground: true,
-            margins: { marginType: 'none' }
+            margins: { marginType: 'none' },
+            ...options
         }, (success, failureReason) => {
-            if (!success) console.log(`Print failed: ${failureReason}`);
+            console.log(`[PRINT DEBUG] Print finished. Success: ${success}, Reason: ${failureReason}`);
+            if (!success) {
+                console.error(`[PRINT ERROR] Details: ${failureReason}`);
+            }
             resolve({ success, failureReason });
         });
     });

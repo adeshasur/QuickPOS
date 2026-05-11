@@ -7,10 +7,10 @@
 .avatar{width:38px;height:38px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff}
 
 /* â”€â”€â”€ DASHBOARD SPLIT â”€â”€â”€ */
-.dashboard{flex:1;display:flex;overflow:hidden;min-height:0}
+.dashboard{flex:1;display:flex;overflow:hidden;min-height:0;min-width:0;width:100%;}
 
 /* â”€â”€â”€ LEFT: PRODUCTS â”€â”€â”€ */
-.products-section{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;background:var(--bg)}
+.products-section{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;width:0;background:var(--bg)}
 
 /* Product toolbar */
 .products-toolbar{padding:20px 24px 12px;background:transparent;border-bottom:none;display:flex;flex-direction:column;gap:16px;flex-shrink:0}
@@ -28,7 +28,7 @@
 .cat-pill.active{background:var(--primary);border-color:var(--primary);color:#fff}
 
 /* Products grid */
-.products-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;padding:16px;align-content:start}
+.products-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;padding:16px;align-content:start}
 .products-grid::-webkit-scrollbar{width:6px}
 .products-grid::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
@@ -114,9 +114,10 @@
 
 /* Cart footer */
 .cart-footer{padding:20px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:14px;background:var(--surface)}
-.total-row{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow: 0 4px 12px rgba(0,0,0,0.03);}
-.total-label{font-size:13px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em}
-.total-amount{font-size:24px;font-weight:800;font-family:var(--mono);color:var(--primary)}
+.total-row{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow: 0 4px 12px rgba(0,0,0,0.03);position:relative;}
+.total-label{font-size:13px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;background:var(--surface);padding-right:10px;z-index:1;}
+.total-dots{flex:1;border-bottom:2px dotted var(--border);margin:0 10px;transform:translateY(-4px);opacity:0.5;}
+.total-amount{font-size:24px;font-weight:800;font-family:var(--mono);color:var(--primary);background:var(--surface);padding-left:10px;z-index:1;}
 .pay-btns{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
 .pay-btn{padding:12px 6px;border:none;border-radius:12px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s ease;box-shadow: 0 4px 6px rgba(0,0,0,0.04);}
 .pay-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
@@ -187,8 +188,21 @@
 /* ——— PRINT STYLES (Thermal Receipt) ——— */
 @media print {
   body * { visibility: hidden; }
-  #print-area, #print-area * { visibility: visible; }
-  #print-area { position: absolute; left: 0; top: 0; width: 100%; display: block !important; padding: 0; margin: 0; }
+  #print-area, #print-area * { visibility: visible !important; }
+  #print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    display: block !important;
+    padding: 0;
+    margin: 0;
+    height: auto !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: auto !important;
+  }
   @page { margin: 0; }
 }
 
@@ -198,6 +212,15 @@
 
 #print-area {
   background: white;
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  width: var(--receipt-width);
+  max-width: var(--receipt-width);
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
 }
 
 .receipt {
@@ -341,12 +364,10 @@
 
 @media (max-width: 1200px) {
   .cart-section { width: 320px; }
-  .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .products-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
 }
 
 @media (max-width: 1024px) {
   .dashboard { flex-direction: column; }
   .cart-section { width: 100%; height: 350px; border-left: none; border-top: 1px solid var(--border); }
 }
-
-

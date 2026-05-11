@@ -212,9 +212,21 @@
                 </div>
             `;
 
+            console.log('[PRINT DEBUG] openReceipt updating innerHTML. Size:', area.innerHTML.length);
+
             // Wait a frame for DOM to update
             requestAnimationFrame(async () => {
+                console.log('[PRINT DEBUG] requestAnimationFrame fired in ledger. Invoking main process print...');
+                
+                // Also log printers for debugging
+                const printers = await window.api.getPrinters();
+                console.log('[PRINT DEBUG] Available printers:', printers);
+                const defaultPrinter = printers.find(p => p.isDefault);
+                console.log('[PRINT DEBUG] Default printer:', defaultPrinter ? defaultPrinter.name : 'NONE');
+
                 const res = await window.api.printReceiptSilent();
+                console.log('[PRINT DEBUG] Print result in ledger:', res);
+
                 if (res && !res.success) {
                     alert('Print failed. Please check if your printer is connected and set as default.\nError: ' + (res.failureReason || 'Unknown error'));
                 }

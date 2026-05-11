@@ -281,6 +281,7 @@
 
 
   function wireEvents() {
+    console.log('[SALES DEBUG] wireEvents() started');
     const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
     const nameEl = document.getElementById('cashierNameDisplay');
     if (nameEl) nameEl.textContent = `${user.role === 'owner' ? 'Owner' : 'Cashier'}: ${user.name || 'User'}`;
@@ -377,7 +378,8 @@
     });
 
     document.getElementById('cashBtn').addEventListener('click', () => {
-      if (!cart.length) return;
+      console.log('[SALES DEBUG] cashBtn clicked, cart.length:', cart.length);
+      if (!cart.length) { alert('Cart is empty! Add a product first.'); return; }
       document.getElementById('cashModalTotal').textContent = fmt(cartTotal());
       document.getElementById('amtReceived').value = '';
       document.getElementById('changeAmt').textContent = fmt(0);
@@ -385,7 +387,8 @@
     });
 
     document.getElementById('cardBtn').addEventListener('click', () => {
-      if (!cart.length) return;
+      console.log('[SALES DEBUG] cardBtn clicked, cart.length:', cart.length);
+      if (!cart.length) { alert('Cart is empty! Add a product first.'); return; }
       document.getElementById('cardModalTotal').textContent = fmt(cartTotal());
       document.getElementById('cardRefNo').value = '';
       document.getElementById('cardModal').classList.add('open');
@@ -457,7 +460,8 @@
     });
 
     document.getElementById('printDraftBtn').addEventListener('click', () => {
-      if (!cart.length) return;
+      console.log('[SALES DEBUG] printDraftBtn clicked, cart.length:', cart.length);
+      if (!cart.length) { alert('Cart is empty! Add a product first.'); return; }
       const total = cartTotal();
       const draftData = {
         billId: 'DRAFT',
@@ -469,12 +473,16 @@
       };
       triggerPrint(draftData);
     });
+    console.log('[SALES DEBUG] wireEvents() completed — all handlers attached');
   }
 
-  function triggerPrint(saleData) {
+  async function triggerPrint(saleData) {
     if (!saleData) return;
     const area = document.getElementById('print-area');
-    
+    if (!area) return;
+    console.log('[PRINT DEBUG] triggerPrint called with:', saleData);
+
+    // ... (rest of itemsHtml generation)
     const itemsHtml = saleData.items.map(i => {
       const qty = Number(i.qty || i.quantity);
       const formattedQty = qty % 1 === 0 ? qty : qty.toFixed(2);
@@ -555,11 +563,43 @@
         </div>
       </div>
     `;
+
+    console.log('[PRINT DEBUG] Print area innerHTML updated. Size:', area.innerHTML.length);
+
     // Wait a frame for DOM to update
     requestAnimationFrame(async () => {
-      const res = await window.api.printReceiptSilent();
-      if (res && !res.success) {
-        alert('Print failed. Please check if your printer is connected and set as default.\nError: ' + (res.failureReason || 'Unknown error'));
+      console.log('[PRINT DEBUG] requestAnimationFrame fired. Invoking main process print...');
+      try {
+        const printers = await window.api.getPrinters();
+        console.log('[PRINT DEBUG] Available printers:', printers);
+
+        const defaultPrinter = printers.find((p) => p.isDefault);
+        const thermalPrinter = printers.find((p) =>
+          p.name.toLowerCase().includes('pos') ||
+          p.name.toLowerCase().includes('receipt') ||
+          p.name.toLowerCase().includes('thermal') ||
+          p.name.toLowerCase().includes('58') ||
+          p.name.toLowerCase().includes('80') ||
+          p.name.toLowerCase().includes('xp-')
+        );
+        const targetPrinter = thermalPrinter || defaultPrinter || null;
+        console.log('[PRINT DEBUG] Target printer:', targetPrinter ? targetPrinter.name : 'SYSTEM DEFAULT');
+
+        setTimeout(async () => {
+          console.log('[PRINT DEBUG] Delay finished. Sending to printer...');
+          const options = targetPrinter && targetPrinter.name ? { deviceName: targetPrinter.name } : {};
+          const res = await window.api.printReceiptSilent(options);
+          console.log('[PRINT DEBUG] Print result:', res);
+
+          if (res && !res.success) {
+            alert('Print failed. Please check if your printer is connected.\nError: ' + (res.failureReason || 'Unknown error'));
+          }
+          area.innerHTML = '';
+        }, 150);
+      } catch (err) {
+        console.error('[PRINT ERROR] Failed while preparing print:', err);
+        area.innerHTML = '';
+        alert('Failed to print receipt: ' + (err.message || 'Unknown error'));
       }
     });
   }
