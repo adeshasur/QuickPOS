@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   'use strict';
 
   const defaultSettings = {
@@ -10,7 +10,8 @@
     taxPercentage: '0',
     shiftHours: '08:00 - 16:00',
     dateFormat: 'DD/MM/YYYY',
-    timeFormat: '12h'
+    timeFormat: '12h',
+    thermalPrinterName: ''
   };
 
   let settings = { ...defaultSettings };
@@ -37,6 +38,18 @@
     document.getElementById('dateFormat').value = settings.dateFormat;
     document.getElementById('timeFormat').value = settings.timeFormat;
     document.querySelectorAll('.ver-card').forEach((c) => c.classList.toggle('selected', c.dataset.version === settings.systemVersion));
+    // Restore saved printer selection
+    const sel = document.getElementById('thermalPrinterName');
+    if (sel && settings.thermalPrinterName) {
+      // Add saved value as option if not yet in list
+      if (![...sel.options].some(o => o.value === settings.thermalPrinterName)) {
+        const opt = document.createElement('option');
+        opt.value = settings.thermalPrinterName;
+        opt.textContent = settings.thermalPrinterName;
+        sel.appendChild(opt);
+      }
+      sel.value = settings.thermalPrinterName;
+    }
   }
 
   async function refreshSystemStats() {
@@ -68,7 +81,8 @@
       currencySymbol: 'LKR',
       dateFormat: document.getElementById('dateFormat').value,
       timeFormat: document.getElementById('timeFormat').value,
-      systemVersion: document.querySelector('.ver-card.selected')?.dataset.version || 'pro'
+      systemVersion: document.querySelector('.ver-card.selected')?.dataset.version || 'pro',
+      thermalPrinterName: document.getElementById('thermalPrinterName').value.trim()
     };
 
     if (!next.storeName) return showToast('Store Name is required', 'error');
@@ -150,6 +164,36 @@
     document.getElementById('saveBtn').addEventListener('click', saveSettings);
     document.getElementById('resetBtn').addEventListener('click', () => confirm('Reset settings to defaults?') && resetSettings());
     document.getElementById('resetSettingsBtn').addEventListener('click', () => confirm('Reset settings to defaults?') && resetSettings());
+
+    // Detect & populate printers
+    async function detectPrinters() {
+      const btn = document.getElementById('detectPrintersBtn');
+      const sel = document.getElementById('thermalPrinterName');
+      if (btn) btn.disabled = true;
+      try {
+        const printers = await window.api.getPrinters();
+        const current = sel.value;
+        sel.innerHTML = '<option value="">— System Default Printer —</option>';
+        printers.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.name;
+          opt.textContent = p.isDefault ? `${p.name} (Default)` : p.name;
+          sel.appendChild(opt);
+        });
+        // Restore saved selection
+        if (settings.thermalPrinterName) sel.value = settings.thermalPrinterName;
+        else if (current) sel.value = current;
+        showToast(`Found ${printers.length} printer(s)`);
+      } catch (err) {
+        showToast('Could not detect printers: ' + err.message, 'error');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    document.getElementById('detectPrintersBtn').addEventListener('click', detectPrinters);
+    // Auto-detect on load
+    detectPrinters();
 
     document.getElementById('backupBtn').addEventListener('click', async () => {
       try {

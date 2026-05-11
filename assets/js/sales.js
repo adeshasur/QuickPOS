@@ -551,22 +551,26 @@
       </div>
     `;
 
-    console.log('[PRINT] Receipt HTML ready, sending to system default printer...');
+    console.log('[PRINT] Receipt HTML ready, sending to printer...');
 
     // Wait a single animation frame for the DOM to render the receipt
     requestAnimationFrame(async () => {
       try {
-        // Print directly to system default printer — no deviceName to avoid mismatches
-        const res = await window.api.printReceiptSilent({});
+        // Load configured printer name from settings
+        const dbSettings = await window.api.getSettings();
+        const printerName = dbSettings.thermalPrinterName || '';
+        const options = printerName ? { deviceName: printerName } : {};
+        console.log('[PRINT] Using printer:', printerName || '(system default)');
+
+        const res = await window.api.printReceiptSilent(options);
         if (res && !res.success) {
-          console.error('[PRINT ERROR] Print job failed:', res.failureReason);
-          // Sale is already saved — do NOT alert. Just log silently.
+          console.error('[PRINT ERROR] Print failed:', res.failureReason);
+          // Sale is already saved — just log, do not alert
         } else {
           console.log('[PRINT] Receipt printed successfully.');
         }
       } catch (err) {
         console.error('[PRINT ERROR] Exception during print:', err.message);
-        // Sale is already saved — no alert needed
       } finally {
         area.innerHTML = '';
       }

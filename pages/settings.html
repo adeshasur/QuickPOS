@@ -119,6 +119,26 @@
               <label class="ts"><input type="checkbox" id="showLogo"><span class="ts-slider"></span></label>
             </div>
           </div>
+          <div class="scard" style="grid-column:1/-1">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Printer Configuration
+            </div>
+            <div class="field-row">
+              <div class="field" style="flex:1">
+                <label class="field-label">Thermal Printer Name</label>
+                <select class="field-input" id="thermalPrinterName">
+                  <option value="">— System Default Printer —</option>
+                </select>
+                <span class="field-hint">Select your receipt printer. Leave on default if unsure.</span>
+              </div>
+              <div class="field" style="flex:0;align-self:flex-end">
+                <button class="tab-btn active" id="detectPrintersBtn" style="height:44px;padding:0 18px;white-space:nowrap">
+                  <i class="fa-solid fa-arrows-rotate" style="margin-right:6px"></i>Detect Printers
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
