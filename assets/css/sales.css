@@ -203,7 +203,10 @@
     pointer-events: auto !important;
     z-index: auto !important;
   }
-  @page { margin: 0; }
+  @page {
+    margin: 0;
+    size: 58mm auto; /* Match thermal paper width exactly */
+  }
 }
 
 :root {

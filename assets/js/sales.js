@@ -569,8 +569,9 @@
 
     console.log('[PRINT] Receipt HTML ready, sending to printer...');
 
-    // Wait a single animation frame for the DOM to render the receipt
-    requestAnimationFrame(async () => {
+    // Double RAF + 200ms: ensure receipt content is fully painted before print
+    requestAnimationFrame(() => requestAnimationFrame(async () => {
+      await new Promise(r => setTimeout(r, 200));
       try {
         // Load configured printer name from settings
         const dbSettings = await window.api.getSettings();
@@ -590,7 +591,7 @@
       } finally {
         area.innerHTML = '';
       }
-    });
+    }));
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
