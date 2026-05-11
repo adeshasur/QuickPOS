@@ -551,42 +551,24 @@
       </div>
     `;
 
-    console.log('[PRINT DEBUG] Print area innerHTML updated. Size:', area.innerHTML.length);
+    console.log('[PRINT] Receipt HTML ready, sending to system default printer...');
 
-    // Wait a frame for DOM to update
+    // Wait a single animation frame for the DOM to render the receipt
     requestAnimationFrame(async () => {
-      console.log('[PRINT DEBUG] requestAnimationFrame fired. Invoking main process print...');
       try {
-        const printers = await window.api.getPrinters();
-        console.log('[PRINT DEBUG] Available printers:', printers);
-
-        const defaultPrinter = printers.find((p) => p.isDefault);
-        const thermalPrinter = printers.find((p) =>
-          p.name.toLowerCase().includes('pos') ||
-          p.name.toLowerCase().includes('receipt') ||
-          p.name.toLowerCase().includes('thermal') ||
-          p.name.toLowerCase().includes('58') ||
-          p.name.toLowerCase().includes('80') ||
-          p.name.toLowerCase().includes('xp-')
-        );
-        const targetPrinter = thermalPrinter || defaultPrinter || null;
-        console.log('[PRINT DEBUG] Target printer:', targetPrinter ? targetPrinter.name : 'SYSTEM DEFAULT');
-
-        setTimeout(async () => {
-          console.log('[PRINT DEBUG] Delay finished. Sending to printer...');
-          const options = targetPrinter && targetPrinter.name ? { deviceName: targetPrinter.name } : {};
-          const res = await window.api.printReceiptSilent(options);
-          console.log('[PRINT DEBUG] Print result:', res);
-
-          if (res && !res.success) {
-            alert('Print failed. Please check if your printer is connected.\nError: ' + (res.failureReason || 'Unknown error'));
-          }
-          area.innerHTML = '';
-        }, 150);
+        // Print directly to system default printer — no deviceName to avoid mismatches
+        const res = await window.api.printReceiptSilent({});
+        if (res && !res.success) {
+          console.error('[PRINT ERROR] Print job failed:', res.failureReason);
+          // Sale is already saved — do NOT alert. Just log silently.
+        } else {
+          console.log('[PRINT] Receipt printed successfully.');
+        }
       } catch (err) {
-        console.error('[PRINT ERROR] Failed while preparing print:', err);
+        console.error('[PRINT ERROR] Exception during print:', err.message);
+        // Sale is already saved — no alert needed
+      } finally {
         area.innerHTML = '';
-        alert('Failed to print receipt: ' + (err.message || 'Unknown error'));
       }
     });
   }
