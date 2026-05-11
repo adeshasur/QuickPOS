@@ -552,7 +552,13 @@
         </div>
       </div>
     `;
-    window.api.printReceiptSilent();
+    // Wait a frame for DOM to update
+    requestAnimationFrame(async () => {
+      const res = await window.api.printReceiptSilent();
+      if (res && !res.success) {
+        alert('Print failed. Please check if your printer is connected and set as default.\nError: ' + (res.failureReason || 'Unknown error'));
+      }
+    });
   }
 
   document.addEventListener('DOMContentLoaded', async () => {

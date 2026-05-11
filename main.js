@@ -330,14 +330,16 @@ ipcMain.handle('get-sale-details', async (event, saleId) => allAsync('SELECT * F
 
 ipcMain.handle('print-receipt-silent', async (event) => {
     const win = BrowserWindow.fromWebContents(event.sender);
-    win.webContents.print({
-        silent: true,
-        printBackground: true,
-        margins: { marginType: 'none' }
-    }, (success, failureReason) => {
-        if (!success) console.log(`Print failed: ${failureReason}`);
+    return new Promise((resolve) => {
+        win.webContents.print({
+            silent: true,
+            printBackground: true,
+            margins: { marginType: 'none' }
+        }, (success, failureReason) => {
+            if (!success) console.log(`Print failed: ${failureReason}`);
+            resolve({ success, failureReason });
+        });
     });
-    return { success: true };
 });
 
 app.whenReady().then(async () => {

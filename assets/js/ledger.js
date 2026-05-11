@@ -1,4 +1,4 @@
-﻿(function() {
+(function() {
     'use strict';
 
     const formatCurrency = (amt) => `LKR ${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -131,9 +131,99 @@
         }
     }
 
-    function openReceipt(id) {
-        // Placeholder for receipt printing
-        window.location.href = 'sales_reports.html';
+    async function openReceipt(id) {
+        const bill = creditBills.find(b => b.id == id);
+        if (!bill) return;
+
+        try {
+            const items = await window.api.getSaleDetails(id);
+            const area = document.getElementById('print-area');
+            if (!area) return;
+
+            const itemsHtml = items.map(i => {
+                const qty = Number(i.quantity);
+                const formattedQty = qty % 1 === 0 ? qty : qty.toFixed(2);
+                const itemTotal = (Number(i.unit_price) * qty).toLocaleString('en-US', { minimumFractionDigits: 2 });
+                
+                return `
+                    <tr class="rt-item-row">
+                        <td colspan="2">${i.product_name}</td>
+                        <td class="rt-price">${itemTotal}</td>
+                    </tr>
+                    <tr class="rt-detail-row">
+                        <td colspan="3">${formattedQty} x ${Number(i.unit_price).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                    </tr>
+                `;
+            }).join('');
+
+
+            area.innerHTML = `
+                <div class="receipt">
+                    <div class="receipt-header">
+                        <div class="receipt-logo">QuickPOS Supermarket</div>
+                        <div class="receipt-info">
+                            No. 45/A, Galle Road, Colombo 03<br>
+                            Tel: 011 234 5678 | 077 123 4567<br>
+                        </div>
+                    </div>
+
+                    <div class="receipt-divider"></div>
+
+                    <div class="receipt-meta">
+                        <div><strong>TAX INVOICE (COPY)</strong></div>
+                        <div>Date: ${new Date(bill.timestamp).toLocaleDateString()} | Time: ${new Date(bill.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                        <div>No: <strong>${bill.bill_id}</strong> | Staff: ${bill.cashier_name || 'Sunil Perera'}</div>
+                    </div>
+
+                    <div class="receipt-divider"></div>
+
+                    <table class="receipt-table">
+                        <tbody>
+                            ${itemsHtml}
+                        </tbody>
+                    </table>
+
+                    <div class="receipt-divider double"></div>
+
+                    <div class="receipt-totals">
+                        <div class="total-row grand-total">
+                            <span>NET TOTAL</span>
+                            <span>LKR ${bill.total_amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                    </div>
+
+                    <div class="payment-info">
+                        <div class="total-row">
+                            <span>Paid via ${bill.payment_method}</span>
+                            <span>${(bill.received_amount || bill.total_amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Remaining Balance</span>
+                            <span>${(bill.balance_amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                    </div>
+
+                    <div class="receipt-footer">
+                        <div class="footer-msg">ස්තූතියි! නැවත එන්න.</div>
+                        <div class="footer-msg">Thank You! Come Again.</div>
+                        <div class="footer-sub">Software by Antigravity Pro</div>
+                        <div class="barcode-placeholder">*${bill.bill_id}*</div>
+                    </div>
+                </div>
+            `;
+
+            // Wait a frame for DOM to update
+            requestAnimationFrame(async () => {
+                const res = await window.api.printReceiptSilent();
+                if (res && !res.success) {
+                    alert('Print failed. Please check if your printer is connected and set as default.\nError: ' + (res.failureReason || 'Unknown error'));
+                }
+            });
+
+        } catch (err) {
+            console.error('Error printing receipt:', err);
+            alert('Failed to print receipt: ' + err.message);
+        }
     }
 
     function init() {
