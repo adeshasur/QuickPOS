@@ -220,25 +220,28 @@
     payload.timestamp = new Date().toISOString();
     lastSale = payload;
 
-    // Auto-Print the bill
-    setTimeout(() => {
-      triggerPrint(lastSale);
-    }, 500);
-
     const title = document.getElementById('scTitle');
     const amount = document.getElementById('scAmount');
     const msg = document.getElementById('scMsg');
-    title.textContent = `${method} Sale Complete!`;
-    amount.textContent = fmt(total);
-    msg.textContent = method === 'Cash'
-      ? `Invoice ${saved.billId} - Change returned: ${fmt(Number(receivedAmount) - total)}`
-      : `Invoice ${saved.billId} saved successfully`;
+    if (title) title.textContent = `${method} Sale Complete!`;
+    if (amount) amount.textContent = fmt(total);
+    if (msg) {
+      msg.textContent = method === 'Cash'
+        ? `Invoice ${saved.billId} - Change returned: ${fmt(Number(receivedAmount) - total)}`
+        : `Invoice ${saved.billId} saved successfully`;
+    }
 
     cart = [];
     saveCart();
     document.getElementById('cashModal').classList.remove('open');
     document.getElementById('cardModal').classList.remove('open');
     document.getElementById('saleCompleteModal').classList.add('open');
+
+    // Auto-Print the bill (delayed slightly to ensure modal is open and DOM is settled)
+    setTimeout(() => {
+      console.log('Triggering auto-print for:', lastSale.billId);
+      triggerPrint(lastSale);
+    }, 1000);
 
     await loadData();
     renderCart();
