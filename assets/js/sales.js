@@ -481,101 +481,117 @@
 
   async function triggerPrint(saleData) {
     if (!saleData) return;
-    console.log('[PRINT] Building receipt for:', saleData.billId);
+    const area = document.getElementById('print-area');
+    if (!area) return;
+    console.log('[PRINT DEBUG] triggerPrint called with:', saleData);
 
-    const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
-    const staffName = saleData.cashier || user.name || 'Staff';
-    const dateStr = new Date(saleData.timestamp).toLocaleDateString();
-    const timeStr = new Date(saleData.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const changeReturned = saleData.received ? Math.max(0, saleData.received - saleData.total) : 0;
-
+    // ... (rest of itemsHtml generation)
     const itemsHtml = saleData.items.map(i => {
       const qty = Number(i.qty || i.quantity);
-      const fqty = qty % 1 === 0 ? qty : qty.toFixed(2);
-      const itotal = (Number(i.price) * qty).toLocaleString('en-US', { minimumFractionDigits: 2 });
-      return [
-        '<tr class="rt-item-row">',
-          '<td colspan="2">' + i.name + '</td>',
-          '<td class="rt-price">' + itotal + '</td>',
-        '</tr>',
-        '<tr class="rt-detail-row">',
-          '<td colspan="3">' + fqty + ' ' + (i.unit || '') + ' x ' +
-            Number(i.price).toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</td>',
-        '</tr>'
-      ].join('');
+      const formattedQty = qty % 1 === 0 ? qty : qty.toFixed(2);
+      const itemTotal = (Number(i.price) * qty).toLocaleString('en-US', { minimumFractionDigits: 2 });
+      
+      return `
+        <tr class="rt-item-row">
+          <td colspan="2">${i.name}</td>
+          <td class="rt-price">${itemTotal}</td>
+        </tr>
+        <tr class="rt-detail-row">
+          <td colspan="3">${formattedQty} ${i.unit || ''} x ${Number(i.price).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+        </tr>
+      `;
     }).join('');
 
-    // Build complete self-contained HTML with inline CSS — printed in a dedicated hidden window
-    const CSS = [
-      '* { margin:0; padding:0; box-sizing:border-box; }',
-      '@page { margin:0; size:58mm auto; }',
-      'body { width:58mm; background:#fff; font-family:"Segoe UI",Arial,sans-serif; font-size:12px; color:#000; }',
-      '.r { width:58mm; padding:6px 3px; }',
-      '.rh { text-align:center; margin-bottom:5px; }',
-      '.rh-logo { font-size:15px; font-weight:800; text-transform:uppercase; }',
-      '.rh-info { font-size:10px; line-height:1.3; margin-top:2px; }',
-      '.rmeta { text-align:center; font-size:10px; line-height:1.5; margin:4px 0; }',
-      '.rd { border-top:1px dashed #000; margin:5px 0; }',
-      '.rd2 { border-top:2px solid #000; margin:6px 0; }',
-      'table { width:100%; border-collapse:collapse; }',
-      '.rt-item-row td { padding-top:4px; font-weight:700; font-size:12px; }',
-      '.rt-detail-row td { padding-bottom:3px; font-size:10px; color:#444; }',
-      '.rt-price { text-align:right; }',
-      '.trow { display:flex; justify-content:space-between; font-size:11px; padding:1px 0; }',
-      '.trow.grand { font-size:15px; font-weight:800; border-top:1px solid #000; border-bottom:2px solid #000; padding:5px 0; margin:3px 0; }',
-      '.pay { margin-top:5px; font-size:10px; border-top:1px dashed #000; padding-top:4px; }',
-      '.rf { text-align:center; margin-top:10px; font-size:10px; }',
-      '.rf-msg { font-size:13px; font-weight:800; margin-bottom:2px; }',
-      '.rf-sub { font-size:9px; color:#555; margin-top:3px; }',
-      '.bc { margin-top:8px; text-align:center; font-size:10px; font-weight:600; letter-spacing:2px; }'
-    ].join('');
+    const changeReturned = saleData.received ? Math.max(0, saleData.received - saleData.total) : 0;
 
-    const payHtml = !saleData.isDraft ? (
-      '<div class="pay">'
-      + '<div class="trow"><span>Paid via ' + saleData.method + '</span>'
-      + '<span>' + (saleData.received || saleData.total).toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</span></div>'
-      + (saleData.method === 'Cash'
-          ? '<div class="trow"><span>Change</span><span>' + changeReturned.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</span></div>'
-          : '')
-      + '</div>'
-    ) : '';
+    area.innerHTML = `
+      <div class="receipt">
+        <div class="receipt-header">
+          <div class="receipt-logo">QuickPOS Supermarket</div>
+          <div class="receipt-info">
+            No. 45/A, Galle Road, Colombo 03<br>
+            Tel: 011 234 5678 | 077 123 4567<br>
+          </div>
+        </div>
 
-    const fullHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>' + CSS + '</style></head><body>'
-      + '<div class="r">'
-      + '<div class="rh"><div class="rh-logo">QuickPOS Supermarket</div>'
-      + '<div class="rh-info">No. 45/A, Galle Road, Colombo 03<br>Tel: 011 234 5678 | 077 123 4567</div></div>'
-      + '<div class="rd"></div>'
-      + '<div class="rmeta">'
-      + '<div>' + (saleData.isDraft ? '<strong>*** ESTIMATE ***</strong>' : '<strong>TAX INVOICE</strong>') + '</div>'
-      + '<div>Date: ' + dateStr + ' | Time: ' + timeStr + '</div>'
-      + '<div>No: <strong>' + saleData.billId + '</strong> | Staff: ' + staffName + '</div>'
-      + '</div>'
-      + '<div class="rd"></div>'
-      + '<table><tbody>' + itemsHtml + '</tbody></table>'
-      + '<div class="rd2"></div>'
-      + '<div><div class="trow grand"><span>NET TOTAL</span><span>LKR '
-      + saleData.total.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</span></div></div>'
-      + payHtml
-      + '<div class="rf">'
-      + '<div class="rf-msg">ස්තූතියි! නැවත එන්න.</div>'
-      + '<div class="rf-msg">Thank You! Come Again.</div>'
-      + '<div class="rf-sub">' + (saleData.isDraft ? 'Draft Receipt - Not a Tax Invoice' : 'Software by Antigravity Pro') + '</div>'
-      + '<div class="bc">' + (saleData.billId === 'DRAFT' ? 'DRAFT' : '* ' + saleData.billId + ' *') + '</div>'
-      + '</div></div></body></html>';
+        <div class="receipt-divider"></div>
 
-    try {
-      const dbSettings = await window.api.getSettings();
-      const printerName = dbSettings.thermalPrinterName || '';
-      console.log('[PRINT] Using printer:', printerName || '(system default)');
-      const res = await window.api.printReceiptSilent({ html: fullHtml, deviceName: printerName });
-      if (res && !res.success) {
-        console.error('[PRINT ERROR]', res.failureReason);
-      } else {
-        console.log('[PRINT] Receipt sent successfully.');
+        <div class="receipt-meta">
+          <div>${saleData.isDraft ? '<strong>*** ESTIMATE ***</strong>' : '<strong>TAX INVOICE</strong>'}</div>
+          <div>Date: ${new Date(saleData.timestamp).toLocaleDateString()} | Time: ${new Date(saleData.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+          <div>No: <strong>${saleData.billId}</strong> | Staff: ${saleData.cashier || (JSON.parse(localStorage.getItem('quickpos-user') || '{}').name) || 'Sunil Perera'}</div>
+        </div>
+
+        <div class="receipt-divider"></div>
+
+        <table class="receipt-table">
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
+
+        <div class="receipt-divider double"></div>
+
+        <div class="receipt-totals">
+          <div class="total-row grand-total">
+            <span>NET TOTAL</span>
+            <span>LKR ${saleData.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+          </div>
+        </div>
+
+        ${!saleData.isDraft ? `
+          <div class="payment-info">
+            <div class="total-row">
+              <span>Paid via ${saleData.method}</span>
+              <span>${(saleData.received || saleData.total).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+            </div>
+            ${saleData.method === 'Cash' ? `
+              <div class="total-row">
+                <span>Change</span>
+                <span>${changeReturned.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+              </div>
+            ` : ''}
+          </div>
+        ` : ''}
+
+        <div class="receipt-footer">
+          <div class="footer-msg">ස්තූතියි! නැවත එන්න.</div>
+          <div class="footer-msg">Thank You! Come Again.</div>
+          <div class="footer-sub">
+            ${saleData.isDraft ? 'Draft Receipt - Not a Tax Invoice' : 'Software by Antigravity Pro'}
+          </div>
+          <div class="barcode-placeholder">
+            ${saleData.billId === 'DRAFT' ? 'DRAFT' : '*' + saleData.billId + '*'}
+          </div>
+        </div>
+      </div>
+    `;
+
+    console.log('[PRINT] Receipt HTML ready, sending to printer...');
+
+    // Double RAF + 200ms: ensure receipt content is fully painted before print
+    requestAnimationFrame(() => requestAnimationFrame(async () => {
+      await new Promise(r => setTimeout(r, 200));
+      try {
+        // Load configured printer name from settings
+        const dbSettings = await window.api.getSettings();
+        const printerName = dbSettings.thermalPrinterName || '';
+        const options = printerName ? { deviceName: printerName } : {};
+        console.log('[PRINT] Using printer:', printerName || '(system default)');
+
+        const res = await window.api.printReceiptSilent(options);
+        if (res && !res.success) {
+          console.error('[PRINT ERROR] Print failed:', res.failureReason);
+          // Sale is already saved — just log, do not alert
+        } else {
+          console.log('[PRINT] Receipt printed successfully.');
+        }
+      } catch (err) {
+        console.error('[PRINT ERROR] Exception during print:', err.message);
+      } finally {
+        area.innerHTML = '';
       }
-    } catch (err) {
-      console.error('[PRINT ERROR] Exception:', err.message);
-    }
+    }));
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
