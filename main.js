@@ -365,3 +365,58 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
 });
+
+ipcMain.handle('print-receipt-silent', async (event, options = {}) => {
+    console.log('[PRINT DEBUG] Main process received print request for device:', options.deviceName || 'default');
+    
+    if (options.html) {
+        return new Promise(async (resolve) => {
+            const printWin = new BrowserWindow({
+                show: false,
+                webPreferences: { nodeIntegration: false, contextIsolation: true }
+            });
+            
+            const htmlContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <meta charset="utf-8">
+                  <style>
+                    body { margin: 0; padding: 0; background: #fff; color: #000; }
+                    ${options.css || ''}
+                  </style>
+                </head>
+                <body>${options.html}</body>
+                </html>
+            `;
+            
+            await printWin.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
+            
+            console.log('[PRINT DEBUG] Hidden print window loaded HTML. Triggering print...');
+            const printOptions = {
+                silent: true,
+                printBackground: true,
+                margins: { marginType: 'none' },
+                pageSize: { width: 80000, height: 297000 } // 80mm width, 297mm height in microns
+            };
+            if (options.deviceName) printOptions.deviceName = options.deviceName;
+            
+            printWin.webContents.print(printOptions, (success, failureReason) => {
+                console.log(`[PRINT DEBUG] Print finished. Success: ${success}, Reason: ${failureReason}`);
+                if (!success) console.error(`[PRINT ERROR] Details: ${failureReason}`);
+                printWin.close();
+                resolve({ success, failureReason });
+            });
+        });
+    }
+
+    const win = BrowserWindow.fromWebContents(event.sender);
+    return new Promise((resolve) => {
+        const printOptions = { silent: true, printBackground: true, margins: { marginType: 'none' } };
+        if (options.deviceName) printOptions.deviceName = options.deviceName;
+        
+        win.webContents.print(printOptions, (success, failureReason) => {
+            resolve({ success, failureReason });
+        });
+    });
+});

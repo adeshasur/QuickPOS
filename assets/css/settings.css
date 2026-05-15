@@ -1,9 +1,9 @@
-﻿/* â”€â”€â”€ MAIN â”€â”€â”€ */
+/* â”€â”€â”€ MAIN â”€â”€â”€ */
 .main-content{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;background:var(--bg);font-family:var(--font);color:var(--text);}
-.topbar{height:70px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 24px;flex-shrink:0;box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);}
+.topbar{height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 24px;flex-shrink:0;box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);}
 .tb-title{font-size:20px;font-weight:600;color:var(--text)}
-.tb-right{display:flex;align-items:center;gap:14px;margin-left:auto}
-.tb-role{font-size:14px;font-weight:500;color:var(--text2)}
+.tb-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.cashier-tag{font-size:14px;font-weight:500;color:var(--text2)}
 .avatar{width:38px;height:38px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff}
 .save-topbar-btn{background:var(--success);color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:8px;transition:all .2s;box-shadow: 0 2px 4px rgba(45,106,79,.3)}
 .save-topbar-btn:hover{background:#22543D;transform:translateY(-1px)}

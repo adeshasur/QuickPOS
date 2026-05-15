@@ -11,25 +11,26 @@
         topbarContainer.innerHTML = `
           <div class="topbar">
             <div class="tb-title">${title}</div>
-            <div class="tb-right">
-              <div class="tb-refresh" id="topbarRefreshBtn" title="Sync Data">
-                <i class="fa-solid fa-arrows-rotate"></i>
-              </div>
-              <div class="notif-wrapper">
-                <div class="tb-notifications" id="notifBell" title="Low Stock Alerts">
-                  <i class="fa-solid fa-bell"></i>
-                  <span class="notif-badge" id="topbarNotifBadge" style="display:none;">0</span>
+              <div class="tb-right">
+                <div class="cashier-tag" id="cashierNameDisplay">${user.role === 'owner' ? 'Owner' : 'Cashier'}: ${user.name || 'User'}</div>
+                <div class="tb-refresh" id="topbarRefreshBtn" title="Sync Data">
+                  <i class="fa-solid fa-arrows-rotate"></i>
                 </div>
-                <div class="notif-dropdown" id="notifDropdown">
-                  <div class="nd-header">Notifications</div>
-                  <div class="nd-body" id="notifList">
-                    <div class="nd-empty">No new notifications</div>
+                <div class="notif-wrapper">
+                  <div class="tb-notifications" id="notifBell" title="Low Stock Alerts">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="notif-badge" id="topbarNotifBadge" style="display:none;">0</span>
                   </div>
-                  <div class="nd-footer" onclick="location.href='inventory.html'">View All Inventory</div>
+                  <div class="notif-dropdown" id="notifDropdown">
+                    <div class="nd-header">Notifications</div>
+                    <div class="nd-body" id="notifList">
+                      <div class="nd-empty">No new notifications</div>
+                    </div>
+                    <div class="nd-footer" onclick="location.href='inventory.html'">View All Inventory</div>
+                  </div>
                 </div>
+                <div class="avatar">${String(user.name || 'U').slice(0, 2).toUpperCase()}</div>
               </div>
-              <div class="avatar">${String(user.name || 'U').slice(0, 2).toUpperCase()}</div>
-            </div>
           </div>
           <div id="toast-container" class="toast-container"></div>
         `;

@@ -1,17 +1,17 @@
 /* Variables inherited from common.css */
 
-/* â”€â”€â”€ MAIN & TOPBAR â”€â”€â”€ */
+/* ─── MAIN & TOPBAR ─── */
 .main-content {flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);font-family:var(--font);color:var(--text);min-width:0;}
-.topbar{height:70px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 24px;flex-shrink:0;box-shadow: var(--shadow-sm);}
+.topbar{height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 24px;flex-shrink:0;box-shadow: var(--shadow-sm);}
 .tb-title{font-size:20px;font-weight:600;color:var(--text)}
-.tb-right{display:flex;align-items:center;gap:14px;margin-left:auto}
-.tb-sub{font-size:14px;font-weight:500;color:var(--text2)}
+.tb-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.cashier-tag{font-size:14px;font-weight:500;color:var(--text2)}
 .avatar{width:38px;height:38px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff}
 
-/* â”€â”€â”€ CONTENT â”€â”€â”€ */
+/* ─── CONTENT ─── */
 .content{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:24px 32px;gap:20px}
 
-/* â”€â”€â”€ HEADER â”€â”€â”€ */
+/* ─── HEADER ─── */
 .page-header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .page-header-left{display:flex;flex-direction:column;gap:6px}
 .page-heading{font-size:22px;font-weight:700;color:var(--text)}
@@ -21,7 +21,7 @@
 .add-btn:hover{background:var(--primary-dark);transform:translateY(-2px)}
 .add-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 
-/* â”€â”€â”€ TABLE AREA â”€â”€â”€ */
+/* ─── TABLE AREA ─── */
 .table-wrap{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;display:flex;flex-direction:column;min-height:0;box-shadow: var(--shadow-sm);}
 .table-scroll{flex:1;overflow-y:auto;overflow-x:auto}
 .table-scroll::-webkit-scrollbar{width:6px;height:6px}
@@ -74,7 +74,7 @@ tbody tr:last-child td{border-bottom:none}
 .empty-state p{font-size:18px;font-weight:600;}
 .empty-state small{font-size:14px;font-weight:500;}
 
-/* â”€â”€â”€ MODALS â”€â”€â”€ */
+/* ─── MODALS ─── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:500;opacity:0;visibility:hidden;transition:all .2s;backdrop-filter:blur(3px)}
 .modal-overlay.open{opacity:1;visibility:visible}
 .modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:20px;width:90%;max-width:550px;max-height:90vh;overflow-y:auto;transform:scale(.95);transition:transform .2s;box-shadow:0 20px 40px rgba(0,0,0,0.15)}
@@ -137,7 +137,7 @@ tbody tr:last-child td{border-bottom:none}
 .del-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:12px}
 .del-msg{font-size:15px;font-weight:500;color:var(--text3);margin-bottom:30px;line-height:1.5}
 .del-actions{display:flex;gap:16px}
-/* â”€â”€â”€ RESPONSIVE â”€â”€â”€ */
+/* ─── RESPONSIVE ─── */
 @media (max-width: 1024px) {
   .page-header { flex-direction: column; align-items: flex-start; gap: 16px; }
   .field-row { grid-template-columns: 1fr; }

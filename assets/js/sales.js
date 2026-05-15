@@ -223,6 +223,8 @@
     // Close payment modals immediately — no popup window
     cart = [];
     saveCart();
+    
+    // Close payment modals immediately
     document.getElementById('cashModal').classList.remove('open');
     document.getElementById('cardModal').classList.remove('open');
 
@@ -390,7 +392,9 @@
       const ref = document.getElementById('cardRefNo').value.trim();
       try {
         await completeSale('Card', cartTotal(), ref);
+        setTimeout(() => { btn.disabled = false; }, 300);
       } catch (err) {
+        btn.disabled = false;
         alert(`Failed to save sale: ${err.message}`);
         btn.disabled = false;
         btn.textContent = 'Complete Sale';
@@ -404,11 +408,16 @@
     document.getElementById('closeCardModal').addEventListener('click', () => document.getElementById('cardModal').classList.remove('open'));
     document.getElementById('cancelCardModal').addEventListener('click', () => document.getElementById('cardModal').classList.remove('open'));
 
-    document.getElementById('creditBtn').addEventListener('click', async () => {
-      if (!cart.length || !selectedCustomer) return;
+    document.getElementById('creditBtn').addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      if (btn.disabled || !cart.length || !selectedCustomer) return;
+      btn.disabled = true;
+      btn.blur();
       try {
         await completeSale('Credit', 0);
+        setTimeout(() => { btn.disabled = false; }, 300);
       } catch (err) {
+        btn.disabled = false;
         alert(`Failed to save credit sale: ${err.message}`);
       }
     });
@@ -447,7 +456,11 @@
       }
       try {
         await completeSale('Cash', rec);
+        // Do NOT re-enable the button here if successful. Modal is closing.
+        // It prevents double-clicking while the modal is fading out.
+        setTimeout(() => { btn.disabled = false; }, 300);
       } catch (err) {
+        btn.disabled = false;
         alert(`Failed to save sale: ${err.message}`);
         btn.disabled = false;
         btn.textContent = 'Complete Sale';

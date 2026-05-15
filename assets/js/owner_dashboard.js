@@ -39,7 +39,7 @@
   }
 
   function getMetrics(list) {
-    const m = { revenue: 0, items: 0, tx: list.length, cash: 0, card: 0, hourSales: new Array(24).fill(0), catSales: {} };
+    const m = { revenue: 0, profit: 0, items: 0, tx: list.length, cash: 0, card: 0, hourSales: new Array(24).fill(0), catSales: {} };
     list.forEach((s) => {
       m.revenue += Number(s.total_amount || 0);
       if ((s.payment_method || '').toLowerCase() === 'cash') m.cash += Number(s.total_amount || 0);
@@ -51,6 +51,13 @@
       items.forEach((i) => {
         m.items += Number(i.quantity || 0);
         const p = products.find(x => x.id === i.product_id);
+        
+        if (p) {
+          const cost = Number(p.cost_price || 0);
+          const salePrice = Number(i.unit_price || 0);
+          m.profit += (salePrice - cost) * Number(i.quantity || 0);
+        }
+
         const catName = p ? categoryMap.get(p.category_id) : 'General';
         m.catSales[catName] = (m.catSales[catName] || 0) + Number(i.subtotal || 0);
       });
@@ -132,10 +139,9 @@
     document.getElementById('kpiAvg').textContent = fmtK(m.avg);
     document.getElementById('kpiTxCount').textContent = `${m.tx} transactions`;
 
-    const totalStock = products.reduce((s, p) => s + Number(p.current_stock || 0), 0);
-    const low = products.filter((p) => Number(p.current_stock || 0) > 0 && Number(p.current_stock || 0) <= Number(p.alert_level || 0)).length;
-    document.getElementById('kpiStock').innerHTML = `${totalStock.toLocaleString()} <span style="font-size:14px;color:var(--text3)">units</span>`;
-    document.getElementById('kpiStockLow').textContent = low > 0 ? `${low} products low stock` : 'All stock levels OK';
+    document.getElementById('kpiProfit').textContent = fmtK(m.profit);
+    const margin = m.revenue > 0 ? Math.round((m.profit / m.revenue) * 100) : 0;
+    document.getElementById('kpiProfitMargin').textContent = `${margin}% profit margin`;
 
     document.getElementById('ovToday0').textContent = t.tx;
     document.getElementById('ovWeek0').textContent = w.tx;

@@ -38,9 +38,7 @@ contextBridge.exposeInMainWorld('api', {
     backupDatabase: () => ipcRenderer.invoke('backup-database'),
     restoreDatabase: () => ipcRenderer.invoke('restore-database'),
     getExpiredItems: () => ipcRenderer.invoke('get-expired-items'),
+    // Printing
     printReceiptSilent: (options) => ipcRenderer.invoke('print-receipt-silent', options),
-  getPrinters: () => ipcRenderer.invoke('get-printers')
+    getPrinters: () => ipcRenderer.invoke('get-printers')
 });
-
-
-
