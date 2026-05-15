@@ -243,3 +243,10 @@
 }
 
 
+
+/* Unified topbar (match Make a Sale) */
+.topbar{height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 24px;flex-shrink:0;box-shadow:0 4px 6px rgba(0,0,0,.05)}
+.tb-title{font-size:20px;font-weight:600;color:var(--text)}
+.tb-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.cashier-tag{font-size:14px;font-weight:500;color:var(--text2)}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff}

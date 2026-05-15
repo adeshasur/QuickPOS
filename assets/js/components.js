@@ -4,6 +4,7 @@
   const Components = {
     init(options = {}) {
       const title = options.title || '';
+      const actions = options.actions || '';
       const topbarContainer = document.getElementById('topbar-container');
       const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
 
@@ -11,8 +12,9 @@
         topbarContainer.innerHTML = `
           <div class="topbar">
             <div class="tb-title">${title}</div>
+            <div class="tb-actions">${actions}</div>
               <div class="tb-right">
-                <div class="cashier-tag" id="cashierNameDisplay">${user.role === 'owner' ? 'Owner' : 'Cashier'}: ${user.name || 'User'}</div>
+                <div class="tb-chip" id="globalTopClock">00:00:00 AM</div>
                 <div class="tb-refresh" id="topbarRefreshBtn" title="Sync Data">
                   <i class="fa-solid fa-arrows-rotate"></i>
                 </div>
@@ -58,6 +60,21 @@
           });
         }
 
+        const clockEl = document.getElementById('globalTopClock');
+        if (clockEl) {
+          const updateClock = () => {
+            const now = new Date();
+            clockEl.textContent = now.toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: true
+            });
+          };
+          updateClock();
+          setInterval(updateClock, 1000);
+        }
+
         // Notifications logic is now handled in notifications.js
         if (window.Notifications) window.Notifications.refresh();
       }
@@ -68,6 +85,31 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     const sidebarContainer = document.getElementById('sidebar-container');
+    const currentPage = window.location.pathname.split("/").pop().replace('.html', '');
+
+    // Fallback: ensure business pages always get a standard topbar even if
+    // a page script forgets to initialize it.
+    const topbarContainer = document.getElementById('topbar-container');
+    if (topbarContainer && !topbarContainer.children.length) {
+      const pageTitles = {
+        sales: 'Make a Sale',
+        categories: 'Categories',
+        products: 'Products',
+        inventory: 'Inventory',
+        customers: 'Customers',
+        quotations: 'Quotations',
+        ledger: 'Credit Ledger',
+        sales_reports: 'Invoice History',
+        reports: 'Shift Reports',
+        users: 'Users',
+        settings: 'Settings'
+      };
+      const fallbackTitle = pageTitles[currentPage];
+      if (fallbackTitle) {
+        Components.init({ title: fallbackTitle });
+      }
+    }
+
     if (!sidebarContainer) return;
 
     const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
@@ -109,7 +151,6 @@
     }
 
     const menuItems = document.querySelectorAll('.menu-item');
-    const currentPage = window.location.pathname.split("/").pop().replace('.html', '');
     menuItems.forEach(item => {
         item.classList.remove('active');
         if (item.dataset.page && currentPage.includes(item.dataset.page)) item.classList.add('active');

@@ -233,7 +233,21 @@
       return;
     }
 
-    document.getElementById('userRoleDisplay').textContent = `Owner: ${user.name || 'Owner'}`;
+    Components.init({
+      title: 'System Settings',
+      actions: `
+        <span class="kbd-hint"><kbd>Ctrl</kbd>+<kbd>S</kbd> to save</span>
+        <button class="reset-topbar-btn" id="resetBtn">
+          <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+          Reset
+        </button>
+        <button class="save-topbar-btn" id="saveBtn">
+          <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save Settings
+        </button>
+      `
+    });
+
     bindEvents();
     try {
       await loadSettings();

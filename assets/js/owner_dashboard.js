@@ -240,54 +240,19 @@
 
 
   document.addEventListener('DOMContentLoaded', async () => {
-    // Initialize standard components
-    Components.init({ title: 'Executive Dashboard' });
-
-    // Inject dashboard specific topbar elements
-    const topbar = document.querySelector('.topbar');
-    if (topbar) {
-      const chip = document.createElement('div');
-      chip.className = 'tb-chip';
-      chip.id = 'topClock';
-      chip.textContent = '00:00:00 AM';
-      topbar.insertBefore(chip, topbar.querySelector('.tb-right'));
-
-      const filters = document.createElement('div');
-      filters.className = 'tb-filters';
-      filters.id = 'topbarFilters';
-      filters.innerHTML = `
-        <button class="filter-btn active" data-range="today">Today</button>
-        <button class="filter-btn" data-range="yesterday">Yesterday</button>
-        <button class="filter-btn" data-range="last7">7 Days</button>
-        <button class="filter-btn" data-range="thisMonth">This Month</button>
-        <button class="filter-btn" data-range="lastMonth">Last Month</button>
-      `;
-      topbar.insertBefore(filters, topbar.querySelector('.tb-right'));
-
-      topbar.insertBefore(filters, topbar.querySelector('.tb-right'));
-    }
-
-    const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
-    const welcomeMsg = document.getElementById('welcomeMsg');
-    const welcomeUserName = document.getElementById('welcomeUserName');
-    const topbarFilters = document.getElementById('topbarFilters');
-
-    if (user && user.name && welcomeMsg && topbarFilters) {
-      welcomeUserName.textContent = user.name;
-      welcomeMsg.style.display = 'flex';
-      topbarFilters.style.display = 'none';
-
-      // Set avatar initials
-      const avatar = document.querySelector('.topbar .avatar');
-      if (avatar) {
-        avatar.textContent = String(user.name).split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-      }
-
-      setTimeout(() => {
-        welcomeMsg.style.display = 'none';
-        topbarFilters.style.display = 'flex';
-      }, 5000);
-    }
+    // Dashboard-only topbar actions
+    Components.init({
+      title: 'Executive Dashboard',
+      actions: `
+        <div class="tb-filters" id="topbarFilters">
+          <button class="filter-btn active" data-range="today">Today</button>
+          <button class="filter-btn" data-range="yesterday">Yesterday</button>
+          <button class="filter-btn" data-range="last7">7 Days</button>
+          <button class="filter-btn" data-range="thisMonth">This Month</button>
+          <button class="filter-btn" data-range="lastMonth">Last Month</button>
+        </div>
+      `
+    });
 
 
     document.querySelectorAll('.filter-btn').forEach((btn) => {
@@ -306,19 +271,7 @@
       updateDashboard(active ? active.dataset.range : 'today');
     });
 
-    function startClock() {
-      const el = document.getElementById('topClock');
-      if (!el) return;
-      const update = () => {
-        const now = new Date();
-        el.textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-      };
-      update();
-      setInterval(update, 1000);
-    }
-
     try {
-      startClock();
       await loadData();
       updateDashboard('today');
     } catch (err) {

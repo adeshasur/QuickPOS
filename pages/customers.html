@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QuickPOS Pro â€” Customers</title>
+<title>QuickPOS Pro � Customers</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -19,18 +19,24 @@
 <div class="main-content">
   <div id="topbar-container"></div>
   <div class="content">
-    <div class="toolbar">
-      <div class="search-wrap">
-        <span class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-        <input class="search-input" id="searchInput" placeholder="Search by name or phoneâ€¦">
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-heading">Customer Management</div>
+        <div class="page-sub">Manage profiles, balances, and quick customer lookup for sales</div>
       </div>
-      <div class="count-badge">Total: <span id="countDisplay">0</span></div>
       <button class="add-btn" id="addBtn">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add Customer
       </button>
     </div>
 
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input class="search-input" id="searchInput" placeholder="Search by name or phone...">
+      </div>
+      <div class="count-badge">Total: <span id="countDisplay">0</span></div>
+    </div>
     <div class="table-card">
       <div class="table-head">
         <div class="th"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Customer</div>
@@ -104,5 +110,9 @@
 <script src="../assets/js/customers.js"></script>
 </body>
 </html>
+
+
+
+
 
 

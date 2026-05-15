@@ -20,9 +20,19 @@
         <div id="topbar-container"></div>
 
         <div class="inventory-container">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <div class="page-heading">Inventory Management</div>
+                    <div class="page-sub">Track stock levels, expiry status, and restocking updates in one place</div>
+                </div>
+            </div>
+
             <div class="stock-in-card owner-only">
-                <div class="card-title">
-                    <span class="material-symbols-rounded">add</span> Add New Stock
+                <div class="card-top">
+                    <div class="card-title">
+                        <span class="material-symbols-rounded">add_circle</span> Add New Stock
+                    </div>
+                    <button class="update-btn" id="addStockBtn"><span class="material-symbols-rounded s18" style="vertical-align:middle;">add</span> Add to Inventory</button>
                 </div>
                 <div class="form-grid">
                     <div class="form-group">
@@ -54,13 +64,10 @@
                         <input type="date" class="form-control" id="stockExpiryDate">
                     </div>
                 </div>
-                <div style="margin-top: 20px; text-align: right;">
-                    <button class="update-btn" id="addStockBtn"><span class="material-symbols-rounded s18" style="vertical-align:middle;">add</span> Add to Inventory</button>
-                </div>
             </div>
 
             <div class="expiry-filters">
-                <span style="font-weight: 600;">Filter by Expiry:</span>
+                <span class="filters-label">Filter by Expiry:</span>
                 <div class="filter-badge active" data-filter="all">All Stock</div>
                 <div class="filter-badge" data-filter="good"><span class="material-symbols-rounded success s18" style="vertical-align:middle;">check_circle</span> Good (30+ days)</div>
                 <div class="filter-badge expiring" data-filter="expiring"><span class="material-symbols-rounded warning s18" style="vertical-align:middle;">warning</span> Expiring Soon (&lt;30 days)</div>

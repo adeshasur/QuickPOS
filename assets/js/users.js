@@ -109,6 +109,7 @@
         }
 
         await loadUsers();
+        Components.init({ title: 'User Management' });
 
         const createUserBtn = document.getElementById('createUserBtn');
         if(createUserBtn) {

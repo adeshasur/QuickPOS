@@ -1,4 +1,4 @@
-/* â”€â”€â”€ MAIN & TOPBAR â”€â”€â”€ */
+/* ─── MAIN & TOPBAR ─── */
 .main-content {flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);font-family:var(--font);color:var(--text);min-width:0;}
 .topbar{height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 24px;flex-shrink:0;box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);}
 .tb-title{font-size:20px;font-weight:600;color:var(--text)}
@@ -6,32 +6,33 @@
 .cashier-tag{font-size:14px;font-weight:500;color:var(--text2)}
 .avatar{width:38px;height:38px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff}
 
-/* â”€â”€â”€ CONTENT â”€â”€â”€ */
+/* ─── CONTENT ─── */
 .content{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:24px 32px;gap:20px}
 
-/* â”€â”€â”€ HEADER ROW â”€â”€â”€ */
-.page-header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+/* ─── HEADER ROW ─── */
+.page-header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;box-shadow:0 4px 14px rgba(15,23,42,.04)}
 .page-header-left{display:flex;flex-direction:column;gap:6px}
-.page-heading{font-size:22px;font-weight:700;color:var(--text)}
-.page-sub{font-size:14px;font-weight:500;color:var(--text3)}
+.page-heading{font-size:20px;font-weight:700;color:var(--text)}
+.page-sub{font-size:13px;font-weight:500;color:var(--text3)}
 
-.add-btn{display:flex;align-items:center;gap:8px;background:var(--primary);color:#fff;border:none;border-radius:8px;padding:12px 20px;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;transition:all .2s;box-shadow: 0 4px 10px var(--primary-glow);}
+.add-btn{display:flex;align-items:center;gap:8px;background:var(--primary);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;transition:all .2s;box-shadow: 0 4px 10px var(--primary-glow);}
 .add-btn:hover{background:var(--primary-dark);transform:translateY(-2px)}
 .add-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 
-/* â”€â”€â”€ STATS â”€â”€â”€ */
-.stats-row{display:flex;gap:20px;flex-shrink:0}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;display:flex;align-items:center;gap:16px;box-shadow: 0 2px 4px rgba(0,0,0,0.02);min-width: 250px;}
-.stat-icon-wrap{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+/* ─── STATS ─── */
+.stats-row{display:flex;gap:14px;flex-shrink:0}
+.stats-row .stat-card{flex:1}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow: 0 2px 4px rgba(0,0,0,0.02);min-width: 0;min-height: 72px;}
+.stat-icon-wrap{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center}
 .stat-icon-wrap.blue{background:var(--primary-glow)}
 .stat-icon-wrap.green{background:var(--surface2)}
-.stat-icon-wrap svg{width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.stat-icon-wrap svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .stat-icon-wrap.blue svg{stroke:var(--primary)}
 .stat-icon-wrap.green svg{stroke:var(--success)}
-.stat-val{font-size:28px;font-weight:800;font-family:var(--mono);color:var(--text)}
-.stat-lbl{font-size:13px;font-weight:600;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:0.05em;}
+.stat-val{font-size:24px;font-weight:800;font-family:var(--mono);color:var(--text);line-height:1}
+.stat-lbl{font-size:11px;font-weight:700;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:0.03em;}
 
-/* â”€â”€â”€ TABLE AREA â”€â”€â”€ */
+/* ─── TABLE AREA ─── */
 .table-wrap{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;display:flex;flex-direction:column;min-height:0;box-shadow: 0 2px 4px rgba(0,0,0,0.02);}
 .table-scroll{flex:1;overflow-y:auto}
 .table-scroll::-webkit-scrollbar{width:6px}
@@ -64,7 +65,7 @@ tbody tr:last-child td{border-bottom:none}
 .empty-state p{font-size:18px;font-weight:600;}
 .empty-state small{font-size:14px;font-weight:500;}
 
-/* â”€â”€â”€ MODAL â”€â”€â”€ */
+/* ─── MODAL ─── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:500;opacity:0;visibility:hidden;transition:all .2s;backdrop-filter:blur(3px)}
 .modal-overlay.open{opacity:1;visibility:visible}
 .modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:20px;width:90%;max-width:500px;overflow:hidden;transform:scale(.95);transition:transform .2s;box-shadow:0 20px 40px rgba(0,0,0,0.15)}
@@ -94,12 +95,18 @@ tbody tr:last-child td{border-bottom:none}
 .mact-btn.confirm{background:var(--primary);color:#fff;box-shadow: 0 4px 10px var(--primary-glow)}
 .mact-btn.confirm:hover{background:var(--primary-dark);transform:translateY(-2px)}
 
-/* â”€â”€â”€ DELETE CONFIRM MODAL â”€â”€â”€ */
+/* ─── DELETE CONFIRM MODAL ─── */
 .del-modal-box{padding:36px;text-align:center}
 .del-icon{width:70px;height:70px;border-radius:50%;background:var(--danger-light);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
 .del-icon svg{width:36px;height:36px;stroke:var(--danger);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .del-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:12px}
 .del-msg{font-size:15px;font-weight:500;color:var(--text3);margin-bottom:30px;line-height:1.5}
 .del-actions{display:flex;gap:16px}
+
+@media(max-width:980px){
+  .page-header{flex-direction:column;align-items:flex-start;gap:10px}
+  .add-btn{width:100%;justify-content:center}
+  .stats-row{flex-direction:column}
+}
 
 
