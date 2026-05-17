@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  const fmt = (n) => `LKR ${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  const fmtK = (n) => fmt(n);
+  const fmt = window.fmtLKR;
+  const fmtK = window.fmtLKR;
   const fmtRu = (n) => `රු. ${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   let sales = [];

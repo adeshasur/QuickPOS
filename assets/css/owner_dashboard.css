@@ -1,11 +1,4 @@
-/* â”€â”€â”€ MAIN â”€â”€â”€ */
-.main-content {flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);font-family:'Inter', sans-serif;color:var(--text);}
-
-/* â”€â”€â”€ TOPBAR â”€â”€â”€ */
-.topbar{height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 24px;flex-shrink:0;box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);}
-.tb-title{font-size:20px;font-weight:600;color:var(--text);white-space:nowrap}
-.tb-chip{background:var(--surface2);color:var(--success);font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:5px}
-.tb-chip::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--success)}
+/* ─── DASHBOARD TOPBAR FILTERS ─── */
 .tb-filters{display:flex;align-items:center;gap:8px;margin-left:auto}
 .tb-welcome{display:none;align-items:center;gap:10px;margin-left:auto;animation:welcomeFadeIn 0.5s ease-out forwards}
 .welcome-text{font-size:16px;font-weight:600;color:var(--primary);display:flex;align-items:center;gap:8px}
@@ -18,7 +11,7 @@
 .filter-btn{background:var(--surface);border:1px solid var(--border2);color:var(--text2);font-size:13px;font-weight:500;padding:6px 14px;border-radius:8px;cursor:pointer;transition:all .2s;font-family:var(--font)}
 .filter-btn:hover{border-color:var(--primary);color:var(--text);background:var(--surface2);}
 .filter-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
-.tb-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+
 .tb-icon-btn{width:38px;height:38px;background:var(--surface);border:1px solid var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);transition:all .2s}
 .tb-icon-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-glow);}
 .tb-icon-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}

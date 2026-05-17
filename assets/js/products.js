@@ -5,7 +5,7 @@
   let products = [];
   let deletingId = null;
 
-  const fmt = (n) => `LKR ${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const fmt = window.fmtLKR;
   const calcFinal = (base, discount) => Math.max(0, Number(base || 0) - Number(discount || 0));
 
   function openModal(id) { document.getElementById(id).classList.add('open'); }

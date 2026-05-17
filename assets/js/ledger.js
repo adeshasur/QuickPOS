@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    const formatCurrency = (amt) => `LKR ${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const formatCurrency = window.fmtLKR;
 
     let creditBills = [];
     let customers = [];

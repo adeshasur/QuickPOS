@@ -127,6 +127,10 @@
     }
   };
 
+  window.fmtLKR = function (n) {
+    return `LKR ${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
   window.Components = Components;
 
   document.addEventListener('DOMContentLoaded', () => {

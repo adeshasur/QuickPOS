@@ -1,11 +1,11 @@
-﻿(function () {
+(function () {
   'use strict';
 
   let customers = [];
   let deleteCandidateId = null;
   const AVATAR_COLORS = ['av-blue', 'av-green', 'av-purple', 'av-amber', 'av-cyan'];
 
-  const fmt = (n) => `LKR ${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const fmt = window.fmtLKR;
   const initials = (n) => String(n || '').trim().split(' ').map((w) => w[0] || '').join('').slice(0, 2).toUpperCase();
 
   function showToast(msg, type = 'success') {

@@ -6,9 +6,7 @@
     let currentFilter = "all";
     let searchTerm = "";
 
-    function formatCurrency(amount) {
-        return `LKR ${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-    }
+    const formatCurrency = window.fmtLKR;
 
     function formatDate(dateString) {
         if (!dateString) return 'N/A';

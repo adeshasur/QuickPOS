@@ -1,8 +1,8 @@
-(function() {
+﻿(function() {
     'use strict';
 
     const $ = id => document.getElementById(id);
-    const fmtLKR = n => 'LKR ' + (+n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtLKR = window.fmtLKR;
 
     let salesData = [];
     let currentDateFilter = 'all';
@@ -72,7 +72,7 @@
         salesBody.innerHTML = list.map(s => `
             <tr onclick="openReceipt('${s.bill_id}')">
                 <td><span class="inv-id">${s.bill_id}</span></td>
-                <td>${new Date(s.timestamp).toLocaleDateString()} � ${new Date(s.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+                <td>${new Date(s.timestamp).toLocaleDateString()} · ${new Date(s.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
                 <td>Detailed Invoice Available</td>
                 <td><span class="pay-badge ${String(s.payment_method || '').toLowerCase()}">${s.payment_method}</span></td>
                 <td class="amount-cell">${fmtLKR(s.total_amount)}</td>
@@ -172,3 +172,4 @@
 
     document.addEventListener('DOMContentLoaded', init);
 })();
+

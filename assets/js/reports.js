@@ -24,9 +24,7 @@
     const inventoryTableBody = document.getElementById('inventoryTableBody');
     const emptyInventoryRow = document.getElementById('emptyInventoryRow');
 
-    function formatCurrency(amount) {
-        return `LKR ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    }
+    const formatCurrency = window.fmtLKR;
 
     function formatDisplayDate(timestamp) {
         const date = new Date(timestamp);

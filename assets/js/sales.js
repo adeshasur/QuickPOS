@@ -11,7 +11,7 @@
   let priceEdited = false;
   let lastSale = null;
 
-  const fmt = (n) => `LKR ${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const fmt = window.fmtLKR;
 
   function normalizeCategory(name) {
     return String(name || '').toLowerCase().replace(/\s+/g, '-');

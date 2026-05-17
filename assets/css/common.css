@@ -110,6 +110,9 @@ body.dashboard-body {
     height: 100vh;
     overflow: hidden;
     position: relative;
+    background: var(--bg);
+    color: var(--text);
+    min-width: 0;
 }
 
 /* Scrollbar styling */

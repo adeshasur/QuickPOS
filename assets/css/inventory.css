@@ -249,16 +249,4 @@
     .search-box { width: 100%; }
 }
 
-/* Keep topbar profile icon identical to other pages */
-.topbar .avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: var(--primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: 600;
-    color: #fff;
-}
+
