@@ -76,6 +76,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .kpi-card:hover {
@@ -206,7 +207,7 @@
   display: flex;
   flex-direction: column;
 }
-.card{background:var(--surface);border:1px solid rgba(226, 232, 240, 0.8);border-top:none;border-radius:24px;display:flex;flex-direction:column;overflow:hidden;box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02);transition: all 0.3s ease;}
+.card{background:var(--surface);border:1px solid rgba(226, 232, 240, 0.8);border-top:none;border-radius:24px;display:flex;flex-direction:column;overflow:hidden;box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02);transition: all 0.3s ease;animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;}
 .card:hover { box-shadow: 0 10px 30px rgba(15, 23, 24, 0.05); }
 .card-header{padding:16px 24px;border-bottom:1px solid rgba(226, 232, 240, 0.8);background:#fcfdfe;display:flex;align-items:center;justify-content:space-between}
 .card-title{font-size:15px;font-weight:700;color:#1e293b;display:flex;align-items:center;gap:8px}
