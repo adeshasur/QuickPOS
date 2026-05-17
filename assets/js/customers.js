@@ -7,6 +7,14 @@
 
   const fmt = window.fmtLKR;
   const initials = (n) => String(n || '').trim().split(' ').map((w) => w[0] || '').join('').slice(0, 2).toUpperCase();
+  const formatPhone = (phone) => {
+    if (!phone) return '-';
+    const clean = String(phone).replace(/\s+/g, '');
+    if (clean.length === 10) {
+      return `${clean.slice(0, 3)} ${clean.slice(3, 6)} ${clean.slice(6)}`;
+    }
+    return phone;
+  };
 
   function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
@@ -34,9 +42,9 @@
     body.innerHTML = list
       .map((c) => `<div class="cust-row" data-id="${c.id}">
       <div class="td"><div class="cust-name-cell"><div class="cust-avatar ${AVATAR_COLORS[c.id % AVATAR_COLORS.length]}">${initials(c.name)}</div><div><div class="cust-fullname">${c.name}</div><div class="cust-id">#${String(c.id).padStart(4, '0')}</div></div></div></div>
-      <div class="td"><span class="phone-val">${c.phone || '-'}</span></div>
+      <div class="td"><span class="phone-val">${formatPhone(c.phone)}</span></div>
       <div class="td"><span class="addr-val">${c.address || '-'}</span></div>
-      <div class="td"><span class="bal-val ${(c.balance || 0) > 0 ? 'pos' : 'zero'}">${fmt(c.balance || 0)}</span></div>
+      <div class="td"><span class="bal-val ${(c.balance || 0) > 0 ? 'credit-due' : 'zero'}">${fmt(c.balance || 0)}</span></div>
       <div class="td"><div class="row-actions"><button class="row-btn edit" data-id="${c.id}">Edit</button><button class="row-btn del" data-id="${c.id}">Delete</button></div></div>
     </div>`)
       .join('');
