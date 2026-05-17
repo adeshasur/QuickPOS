@@ -1,4 +1,4 @@
-(function() {
+﻿(function() {
     'use strict';
 
     const formatCurrency = window.fmtLKR;
@@ -11,6 +11,10 @@
     // DOM Elements
     const tableBody = document.getElementById('tableBody');
     const totalOutstandingSpan = document.getElementById('totalOutstanding');
+    const totalCreditCustomersSpan = document.getElementById('totalCreditCustomers');
+    const overdueBillsSpan = document.getElementById('overdueBills');
+    const ledgerSearchInput = document.getElementById('ledgerSearch');
+    
     const pendingTab = document.getElementById('pendingTab');
     const settledTab = document.getElementById('settledTab');
     const paymentModal = document.getElementById('paymentModal');
@@ -27,7 +31,6 @@
             customers = await window.api.getCustomers();
             
             // Filter only credit sales
-            // Note: In our current logic, balance_amount for Credit sales stores the "Remaining Due"
             creditBills = allSales.filter(s => s.payment_method === 'Credit');
             
             renderLedger();
@@ -39,18 +42,40 @@
     function renderLedger() {
         if (!tableBody) return;
 
+        const searchQuery = ledgerSearchInput ? ledgerSearchInput.value.toLowerCase().trim() : '';
+
         const filtered = creditBills.filter(b => {
             const isSettled = (b.balance_amount || 0) <= 0;
-            return currentTab === 'pending' ? !isSettled : isSettled;
+            const matchesTab = currentTab === 'pending' ? !isSettled : isSettled;
+            if (!matchesTab) return false;
+
+            if (searchQuery) {
+                const customer = customers.find(c => c.id === b.customer_id);
+                const customerName = customer ? customer.name.toLowerCase() : '';
+                const billId = String(b.bill_id).toLowerCase();
+                return customerName.includes(searchQuery) || billId.includes(searchQuery);
+            }
+            return true;
         });
 
         filtered.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
 
+        // Update KPI card metrics
         let totalOutstanding = creditBills.reduce((acc, b) => acc + (b.balance_amount > 0 ? b.balance_amount : 0), 0);
         if (totalOutstandingSpan) totalOutstandingSpan.innerText = formatCurrency(totalOutstanding);
 
+        // Unique Customers with outstanding debt (balance_amount > 0)
+        const uniqueDebtors = new Set(creditBills.filter(b => b.balance_amount > 0).map(b => b.customer_id));
+        if (totalCreditCustomersSpan) totalCreditCustomersSpan.innerText = uniqueDebtors.size;
+
+        // Overdue bills (pending credit bills older than 30 days)
+        const creditTermMs = 30 * 24 * 60 * 60 * 1000;
+        const now = new Date();
+        const overdueCount = creditBills.filter(b => b.balance_amount > 0 && (now - new Date(b.timestamp) > creditTermMs)).length;
+        if (overdueBillsSpan) overdueBillsSpan.innerText = overdueCount;
+
         if (filtered.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;">No ${currentTab} bills</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;">No matching ${currentTab} bills</td></tr>`;
             return;
         }
 
@@ -59,12 +84,15 @@
             const statusClass = (bill.balance_amount || 0) <= 0 ? 'settled' : '';
             const statusText = (bill.balance_amount || 0) <= 0 ? 'SETTLED' : 'PENDING';
             
+            const bal = bill.balance_amount || 0;
+            const balClass = bal <= 0 ? 'badge-clear' : 'badge-outstanding';
+            
             return `<tr>
                 <td>${new Date(bill.timestamp).toLocaleDateString()}</td>
                 <td><strong>#${bill.bill_id}</strong></td>
                 <td>${customer ? customer.name : 'Unknown Customer'}</td>
                 <td>${formatCurrency(bill.total_amount)}</td>
-                <td>${formatCurrency(bill.balance_amount)}</td>
+                <td><span class="bal-badge ${balClass}">${formatCurrency(bal)}</span></td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                 <td>
                     <div class="action-buttons">
@@ -119,9 +147,6 @@
         }
 
         try {
-            // In a real app, we'd have an API like window.api.updateSaleBalance
-            // For now, we'll alert that this needs backend implementation or we can try to use saveSale if it supports updates
-            // But let's assume we need a new API.
             const result = await window.api.recordCreditPayment({ saleId: selectedBillForPayment.id, amount: amountReceived });
             selectedBillForPayment.balance_amount = result.remainingBalance;
             await loadData();
@@ -155,7 +180,6 @@
                     </tr>
                 `;
             }).join('');
-
 
             area.innerHTML = `
                 <div class="receipt">
@@ -204,7 +228,7 @@
                     </div>
 
                     <div class="receipt-footer">
-                        <div class="footer-msg">ස්තූතියි! නැවත එන්න.</div>
+                        <div class="footer-msg">Stays Fresh! Shop Daily.</div>
                         <div class="footer-msg">Thank You! Come Again.</div>
                         <div class="footer-sub">Software by Antigravity Pro</div>
                         <div class="barcode-placeholder">*${bill.bill_id}*</div>
@@ -214,11 +238,9 @@
 
             console.log('[PRINT DEBUG] openReceipt updating innerHTML. Size:', area.innerHTML.length);
 
-            // Wait a frame for DOM to update
             requestAnimationFrame(async () => {
                 console.log('[PRINT DEBUG] requestAnimationFrame fired in ledger. Invoking main process print...');
                 
-                // Also log printers for debugging
                 const printers = await window.api.getPrinters();
                 console.log('[PRINT DEBUG] Available printers:', printers);
                 const defaultPrinter = printers.find(p => p.isDefault);
@@ -262,6 +284,10 @@
             });
         }
 
+        if(ledgerSearchInput) {
+            ledgerSearchInput.addEventListener('input', () => renderLedger());
+        }
+
         if(closePaymentModalBtn) closePaymentModalBtn.addEventListener('click', closeModal);
         if(cancelPaymentBtn) cancelPaymentBtn.addEventListener('click', closeModal);
         if(confirmPaymentBtn) confirmPaymentBtn.addEventListener('click', handleConfirmPayment);
@@ -275,4 +301,3 @@
 
     document.addEventListener('DOMContentLoaded', init);
 })();
-

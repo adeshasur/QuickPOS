@@ -1,13 +1,14 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>QuickPOS Pro — Credit Ledger</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
+    <title>QuickPOS Pro - Credit Ledger</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
     <link rel="stylesheet" href="../assets/css/common.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
@@ -27,14 +28,45 @@
                 </div>
             </div>
 
-            <div class="outstanding-card">
-                <span class="outstanding-label"><span class="material-symbols-rounded s24" style="vertical-align:middle;">menu_book</span> Total Outstanding Credit</span>
-                <span class="outstanding-number" id="totalOutstanding">LKR 0.00</span>
+            <div class="kpi-grid">
+                <div class="kpi-card outstanding">
+                    <div class="kpi-icon-wrap">
+                        <span class="material-icons">menu_book</span>
+                    </div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Total Outstanding Credit</span>
+                        <span class="kpi-val" id="totalOutstanding">LKR 0.00</span>
+                    </div>
+                </div>
+                <div class="kpi-card customers">
+                    <div class="kpi-icon-wrap">
+                        <span class="material-icons">people</span>
+                    </div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Total Credit Customers</span>
+                        <span class="kpi-val" id="totalCreditCustomers">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card overdue">
+                    <div class="kpi-icon-wrap">
+                        <span class="material-icons">warning</span>
+                    </div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Overdue Bills</span>
+                        <span class="kpi-val" id="overdueBills">0</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="tab-bar">
-                <button class="tab-btn active" id="pendingTab">Pending Bills</button>
-                <button class="tab-btn" id="settledTab">Settled Bills</button>
+            <div class="toolbar">
+                <div class="tab-bar">
+                    <button class="tab-btn active" id="pendingTab">Pending Bills</button>
+                    <button class="tab-btn" id="settledTab">Settled Bills</button>
+                </div>
+                <div class="search-wrap">
+                    <span class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+                    <input class="search-input" id="ledgerSearch" placeholder="Search by Customer Name or Bill ID...">
+                </div>
             </div>
 
             <div class="table-wrapper">
@@ -45,7 +77,7 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </div>
