@@ -284,39 +284,101 @@
       renderProducts();
     });
 
+    const barcodeInput = document.getElementById('barcodeInput');
     const search = document.getElementById('stockSearch');
-    search.focus(); // Auto-focus for barcode scanning
 
-    search.addEventListener('input', (e) => {
-      currentSearch = e.target.value.toLowerCase().trim();
-      renderProducts();
-    });
+    if (barcodeInput) {
+      barcodeInput.focus(); // On page load, automatically focus the barcode input field
+    }
 
-    search.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        const val = search.value.toLowerCase().trim();
-        if (!val) return;
-
-        // 1. Try exact barcode match
-        let p = products.find(x => String(x.barcode || '').toLowerCase() === val);
-        
-        // 2. Try exact name match
-        if (!p) p = products.find(x => x.name.toLowerCase() === val);
-
-        // 3. Try first match in current grid
-        if (!p) {
-          const list = products.filter(x => x.name.toLowerCase().includes(val));
-          if (list.length > 0) p = list[0];
-        }
-
-        if (p) {
-          addToCart(p.id, 1, p.selling_price);
-          search.value = '';
-          currentSearch = '';
-          renderProducts();
-        }
+    // 1. Persistent Focus Management with Smart Exclusions
+    function keepFocus() {
+      if (!barcodeInput) return;
+      const activeEl = document.activeElement;
+      // Exclude customer search, cash received, customize modal fields, card ref, and standard search bar
+      const exemptIds = ['custSearch', 'amtReceived', 'custQty', 'custPrice', 'cardRefNo', 'stockSearch'];
+      if (activeEl && exemptIds.includes(activeEl.id)) {
+        return; // Cashier is actively typing in a valid exempt input field
       }
+      barcodeInput.focus();
+    }
+
+    document.addEventListener('click', () => {
+      setTimeout(keepFocus, 50);
     });
+    document.addEventListener('focusin', () => {
+      setTimeout(keepFocus, 50);
+    });
+
+    // 2. Enter Key Event Listener with hardware scanner keyboard emulation
+    if (barcodeInput) {
+      barcodeInput.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault(); // Prevent default form submission or page action
+          const val = barcodeInput.value.trim();
+          if (!val) return;
+
+          try {
+            // Trigger searchProductByBarcode API call
+            const product = await window.api.searchProductByBarcode(val);
+            if (product) {
+              // Smart Cart Logic: addToCart increments by 1 if product is already in cart
+              addToCart(product.id, 1, product.selling_price);
+              // Instantly clear the barcode text input
+              barcodeInput.value = '';
+            } else {
+              console.warn('Barcode not found:', val);
+              alert(`Barcode "${val}" not found in database.`);
+              barcodeInput.value = '';
+            }
+          } catch (err) {
+            console.error('Barcode search error:', err);
+            alert(`Error processing scan: ${err.message}`);
+            barcodeInput.value = '';
+          }
+        }
+      });
+    }
+
+    // 3. Name-based Quick Stock Search Event Listeners
+    if (search) {
+      search.addEventListener('input', (e) => {
+        currentSearch = e.target.value.toLowerCase().trim();
+        renderProducts();
+      });
+
+      search.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const val = search.value.toLowerCase().trim();
+          if (!val) return;
+
+          // 1. Try exact barcode match
+          let p = products.find(x => String(x.barcode || '').toLowerCase() === val);
+          
+          // 2. Try exact name match
+          if (!p) p = products.find(x => x.name.toLowerCase() === val);
+
+          // 3. Try first match in current grid
+          if (!p) {
+            const list = products.filter(x => x.name.toLowerCase().includes(val));
+            if (list.length > 0) p = list[0];
+          }
+
+          if (p) {
+            addToCart(p.id, 1, p.selling_price);
+            search.value = '';
+            currentSearch = '';
+            renderProducts();
+            
+            // Redirect focus back to barcode scanner
+            setTimeout(() => {
+              if (barcodeInput) barcodeInput.focus();
+            }, 100);
+          }
+        }
+      });
+    }
 
     const custSearch = document.getElementById('custSearch');
     const custDrop = document.getElementById('custDropdown');
