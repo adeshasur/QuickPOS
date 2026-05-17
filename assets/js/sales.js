@@ -236,15 +236,77 @@
     renderCart();
   }
 
+  const categoryThemeMap = {
+    'all': { icon: 'fa-solid fa-border-all', hue: '225' }, // Brand blue
+    'rice': { icon: 'fa-solid fa-wheat-awn', hue: '38' }, // Warm amber
+    'grain': { icon: 'fa-solid fa-wheat-awn', hue: '38' },
+    'beverages': { icon: 'fa-solid fa-bottle-water', hue: '198' }, // Cool blue
+    'dairy': { icon: 'fa-solid fa-egg', hue: '48' }, // Warm yellow
+    'egg': { icon: 'fa-solid fa-egg', hue: '48' },
+    'bakery': { icon: 'fa-solid fa-bread-slice', hue: '28' }, // Warm orange/brown
+    'bread': { icon: 'fa-solid fa-bread-slice', hue: '28' },
+    'snacks': { icon: 'fa-solid fa-cookie-bite', hue: '335' }, // Pinkish rose
+    'sweet': { icon: 'fa-solid fa-cookie-bite', hue: '335' },
+    'frozen': { icon: 'fa-solid fa-snowflake', hue: '175' }, // Cool cyan
+    'spices': { icon: 'fa-solid fa-pepper-hot', hue: '0' }, // Spicy red
+    'condiments': { icon: 'fa-solid fa-pepper-hot', hue: '0' },
+    'canned': { icon: 'fa-solid fa-box-open', hue: '15' }, // Brown
+    'packaged': { icon: 'fa-solid fa-box-open', hue: '15' },
+    'personal': { icon: 'fa-solid fa-soap', hue: '265' }, // Lavender purple
+    'care': { icon: 'fa-solid fa-soap', hue: '265' },
+    'cleaning': { icon: 'fa-solid fa-broom', hue: '155' }, // Clean teal/green
+    'baby': { icon: 'fa-solid fa-baby', hue: '310' }, // Soft pink
+    'pet': { icon: 'fa-solid fa-dog', hue: '125' }, // Greenish
+    'fruits': { icon: 'fa-solid fa-apple-whole', hue: '5' }, // Bright fruit red
+    'vegetables': { icon: 'fa-solid fa-carrot', hue: '135' }, // Fresh vegetable green
+    'meat': { icon: 'fa-solid fa-drumstick-bite', hue: '350' }, // Red-salmon
+    'seafood': { icon: 'fa-solid fa-fish', hue: '210' }, // Oceanic blue
+    'breakfast': { icon: 'fa-solid fa-bowl-food', hue: '33' }, // Golden
+    'health': { icon: 'fa-solid fa-heart-pulse', hue: '345' }, // Pink-red
+    'wellness': { icon: 'fa-solid fa-heart-pulse', hue: '345' },
+    'household': { icon: 'fa-solid fa-plug', hue: '220' } // Grey-blue
+  };
+
+  function getCategoryMeta(name) {
+    const key = normalizeCategory(name);
+    if (categoryThemeMap[key]) return categoryThemeMap[key];
+    
+    // Check keys as substrings
+    for (const [k, v] of Object.entries(categoryThemeMap)) {
+      if (key.includes(k) || k.includes(key)) return v;
+    }
+    
+    // Deterministic hue hashing for any custom category
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs(hash % 360);
+    return { icon: 'fa-solid fa-tag', hue: String(hue) };
+  }
+
   function renderCategories(rows) {
     const el = document.getElementById('catPills');
     if (!el) return;
-    el.innerHTML = '<button class="cat-pill active" data-cat="all">All</button>';
+    
+    const allMeta = getCategoryMeta('all');
+    el.innerHTML = `
+      <button class="cat-pill active" data-cat="all" style="--hue: ${allMeta.hue}">
+        <div class="cat-icon-badge"><i class="${allMeta.icon}"></i></div>
+        <span class="cat-name">All</span>
+      </button>
+    `;
+    
     rows.forEach((c) => {
       const btn = document.createElement('button');
       btn.className = 'cat-pill';
       btn.dataset.cat = normalizeCategory(c.name);
-      btn.textContent = c.name;
+      const meta = getCategoryMeta(c.name);
+      btn.style.setProperty('--hue', meta.hue);
+      btn.innerHTML = `
+        <div class="cat-icon-badge"><i class="${meta.icon}"></i></div>
+        <span class="cat-name">${c.name}</span>
+      `;
       el.appendChild(btn);
     });
   }

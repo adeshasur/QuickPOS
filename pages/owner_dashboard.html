@@ -19,31 +19,61 @@
 <div class="main-content">
   <div id="topbar-container"></div>
   <div class="content" id="dashContent">
+    <!-- Expired Items Warning Card Widget -->
+    <div class="card alert-card" id="expiryAlertCard" style="display:none; border-color: var(--danger); background: var(--danger-light); margin-bottom: 20px; border-radius: 24px;">
+      <div class="card-body" style="padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div class="alert-icon-circle" style="width: 40px; height: 40px; border-radius: 12px; background: rgba(239, 68, 68, 0.1); color: var(--danger); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div>
+            <h4 style="font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 2px;">Expired & Expiring Items Alert</h4>
+            <p style="font-size: 13px; color: var(--text2); font-weight: 500;">
+              There are <strong id="expiryAlertCount" style="color: var(--danger); font-weight: 700;">0</strong> items expiring within the next 30 days. Please review inventory immediately.
+            </p>
+          </div>
+        </div>
+        <button class="alert-btn danger-btn" onclick="document.getElementById('expiryList').scrollIntoView({ behavior: 'smooth' })" style="background: var(--danger); color: #fff; border: none; font-weight: 700; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+          Review Items
+        </button>
+      </div>
+    </div>
+
     <div class="kpi-grid">
       <div class="kpi-card blue">
         <div class="kpi-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H7"/></svg></div>
         <div class="kpi-label"><i class="fa-solid fa-money-bill-trend-up"></i> Total Revenue</div>
         <div class="kpi-val" id="kpiRevenue">LKR 0</div>
-        <div class="kpi-meta" id="kpiRevTrend"></div>
+        <div class="kpi-meta"><span class="kpi-sub">Gross sales revenue</span></div>
       </div>
       <div class="kpi-card green">
+        <div id="kpiProfitTrendBadge"></div>
         <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H7"/></svg></div>
         <div class="kpi-label"><i class="fa-solid fa-hand-holding-dollar"></i> Total Profit</div>
         <div class="kpi-val" id="kpiProfit">LKR 0</div>
-        <div class="kpi-meta" id="kpiProfitCompare"></div>
-        <div class="kpi-meta"><span class="kpi-sub" id="kpiProfitMargin">0% margin</span></div>
+        <div class="kpi-meta">
+          <span class="kpi-sub" id="kpiProfitMargin">0% margin</span>
+          <span class="kpi-sub-separator">•</span>
+          <span class="kpi-sub" id="kpiProfitCompareText">Yest: රු. 0</span>
+        </div>
+      </div>
+      <div class="kpi-card pink">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="kpi-label"><i class="fa-solid fa-users"></i> Credit Receivable</div>
+        <div class="kpi-val" id="kpiCredit">රු. 0</div>
+        <div class="kpi-meta"><span class="kpi-sub">Total customer debt</span></div>
+      </div>
+      <div class="kpi-card teal">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+        <div class="kpi-label"><i class="fa-solid fa-boxes-stacked"></i> Stock Assets</div>
+        <div class="kpi-val" id="kpiStockValue">රු. 0</div>
+        <div class="kpi-meta"><span class="kpi-sub">Total inventory value</span></div>
       </div>
       <div class="kpi-card amber">
         <div class="kpi-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
         <div class="kpi-label"><i class="fa-solid fa-cart-arrow-down"></i> Items Sold Today</div>
         <div class="kpi-val" id="kpiItems">0</div>
-        <div class="kpi-meta"><span class="kpi-sub">Total quantity</span></div>
-      </div>
-      <div class="kpi-card purple">
-        <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 01-10 0z"/><path d="M7 8H5a3 3 0 003 3"/><path d="M17 8h2a3 3 0 01-3 3"/><line x1="12" y1="13" x2="12" y2="18"/><line x1="8" y1="22" x2="16" y2="22"/></svg></div>
-        <div class="kpi-label"><i class="fa-solid fa-receipt"></i> Avg Transaction</div>
-        <div class="kpi-val" id="kpiAvg">LKR 0</div>
-        <div class="kpi-meta"><span class="kpi-sub" id="kpiTxCount">0 transactions</span></div>
+        <div class="kpi-meta"><span class="kpi-sub">Total quantity sold</span></div>
       </div>
     </div>
 
@@ -170,16 +200,44 @@
       </div>
     </div>
 
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title" style="color:var(--danger)">
+            <i class="fa-solid fa-calendar-times"></i>
+            Expiry Alerts
+          </div>
+          <span class="section-badge badge-red" id="expiryBadge">0 items</span>
+        </div>
+        <div class="card-body overflow-scroll" id="expiryList" style="display:flex;flex-direction:column;max-height:220px">
+          <div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">Checking expiration dates…</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title" style="color:var(--amber)">
+            <i class="fa-solid fa-hourglass-half"></i>
+            Slow Moving Items
+          </div>
+          <span class="section-badge badge-amber">No sales 3+ days</span>
+        </div>
+        <div class="card-body overflow-scroll" style="max-height:220px">
+          <div id="slowList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-header">
-        <div class="card-title" style="color:var(--amber)">
-          <i class="fa-solid fa-hourglass-half"></i>
-          Slow Moving Items
+        <div class="card-title" style="color:var(--primary)">
+          <i class="fa-solid fa-users-viewfinder"></i>
+          Today's Cashier Performance
         </div>
-        <span class="section-badge badge-amber">No sales 3+ days</span>
+        <span class="section-badge badge-blue">Sales Breakdown</span>
       </div>
-      <div class="card-body">
-        <div id="slowList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px"></div>
+      <div class="card-body" id="cashierPerformanceList" style="overflow-x:auto">
+        <div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">Loading cashier performance metrics…</div>
       </div>
     </div>
   </div>

@@ -8,6 +8,8 @@
   let sales = [];
   let saleItemsMap = new Map();
   let products = [];
+  let customers = [];
+  let expiredItems = [];
 
   function inRange(date, range) {
     const d = new Date(date);
@@ -139,12 +141,25 @@
 
     document.getElementById('kpiRevenue').textContent = fmtK(m.revenue);
     document.getElementById('kpiItems').textContent = m.items;
-    document.getElementById('kpiAvg').textContent = fmtK(m.avg);
-    document.getElementById('kpiTxCount').textContent = `${m.tx} transactions`;
+    
+    const avgEl = document.getElementById('kpiAvg');
+    if (avgEl) avgEl.textContent = fmtK(m.avg);
+    const txCountEl = document.getElementById('kpiTxCount');
+    if (txCountEl) txCountEl.textContent = `${m.tx} transactions`;
 
     document.getElementById('kpiProfit').textContent = fmtK(m.profit);
     const margin = m.revenue > 0 ? Math.round((m.profit / m.revenue) * 100) : 0;
-    document.getElementById('kpiProfitMargin').textContent = `${margin}% profit margin`;
+    document.getElementById('kpiProfitMargin').textContent = `${margin}% margin`;
+
+    // Calculate system-wide Credit Receivable outstanding balance
+    const totalCredit = customers.reduce((sum, c) => sum + Number(c.balance || 0), 0);
+    const creditEl = document.getElementById('kpiCredit');
+    if (creditEl) creditEl.textContent = fmtRu(totalCredit);
+
+    // Calculate system-wide Stock Asset Valuation (stock * cost_price)
+    const totalStockValue = products.reduce((sum, p) => sum + (Number(p.current_stock || 0) * Number(p.cost_price || 0)), 0);
+    const stockValEl = document.getElementById('kpiStockValue');
+    if (stockValEl) stockValEl.textContent = fmtRu(totalStockValue);
 
     // Dynamic Today vs Yesterday Profit comparison rendering
     const todayProfit = t.profit;
@@ -163,16 +178,20 @@
       pctChangeText = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
     }
 
-    const profitCompareEl = document.getElementById('kpiProfitCompare');
-    if (profitCompareEl) {
-      profitCompareEl.innerHTML = `
-        <div class="kpi-compare">
-          <span class="compare-vals">Today: <strong>${fmtRu(todayProfit)}</strong> | Yest: <span>${fmtRu(yesterdayProfit)}</span></span>
-          <span class="compare-indicator ${diff >= 0 ? 'up' : 'down'}">
-            <i class="fa-solid ${diff >= 0 ? 'fa-caret-up' : 'fa-caret-down'}"></i> ${pctChangeText}
-          </span>
-        </div>
+    // Floating absolute trend badge
+    const profitTrendBadgeEl = document.getElementById('kpiProfitTrendBadge');
+    if (profitTrendBadgeEl) {
+      profitTrendBadgeEl.innerHTML = `
+        <span class="kpi-trend-badge ${diff >= 0 ? 'up' : 'down'}" title="Today: ${fmtRu(todayProfit)} | Yesterday: ${fmtRu(yesterdayProfit)}">
+          <i class="fa-solid ${diff >= 0 ? 'fa-caret-up' : 'fa-caret-down'}"></i> ${pctChangeText}
+        </span>
       `;
+    }
+
+    // Symmetrical sub-text yesterday comparison
+    const profitCompareTextEl = document.getElementById('kpiProfitCompareText');
+    if (profitCompareTextEl) {
+      profitCompareTextEl.textContent = `Yest: ${fmtRu(yesterdayProfit)}`;
     }
 
     document.getElementById('ovToday0').textContent = t.tx;
@@ -206,6 +225,46 @@
       ? lowItems.map((p) => `<div class="alert-item"><div class="alert-info"><div class="alert-name">${p.name}</div><div class="alert-meta">Stock low</div></div><span class="alert-qty warn">${p.current_stock} left</span></div>`).join('')
       : '<div style="text-align:center;padding:30px 0;color:var(--green)">All stock levels are healthy</div>';
 
+    // Expired / Expiring Items Alerts populating
+    const expiryBadgeEl = document.getElementById('expiryBadge');
+    const expiryListEl = document.getElementById('expiryList');
+    const expiryAlertCardEl = document.getElementById('expiryAlertCard');
+    const expiryAlertCountEl = document.getElementById('expiryAlertCount');
+
+    if (expiryBadgeEl) expiryBadgeEl.textContent = `${expiredItems.length} items`;
+    if (expiryAlertCountEl) expiryAlertCountEl.textContent = expiredItems.length;
+
+    if (expiredItems.length > 0) {
+      if (expiryAlertCardEl) expiryAlertCardEl.style.display = 'block';
+      if (expiryListEl) {
+        expiryListEl.innerHTML = expiredItems.map((p) => {
+          let daysLeft = 0;
+          if (p.expiry_date) {
+            const exp = new Date(p.expiry_date);
+            const todayDate = new Date();
+            todayDate.setHours(0,0,0,0);
+            daysLeft = Math.ceil((exp - todayDate) / (1000 * 60 * 60 * 24));
+          }
+          let statusClass = daysLeft <= 0 ? 'critical' : 'warn';
+          let metaText = daysLeft <= 0 ? 'Expired' : `${daysLeft} days left`;
+          return `
+            <div class="alert-item ${statusClass}">
+              <div class="alert-info">
+                <div class="alert-name">${p.name}</div>
+                <div class="alert-meta">Expiry: ${p.expiry_date || 'N/A'} (${metaText})</div>
+              </div>
+              <span class="alert-qty ${statusClass}">${p.current_stock} left</span>
+            </div>
+          `;
+        }).join('');
+      }
+    } else {
+      if (expiryAlertCardEl) expiryAlertCardEl.style.display = 'none';
+      if (expiryListEl) {
+        expiryListEl.innerHTML = '<div style="text-align:center;padding:30px 0;color:var(--success);font-size:13px">No expiring products in the next 30 days</div>';
+      }
+    }
+
     const productQty = new Map();
     filtered.forEach((s) => {
       (saleItemsMap.get(s.id) || []).forEach((i) => {
@@ -224,6 +283,66 @@
           </div>
         `).join('')
       : '<div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">No sales found for this period</div>';
+
+    // Today's Cashier Performance Table Rendering
+    const cashierContainer = document.getElementById('cashierPerformanceList');
+    if (cashierContainer) {
+      const todaySales = sales.filter((s) => inRange(s.timestamp, 'today'));
+      const cashierData = {};
+      
+      todaySales.forEach((s) => {
+        const cashier = s.cashier_name || 'System';
+        if (!cashierData[cashier]) {
+          cashierData[cashier] = { count: 0, revenue: 0 };
+        }
+        cashierData[cashier].count += 1;
+        cashierData[cashier].revenue += Number(s.total_amount || 0);
+      });
+      
+      const cashierList = Object.entries(cashierData).map(([name, data]) => {
+        return {
+          name,
+          count: data.count,
+          revenue: data.revenue,
+          avg: data.count > 0 ? data.revenue / data.count : 0
+        };
+      }).sort((a, b) => b.revenue - a.revenue);
+      
+      if (cashierList.length > 0) {
+        cashierContainer.innerHTML = `
+          <table class="cashier-performance-table">
+            <thead>
+              <tr>
+                <th>Cashier</th>
+                <th style="text-align:right">Transactions</th>
+                <th style="text-align:right">Total Revenue</th>
+                <th style="text-align:right">Avg Transaction</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${cashierList.map((c) => {
+                const initials = c.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                return `
+                  <tr>
+                    <td>
+                      <div class="cashier-avatar-badge">
+                        <div class="cashier-avatar-circle">${initials}</div>
+                        <span>${c.name}</span>
+                      </div>
+                    </td>
+                    <td style="text-align:right" class="cashier-metrics-val">${c.count}</td>
+                    <td style="text-align:right" class="cashier-metrics-val">${fmt(c.revenue)}</td>
+                    <td style="text-align:right" class="cashier-metrics-val">${fmt(c.avg)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        `;
+      } else {
+        cashierContainer.innerHTML = '<div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">No sales recorded today.</div>';
+      }
+    }
   }
 
 
@@ -260,10 +379,12 @@
   let categoryMap = new Map();
 
   async function loadData() {
-    [sales, products, categories] = await Promise.all([
+    [sales, products, categories, customers, expiredItems] = await Promise.all([
       window.api.getSalesHistory(),
       window.api.getProducts(),
-      window.api.getCategories()
+      window.api.getCategories(),
+      window.api.getCustomers(),
+      window.api.getExpiredItems()
     ]);
     categoryMap = new Map(categories.map(c => [c.id, c.name]));
     const details = await Promise.all(sales.map((s) => window.api.getSaleDetails(s.id)));

@@ -333,26 +333,7 @@ ipcMain.handle('get-printers', async (event) => {
     return win.webContents.getPrintersAsync();
 });
 
-ipcMain.handle('print-receipt-silent', async (event, options = {}) => {
-    console.log('[PRINT DEBUG] Main process received print request', options);
-    const win = BrowserWindow.fromWebContents(event.sender);
-    
-    return new Promise((resolve) => {
-        console.log('[PRINT DEBUG] Starting webContents.print...');
-        win.webContents.print({
-            silent: true,
-            printBackground: true,
-            margins: { marginType: 'none' },
-            ...options
-        }, (success, failureReason) => {
-            console.log(`[PRINT DEBUG] Print finished. Success: ${success}, Reason: ${failureReason}`);
-            if (!success) {
-                console.error(`[PRINT ERROR] Details: ${failureReason}`);
-            }
-            resolve({ success, failureReason });
-        });
-    });
-});
+
 
 app.whenReady().then(async () => {
     const plainUsers = await allAsync("SELECT id, password FROM users WHERE password NOT LIKE 'pbkdf2$%'");
