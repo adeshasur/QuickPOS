@@ -268,10 +268,10 @@ ipcMain.handle('get-customers', async () => allAsync('SELECT * FROM customers'))
 
 ipcMain.handle('save-customer', async (event, c) => {
     if (c.id) {
-        await runAsync('UPDATE customers SET name = ?, phone = ?, address = ?, balance = ? WHERE id = ?', [c.name, c.phone, c.address, c.balance, c.id]);
+        await runAsync('UPDATE customers SET name = ?, phone = ?, address = ?, balance = ?, loyalty_points = ? WHERE id = ?', [c.name, c.phone, c.address, c.balance, c.loyaltyPoints || 0, c.id]);
         return { success: true };
     }
-    const result = await runAsync('INSERT INTO customers (name, phone, address, balance) VALUES (?, ?, ?, ?)', [c.name, c.phone, c.address, c.balance]);
+    const result = await runAsync('INSERT INTO customers (name, phone, address, balance, loyalty_points) VALUES (?, ?, ?, ?, ?)', [c.name, c.phone, c.address, c.balance, c.loyaltyPoints || 0]);
     return { success: true, id: result.lastID };
 });
 

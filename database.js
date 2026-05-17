@@ -94,6 +94,10 @@ db.serialize(() => {
     db.run("ALTER TABLE sales ADD COLUMN ref_no TEXT", (err) => {
         // Ignore error if column already exists
     });
+
+    db.run("ALTER TABLE customers ADD COLUMN loyalty_points INTEGER DEFAULT 0", (err) => {
+        // Ignore error if column already exists
+    });
 }); // end outer db.serialize
 
 
