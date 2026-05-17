@@ -132,6 +132,21 @@
         }).join('');
     }
 
+    // Modal Visibility Helpers
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('open');
+        }
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('open');
+        }
+    }
+
     // Expose stock write-off globally
     window.discardStockBatch = async function(id, name, currentStock) {
         if (!currentStock || currentStock <= 0) {
@@ -187,17 +202,37 @@
 
         await loadData();
 
-        // 1. Sleek accordion expanding toggling
+        // 1. Premium modal toggling bindings
         const toggleBtn = document.getElementById('toggleFormBtn');
-        const accordionHeader = document.getElementById('accordionHeader');
-        const accordion = document.getElementById('addStockAccordion');
+        const closeBtn = document.getElementById('closeAddStockModal');
+        const cancelBtn = document.getElementById('cancelAddStockModal');
+        const addStockModal = document.getElementById('addStockModal');
         
-        const toggleAccordion = () => {
-            if (accordion) accordion.classList.toggle('collapsed');
-        };
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                openModal('addStockModal');
+            });
+        }
 
-        if (toggleBtn) toggleBtn.addEventListener('click', toggleAccordion);
-        if (accordionHeader) accordionHeader.addEventListener('click', toggleAccordion);
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                closeModal('addStockModal');
+            });
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                closeModal('addStockModal');
+            });
+        }
+
+        if (addStockModal) {
+            addStockModal.addEventListener('click', (e) => {
+                if (e.target === addStockModal) {
+                    closeModal('addStockModal');
+                }
+            });
+        }
 
         // 2. Smart Category Auto-Fill & Price Pre-population
         const productSelect = document.getElementById('stockProduct');
@@ -252,7 +287,7 @@
                         alert('Stock added successfully!');
                     }
 
-                    // Reset form and collapse
+                    // Reset form and close modal
                     document.getElementById('stockProduct').value = '';
                     document.getElementById('stockCategory').value = '';
                     document.getElementById('stockQuantity').value = '1';
@@ -260,7 +295,7 @@
                     document.getElementById('stockSellingPrice').value = '';
                     document.getElementById('stockExpiryDate').value = '';
 
-                    if (accordion) accordion.classList.add('collapsed');
+                    closeModal('addStockModal');
 
                     await loadData();
                 } catch (err) {

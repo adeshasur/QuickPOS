@@ -31,58 +31,6 @@
                 </button>
             </div>
 
-            <div class="stock-in-card owner-only collapsed" id="addStockAccordion">
-                <div class="card-top" id="accordionHeader" style="cursor: pointer;">
-                    <div class="card-title">
-                        <span class="material-symbols-rounded">add_circle</span> Add New Stock
-                    </div>
-                    <span class="material-symbols-rounded arrow-icon" style="transition: transform 0.3s;">keyboard_arrow_down</span>
-                </div>
-                <div class="accordion-content">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">Product *</label>
-                            <select class="form-select" id="stockProduct">
-                                <option value="">Select Product</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Category *</label>
-                            <select class="form-select" id="stockCategory" disabled>
-                                <option value="">Select Category</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Quantity *</label>
-                            <input type="number" class="form-control" id="stockQuantity" min="1" value="1">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Cost Price (LKR) *</label>
-                            <input type="number" class="form-control" id="stockCostPrice" step="0.01" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Selling Price (LKR) *</label>
-                            <input type="number" class="form-control" id="stockSellingPrice" step="0.01" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Expiry Date *</label>
-                            <input type="date" class="form-control" id="stockExpiryDate">
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <button class="update-btn" id="addStockBtn"><span class="material-symbols-rounded s18" style="vertical-align:middle;margin-right:6px;">add</span> Add to Inventory</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="expiry-filters">
-                <span class="filters-label">Filter by Expiry:</span>
-                <div class="filter-badge active" data-filter="all">All Stock</div>
-                <div class="filter-badge" data-filter="good"><span class="material-symbols-rounded success s18" style="vertical-align:middle;">check_circle</span> Good (30+ days)</div>
-                <div class="filter-badge expiring" data-filter="expiring"><span class="material-symbols-rounded warning s18" style="vertical-align:middle;">warning</span> Expiring Soon (&lt;30 days)</div>
-                <div class="filter-badge expired" data-filter="expired"><span class="material-symbols-rounded danger s18" style="vertical-align:middle;">dangerous</span> Expired</div>
-            </div>
-
             <div class="stock-history-section">
                 <div class="section-header">
                     <div class="section-title">
@@ -109,6 +57,58 @@
                             </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Premium Add New Stock Modal -->
+    <div class="modal-overlay" id="addStockModal">
+        <div class="modal-box">
+            <div class="modal-top">
+                <div class="modal-title">Add New Stock</div>
+                <button class="modal-close" id="closeAddStockModal">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="field-row">
+                    <div class="field-group">
+                        <label class="field-label" for="stockProduct">Product <span class="req">*</span></label>
+                        <select class="field-select" id="stockProduct">
+                            <option value="">Select Product</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label" for="stockCategory">Category <span class="req">*</span></label>
+                        <select class="field-select" id="stockCategory" disabled>
+                            <option value="">Select Category</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field-group">
+                        <label class="field-label" for="stockQuantity">Quantity <span class="req">*</span></label>
+                        <input class="field-input" type="number" id="stockQuantity" min="1" value="1" placeholder="Enter quantity">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label" for="stockExpiryDate">Expiry Date <span class="req">*</span></label>
+                        <input class="field-input" type="date" id="stockExpiryDate">
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field-group">
+                        <label class="field-label" for="stockCostPrice">Cost Price (LKR) <span class="req">*</span></label>
+                        <input class="field-input" type="number" id="stockCostPrice" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label" for="stockSellingPrice">Selling Price (LKR) <span class="req">*</span></label>
+                        <input class="field-input" type="number" id="stockSellingPrice" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="mact-btn cancel" id="cancelAddStockModal">Cancel</button>
+                <button class="mact-btn confirm" id="addStockBtn">Add to Inventory</button>
             </div>
         </div>
     </div>
