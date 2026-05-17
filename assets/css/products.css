@@ -20,7 +20,7 @@
 /* ─── KPI METRICS ─── */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 8px;
   animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -62,6 +62,10 @@
 .kpi-icon.out {
   background: rgba(239, 68, 68, 0.08);
   color: var(--danger);
+}
+.kpi-icon.value {
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--success);
 }
 .kpi-info {
   display: flex;

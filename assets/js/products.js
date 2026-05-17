@@ -40,14 +40,17 @@
     const total = products.length;
     const lowStock = products.filter(p => Number(p.current_stock || 0) <= Number(p.alert_level || 0)).length;
     const outOfStock = products.filter(p => Number(p.current_stock || 0) === 0).length;
+    const totalValue = products.reduce((acc, p) => acc + (Number(p.current_stock || 0) * Number(p.selling_price || 0)), 0);
 
     const totalEl = document.getElementById('totalProductsCount');
     const lowStockEl = document.getElementById('lowStockCount');
     const outOfStockEl = document.getElementById('outOfStockCount');
+    const totalValueEl = document.getElementById('totalStockValue');
 
     if (totalEl) totalEl.textContent = total;
     if (lowStockEl) lowStockEl.textContent = lowStock;
     if (outOfStockEl) outOfStockEl.textContent = outOfStock;
+    if (totalValueEl) totalValueEl.textContent = fmt(totalValue);
   }
 
   function updatePreview(prefix) {
