@@ -70,14 +70,15 @@
   }
 
 
-  function renderHourChart(m) {
+  function renderHourChart(t, y) {
     const el = document.getElementById('hourChart');
     const labelsEl = document.getElementById('hourLabels');
     if (!el || !labelsEl) return;
 
     const businessHours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    const hourSales = businessHours.map(h => m.hourSales[h] || 0);
-    const max = Math.max(...hourSales, 1);
+    const todayHourSales = businessHours.map(h => t.hourSales[h] || 0);
+    const yesterdayHourSales = businessHours.map(h => y.hourSales[h] || 0);
+    const max = Math.max(...todayHourSales, ...yesterdayHourSales, 1);
     const hoursToRender = [8, 11, 14, 17, 20];
     
     el.innerHTML = `
@@ -88,13 +89,24 @@
       </div>
       <div class="chart-bars">
         ${businessHours.map((h, idx) => {
-          const val = m.hourSales[h] || 0;
-          const pct = (val / max) * 100;
-          const isPeak = val === max && val > 0;
-          const visualPct = Math.max(pct, 8); 
+          const tVal = t.hourSales[h] || 0;
+          const yVal = y.hourSales[h] || 0;
+          const tPct = (tVal / max) * 100;
+          const yPct = (yVal / max) * 100;
+          
+          // Ensure a minimum visible height (e.g. 5% if there's any value, or 1% if zero)
+          const tVisualPct = tVal > 0 ? Math.max(tPct, 5) : 1;
+          const yVisualPct = yVal > 0 ? Math.max(yPct, 5) : 1;
+          
           return `
-            <div class="hbar ${isPeak ? 'peak' : ''} ${val === 0 ? 'low-activity' : ''}" style="height:${visualPct}%">
-              <div class="hbar-tip">${h}:00 - ${fmt(val)}</div>
+            <div class="hbar-group">
+              <div class="hbar yesterday" style="height:${yVisualPct}%"></div>
+              <div class="hbar today" style="height:${tVisualPct}%"></div>
+              <div class="hbar-tip">
+                <strong style="display:block;margin-bottom:4px;border-bottom:1px solid var(--border);padding-bottom:4px;font-size:12px;">${h}:00 Interval</strong>
+                <span style="display:flex;align-items:center;gap:6px;font-weight:600;margin-bottom:2px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--primary);display:inline-block;"></span>Today: ${fmt(tVal)}</span>
+                <span style="display:flex;align-items:center;gap:6px;font-weight:600;color:var(--text-light);"><span style="width:8px;height:8px;border-radius:50%;background:#cbd5e1;display:inline-block;"></span>Yest: ${fmt(yVal)}</span>
+              </div>
             </div>`;
         }).join('')}
       </div>
@@ -215,7 +227,7 @@
       cardFill.style.width = `${(m.card / total) * 100}%`;
     }
 
-    renderHourChart(m);
+    renderHourChart(t, y);
     renderCatChart(m);
     renderSlowItems();
 

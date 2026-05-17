@@ -81,17 +81,20 @@
     <div class="card sales-chart-card">
       <div class="card-header">
         <div class="card-title" style="color:var(--primary)">
-          <i class="fa-solid fa-chart-line"></i>
-          Hourly Sales Trend & Business Performance
+          <i class="fa-solid fa-chart-column"></i>
+          Hourly Sales Trend (Today vs Yesterday)
         </div>
-        <span class="section-badge badge-blue">Today's Distribution</span>
+        <div class="chart-header-legend" style="display:flex;align-items:center;gap:16px;">
+          <div class="leg-item" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);font-weight:600;"><div class="leg-dot" style="width:10px;height:10px;border-radius:3px;background:var(--primary)"></div>Today</div>
+          <div class="leg-item" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);font-weight:600;"><div class="leg-dot" style="width:10px;height:10px;border-radius:3px;background:#cbd5e1;border:1px solid var(--border)"></div>Yesterday</div>
+        </div>
       </div>
       <div class="card-body" style="display:flex;flex-direction:column">
         <div id="hourChart" class="hour-chart large-chart"></div>
         <div id="hourLabels" class="hour-labels large-labels"></div>
-        <div class="bar-chart-legend" style="margin-top:16px">
-          <div class="leg-item"><div class="leg-dot" style="background:var(--primary)"></div>Peak period</div>
-          <div class="leg-item"><div class="leg-dot" style="background:#e2e8f0; border:1px solid var(--border)"></div>Low period</div>
+        <div class="bar-chart-legend" style="margin-top:16px;display:flex;gap:16px;">
+          <div class="leg-item" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);font-weight:500;"><div class="leg-dot" style="width:10px;height:10px;border-radius:3px;background:var(--primary)"></div>Today's Sales (Dark Blue)</div>
+          <div class="leg-item" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);font-weight:500;"><div class="leg-dot" style="width:10px;height:10px;border-radius:3px;background:#cbd5e1;border:1px solid var(--border)"></div>Yesterday's Sales (Lighter Grey)</div>
         </div>
       </div>
     </div>
