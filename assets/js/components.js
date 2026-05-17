@@ -146,7 +146,6 @@
         products: 'Products',
         inventory: 'Inventory',
         customers: 'Customers',
-        quotations: 'Quotations',
         ledger: 'Credit Ledger',
         sales_reports: 'Invoice History',
         reports: 'Shift Reports',
@@ -177,7 +176,6 @@
           <a href="products.html" class="menu-item" data-page="products"><i class="fa-solid fa-box-open"></i> Products</a>
           <a href="inventory.html" class="menu-item" data-page="inventory"><i class="fa-solid fa-warehouse"></i> Inventory <span id="lowStockBadge" style="display:none;margin-left:auto;padding:2px 8px;border-radius:999px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;"></span></a>
           <a href="customers.html" class="menu-item" data-page="customers"><i class="fa-solid fa-users"></i> Customers</a>
-          <a href="quotations.html" class="menu-item" data-page="quotations"><i class="fa-solid fa-file-invoice"></i> Quotations</a>
           <a href="ledger.html" class="menu-item" data-page="ledger"><i class="fa-solid fa-book"></i> Credit Ledger</a>
           <a href="sales_reports.html" class="menu-item" data-page="sales_reports"><i class="fa-solid fa-history"></i> Invoice History</a>
           <a href="reports.html" class="menu-item reports-allowed" data-page="reports"><i class="fa-solid fa-chart-pie"></i> Shift Reports</a>
