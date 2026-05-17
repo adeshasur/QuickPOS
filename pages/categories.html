@@ -6,7 +6,7 @@
 <title>QuickPOS Pro — Categories</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 <link rel="stylesheet" href="../assets/css/common.css">
 <link rel="stylesheet" href="../assets/css/sidebar.css">
@@ -33,41 +33,33 @@
       </button>
     </div>
 
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-icon-wrap blue">
-          <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-        </div>
-        <div>
-          <div class="stat-val" id="totalCategories">0</div>
-          <div class="stat-lbl">Total Categories</div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon blue"><i class="fa-solid fa-tags"></i></div>
+        <div class="kpi-info">
+          <span class="kpi-label">Total Categories</span>
+          <span class="kpi-val" id="totalCategories">0</span>
         </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon-wrap green">
-          <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7-4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
-        </div>
-        <div>
-          <div class="stat-val" id="totalProducts">0</div>
-          <div class="stat-lbl">Products in Categories</div>
+      <div class="kpi-card">
+        <div class="kpi-icon green"><i class="fa-solid fa-boxes-stacked"></i></div>
+        <div class="kpi-info">
+          <span class="kpi-label">Products in Categories</span>
+          <span class="kpi-val" id="totalProducts">0</span>
         </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon-wrap violet">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
-        </div>
-        <div>
-          <div class="stat-val" id="topSellingCategory">None</div>
-          <div class="stat-lbl">Top Selling Category</div>
+      <div class="kpi-card">
+        <div class="kpi-icon violet"><i class="fa-solid fa-trophy"></i></div>
+        <div class="kpi-info">
+          <span class="kpi-label">Top Selling Category</span>
+          <span class="kpi-val" id="topSellingCategory">None</span>
         </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon-wrap amber">
-          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-        </div>
-        <div>
-          <div class="stat-val" id="totalActiveProducts">0</div>
-          <div class="stat-lbl">Total Active Products</div>
+      <div class="kpi-card">
+        <div class="kpi-icon amber"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="kpi-info">
+          <span class="kpi-label">Total Active Products</span>
+          <span class="kpi-val" id="totalActiveProducts">0</span>
         </div>
       </div>
     </div>

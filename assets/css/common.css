@@ -444,3 +444,85 @@ body.dashboard-body {
 .btn, button, a, .sidebar-link, .menu-item, .cat-pill, .product-card, .kpi-card, .card, .filter-btn {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
+
+/* ─── KPI METRICS (SHARED) ─── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 8px;
+  animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.02);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+  min-height: 84px;
+  box-sizing: border-box;
+}
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  border-color: var(--border2);
+}
+.kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+.kpi-icon.total, .kpi-icon.blue {
+  background: rgba(29, 45, 191, 0.08);
+  color: var(--primary);
+}
+.kpi-icon.low, .kpi-icon.amber {
+  background: rgba(245, 158, 11, 0.08);
+  color: var(--warning);
+}
+.kpi-icon.out {
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--danger);
+}
+.kpi-icon.value, .kpi-icon.green {
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--success);
+}
+.kpi-icon.violet {
+  background: rgba(139, 92, 246, 0.08);
+  color: #8b5cf6;
+}
+.kpi-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.kpi-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.kpi-val {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  font-family: var(--mono);
+  line-height: 1.1;
+}
+
+@media(max-width:980px){
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
