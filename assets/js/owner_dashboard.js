@@ -3,6 +3,7 @@
 
   const fmt = (n) => `LKR ${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const fmtK = (n) => fmt(n);
+  const fmtRu = (n) => `රු. ${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   let sales = [];
   let saleItemsMap = new Map();
@@ -128,10 +129,12 @@
   function updateDashboard(range) {
     const filtered = sales.filter((s) => inRange(s.timestamp, range));
     const today = sales.filter((s) => inRange(s.timestamp, 'today'));
+    const yesterday = sales.filter((s) => inRange(s.timestamp, 'yesterday'));
     const week = sales.filter((s) => inRange(s.timestamp, 'last7'));
 
     const m = getMetrics(filtered);
     const t = getMetrics(today);
+    const y = getMetrics(yesterday);
     const w = getMetrics(week);
 
     document.getElementById('kpiRevenue').textContent = fmtK(m.revenue);
@@ -142,6 +145,35 @@
     document.getElementById('kpiProfit').textContent = fmtK(m.profit);
     const margin = m.revenue > 0 ? Math.round((m.profit / m.revenue) * 100) : 0;
     document.getElementById('kpiProfitMargin').textContent = `${margin}% profit margin`;
+
+    // Dynamic Today vs Yesterday Profit comparison rendering
+    const todayProfit = t.profit;
+    const yesterdayProfit = y.profit;
+    const diff = todayProfit - yesterdayProfit;
+    let pctChangeText = '0.0%';
+    if (yesterdayProfit > 0) {
+      const pct = (diff / yesterdayProfit) * 100;
+      pctChangeText = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
+    } else if (todayProfit > 0) {
+      pctChangeText = '+100.0%';
+    } else if (todayProfit === 0 && yesterdayProfit === 0) {
+      pctChangeText = '0.0%';
+    } else {
+      const pct = (diff / (Math.abs(yesterdayProfit) || 1)) * 100;
+      pctChangeText = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
+    }
+
+    const profitCompareEl = document.getElementById('kpiProfitCompare');
+    if (profitCompareEl) {
+      profitCompareEl.innerHTML = `
+        <div class="kpi-compare">
+          <span class="compare-vals">Today: <strong>${fmtRu(todayProfit)}</strong> | Yest: <span>${fmtRu(yesterdayProfit)}</span></span>
+          <span class="compare-indicator ${diff >= 0 ? 'up' : 'down'}">
+            <i class="fa-solid ${diff >= 0 ? 'fa-caret-up' : 'fa-caret-down'}"></i> ${pctChangeText}
+          </span>
+        </div>
+      `;
+    }
 
     document.getElementById('ovToday0').textContent = t.tx;
     document.getElementById('ovWeek0').textContent = w.tx;

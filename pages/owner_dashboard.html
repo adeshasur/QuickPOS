@@ -30,6 +30,7 @@
         <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H7"/></svg></div>
         <div class="kpi-label"><i class="fa-solid fa-hand-holding-dollar"></i> Total Profit</div>
         <div class="kpi-val" id="kpiProfit">LKR 0</div>
+        <div class="kpi-meta" id="kpiProfitCompare"></div>
         <div class="kpi-meta"><span class="kpi-sub" id="kpiProfitMargin">0% margin</span></div>
       </div>
       <div class="kpi-card amber">
@@ -43,6 +44,25 @@
         <div class="kpi-label"><i class="fa-solid fa-receipt"></i> Avg Transaction</div>
         <div class="kpi-val" id="kpiAvg">LKR 0</div>
         <div class="kpi-meta"><span class="kpi-sub" id="kpiTxCount">0 transactions</span></div>
+      </div>
+    </div>
+
+    <!-- Dedicated Full-Width Sales Graph Container -->
+    <div class="card sales-chart-card">
+      <div class="card-header">
+        <div class="card-title" style="color:var(--primary)">
+          <i class="fa-solid fa-chart-line"></i>
+          Hourly Sales Trend & Business Performance
+        </div>
+        <span class="section-badge badge-blue">Today's Distribution</span>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column">
+        <div id="hourChart" class="hour-chart large-chart"></div>
+        <div id="hourLabels" class="hour-labels large-labels"></div>
+        <div class="bar-chart-legend" style="margin-top:16px">
+          <div class="leg-item"><div class="leg-dot" style="background:var(--primary)"></div>Peak period</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#e2e8f0; border:1px solid var(--border)"></div>Low period</div>
+        </div>
       </div>
     </div>
 
@@ -104,7 +124,7 @@
       </div>
     </div>
 
-    <div class="grid-3">
+    <div class="grid-2">
       <div class="card">
         <div class="card-header">
           <div class="card-title" style="color:var(--success)">
@@ -115,24 +135,6 @@
         </div>
         <div class="card-body" id="topItemsList">
           <div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">No sales data</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title" style="color:var(--primary)">
-            <i class="fa-solid fa-clock-rotate-left"></i>
-            Peak Hours
-          </div>
-          <span class="section-badge badge-blue">today</span>
-        </div>
-        <div class="card-body" style="display:flex;flex-direction:column">
-          <div id="hourChart" class="hour-chart"></div>
-          <div id="hourLabels" class="hour-labels"></div>
-          <div class="bar-chart-legend">
-            <div class="leg-item"><div class="leg-dot" style="background:var(--primary)"></div>Peak period</div>
-            <div class="leg-item"><div class="leg-dot" style="background:#e2e8f0; border:1px solid var(--border)"></div>Low period</div>
-          </div>
         </div>
       </div>
 
