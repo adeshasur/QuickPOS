@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld('api', {
     getProducts: () => ipcRenderer.invoke('get-products'),
     updateProduct: (product) => ipcRenderer.invoke('update-product', product),
     deleteProduct: (id) => ipcRenderer.invoke('delete-product', id),
+    addStock: (data) => ipcRenderer.invoke('add-stock', data),
+    discardStock: (data) => ipcRenderer.invoke('discard-stock', data),
     searchProductByBarcode: (barcode) => ipcRenderer.invoke('search-barcode', barcode),
     
     // Categories

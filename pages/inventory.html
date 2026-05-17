@@ -6,7 +6,7 @@
     <title>QuickPOS Pro - Inventory Management</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
     <link rel="stylesheet" href="../assets/css/common.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
@@ -25,43 +25,52 @@
                     <div class="page-heading">Inventory Management</div>
                     <div class="page-sub">Track stock levels, expiry status, and restocking updates in one place</div>
                 </div>
+                <button class="add-btn owner-only" id="toggleFormBtn">
+                    <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;margin-right:8px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add New Stock
+                </button>
             </div>
 
-            <div class="stock-in-card owner-only">
-                <div class="card-top">
+            <div class="stock-in-card owner-only collapsed" id="addStockAccordion">
+                <div class="card-top" id="accordionHeader" style="cursor: pointer;">
                     <div class="card-title">
                         <span class="material-symbols-rounded">add_circle</span> Add New Stock
                     </div>
-                    <button class="update-btn" id="addStockBtn"><span class="material-symbols-rounded s18" style="vertical-align:middle;">add</span> Add to Inventory</button>
+                    <span class="material-symbols-rounded arrow-icon" style="transition: transform 0.3s;">keyboard_arrow_down</span>
                 </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Category *</label>
-                        <select class="form-select" id="stockCategory">
-                            <option value="">Select Category</option>
-                        </select>
+                <div class="accordion-content">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Product *</label>
+                            <select class="form-select" id="stockProduct">
+                                <option value="">Select Product</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category *</label>
+                            <select class="form-select" id="stockCategory" disabled>
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Quantity *</label>
+                            <input type="number" class="form-control" id="stockQuantity" min="1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Cost Price (LKR) *</label>
+                            <input type="number" class="form-control" id="stockCostPrice" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Selling Price (LKR) *</label>
+                            <input type="number" class="form-control" id="stockSellingPrice" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Expiry Date *</label>
+                            <input type="date" class="form-control" id="stockExpiryDate">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Product *</label>
-                        <select class="form-select" id="stockProduct">
-                            <option value="">Select Product</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Quantity *</label>
-                        <input type="number" class="form-control" id="stockQuantity" min="1" value="1">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Cost Price (LKR) *</label>
-                        <input type="number" class="form-control" id="stockCostPrice" step="0.01" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Selling Price (LKR) *</label>
-                        <input type="number" class="form-control" id="stockSellingPrice" step="0.01" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Expiry Date *</label>
-                        <input type="date" class="form-control" id="stockExpiryDate">
+                    <div class="form-actions">
+                        <button class="update-btn" id="addStockBtn"><span class="material-symbols-rounded s18" style="vertical-align:middle;margin-right:6px;">add</span> Add to Inventory</button>
                     </div>
                 </div>
             </div>

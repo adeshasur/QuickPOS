@@ -194,6 +194,25 @@ ipcMain.handle('delete-product', async (event, id) => {
     return { success: true };
 });
 
+ipcMain.handle('add-stock', async (event, { productId, quantity, costPrice, sellingPrice, expiryDate }) => {
+    await runAsync(
+        'UPDATE products SET current_stock = current_stock + ?, cost_price = ?, selling_price = ?, expiry_date = ? WHERE id = ?',
+        [quantity, costPrice, sellingPrice, expiryDate, productId]
+    );
+    return { success: true };
+});
+
+ipcMain.handle('discard-stock', async (event, { productId, quantity }) => {
+    const product = await getAsync('SELECT current_stock FROM products WHERE id = ?', [productId]);
+    if (!product) throw new Error('Product not found');
+    const newStock = Math.max(0, Number(product.current_stock || 0) - Number(quantity || 0));
+    await runAsync(
+        'UPDATE products SET current_stock = ? WHERE id = ?',
+        [newStock, productId]
+    );
+    return { success: true, newStock };
+});
+
 ipcMain.handle('search-barcode', async (event, barcode) => getAsync('SELECT * FROM products WHERE barcode = ?', [barcode]));
 ipcMain.handle('get-expired-items', async () => allAsync("SELECT * FROM products WHERE expiry_date <= date('now', '+30 days')"));
 ipcMain.handle('get-categories', async () => allAsync('SELECT * FROM categories'));

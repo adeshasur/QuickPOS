@@ -34,6 +34,7 @@
         try {
             categories = await window.api.getCategories();
             products = await window.api.getProducts();
+            populateProductDropdown();
             populateCategoryDropdown();
             renderStockTable();
         } catch (err) {
@@ -53,17 +54,11 @@
         });
     }
 
-    function populateProductDropdown(categoryId) {
+    function populateProductDropdown() {
         const productSelect = document.getElementById('stockProduct');
         if (!productSelect) return;
-        if (!categoryId) {
-            productSelect.innerHTML = '<option value="">Select Category First</option>';
-            return;
-        }
-        
-        const filteredProducts = products.filter(p => p.category_id == categoryId);
         productSelect.innerHTML = '<option value="">Select Product</option>';
-        filteredProducts.forEach(product => {
+        products.forEach(product => {
             const option = document.createElement('option');
             option.value = product.id;
             option.textContent = product.name;
@@ -122,15 +117,67 @@
                     </td>
                     <td>
                         ${canEditInventory
-                          ? `<button class="update-btn" onclick="location.href='products.html'">
-                               <span class="material-symbols-rounded" style="font-size:16px;">edit</span>
-                             </button>`
+                          ? `<div style="display:flex;gap:6px;align-items:center;">
+                               <button class="tbl-btn edit" onclick="location.href='products.html'" title="Edit Product">
+                                   <span class="material-symbols-rounded" style="font-size:16px;">edit</span>
+                               </button>
+                               <button class="tbl-btn discard-btn" onclick="window.discardStockBatch(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.current_stock})" title="Discard / Write-off Stock">
+                                   <span class="material-symbols-rounded" style="font-size:16px;">delete_sweep</span>
+                               </button>
+                             </div>`
                           : '<span style="color: var(--text3); font-size:12px; font-weight:600;">View Only</span>'}
                     </td>
                 </tr>
             `;
         }).join('');
     }
+
+    // Expose stock write-off globally
+    window.discardStockBatch = async function(id, name, currentStock) {
+        if (!currentStock || currentStock <= 0) {
+            if (window.Notifications) {
+                window.Notifications.showToast('This product is already out of stock.', 'warning');
+            } else {
+                alert('This product is already out of stock.');
+            }
+            return;
+        }
+
+        const input = prompt(`Enter the number of units to write off/discard for "${name}" (Current Stock: ${currentStock}):`);
+        if (input === null) return; // user cancelled
+
+        const qty = Number(input);
+        if (isNaN(qty) || qty <= 0) {
+            alert('Please enter a valid positive number.');
+            return;
+        }
+
+        if (qty > currentStock) {
+            alert(`Cannot discard ${qty} units. Only ${currentStock} units are in stock.`);
+            return;
+        }
+
+        const confirmMessage = qty === currentStock 
+            ? `WARNING: You are about to completely write off all ${currentStock} units of "${name}". This will archive the stock to 0.\n\nAre you absolutely sure?`
+            : `Are you sure you want to write off / discard ${qty} units of "${name}"?`;
+
+        if (!confirm(confirmMessage)) return;
+
+        try {
+            const result = await window.api.discardStock({ productId: id, quantity: qty });
+            
+            if (window.Notifications) {
+                window.Notifications.showToast(`Successfully wrote off ${qty} units of ${name}.`, 'warning');
+                await window.Notifications.refresh();
+            } else {
+                alert('Stock updated successfully.');
+            }
+
+            await loadData();
+        } catch (err) {
+            alert('Failed to discard stock: ' + err.message);
+        }
+    };
 
     async function init() {
         const user = JSON.parse(localStorage.getItem('quickpos-user'));
@@ -140,10 +187,85 @@
 
         await loadData();
 
-        const categorySelect = document.getElementById('stockCategory');
-        if(categorySelect) {
-            categorySelect.addEventListener('change', function() {
-                populateProductDropdown(this.value);
+        // 1. Sleek accordion expanding toggling
+        const toggleBtn = document.getElementById('toggleFormBtn');
+        const accordionHeader = document.getElementById('accordionHeader');
+        const accordion = document.getElementById('addStockAccordion');
+        
+        const toggleAccordion = () => {
+            if (accordion) accordion.classList.toggle('collapsed');
+        };
+
+        if (toggleBtn) toggleBtn.addEventListener('click', toggleAccordion);
+        if (accordionHeader) accordionHeader.addEventListener('click', toggleAccordion);
+
+        // 2. Smart Category Auto-Fill & Price Pre-population
+        const productSelect = document.getElementById('stockProduct');
+        if (productSelect) {
+            productSelect.addEventListener('change', function() {
+                const prodId = Number(this.value);
+                const prod = products.find(p => p.id === prodId);
+                const catSelect = document.getElementById('stockCategory');
+                
+                if (prod) {
+                    if (catSelect) catSelect.value = prod.category_id;
+                    document.getElementById('stockCostPrice').value = prod.cost_price || '';
+                    document.getElementById('stockSellingPrice').value = prod.selling_price || '';
+                    document.getElementById('stockExpiryDate').value = prod.expiry_date || '';
+                } else {
+                    if (catSelect) catSelect.value = '';
+                    document.getElementById('stockCostPrice').value = '';
+                    document.getElementById('stockSellingPrice').value = '';
+                    document.getElementById('stockExpiryDate').value = '';
+                }
+            });
+        }
+
+        // 3. Add Stock Submission Handler
+        const addStockBtn = document.getElementById('addStockBtn');
+        if (addStockBtn) {
+            addStockBtn.addEventListener('click', async () => {
+                const productId = Number(document.getElementById('stockProduct').value);
+                const quantity = Number(document.getElementById('stockQuantity').value);
+                const costPrice = Number(document.getElementById('stockCostPrice').value);
+                const sellingPrice = Number(document.getElementById('stockSellingPrice').value);
+                const expiryDate = document.getElementById('stockExpiryDate').value;
+
+                if (!productId || !quantity || quantity <= 0 || !costPrice || costPrice < 0 || !sellingPrice || sellingPrice < 0 || !expiryDate) {
+                    alert('Please fill out all required fields with valid values.');
+                    return;
+                }
+
+                try {
+                    await window.api.addStock({
+                        productId,
+                        quantity,
+                        costPrice,
+                        sellingPrice,
+                        expiryDate
+                    });
+                    
+                    if (window.Notifications) {
+                        window.Notifications.showToast(`Restocked ${quantity} units successfully!`, 'success');
+                        await window.Notifications.refresh();
+                    } else {
+                        alert('Stock added successfully!');
+                    }
+
+                    // Reset form and collapse
+                    document.getElementById('stockProduct').value = '';
+                    document.getElementById('stockCategory').value = '';
+                    document.getElementById('stockQuantity').value = '1';
+                    document.getElementById('stockCostPrice').value = '';
+                    document.getElementById('stockSellingPrice').value = '';
+                    document.getElementById('stockExpiryDate').value = '';
+
+                    if (accordion) accordion.classList.add('collapsed');
+
+                    await loadData();
+                } catch (err) {
+                    alert('Failed to add stock: ' + err.message);
+                }
             });
         }
 
