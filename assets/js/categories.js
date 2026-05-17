@@ -167,9 +167,11 @@
         const deleteDisabledAttr = pCount > 0
           ? 'disabled style="opacity: 0.4; cursor: not-allowed;" title="Cannot delete category with active products"'
           : '';
+        const statusClass = (cat.description === 'Inactive') ? 'inactive' : 'active';
+        const statusText = cat.description === 'Inactive' ? 'Inactive' : 'Active';
         return `<tr>
           <td class="td-name">${cat.name}</td>
-          <td><span class="status-badge active">Active</span></td>
+          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
           <td><span class="count-badge">${pCount} product(s)</span></td>
           <td>
             <div class="actions-cell">
@@ -192,7 +194,7 @@
     document.getElementById('addCategoryBtn').addEventListener('click', () => {
       document.getElementById('categoryId').value = '';
       document.getElementById('categoryName').value = '';
-      document.getElementById('categoryDescription').value = '';
+      document.getElementById('categoryStatus').value = 'Active';
       document.getElementById('modalTitle').textContent = 'Add New Category';
       openModal('categoryModal');
     });
@@ -206,7 +208,7 @@
         if (!cat) return;
         document.getElementById('categoryId').value = cat.id;
         document.getElementById('categoryName').value = cat.name;
-        document.getElementById('categoryDescription').value = cat.description || '';
+        document.getElementById('categoryStatus').value = cat.description || 'Active';
         document.getElementById('modalTitle').textContent = 'Edit Category';
         openModal('categoryModal');
       }
@@ -223,10 +225,10 @@
     document.getElementById('saveModalBtn').addEventListener('click', async () => {
       const id = Number(document.getElementById('categoryId').value || 0);
       const name = document.getElementById('categoryName').value.trim();
-      const description = document.getElementById('categoryDescription').value.trim();
+      const status = document.getElementById('categoryStatus').value;
       if (!name) return alert('Please enter a category name.');
 
-      await window.api.saveCategory({ id: id || null, name, description });
+      await window.api.saveCategory({ id: id || null, name, description: status });
       closeModal('categoryModal');
       await reload();
     });

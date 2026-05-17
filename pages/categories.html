@@ -117,9 +117,12 @@
         <span class="field-hint">Maximum 50 characters</span>
       </div>
       <div class="field-group">
-        <label class="field-label" for="categoryDescription">Description <span style="color:var(--text3);font-weight:400;text-transform:none">(optional)</span></label>
-        <textarea class="field-textarea" id="categoryDescription" placeholder="Short description for this category…" maxlength="200" rows="3"></textarea>
-        <span class="field-hint">Maximum 200 characters</span>
+        <label class="field-label" for="categoryStatus">Status</label>
+        <select class="field-select" id="categoryStatus">
+          <option value="Active" selected>Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+        <span class="field-hint">Specify whether this category is active</span>
       </div>
     </div>
     <div class="modal-actions">
