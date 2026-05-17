@@ -57,7 +57,6 @@
       card.className = `product-card${out ? ' out-of-stock' : ''}`;
       card.innerHTML = `
         ${out ? '<div class="out-label">OUT</div>' : ''}
-        <button class="cust-btn" data-id="${p.id}" title="Customize qty/price"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
         <div class="pc-cat">${(p.category_name || 'General').toLowerCase()}</div>
         <div class="pc-name">${p.name}${p.unit_type ? ` / ${p.unit_type}` : ''}</div>
         <div class="pc-price">${fmt(p.selling_price || 0)}</div>
@@ -65,15 +64,10 @@
       `;
 
       if (!out) {
-        card.addEventListener('click', (e) => {
-          if (!e.target.closest('.cust-btn')) addToCart(p.id, 1, Number(p.selling_price || 0));
+        card.addEventListener('click', () => {
+          addToCart(p.id, 1, Number(p.selling_price || 0));
         });
       }
-
-      card.querySelector('.cust-btn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        openCustomize(p.id);
-      });
       grid.appendChild(card);
     });
   }
