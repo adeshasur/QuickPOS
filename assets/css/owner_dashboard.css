@@ -15,7 +15,7 @@
 .tb-icon-btn{width:38px;height:38px;background:var(--surface);border:1px solid var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);transition:all .2s}
 .tb-icon-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-glow);}
 .tb-icon-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg, var(--primary), #4054ff);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;cursor:pointer;box-shadow: 0 4px 10px rgba(29, 45, 191, 0.2);}
+
 
 /* ——— DASH HEADER ——— */
 .dash-header {
