@@ -264,7 +264,7 @@ body.dashboard-body {
     position: absolute;
     top: 50px;
     right: 0;
-    width: 300px;
+    width: 320px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 16px;
@@ -287,6 +287,7 @@ body.dashboard-body {
 .nd-body {
     max-height: 350px;
     overflow-y: auto;
+    width: 100%;
 }
 .nd-item {
     display: flex;
@@ -296,6 +297,9 @@ body.dashboard-body {
     border-bottom: 1px solid #f1f5f9;
     cursor: pointer;
     transition: background 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 .nd-item:hover {
     background: #f8fafc;
@@ -313,12 +317,16 @@ body.dashboard-body {
 }
 .nd-item-info {
     flex: 1;
+    min-width: 0;
 }
 .nd-item-name {
     font-weight: 600;
     font-size: 13px;
     color: var(--text);
     margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .nd-item-stock {
     font-size: 11px;
