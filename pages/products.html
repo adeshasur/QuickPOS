@@ -6,7 +6,7 @@
 <title>QuickPOS Pro — Products</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
     <link rel="stylesheet" href="../assets/css/common.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
@@ -32,6 +32,43 @@
       </button>
     </div>
 
+    <div class="kpi-grid">
+      <div class="kpi-card" id="kpiTotalProducts">
+        <div class="kpi-icon total"><i class="fa-solid fa-boxes-stacked"></i></div>
+        <div class="kpi-info">
+          <span class="kpi-label">Total Products</span>
+          <span class="kpi-val" id="totalProductsCount">0</span>
+        </div>
+      </div>
+      <div class="kpi-card" id="kpiLowStock">
+        <div class="kpi-icon low"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="kpi-info">
+          <span class="kpi-label">Low Stock Items</span>
+          <span class="kpi-val" id="lowStockCount">0</span>
+        </div>
+      </div>
+      <div class="kpi-card" id="kpiOutOfStock">
+        <div class="kpi-icon out"><i class="fa-solid fa-circle-xmark"></i></div>
+        <div class="kpi-info">
+          <span class="kpi-label">Out of Stock</span>
+          <span class="kpi-val" id="outOfStockCount">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-toolbar">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="productSearch" placeholder="Search by Name or Barcode..." class="filter-input">
+      </div>
+      <div class="cat-filter-box">
+        <i class="fa-solid fa-filter filter-icon"></i>
+        <select id="categoryFilter" class="filter-select">
+          <option value="">All Categories</option>
+        </select>
+      </div>
+    </div>
+
     <div class="table-wrap">
       <div class="table-scroll">
         <table>
@@ -41,14 +78,13 @@
               <th>Category</th>
               <th>Measurement</th>
               <th>Stock</th>
-              <th>Alert</th>
               <th style="text-align:right">Price (LKR)</th>
               <th style="text-align:right">Actions</th>
             </tr>
           </thead>
           <tbody id="productsTableBody">
             <tr id="emptyRow">
-              <td colspan="7">
+              <td colspan="6">
                 <div class="empty-state">
                   <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
                   <p>No products found</p>
@@ -155,6 +191,7 @@
       <button class="modal-close" id="closeEditModal"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body">
+      <input type="hidden" id="editId">
       <div class="field-row">
         <div class="field-group">
           <label class="field-label" for="editBarcode">Barcode</label>

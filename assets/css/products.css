@@ -1,4 +1,7 @@
 /* Variables inherited from common.css */
+:root {
+  --font: 'Manrope', 'Inter', sans-serif;
+}
 
 
 /* ─── CONTENT ─── */
@@ -13,6 +16,164 @@
 .add-btn{display:flex;align-items:center;gap:8px;background:var(--primary);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;transition:all .2s;box-shadow: 0 4px 10px var(--primary-glow);}
 .add-btn:hover{background:var(--primary-dark);transform:translateY(-2px)}
 .add-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* ─── KPI METRICS ─── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 8px;
+  animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.02);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+}
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  border-color: var(--border2);
+}
+.kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+.kpi-icon.total {
+  background: rgba(29, 45, 191, 0.08);
+  color: var(--primary);
+}
+.kpi-icon.low {
+  background: rgba(245, 158, 11, 0.08);
+  color: var(--warning);
+}
+.kpi-icon.out {
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--danger);
+}
+.kpi-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.kpi-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.kpi-val {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  font-family: var(--mono);
+  line-height: 1.1;
+}
+
+/* ─── FILTER TOOLBAR ─── */
+.filter-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.02);
+  margin-bottom: 4px;
+  animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.search-box {
+  position: relative;
+  flex: 1;
+  max-width: 360px;
+}
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3);
+  font-size: 13px;
+  pointer-events: none;
+}
+.filter-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 12px 8px 34px;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.filter-input::placeholder {
+  color: var(--text3);
+  font-weight: 400;
+}
+.filter-input:focus {
+  border-color: var(--primary);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+.cat-filter-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.filter-icon {
+  color: var(--text3);
+  font-size: 13px;
+}
+.filter-select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 32px 8px 12px;
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  transition: all 0.2s ease;
+}
+.cat-filter-box::after {
+  content: '\f078';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3);
+  font-size: 9px;
+  pointer-events: none;
+}
+.filter-select:focus {
+  border-color: var(--primary);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
 
 /* ─── TABLE AREA ─── */
 .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:visible;display:flex;flex-direction:column;box-shadow: 0 2px 4px rgba(0,0,0,0.02);animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;}
@@ -34,11 +195,23 @@ tbody tr:last-child td{border-bottom:none}
 .p-name-main{font-size:14px;font-weight:700;color:var(--text)}
 .p-barcode-sub{font-size:11px;font-weight:600;color:var(--text3);background:var(--surface2);padding:2px 6px;border-radius:4px;border:1px solid var(--border);width:fit-content;font-family:var(--mono);}
 
-/* Badges */
+/* Badges & Measurement Tag */
 .badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
 .badge.unit{background:var(--primary-light);color:var(--primary);border:1px solid rgba(31,111,84,.2)}
 .badge.weight{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
 .badge.unit-type{background:var(--warning-light);color:var(--warning);border:1px solid rgba(185,110,27,.2);margin-left:4px}
+.measure-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  background: var(--surface2);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-family: var(--font);
+}
 
 /* Stock */
 .stock-ok{font-size:14px;font-weight:700;font-family:var(--mono);color:var(--success)}
@@ -49,7 +222,7 @@ tbody tr:last-child td{border-bottom:none}
 /* Price cell */
 .price-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
 .price-base{font-size:12px;color:var(--text3);text-decoration:line-through;font-family:var(--mono);font-weight:500;}
-.price-final{font-size:15px;font-weight:800;font-family:var(--mono);color:var(--success)}
+.price-final{font-size:15px;font-weight:800;font-family:var(--mono);color:#1a1a1a}
 .price-disc{font-size:11px;font-weight:700;color:var(--warning);background:var(--warning-light);border:1px solid rgba(185,110,27,.2);padding:2px 8px;border-radius:6px;margin-top:2px}
 
 /* Action buttons */

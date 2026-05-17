@@ -8,6 +8,7 @@
     /* Base colors - Brand Blue/Orange Theme */
     --primary: #1D2DBF;
     --primary-dark: #16239a;
+    --primary-glow: rgba(29, 45, 191, 0.08);
     --accent: #FF9800;
     --accent-light: #ffb11a;
     

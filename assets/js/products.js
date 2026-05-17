@@ -14,6 +14,7 @@
   function populateCategoryDropdowns() {
     ['addCat', 'editCat'].forEach((id) => {
       const select = document.getElementById(id);
+      if (!select) return;
       select.innerHTML = '<option value="">Select Category</option>';
       categories.forEach((c) => {
         const opt = document.createElement('option');
@@ -22,6 +23,31 @@
         select.appendChild(opt);
       });
     });
+
+    const filterSelect = document.getElementById('categoryFilter');
+    if (filterSelect) {
+      filterSelect.innerHTML = '<option value="">All Categories</option>';
+      categories.forEach((c) => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name;
+        filterSelect.appendChild(opt);
+      });
+    }
+  }
+
+  function updateKPICards() {
+    const total = products.length;
+    const lowStock = products.filter(p => Number(p.current_stock || 0) <= Number(p.alert_level || 0)).length;
+    const outOfStock = products.filter(p => Number(p.current_stock || 0) === 0).length;
+
+    const totalEl = document.getElementById('totalProductsCount');
+    const lowStockEl = document.getElementById('lowStockCount');
+    const outOfStockEl = document.getElementById('outOfStockCount');
+
+    if (totalEl) totalEl.textContent = total;
+    if (lowStockEl) lowStockEl.textContent = lowStock;
+    if (outOfStockEl) outOfStockEl.textContent = outOfStock;
   }
 
   function updatePreview(prefix) {
@@ -34,15 +60,36 @@
 
   function render() {
     const tbody = document.getElementById('productsTableBody');
-    if (!products.length) {
-      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>No products found</p></div></td></tr>`;
+    
+    // Get filter inputs
+    const query = (document.getElementById('productSearch')?.value || '').toLowerCase().trim();
+    const catFilterVal = document.getElementById('categoryFilter')?.value || '';
+
+    // Filter products list dynamically
+    const filteredProducts = products.filter((p) => {
+      const nameMatch = p.name.toLowerCase().includes(query);
+      const barcodeMatch = (p.barcode || '').toLowerCase().includes(query);
+      const queryMatch = !query || nameMatch || barcodeMatch;
+
+      const catMatch = !catFilterVal || p.category_id === Number(catFilterVal);
+
+      return queryMatch && catMatch;
+    });
+
+    if (!filteredProducts.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><p>No products found</p></div></td></tr>`;
       return;
     }
 
-    tbody.innerHTML = products.map((p) => {
+    tbody.innerHTML = filteredProducts.map((p) => {
       const cat = categories.find((c) => c.id === p.category_id);
       const low = Number(p.current_stock || 0) <= Number(p.alert_level || 0);
       const discount = Math.max(0, Number(p.cost_price || 0) - Number(p.selling_price || 0));
+      
+      // Dynamic measurement text optimization
+      const unitStr = p.unit_type || 'pc';
+      const displayUnit = (unitStr.toLowerCase() === 'pcs' || unitStr.toLowerCase() === 'pc') ? '1 pc' : `1 ${unitStr}`;
+
       return `<tr>
         <td class="td-name">
           <div class="name-box">
@@ -51,9 +98,8 @@
           </div>
         </td>
         <td class="td-cat">${cat ? cat.name : '-'}</td>
-        <td>${p.is_weighted ? `<span class="badge weight">By Weight</span><span class="badge unit-type">${p.unit_type || '-'}</span>` : '<span class="badge unit">Unit</span>'}</td>
+        <td><span class="measure-tag">${displayUnit}</span></td>
         <td>${low ? `<span class="stock-low">${p.current_stock}</span>` : `<span class="stock-ok">${p.current_stock}</span>`}</td>
-        <td><span class="alert-val">${p.alert_level || 0}</span></td>
         <td><div class="price-wrap">${discount > 0 ? `<span class="price-base">${fmt(p.cost_price)}</span>` : ''}<span class="price-final">${fmt(p.selling_price)}</span>${discount > 0 ? `<span class="price-disc">-${fmt(discount)}</span>` : ''}</div></td>
         <td><div class="actions-cell"><button class="tbl-btn edit" data-id="${p.id}">Edit</button><button class="tbl-btn del" data-id="${p.id}">Delete</button></div></td>
       </tr>`;
@@ -63,6 +109,7 @@
   async function reload() {
     [categories, products] = await Promise.all([window.api.getCategories(), window.api.getProducts()]);
     populateCategoryDropdowns();
+    updateKPICards();
     render();
   }
 
@@ -78,6 +125,21 @@
   }
 
   function bindEvents() {
+    const searchInput = document.getElementById('productSearch');
+    const catFilter = document.getElementById('categoryFilter');
+
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        render();
+      });
+    }
+
+    if (catFilter) {
+      catFilter.addEventListener('change', () => {
+        render();
+      });
+    }
+
     document.getElementById('addProductBtn').addEventListener('click', () => {
       ['addBarcode', 'addName', 'addCat', 'addUnit', 'addBasePrice'].forEach((id) => (document.getElementById(id).value = ''));
       document.getElementById('addWeighted').checked = false;
