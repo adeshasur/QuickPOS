@@ -6,7 +6,7 @@
       if (!window.api?.getProducts) return;
       try {
         const products = await window.api.getProducts();
-        const lowItems = (products || []).filter((p) => Number(p.current_stock || 0) > 0 && Number(p.current_stock || 0) <= Number(p.alert_level || 0));
+        const lowItems = (products || []).filter((p) => Number(p.current_stock || 0) >= 0 && Number(p.current_stock || 0) <= Number(p.alert_level || 0));
         const lowCount = lowItems.length;
 
         // Update badges
