@@ -3,8 +3,10 @@
 
   let categories = [];
   let products = [];
+  let revenueData = [];
   let topSellingCategoryName = 'None';
   let deletingId = null;
+  let chartInstance = null;
 
   async function openModal(id) { document.getElementById(id).classList.add('open'); }
   async function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -13,11 +15,135 @@
     const results = await Promise.all([
       window.api.getCategories(),
       window.api.getProducts(),
-      window.api.getTopSellingCategory()
+      window.api.getTopSellingCategory(),
+      window.api.getCategoriesRevenue()
     ]);
     categories = results[0];
     products = results[1];
     topSellingCategoryName = results[2] || 'None';
+    revenueData = results[3] || [];
+  }
+
+  function renderChart() {
+    const canvas = document.getElementById('categoryShareChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    // Filter categories with actual sales revenue > 0
+    const activeData = revenueData.filter(d => Number(d.revenue) > 0);
+
+    let labels, data, colors;
+    if (activeData.length === 0) {
+      labels = ['No Sales'];
+      data = [1];
+      colors = ['#cbd5e1']; // Sleek slate gray placeholder
+    } else {
+      labels = activeData.map(d => d.name);
+      data = activeData.map(d => Number(d.revenue));
+      colors = [
+        '#1D2DBF', // Indigo
+        '#10b981', // Emerald
+        '#f59e0b', // Amber
+        '#8b5cf6', // Violet
+        '#f43f5e', // Rose
+        '#06b6d4', // Sky/Cyan
+        '#14b8a6', // Teal
+        '#ef4444'  // Red
+      ];
+    }
+
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: colors,
+          borderWidth: 2,
+          borderColor: '#ffffff',
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: '#0f172a',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff',
+            borderColor: '#1e293b',
+            borderWidth: 1,
+            padding: 12,
+            boxPadding: 8,
+            callbacks: {
+              label: function (context) {
+                if (activeData.length === 0) return ' No sales generated yet';
+                const val = context.raw;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percent = ((val / total) * 100).toFixed(1);
+                return ` ${context.label}: LKR ${val.toLocaleString('en-US', { minimumFractionDigits: 2 })} (${percent}%)`;
+              }
+            },
+            titleFont: {
+              family: 'Inter',
+              weight: 700
+            },
+            bodyFont: {
+              family: 'Inter'
+            }
+          }
+        },
+        cutout: '72%'
+      }
+    });
+
+    // Generate Premium Custom Vertical Legend
+    const legendContainer = document.getElementById('customChartLegend');
+    if (legendContainer) {
+      if (activeData.length === 0) {
+        legendContainer.innerHTML = `
+          <div class="legend-row empty">
+            <span class="legend-label">
+              <span class="legend-dot" style="background-color: #cbd5e1;"></span>
+              No sales share
+            </span>
+            <span class="legend-value">0%</span>
+          </div>
+        `;
+      } else {
+        const grandTotal = activeData.reduce((sum, d) => sum + Number(d.revenue), 0);
+        legendContainer.innerHTML = activeData
+          .sort((a, b) => Number(b.revenue) - Number(a.revenue)) // Optional: Sort by revenue descending for neatness!
+          .map((d) => {
+            const revenue = Number(d.revenue);
+            const percent = grandTotal > 0 ? ((revenue / grandTotal) * 100).toFixed(0) : 0;
+            
+            // Match chart colors by original activeData index
+            const origIndex = activeData.findIndex(item => item.id === d.id);
+            const color = colors[origIndex % colors.length];
+            const formattedRevenue = window.fmtLKR ? window.fmtLKR(revenue) : `LKR ${revenue.toLocaleString('en-US')}`;
+
+            return `
+              <div class="legend-row">
+                <span class="legend-label">
+                  <span class="legend-dot" style="background-color: ${color};"></span>
+                  <span class="legend-text">${d.name}</span>
+                </span>
+                <span class="legend-value">${percent}% <span class="legend-currency">(${formattedRevenue})</span></span>
+              </div>
+            `;
+          })
+          .join('');
+      }
+    }
   }
 
   function render() {
@@ -38,8 +164,8 @@
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((cat) => {
         const pCount = counts.get(cat.id) || 0;
-        const deleteDisabledAttr = pCount > 0 
-          ? 'disabled style="opacity: 0.4; cursor: not-allowed;" title="Cannot delete category with active products"' 
+        const deleteDisabledAttr = pCount > 0
+          ? 'disabled style="opacity: 0.4; cursor: not-allowed;" title="Cannot delete category with active products"'
           : '';
         return `<tr>
           <td class="td-name">${cat.name}</td>
@@ -59,6 +185,7 @@
   async function reload() {
     await loadData();
     render();
+    renderChart();
   }
 
   function bindEvents() {
@@ -106,14 +233,19 @@
 
     document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
       if (!deletingId) return;
-      const result = await window.api.deleteCategory(deletingId);
-      if (!result.success) {
-        alert(result.message || 'Cannot delete this category.');
-        return;
+      const cat = categories.find((c) => c.id === deletingId);
+      
+      // Safety window confirmation dialog box checkpoint
+      if (confirm(`Are you sure you want to delete the category "${cat ? cat.name : ''}"?`)) {
+        const result = await window.api.deleteCategory(deletingId);
+        if (!result.success) {
+          alert(result.message || 'Cannot delete this category.');
+          return;
+        }
+        deletingId = null;
+        closeModal('deleteModal');
+        await reload();
       }
-      deletingId = null;
-      closeModal('deleteModal');
-      await reload();
     });
 
     ['closeModalBtn', 'cancelModalBtn'].forEach((id) => document.getElementById(id).addEventListener('click', () => closeModal('categoryModal')));

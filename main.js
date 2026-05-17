@@ -209,6 +209,15 @@ ipcMain.handle('get-top-selling-category', async () => {
     `);
     return row ? row.name : 'None';
 });
+ipcMain.handle('get-categories-revenue', async () => {
+    return allAsync(`
+        SELECT c.id, c.name, COALESCE(SUM(si.subtotal), 0) AS revenue
+        FROM categories c
+        LEFT JOIN products p ON p.category_id = c.id
+        LEFT JOIN sale_items si ON si.product_id = p.id
+        GROUP BY c.id, c.name
+    `);
+});
 
 ipcMain.handle('save-category', async (event, c) => {
     if (c.id) {

@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('api', {
     saveCategory: (category) => ipcRenderer.invoke('save-category', category),
     deleteCategory: (id) => ipcRenderer.invoke('delete-category', id),
     getTopSellingCategory: () => ipcRenderer.invoke('get-top-selling-category'),
+    getCategoriesRevenue: () => ipcRenderer.invoke('get-categories-revenue'),
     
     // Customers
     getCustomers: () => ipcRenderer.invoke('get-customers'),

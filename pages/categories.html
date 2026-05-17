@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="../assets/css/common.css">
 <link rel="stylesheet" href="../assets/css/sidebar.css">
 <link rel="stylesheet" href="../assets/css/categories.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="dashboard-body">
 
@@ -62,29 +63,41 @@
       </div>
     </div>
 
-    <div class="table-wrap">
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Category Name</th>
-              <th>Status</th>
-              <th>Products</th>
-              <th style="text-align:right">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="categoriesTableBody">
-            <tr id="emptyRow">
-              <td colspan="4">
-                <div class="empty-state">
-                  <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                  <p>No categories found</p>
-                  <small>Click "Add New Category" to get started</small>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <div class="split-row">
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Category Name</th>
+                <th>Status</th>
+                <th>Products</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="categoriesTableBody">
+              <tr id="emptyRow">
+                <td colspan="4">
+                  <div class="empty-state">
+                    <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                    <p>No categories found</p>
+                    <small>Click "Add New Category" to get started</small>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-header">
+          <div class="chart-title">Sales Share by Category</div>
+        </div>
+        <div class="chart-container">
+          <canvas id="categoryShareChart"></canvas>
+        </div>
+        <div id="customChartLegend" class="custom-chart-legend"></div>
       </div>
     </div>
   </div>
