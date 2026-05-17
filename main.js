@@ -219,6 +219,16 @@ ipcMain.handle('get-categories-revenue', async () => {
     `);
 });
 
+ipcMain.handle('get-active-products-count', async () => {
+    const row = await getAsync(`
+        SELECT COUNT(*) AS count 
+        FROM products p
+        JOIN categories c ON p.category_id = c.id
+        WHERE c.description != 'Inactive' OR c.description IS NULL
+    `);
+    return row ? row.count : 0;
+});
+
 ipcMain.handle('save-category', async (event, c) => {
     if (c.id) {
         await runAsync('UPDATE categories SET name = ?, description = ? WHERE id = ?', [c.name, c.description, c.id]);

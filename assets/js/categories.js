@@ -7,6 +7,7 @@
   let topSellingCategoryName = 'None';
   let deletingId = null;
   let chartInstance = null;
+  let activeProductsCount = 0;
 
   async function openModal(id) { document.getElementById(id).classList.add('open'); }
   async function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -16,12 +17,14 @@
       window.api.getCategories(),
       window.api.getProducts(),
       window.api.getTopSellingCategory(),
-      window.api.getCategoriesRevenue()
+      window.api.getCategoriesRevenue(),
+      window.api.getActiveProductsCount()
     ]);
     categories = results[0];
     products = results[1];
     topSellingCategoryName = results[2] || 'None';
     revenueData = results[3] || [];
+    activeProductsCount = results[4] || 0;
   }
 
   function renderChart() {
@@ -154,6 +157,7 @@
     document.getElementById('totalCategories').textContent = categories.length;
     document.getElementById('totalProducts').textContent = products.length;
     document.getElementById('topSellingCategory').textContent = topSellingCategoryName;
+    document.getElementById('totalActiveProducts').textContent = activeProductsCount;
 
     if (!categories.length) {
       tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><p>No categories found</p></div></td></tr>';
@@ -169,10 +173,11 @@
           : '';
         const statusClass = (cat.description === 'Inactive') ? 'inactive' : 'active';
         const statusText = cat.description === 'Inactive' ? 'Inactive' : 'Active';
+        const pluralizedText = pCount === 1 ? '1 Product' : `${pCount} Products`;
         return `<tr>
           <td class="td-name">${cat.name}</td>
           <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-          <td><span class="count-badge">${pCount} product(s)</span></td>
+          <td><span class="count-badge">${pluralizedText}</span></td>
           <td>
             <div class="actions-cell">
               <button class="tbl-btn edit" data-id="${cat.id}">Edit</button>

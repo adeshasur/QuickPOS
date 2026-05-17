@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('api', {
     deleteCategory: (id) => ipcRenderer.invoke('delete-category', id),
     getTopSellingCategory: () => ipcRenderer.invoke('get-top-selling-category'),
     getCategoriesRevenue: () => ipcRenderer.invoke('get-categories-revenue'),
+    getActiveProductsCount: () => ipcRenderer.invoke('get-active-products-count'),
     
     // Customers
     getCustomers: () => ipcRenderer.invoke('get-customers'),
