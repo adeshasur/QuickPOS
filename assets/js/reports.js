@@ -2,7 +2,7 @@
     'use strict';
 
     let salesData = [];
-    let inventoryData = [];
+    let saleDetailsMap = new Map();
 
     // DOM elements
     const generateReportBtn = document.getElementById('generateReportBtn');
@@ -34,11 +34,24 @@
                date.toLocaleTimeString('en-US', { hour: '2-digit', minute:'2-digit' });
     }
 
+    function isToday(timestamp) {
+        const d = new Date(timestamp);
+        const now = new Date();
+        return d.getFullYear() === now.getFullYear()
+            && d.getMonth() === now.getMonth()
+            && d.getDate() === now.getDate();
+    }
+
     async function loadData() {
         try {
             salesData = await window.api.getSalesHistory();
-            // Inventory movement tracking not fully implemented in DB yet, using empty or products
-            inventoryData = []; 
+            const detailEntries = await Promise.all(
+                salesData.map(async (sale) => {
+                    const details = await window.api.getSaleDetails(sale.id);
+                    return [sale.id, Array.isArray(details) ? details : []];
+                })
+            );
+            saleDetailsMap = new Map(detailEntries);
             generateReport();
         } catch (err) {
             console.error('Error loading report data:', err);
@@ -87,10 +100,83 @@
         });
     }
 
+    function renderTopItems(sales) {
+        if (!topItemsTableBody) return;
+
+        const stats = new Map();
+        sales.forEach((sale) => {
+            const items = saleDetailsMap.get(sale.id) || [];
+            items.forEach((it) => {
+                const key = it.product_name || `Item #${it.product_id}`;
+                const prev = stats.get(key) || { qty: 0, revenue: 0 };
+                prev.qty += Number(it.quantity || 0);
+                prev.revenue += Number(it.subtotal || 0);
+                stats.set(key, prev);
+            });
+        });
+
+        const top = Array.from(stats.entries())
+            .sort((a, b) => b[1].revenue - a[1].revenue)
+            .slice(0, 10);
+
+        if (!top.length) {
+            if (emptyItemsRow) emptyItemsRow.style.display = '';
+            return;
+        }
+        if (emptyItemsRow) emptyItemsRow.style.display = 'none';
+
+        topItemsTableBody.innerHTML = top.map(([name, s]) => `
+            <tr>
+                <td class="product-name-cell">${name}</td>
+                <td class="quantity-cell">${Number(s.qty).toFixed(2)}</td>
+                <td class="revenue-cell">${formatCurrency(s.revenue)}</td>
+            </tr>
+        `).join('');
+    }
+
+    function renderProductActivity(sales) {
+        if (!inventoryTableBody) return;
+
+        const activity = new Map();
+        sales.forEach((sale) => {
+            const items = saleDetailsMap.get(sale.id) || [];
+            items.forEach((it) => {
+                const key = it.product_name || `Item #${it.product_id}`;
+                const prev = activity.get(key) || { qty: 0, latest: sale.timestamp };
+                prev.qty += Number(it.quantity || 0);
+                if (new Date(sale.timestamp) > new Date(prev.latest)) prev.latest = sale.timestamp;
+                activity.set(key, prev);
+            });
+        });
+
+        const rows = Array.from(activity.entries())
+            .sort((a, b) => new Date(b[1].latest) - new Date(a[1].latest))
+            .slice(0, 15);
+
+        if (!rows.length) {
+            if (emptyInventoryRow) emptyInventoryRow.style.display = '';
+            return;
+        }
+        if (emptyInventoryRow) emptyInventoryRow.style.display = 'none';
+
+        inventoryTableBody.innerHTML = rows.map(([name, a]) => `
+            <tr>
+                <td class="inventory-date-cell">${formatDisplayDate(a.latest)}</td>
+                <td class="item-name-cell">${name}</td>
+                <td class="quantity-added-cell">${Number(a.qty).toFixed(2)}</td>
+            </tr>
+        `).join('');
+    }
+
     function generateReport() {
-        const totals = calculateTotals(salesData);
+        const todaySales = salesData.filter(s => isToday(s.timestamp));
+        const baseSales = todaySales.length ? todaySales : salesData;
+
+        const totals = calculateTotals(baseSales);
         updateSummaryCards(totals);
-        renderSalesHistory(salesData);
+        renderSalesHistory(baseSales);
+        renderTopItems(baseSales);
+        renderProductActivity(baseSales);
     }
 
     async function init() {

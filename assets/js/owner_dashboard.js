@@ -240,6 +240,17 @@
 
 
   document.addEventListener('DOMContentLoaded', async () => {
+    const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
+    if (!user) {
+      window.location.href = 'login.html';
+      return;
+    }
+    if (user.role !== 'owner') {
+      alert('Access Denied: Owner Only');
+      window.location.href = 'sales.html';
+      return;
+    }
+
     // Dashboard-only topbar actions
     Components.init({
       title: 'Executive Dashboard',

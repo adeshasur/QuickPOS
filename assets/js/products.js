@@ -199,6 +199,11 @@
       window.location.href = 'login.html';
       return;
     }
+    if (user.role !== 'owner') {
+      alert('Access Denied: Owner Only');
+      window.location.href = 'sales.html';
+      return;
+    }
     Components.init({ title: 'Products' });
 
     bindEvents();

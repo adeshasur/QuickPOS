@@ -1,12 +1,58 @@
 (function () {
   'use strict';
 
+  let isNavigating = false;
+
+  function getCurrentUser() {
+    const raw = localStorage.getItem('quickpos-user') || localStorage.getItem('quickposUser');
+    if (!raw) return {};
+    try {
+      return JSON.parse(raw) || {};
+    } catch (_err) {
+      return {};
+    }
+  }
+
+  function runPageEnterTransition() {
+    document.body.classList.add('page-enter');
+    requestAnimationFrame(() => {
+      document.body.classList.add('page-enter-active');
+    });
+  }
+
+  function smoothNavigate(url) {
+    if (!url || isNavigating) return;
+    isNavigating = true;
+    document.body.classList.add('page-leaving');
+    setTimeout(() => {
+      window.location.href = url;
+    }, 45);
+  }
+
+  function bindSmoothNavigation() {
+    document.addEventListener('click', (event) => {
+      const link = event.target.closest('a[href]');
+      if (!link) return;
+
+      const href = link.getAttribute('href') || '';
+      if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (link.target && link.target !== '_self') return;
+      if (!href.endsWith('.html')) return;
+
+      event.preventDefault();
+      smoothNavigate(href);
+    }, true);
+  }
+
   const Components = {
     init(options = {}) {
       const title = options.title || '';
       const actions = options.actions || '';
       const topbarContainer = document.getElementById('topbar-container');
-      const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
+      const user = getCurrentUser();
+      const avatarSeed = String(user.name || user.username || 'U').trim();
+      const avatarText = avatarSeed.slice(0, 2).toUpperCase();
 
       if (topbarContainer) {
         topbarContainer.innerHTML = `
@@ -31,7 +77,7 @@
                     <div class="nd-footer" onclick="location.href='inventory.html'">View All Inventory</div>
                   </div>
                 </div>
-                <div class="avatar">${String(user.name || 'U').slice(0, 2).toUpperCase()}</div>
+                <div class="avatar">${avatarText}</div>
               </div>
           </div>
           <div id="toast-container" class="toast-container"></div>
@@ -84,6 +130,9 @@
   window.Components = Components;
 
   document.addEventListener('DOMContentLoaded', () => {
+    runPageEnterTransition();
+    bindSmoothNavigation();
+
     const sidebarContainer = document.getElementById('sidebar-container');
     const currentPage = window.location.pathname.split("/").pop().replace('.html', '');
 
@@ -112,7 +161,7 @@
 
     if (!sidebarContainer) return;
 
-    const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
+    const user = getCurrentUser();
     document.body.classList.add('dashboard-body');
 
     sidebarContainer.innerHTML = `
@@ -161,7 +210,7 @@
       logoutBtn.addEventListener('click', () => {
         if (confirm('Are you sure you want to logout?')) {
           localStorage.removeItem('quickpos-user');
-          window.location.href = 'login.html';
+          smoothNavigate('login.html');
         }
       });
     }

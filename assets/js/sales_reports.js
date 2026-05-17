@@ -26,23 +26,24 @@
     function filterByDate(sale) {
         const today = new Date().toISOString().split('T')[0];
         const saleDate = new Date(sale.timestamp).toISOString().split('T')[0];
-        
+
         if (currentDateFilter === 'today') return saleDate === today;
         if (currentDateFilter === 'week') {
-            const w = new Date(); w.setDate(w.getDate() - 7);
+            const w = new Date();
+            w.setDate(w.getDate() - 7);
             return saleDate >= w.toISOString().split('T')[0];
         }
         return true;
     }
 
-    function renderTable() {
+    window.renderTable = function renderTable() {
         const payFilter = $('payFilter');
         const searchInput = $('searchInput');
         const salesBody = $('salesBody');
         const emptyState = $('emptyState');
         const summaryRow = $('summaryRow');
 
-        if(!salesBody || !emptyState || !summaryRow) return;
+        if (!salesBody || !emptyState || !summaryRow) return;
 
         const pay = payFilter ? payFilter.value : '';
         const q = searchInput ? searchInput.value.trim().toLowerCase() : '';
@@ -50,48 +51,51 @@
         const list = salesData.filter(s => {
             if (!filterByDate(s)) return false;
             if (pay && s.payment_method !== pay) return false;
-            if (q && !(s.bill_id.toLowerCase().includes(q))) return false;
+            if (q && !(String(s.bill_id || '').toLowerCase().includes(q))) return false;
             return true;
         });
 
-        const totalAmt = list.reduce((s, x) => s + x.total_amount, 0);
+        const totalAmt = list.reduce((sum, x) => sum + Number(x.total_amount || 0), 0);
         summaryRow.innerHTML = `
             <div class="sum-pill">Bills: <span class="val">${list.length}</span></div>
             <div class="sum-pill">Total Revenue: <span class="val green">${fmtLKR(totalAmt)}</span></div>
         `;
 
         if (!list.length) {
-            salesBody.innerHTML = ''; emptyState.style.display = 'flex'; return;
+            salesBody.innerHTML = '';
+            emptyState.style.display = 'flex';
+            return;
         }
+
         emptyState.style.display = 'none';
 
         salesBody.innerHTML = list.map(s => `
             <tr onclick="openReceipt('${s.bill_id}')">
                 <td><span class="inv-id">${s.bill_id}</span></td>
-                <td>${new Date(s.timestamp).toLocaleDateString()} · ${new Date(s.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+                <td>${new Date(s.timestamp).toLocaleDateString()} � ${new Date(s.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
                 <td>Detailed Invoice Available</td>
-                <td><span class="pay-badge ${s.payment_method.toLowerCase()}">${s.payment_method}</span></td>
+                <td><span class="pay-badge ${String(s.payment_method || '').toLowerCase()}">${s.payment_method}</span></td>
                 <td class="amount-cell">${fmtLKR(s.total_amount)}</td>
                 <td style="text-align:right;">
-                    <button class="row-btn" onclick="event.stopPropagation(); openReceipt('${s.bill_id}')">🖨️</button>
+                    <button class="row-btn" onclick="event.stopPropagation(); openReceipt('${s.bill_id}')"><span class="material-symbols-rounded">print</span></button>
                 </td>
             </tr>
         `).join('');
-    }
+    };
 
     window.openReceipt = async function(billId) {
-        const s = salesData.find(x => x.bill_id === billId); 
+        const s = salesData.find(x => x.bill_id === billId);
         if (!s) return;
-        
+
         const receiptBody = $('receiptBody');
         const receiptModal = $('receiptModal');
-        if(receiptBody && receiptModal) {
+        if (receiptBody && receiptModal) {
             const paid = Number(s.received_amount || 0);
             const due = Number(s.balance_amount || 0);
             const total = Number(s.total_amount || 0);
             receiptBody.innerHTML = `
                 <div class="receipt-shop">
-                    <div class="receipt-shop-name">QuickPOS Hardware</div>
+                    <div class="receipt-shop-name">QuickPOS</div>
                     <div class="receipt-shop-sub">Official Sales Receipt</div>
                 </div>
                 <div class="receipt-meta">
@@ -132,34 +136,34 @@
         }
     };
 
-    window.closeReceipt = function() { 
+    window.closeReceipt = function() {
         const receiptModal = $('receiptModal');
-        if(receiptModal) receiptModal.classList.remove('active'); 
+        if (receiptModal) receiptModal.classList.remove('active');
     };
 
     function init() {
-        const user = JSON.parse(localStorage.getItem('quickpos-user'));
-        if (!user) { 
-            window.location.href = 'login.html'; 
+        const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
+        if (!user) {
+            window.location.href = 'login.html';
             return;
         }
 
         Components.init({ title: 'Invoice History' });
 
         const receiptModal = $('receiptModal');
-        if(receiptModal) {
-            receiptModal.addEventListener('click', e => { 
-                if (e.target === receiptModal) closeReceipt(); 
+        if (receiptModal) {
+            receiptModal.addEventListener('click', e => {
+                if (e.target === receiptModal) closeReceipt();
             });
         }
 
         const printReceiptBtn = $('printReceiptBtn');
-        if(printReceiptBtn) {
+        if (printReceiptBtn) {
             printReceiptBtn.addEventListener('click', () => window.print());
         }
 
         const searchInput = $('searchInput');
-        if(searchInput) {
+        if (searchInput) {
             searchInput.addEventListener('input', renderTable);
         }
 

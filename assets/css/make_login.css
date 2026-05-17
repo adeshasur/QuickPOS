@@ -5,6 +5,7 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
+    text-shadow: none !important; /* Ensure absolutely crisp, zero-shadow typography */
 }
 
 /* =========================
@@ -353,79 +354,20 @@ body{
     font-size:16px;
     font-weight:800;
     cursor:pointer;
-    transition:0.3s;
-    box-shadow:
-        0 8px 20px rgba(255,152,0,0.2);
+    transition:all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08); /* Clean, subtle standard drop shadow */
 }
 
 .login-btn:hover{
-    transform:translateY(-2px);
-    box-shadow:
-        0 15px 30px rgba(255,152,0,0.3);
+    transform:translateY(-1px);
+    background:linear-gradient(
+        135deg,
+        #ff9e1a,
+        #ffb833
+    );
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12); /* Subtle hover drop shadow */
 }
 
-/* =========================
-   DEMO BOX
-========================= */
-.demo-box{
-    margin-top:20px;
-    border:1px solid var(--border);
-    border-radius:16px;
-    padding:12px 16px;
-    background:#fbfcff;
-}
-
-.demo-header{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    margin-bottom:10px;
-}
-
-.demo-header i{
-    color:var(--primary);
-    font-size:14px;
-}
-
-.demo-header h4{
-    font-size:14px;
-    font-weight:700;
-}
-
-.demo-item{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:8px 0;
-    border-top:1px dashed #dbe2ea;
-}
-
-.demo-item:first-of-type{
-    border-top:none;
-}
-
-.demo-user{
-    font-size:14px;
-    font-weight:600;
-    color:#334155;
-}
-
-.badge{
-    padding:4px 10px;
-    border-radius:999px;
-    font-size:10px;
-    font-weight:700;
-}
-
-.badge.owner{
-    background:rgba(255,152,0,0.12);
-    color:#d97706;
-}
-
-.badge.cashier{
-    background:rgba(29,45,191,0.12);
-    color:var(--primary);
-}
 
 /* =========================
    FOOTER

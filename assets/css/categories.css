@@ -7,7 +7,7 @@
 .avatar{width:38px;height:38px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff}
 
 /* ─── CONTENT ─── */
-.content{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:24px 32px;gap:20px}
+.content{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:24px 32px;gap:20px}
 
 /* ─── HEADER ROW ─── */
 .page-header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;box-shadow:0 4px 14px rgba(15,23,42,.04)}
@@ -33,8 +33,8 @@
 .stat-lbl{font-size:11px;font-weight:700;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:0.03em;}
 
 /* ─── TABLE AREA ─── */
-.table-wrap{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;display:flex;flex-direction:column;min-height:0;box-shadow: 0 2px 4px rgba(0,0,0,0.02);}
-.table-scroll{flex:1;overflow-y:auto}
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:visible;display:flex;flex-direction:column;box-shadow: 0 2px 4px rgba(0,0,0,0.02);}
+.table-scroll{overflow-x:auto;overflow-y:visible}
 .table-scroll::-webkit-scrollbar{width:6px}
 .table-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 

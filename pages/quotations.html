@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,6 +7,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
     <link rel="stylesheet" href="../assets/css/common.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
@@ -19,17 +20,19 @@
     <div class="main-content">
         <div id="topbar-container"></div>
 
+        <div class="content">
+        <div class="page-header">
+            <div class="page-header-left">
+                <div class="page-heading">Quotation Management</div>
+                <div class="page-sub">Build supplier quotations with editable quantities, pricing, and export-ready PDF</div>
+            </div>
+        </div>
+
         <div class="dashboard">
             <div class="products-section">
                 <div class="section-header">
                     <div class="section-title">Supermarket Quotation Items</div>
-                    <div class="category-filter">
-                        <button class="category-btn active" data-category="all">All</button>
-                        <button class="category-btn" data-category="plumbing">Plumbing</button>
-                        <button class="category-btn" data-category="cement">Cement</button>
-                        <button class="category-btn" data-category="paint">Paint</button>
-                        <button class="category-btn" data-category="steel">Steel</button>
-                    </div>
+                    <div class="category-filter" id="categoryFilter"></div>
                 </div>
                 <div class="products-grid" id="productsGrid"></div>
             </div>
@@ -42,7 +45,7 @@
                 <div class="customer-details">
                     <div class="customer-field">
                         <label>Supplier Name</label>
-                        <input type="text" id="customerName" value="Main Supplier">
+                        <input type="text" id="customerName" placeholder="Enter supplier name">
                     </div>
                     <div class="customer-field">
                         <label>Contact No</label>
@@ -65,6 +68,7 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
 
     <div class="customize-modal" id="customizeModal">
@@ -82,7 +86,7 @@
                 <input type="number" id="customQty" step="0.01" min="0.01" value="1.00">
             </div>
             <div class="price-group-big">
-                <label><span class="material-symbols-rounded s18" style="vertical-align:middle; margin-right:4px;">payments</span> Price (LKR) — edit manually</label>
+                <label><span class="material-symbols-rounded s18" style="vertical-align:middle; margin-right:4px;">payments</span> Price (LKR) - edit manually</label>
                 <input type="number" id="customPrice" step="0.01" min="0">
             </div>
             <div class="modal-actions">
@@ -101,7 +105,10 @@
         </div>
     </div>
 
+    <script src="../assets/js/notifications.js"></script>
     <script src="../assets/js/components.js"></script>
     <script src="../assets/js/quotations.js"></script>
 </body>
 </html>
+
+

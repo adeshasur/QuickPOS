@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,6 +7,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
     <link rel="stylesheet" href="../assets/css/common.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
@@ -17,20 +18,29 @@
 
     <div class="main-content">
         <div id="topbar-container"></div>
-        
-        <div class="user-management-content">
-            <div class="staff-table-section">
-                <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-                    <div class="section-title"><span class="material-symbols-rounded">group</span> Staff Members</div>
-                    <button id="createUserBtn" class="modal-btn submit" style="max-width:180px;">Create User</button>
+
+        <div class="content">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <div class="page-heading">User Management</div>
+                    <div class="page-sub">Manage staff accounts, access levels, and reporting permissions</div>
                 </div>
-                <div class="table-container">
-                    <table class="staff-table">
-                        <thead>
-                            <tr><th>User ID</th><th>Full Name</th><th>Username</th><th>Role</th><th>Status</th><th>Actions</th></tr>
-                        </thead>
-                        <tbody id="staffTableBody"></tbody>
-                    </table>
+                <button id="createUserBtn" class="modal-btn submit create-user-btn">Create User</button>
+            </div>
+
+            <div class="user-management-content">
+                <div class="staff-table-section">
+                    <div class="section-header">
+                        <div class="section-title"><span class="material-symbols-rounded">group</span> Staff Members</div>
+                    </div>
+                    <div class="table-container">
+                        <table class="staff-table">
+                            <thead>
+                                <tr><th>User ID</th><th>Full Name</th><th>Username</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody id="staffTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -71,7 +81,10 @@
         </div>
     </div>
 
+    <script src="../assets/js/notifications.js"></script>
     <script src="../assets/js/components.js"></script>
     <script src="../assets/js/users.js"></script>
 </body>
 </html>
+
+

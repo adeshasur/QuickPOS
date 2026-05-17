@@ -1,19 +1,8 @@
 (function() {
     'use strict';
     
-    // ---------- HARDWARE PRODUCTS ----------
-    const hardwareProducts = [
-        { id: 101, name: 'S-Lon PVC Pipe 1/2"', price: 180, unit: 'ft', category: 'plumbing', isWeighted: true },
-        { id: 102, name: 'Tokyo Super Cement', price: 2350, unit: 'bag', category: 'cement', isWeighted: false },
-        { id: 103, name: 'JAT Emulsion White 10L', price: 9200, unit: 'tank', category: 'paint', isWeighted: false },
-        { id: 104, name: 'Steel Rod 12mm', price: 2100, unit: 'pc', category: 'steel', isWeighted: false },
-        { id: 105, name: 'Anchor Bolts 1/2"', price: 320, unit: 'pc', category: 'steel', isWeighted: false },
-        { id: 106, name: 'PVC Elbow 1/2"', price: 95, unit: 'pc', category: 'plumbing', isWeighted: false },
-        { id: 107, name: 'Rileem Cement Bag', price: 2380, unit: 'bag', category: 'cement', isWeighted: false },
-        { id: 108, name: 'Paint Brush 4"', price: 450, unit: 'pc', category: 'paint', isWeighted: false }
-    ];
-
-    let products = hardwareProducts;
+    let products = [];
+    let categories = [];
     let quoteItems = [];
     let currentCategory = "all";
     let productToCustomize = null;
@@ -25,7 +14,7 @@
     const quotationItemsDiv = document.getElementById('quotationItems');
     const quoteItemCount = document.getElementById('quoteItemCount');
     const quoteTotalSpan = document.getElementById('quoteTotal');
-    const categoryBtns = document.querySelectorAll('.category-btn');
+    const categoryFilter = document.getElementById('categoryFilter');
     const generatePDFBtn = document.getElementById('generatePDFBtn');
     const customerName = document.getElementById('customerName');
     const customerPhone = document.getElementById('customerPhone');
@@ -54,6 +43,7 @@
         div.textContent = text;
         return div.innerHTML;
     };
+    const normalizeCategory = (name) => String(name || 'general').toLowerCase().trim().replace(/\s+/g, '-');
 
     // Safe localStorage wrapper
     const safeStorage = {
@@ -141,30 +131,35 @@
             card.appendChild(nameDiv);
             card.appendChild(detailDiv);
             
-            if (p.isWeighted) {
-                const btn = document.createElement('button');
-                btn.className = 'customize-btn';
-                btn.dataset.id = p.id;
-                btn.innerHTML = '<span class="material-symbols-rounded">scale</span> Customize';
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    openCustomizeModal(p);
-                });
-                card.appendChild(btn);
-            }
-            
+            // Unified interaction: clicking any product opens the customize modal
+            // so quantity/price can be adjusted before adding.
             card.addEventListener('click', () => {
-                if (p.isWeighted) {
-                    openCustomizeModal(p);
-                } else {
-                    addToQuote(p.id);
-                }
+                openCustomizeModal(p);
             });
             
             fragment.appendChild(card);
         });
         
         productsGrid.appendChild(fragment);
+    }
+
+    function renderCategoryButtons() {
+        if (!categoryFilter) return;
+        categoryFilter.innerHTML = '';
+
+        const allBtn = document.createElement('button');
+        allBtn.className = `category-btn${currentCategory === 'all' ? ' active' : ''}`;
+        allBtn.dataset.category = 'all';
+        allBtn.textContent = 'All';
+        categoryFilter.appendChild(allBtn);
+
+        categories.forEach((cat) => {
+            const btn = document.createElement('button');
+            btn.className = `category-btn${currentCategory === cat.key ? ' active' : ''}`;
+            btn.dataset.category = cat.key;
+            btn.textContent = cat.label;
+            categoryFilter.appendChild(btn);
+        });
     }
 
     // Render quotation items
@@ -235,9 +230,13 @@
             fragment.appendChild(itemDiv);
         });
         
+        count = Math.round(count * 100) / 100;
         quotationItemsDiv.innerHTML = '';
         quotationItemsDiv.appendChild(fragment);
-        if(quoteItemCount) quoteItemCount.textContent = count.toFixed(2);
+        if (quoteItemCount) {
+            const isWhole = Math.abs(count - Math.round(count)) < 1e-9;
+            quoteItemCount.textContent = isWhole ? String(Math.round(count)) : count.toFixed(2);
+        }
         if(quoteTotalSpan) quoteTotalSpan.textContent = formatCurrencyPlain(total);
     }
 
@@ -464,18 +463,50 @@
     // Set category filter
     function setCategory(cat) {
         currentCategory = cat;
-        if(categoryBtns) {
-            categoryBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.category === cat));
-        }
+        renderCategoryButtons();
         renderProducts();
+    }
+
+    async function loadProductsFromDb() {
+        try {
+            const dbProducts = await window.api.getProducts();
+            if (!Array.isArray(dbProducts) || dbProducts.length === 0) {
+                products = [];
+                categories = [];
+                return;
+            }
+
+            products = dbProducts.map((p) => ({
+                id: p.id,
+                name: p.name,
+                price: Number(p.selling_price || 0),
+                unit: p.unit_type || 'pc',
+                category: normalizeCategory(p.category_name || 'General')
+            }));
+
+            const seen = new Set();
+            categories = [];
+            products.forEach((p) => {
+                if (p.category === 'all' || seen.has(p.category)) return;
+                seen.add(p.category);
+                const label = (p.category || 'General').replace(/-/g, ' ').replace(/\b\w/g, (ch) => ch.toUpperCase());
+                categories.push({ key: p.category, label });
+            });
+        } catch (err) {
+            console.error('Failed to load products for quotations:', err);
+            products = [];
+            categories = [];
+        }
     }
 
     // Setup event listeners
     function setupListeners() {
-        // Category filters
-        if(categoryBtns) {
-            categoryBtns.forEach(btn => {
-                btn.addEventListener('click', () => setCategory(btn.dataset.category));
+        // Category filters (delegated for dynamic buttons)
+        if (categoryFilter) {
+            categoryFilter.addEventListener('click', (e) => {
+                const btn = e.target.closest('.category-btn');
+                if (!btn) return;
+                setCategory(btn.dataset.category);
             });
         }
 
@@ -529,7 +560,7 @@
 
 
     // Initialize
-    function init() {
+    async function init() {
         // Security check
         const user = safeStorage.getJSON('quickpos-user');
         if (!user) {
@@ -542,6 +573,8 @@
             title: 'Quotations'
         });
         
+        await loadProductsFromDb();
+        renderCategoryButtons();
         renderProducts();
         renderQuotation();
         setupListeners();

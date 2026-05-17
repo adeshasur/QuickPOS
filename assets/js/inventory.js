@@ -74,6 +74,8 @@
     }
 
     function renderStockTable() {
+        const currentUser = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
+        const canEditInventory = currentUser && currentUser.role === 'owner';
         let filteredItems = [...products];
         
         // Apply expiry filter
@@ -121,9 +123,11 @@
                         ${daysLeft < 0 ? 'Expired!' : daysLeft > 365 ? 'Good' : `${daysLeft} days left`}
                     </td>
                     <td>
-                        <button class="update-btn" onclick="location.href='products.html'">
-                            <span class="material-symbols-rounded" style="font-size:16px;">edit</span>
-                        </button>
+                        ${canEditInventory
+                          ? `<button class="update-btn" onclick="location.href='products.html'">
+                               <span class="material-symbols-rounded" style="font-size:16px;">edit</span>
+                             </button>`
+                          : '<span style="color: var(--text3); font-size:12px; font-weight:600;">View Only</span>'}
                     </td>
                 </tr>
             `;

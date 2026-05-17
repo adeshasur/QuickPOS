@@ -66,6 +66,20 @@ body {
     display: flex;
 }
 
+/* Lightweight page transition to make navigation feel smoother without lag */
+body.page-enter {
+    opacity: 0;
+}
+body.page-enter.page-enter-active {
+    opacity: 1;
+    transition: opacity 90ms linear;
+}
+body.page-leaving {
+    opacity: 0;
+    transition: opacity 70ms linear;
+    pointer-events: none;
+}
+
 body.dashboard-body {
     display: flex;
     overflow: hidden;

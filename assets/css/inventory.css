@@ -180,7 +180,7 @@
     background: #fff;
 }
 
-.table-container { overflow: auto; flex: 1; }
+.table-container { overflow-x: auto; overflow-y: visible; }
 
 .stock-table {
     width: 100%;

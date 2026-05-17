@@ -227,24 +227,35 @@
 .item-controls {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    justify-content: center;
+    min-width: 124px;
 }
 
 .quantity-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
     border: 1px solid var(--border2);
-    background: #f4f8f4;
+    background: var(--surface2);
     color: var(--primary);
     font-weight: 700;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quantity-btn .material-symbols-rounded {
+    font-size: 16px;
+    line-height: 1;
 }
 
 .item-quantity {
-    min-width: 40px;
+    min-width: 44px;
     text-align: center;
     font-weight: 700;
+    font-family: var(--mono);
 }
 
 .item-total {
@@ -460,3 +471,41 @@
 .tb-right{display:flex;align-items:center;gap:12px;margin-left:auto}
 .cashier-tag{font-size:14px;font-weight:500;color:var(--text2)}
 .avatar{width:38px;height:38px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff}
+
+/* Quotations redesign override (aligned with Category/Product pages) */
+.content{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:24px 32px;gap:20px}
+.page-header{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;box-shadow:0 4px 14px rgba(15,23,42,.04)}
+.page-header-left{display:flex;flex-direction:column;gap:6px}
+.page-heading{font-size:20px;font-weight:700;color:var(--text)}
+.page-sub{font-size:13px;font-weight:500;color:var(--text3)}
+
+.dashboard{padding:0 !important;gap:14px !important}
+.products-section,.quotation-side{border-radius:14px !important;box-shadow:0 2px 4px rgba(0,0,0,.02) !important}
+.section-header,.quotation-header{padding:14px !important}
+.section-title,.quotation-title{font-size:20px !important;font-weight:700 !important;margin-bottom:10px !important}
+
+.category-btn{padding:7px 12px !important;background:var(--surface) !important;border:1px solid var(--border2) !important;color:var(--text2) !important;font-size:12px !important;font-weight:700 !important}
+.category-btn:hover{border-color:var(--primary) !important;color:var(--text) !important}
+.category-btn.active{background:var(--primary) !important;border-color:var(--primary) !important;color:#fff !important}
+
+.products-grid{gap:12px !important;padding:14px !important}
+.product-card{border-radius:10px !important;padding:12px !important}
+.product-card:hover{border-color:var(--primary) !important;transform:translateY(-1px) !important;box-shadow:0 6px 12px rgba(15,23,42,.06) !important}
+
+.quotation-side{width:420px !important}
+.quotation-count{background:var(--surface2) !important;border:1px solid var(--border) !important;padding:6px 10px !important}
+.customer-details{padding:12px 14px !important;background:var(--surface2) !important;grid-template-columns:minmax(200px,1.2fr) minmax(140px,.8fr) !important}
+.customer-field input{border-radius:10px !important}
+.customer-field:nth-child(2) input{max-width:170px}
+.quotation-items{padding:12px 14px !important}
+.quotation-footer{padding:12px 14px 14px !important}
+.total-row{border-top:1px solid var(--border2) !important;border-bottom:1px solid var(--border2) !important;padding:10px 0 !important}
+.total-label{font-size:15px !important}
+.total-amount{font-size:28px !important}
+.pdf-button{padding:12px !important;font-size:14px !important}
+
+@media (max-width:1200px){
+  .content{padding:14px;gap:12px}
+  .dashboard{padding:0 !important;flex-direction:column}
+  .quotation-side{width:100% !important}
+}
