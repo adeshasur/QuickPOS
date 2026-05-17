@@ -197,6 +197,18 @@ ipcMain.handle('delete-product', async (event, id) => {
 ipcMain.handle('search-barcode', async (event, barcode) => getAsync('SELECT * FROM products WHERE barcode = ?', [barcode]));
 ipcMain.handle('get-expired-items', async () => allAsync("SELECT * FROM products WHERE expiry_date <= date('now', '+30 days')"));
 ipcMain.handle('get-categories', async () => allAsync('SELECT * FROM categories'));
+ipcMain.handle('get-top-selling-category', async () => {
+    const row = await getAsync(`
+        SELECT c.name, SUM(si.quantity) AS total_qty
+        FROM sale_items si
+        JOIN products p ON si.product_id = p.id
+        JOIN categories c ON p.category_id = c.id
+        GROUP BY c.name
+        ORDER BY total_qty DESC
+        LIMIT 1
+    `);
+    return row ? row.name : 'None';
+});
 
 ipcMain.handle('save-category', async (event, c) => {
     if (c.id) {

@@ -1,15 +1,23 @@
-﻿(function () {
+(function () {
   'use strict';
 
   let categories = [];
   let products = [];
+  let topSellingCategoryName = 'None';
   let deletingId = null;
 
-  function openModal(id) { document.getElementById(id).classList.add('open'); }
-  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  async function openModal(id) { document.getElementById(id).classList.add('open'); }
+  async function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
   async function loadData() {
-    [categories, products] = await Promise.all([window.api.getCategories(), window.api.getProducts()]);
+    const results = await Promise.all([
+      window.api.getCategories(),
+      window.api.getProducts(),
+      window.api.getTopSellingCategory()
+    ]);
+    categories = results[0];
+    products = results[1];
+    topSellingCategoryName = results[2] || 'None';
   }
 
   function render() {
@@ -19,6 +27,7 @@
 
     document.getElementById('totalCategories').textContent = categories.length;
     document.getElementById('totalProducts').textContent = products.length;
+    document.getElementById('topSellingCategory').textContent = topSellingCategoryName;
 
     if (!categories.length) {
       tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><p>No categories found</p></div></td></tr>';
@@ -27,12 +36,23 @@
 
     tbody.innerHTML = [...categories]
       .sort((a, b) => a.name.localeCompare(b.name))
-      .map((cat) => `<tr>
-        <td class="td-name">${cat.name}</td>
-        <td class="${cat.description ? 'td-desc' : 'td-desc empty'}">${cat.description || 'No description'}</td>
-        <td><span class="count-badge">${counts.get(cat.id) || 0} product(s)</span></td>
-        <td><div class="actions-cell"><button class="tbl-btn edit" data-id="${cat.id}">Edit</button><button class="tbl-btn del" data-id="${cat.id}">Delete</button></div></td>
-      </tr>`)
+      .map((cat) => {
+        const pCount = counts.get(cat.id) || 0;
+        const deleteDisabledAttr = pCount > 0 
+          ? 'disabled style="opacity: 0.4; cursor: not-allowed;" title="Cannot delete category with active products"' 
+          : '';
+        return `<tr>
+          <td class="td-name">${cat.name}</td>
+          <td><span class="status-badge active">Active</span></td>
+          <td><span class="count-badge">${pCount} product(s)</span></td>
+          <td>
+            <div class="actions-cell">
+              <button class="tbl-btn edit" data-id="${cat.id}">Edit</button>
+              <button class="tbl-btn del" data-id="${cat.id}" ${deleteDisabledAttr}>Delete</button>
+            </div>
+          </td>
+        </tr>`;
+      })
       .join('');
   }
 
@@ -65,7 +85,10 @@
       }
 
       if (delBtn) {
+        if (delBtn.disabled) return;
         deletingId = Number(delBtn.dataset.id);
+        const cat = categories.find((c) => c.id === deletingId);
+        document.getElementById('delMsg').textContent = `Are you sure you want to delete the category "${cat ? cat.name : ''}"? This action cannot be undone.`;
         openModal('deleteModal');
       }
     });
