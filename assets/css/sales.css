@@ -121,14 +121,14 @@
   font-weight: 700;
 }
 
-/* Products grid - strictly 5 columns */
+/* Products grid - strictly 5 columns with optimized tight layout gap */
 .products-grid {
   flex: 1;
   overflow-y: auto;
   display: grid;
   grid-template-columns: repeat(5, 1fr); /* strictly exactly 5 product cards per row */
-  gap: 16px;
-  padding: 16px;
+  gap: 12px;
+  padding: 12px;
   align-content: start;
 }
 .products-grid::-webkit-scrollbar{width:6px}
@@ -139,14 +139,14 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 10px;
+  padding: 12px;
   cursor: pointer;
   transition: all .2s;
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between; /* ensures top and bottom align perfectly */
-  height: 130px; /* strict, identical fixed height */
+  height: 132px; /* strict, identical fixed height with comfortable padding */
   box-sizing: border-box;
   box-shadow: 0 2px 4px rgba(0,0,0,0.02);
   animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -156,9 +156,9 @@
 .product-card.out-of-stock:hover{transform:none;border-color:var(--border)}
 
 /* Category tag on card */
-.pc-cat{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;line-height:1;}
-.pc-name{font-size:14px;font-weight:700;color:var(--text);line-height:1.25;height:35px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin-top:3px;margin-bottom:auto;}
-.pc-price{font-size:14px;font-weight:800;color:var(--primary);font-family:var(--mono);margin-top:4px;margin-bottom:2px;line-height:1;}
+.pc-cat{font-size:9.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;line-height:1;}
+.pc-name{font-size:15px;font-weight:700;color:var(--text);line-height:1.3;height:38px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin-top:4px;margin-bottom:auto;}
+.pc-price{font-size:16px;font-weight:800;color:var(--primary);font-family:var(--mono);margin-top:6px;margin-bottom:2px;line-height:1;}
 .pc-footer{display:flex;align-items:center;justify-content:space-between;line-height:1;}
 .stock-badge{font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px}
 .stock-badge.ok{background:var(--surface3);color:var(--text2)}
