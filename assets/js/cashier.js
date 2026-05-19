@@ -83,16 +83,6 @@
     } catch (_) {}
   }
 
-  // ── QUICK GRID ──────────────────────────────────────────
-  const ICON_COLORS = [
-    { bg: 'rgba(29,45,191,0.09)', color: '#1D2DBF' },
-    { bg: 'rgba(16,185,129,0.09)', color: '#059669' },
-    { bg: 'rgba(245,158,11,0.09)', color: '#b45309' },
-    { bg: 'rgba(239,68,68,0.09)', color: '#dc2626' },
-    { bg: 'rgba(139,92,246,0.09)', color: '#7c3aed' },
-    { bg: 'rgba(236,72,153,0.09)', color: '#be185d' },
-  ];
-
   function renderQuickGrid(products) {
     const grid = document.getElementById('quickGrid');
     const empty = document.getElementById('quickEmpty');
@@ -102,13 +92,9 @@
       return;
     }
     empty.style.display = 'none';
-    grid.innerHTML = products.map((p, i) => {
-      const col = ICON_COLORS[i % ICON_COLORS.length];
+    grid.innerHTML = products.map((p) => {
       const outOfStock = Number(p.current_stock) <= 0;
       return `<div class="quick-card${outOfStock ? ' out-of-stock' : ''}" data-id="${p.id}" title="${p.name}">
-        <div class="quick-card-icon" style="background:${col.bg};color:${col.color}">
-          <i class="fa-solid fa-${categoryIcon(p.category_id)}"></i>
-        </div>
         <span class="quick-card-name">${p.name}</span>
         <span class="quick-card-price">LKR ${fmt(p.selling_price)}</span>
         <span class="quick-card-stock">${outOfStock ? 'Out of stock' : `Stock: ${p.current_stock}`}</span>
