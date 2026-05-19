@@ -5,6 +5,7 @@
   let cart = [];           // { id, name, price, qty, unit }
   let allProducts = [];
   let allCustomers = [];
+  let allCategories = [];  // { id, name }
   let attachedCustomer = null;
   let activePayMethod = 'Cash';
   let shiftStartTime = null;
@@ -36,10 +37,11 @@
       document.getElementById('navStoreName').textContent = settings.storeName || 'QuickPOS';
     } catch (_) {}
 
+    await loadCategories();
     await loadProducts();
     await loadCustomers();
     bindEvents();
-    document.getElementById('barcodeInput').focus();
+    focusBarcode();
   });
 
   // ── SHIFT TIMER ────────────────────────────────────────
@@ -55,7 +57,18 @@
     shiftInterval = setInterval(tick, 1000);
   }
 
+  // ── FOCUS HELPER ────────────────────────────────────────
+  function focusBarcode() {
+    requestAnimationFrame(() => document.getElementById('barcodeInput').focus());
+  }
+
   // ── DATA LOADING ────────────────────────────────────────
+  async function loadCategories() {
+    try {
+      allCategories = await window.api.getCategories();
+    } catch (_) {}
+  }
+
   async function loadProducts() {
     try {
       allProducts = await window.api.getProducts();
@@ -118,10 +131,22 @@
 
   function buildCategoryTabs() {
     const tabsEl = document.getElementById('quickFilterTabs');
-    const cats = [...new Map(allProducts.map(p => [p.category_id, p.category_name || p.category_id])).entries()];
-    const extra = cats.map(([id, name]) =>
-      `<button class="q-tab" data-cat="${id}">${name || 'Cat ' + id}</button>`
-    ).join('');
+
+    // Build a map: category_id → short display name from allCategories
+    const catNameMap = new Map();
+    allCategories.forEach(c => {
+      // Truncate to 6 chars for tab brevity (e.g. 'Grocer' → 'Grocer')
+      catNameMap.set(String(c.id), c.name.length > 6 ? c.name.slice(0, 6) + '.' : c.name);
+    });
+
+    // Collect unique category IDs actually used by products
+    const usedCatIds = [...new Set(allProducts.map(p => String(p.category_id)))];
+
+    const extra = usedCatIds.map(id => {
+      const label = catNameMap.get(id) || ('Cat' + id);
+      return `<button class="q-tab" data-cat="${id}">${label}</button>`;
+    }).join('');
+
     tabsEl.innerHTML = `<button class="q-tab active" data-cat="all">All</button>${extra}`;
     tabsEl.querySelectorAll('.q-tab').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -130,6 +155,7 @@
         const cat = btn.dataset.cat;
         const filtered = cat === 'all' ? allProducts : allProducts.filter(p => String(p.category_id) === cat);
         renderQuickGrid(filtered);
+        focusBarcode();
       });
     });
   }
@@ -284,7 +310,7 @@
 
   function closePayModal() {
     document.getElementById('payModalOverlay').classList.remove('open');
-    document.getElementById('barcodeInput').focus();
+    focusBarcode();
   }
 
   // ── CUSTOMER MODAL ─────────────────────────────────────
@@ -297,7 +323,7 @@
 
   function closeCustModal() {
     document.getElementById('custModalOverlay').classList.remove('open');
-    document.getElementById('barcodeInput').focus();
+    focusBarcode();
   }
 
   function renderCustResults(list) {
@@ -342,7 +368,16 @@
     document.getElementById('payCashBtn').addEventListener('click', () => openPayModal('Cash'));
     document.getElementById('payCardBtn').addEventListener('click', () => openPayModal('Card'));
     document.getElementById('payCreditBtn').addEventListener('click', () => openPayModal('Credit'));
-    document.getElementById('clearCartBtn').addEventListener('click', () => { if (cart.length && confirm('Clear cart?')) { cart = []; attachedCustomer = null; document.getElementById('customerLabel').textContent = 'Walk-in Customer'; document.getElementById('detachCustomerBtn').style.display = 'none'; renderCart(); } });
+    document.getElementById('clearCartBtn').addEventListener('click', () => {
+      if (cart.length && confirm('Clear cart?')) {
+        cart = [];
+        attachedCustomer = null;
+        document.getElementById('customerLabel').textContent = 'Walk-in Customer';
+        document.getElementById('detachCustomerBtn').style.display = 'none';
+        renderCart();
+        focusBarcode();
+      }
+    });
 
     // Pay modal
     document.getElementById('payModalClose').addEventListener('click', closePayModal);
@@ -385,7 +420,7 @@
       if (e.key === 'Escape') {
         closePayModal();
         closeCustModal();
-        document.getElementById('barcodeInput').focus();
+        focusBarcode();
       }
       if (e.ctrlKey && e.key.toLowerCase() === 'l') { e.preventDefault(); openCustModal(); }
     });
@@ -426,7 +461,8 @@
         document.getElementById('customerLabel').textContent = 'Walk-in Customer';
         document.getElementById('detachCustomerBtn').style.display = 'none';
         renderCart();
-        await loadProducts(); // refresh stock
+        await loadProducts(); // refresh stock counts on quick-grid
+        focusBarcode();       // return focus immediately after transaction
       }
     } catch (err) {
       toast(err.message || 'Sale failed', 'error');
