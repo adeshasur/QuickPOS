@@ -366,8 +366,10 @@
     document.getElementById('payCashBtn').addEventListener('click', () => openPayModal('Cash'));
     document.getElementById('payCardBtn').addEventListener('click', () => openPayModal('Card'));
     document.getElementById('payCreditBtn').addEventListener('click', () => openPayModal('Credit'));
-    document.getElementById('clearCartBtn').addEventListener('click', () => {
-      if (cart.length && confirm('Clear cart?')) {
+    document.getElementById('clearCartBtn').addEventListener('click', async () => {
+      if (!cart.length) return;
+      const confirmClear = await showConfirm('Clear Cart', 'Are you sure you want to remove all items from the cart?', { isDanger: true });
+      if (confirmClear) {
         cart = [];
         attachedCustomer = null;
         document.getElementById('customerLabel').textContent = 'Walk-in Customer';
@@ -396,9 +398,16 @@
       renderCustResults(q ? allCustomers.filter(c => c.name.toLowerCase().includes(q) || String(c.phone).includes(q)) : allCustomers.slice(0, 10));
     });
 
+    // Custom dialog button binds
+    document.getElementById('customDialogConfirmBtn').addEventListener('click', () => closeConfirm(true));
+    document.getElementById('customDialogCancelBtn').addEventListener('click', () => closeConfirm(false));
+
     // Logout
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      if (cart.length && !confirm('Cart has items. Logout anyway?')) return;
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      if (cart.length) {
+        const confirmLogout = await showConfirm('Active Cart Warning', 'The cart has items. Are you sure you want to log out and discard them?', { isWarning: true });
+        if (!confirmLogout) return;
+      }
       clearInterval(shiftInterval);
       localStorage.removeItem('quickpos-user');
       localStorage.removeItem('quickpos-shift-start');
@@ -408,9 +417,24 @@
     // Overlay click to close modals
     document.getElementById('payModalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closePayModal(); });
     document.getElementById('custModalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeCustModal(); });
+    document.getElementById('customDialogOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirm(false); });
 
     // Global hotkeys
     document.addEventListener('keydown', e => {
+      // Check if dialog is open
+      const dialogOverlay = document.getElementById('customDialogOverlay');
+      if (dialogOverlay.classList.contains('open')) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          closeConfirm(true);
+        }
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeConfirm(false);
+        }
+        return;
+      }
+
       if (e.target.tagName === 'INPUT' && e.target.id !== 'barcodeInput') return;
       if (e.key === 'F8') { e.preventDefault(); openPayModal('Cash'); }
       if (e.key === 'F9') { e.preventDefault(); openPayModal('Card'); }
@@ -466,6 +490,55 @@
       toast(err.message || 'Sale failed', 'error');
     } finally {
       document.getElementById('payConfirmBtn').disabled = false;
+    }
+  }
+
+  // ── CUSTOM DIALOG ──────────────────────────────────────
+  let activeDialogResolver = null;
+
+  function showConfirm(title, message, options = {}) {
+    const { isDanger = false, isWarning = false } = options;
+    return new Promise((resolve) => {
+      activeDialogResolver = resolve;
+
+      const overlay = document.getElementById('customDialogOverlay');
+      const titleEl = document.getElementById('customDialogTitle');
+      const msgEl = document.getElementById('customDialogMessage');
+      const iconWrap = document.getElementById('customDialogIconWrap');
+      const icon = document.getElementById('customDialogIcon');
+      const confirmBtn = document.getElementById('customDialogConfirmBtn');
+
+      titleEl.textContent = title;
+      msgEl.textContent = message;
+
+      iconWrap.className = 'custom-dialog-icon-wrap';
+      confirmBtn.className = 'custom-dialog-btn confirm-btn';
+
+      if (isDanger) {
+        iconWrap.classList.add('danger-theme');
+        icon.className = 'fa-solid fa-trash-can';
+        confirmBtn.classList.add('danger-theme');
+      } else if (isWarning) {
+        iconWrap.classList.add('warning-theme');
+        icon.className = 'fa-solid fa-triangle-exclamation';
+      } else {
+        iconWrap.classList.add('primary-theme');
+        icon.className = 'fa-solid fa-circle-question';
+      }
+
+      overlay.classList.add('open');
+    });
+  }
+
+  function closeConfirm(result) {
+    const overlay = document.getElementById('customDialogOverlay');
+    if (overlay.classList.contains('open')) {
+      overlay.classList.remove('open');
+      if (activeDialogResolver) {
+        activeDialogResolver(result);
+        activeDialogResolver = null;
+      }
+      focusBarcode();
     }
   }
 
