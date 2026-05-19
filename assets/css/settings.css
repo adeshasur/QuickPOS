@@ -14,7 +14,7 @@
   gap: 8px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   padding: 8px;
   box-shadow: 0 4px 14px rgba(15,23,42,.03);
   overflow-x: auto;
@@ -191,7 +191,7 @@
   justify-content: space-between;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   padding: 16px 20px;
   box-shadow: 0 4px 14px rgba(15,23,42,.03);
   margin-top: 10px;

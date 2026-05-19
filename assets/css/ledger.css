@@ -1,4 +1,4 @@
-﻿/* Credit Ledger - unified redesign */
+/* Credit Ledger - unified redesign */
 .ledger-container {
     flex: 1;
     padding: 20px 32px 32px;
@@ -25,7 +25,7 @@
 .kpi-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: var(--radius-lg);
     padding: 16px 20px;
     display: flex;
     align-items: center;
@@ -161,7 +161,7 @@
 
 .table-wrapper {
     background: var(--surface);
-    border-radius: 14px;
+    border-radius: var(--radius-lg);
     border: 1px solid var(--border);
     box-shadow: 0 2px 4px rgba(0,0,0,.02);
     overflow-x: auto;
@@ -197,20 +197,20 @@ td {
 tr:hover td { background: var(--surface2); }
 
 .status-badge {
-    background: #FEF3C7;
-    color: #92400E;
+    background: rgba(245, 158, 11, 0.08);
+    color: #b45309;
     font-weight: 700;
     font-size: 11px;
     padding: 4px 10px;
     border-radius: 999px;
     display: inline-block;
-    border: 1px solid #FCD34D;
+    border: 1px solid rgba(245, 158, 11, 0.15);
 }
 
 .status-badge.settled {
-    background: #D1FAE5;
-    color: #065F46;
-    border: 1px solid #6EE7B7;
+    background: rgba(16, 185, 129, 0.08);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.15);
 }
 
 /* CONDITIONAL FINANCIAL BADGES */
@@ -272,9 +272,9 @@ tr:hover td { background: var(--surface2); }
 .payment-modal.active { opacity: 1; visibility: visible; }
 
 .payment-modal-content {
-    background: white; border-radius: 16px; padding: 22px;
+    background: var(--surface); border-radius: var(--radius-lg); padding: 22px;
     max-width: 460px; width: 92%; box-shadow: var(--shadow-lg);
-    border: 1px solid var(--border2);
+    border: 1px solid var(--border);
 }
 
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }

@@ -57,6 +57,9 @@
       if (topbarContainer) {
         topbarContainer.innerHTML = `
           <div class="topbar">
+            <button class="menu-toggle-btn" id="globalMenuToggle" title="Open Menu">
+              <i class="fa-solid fa-bars"></i>
+            </button>
             <div class="tb-title">${title}</div>
             <div class="tb-actions">${actions}</div>
               <div class="tb-right">
@@ -84,6 +87,23 @@
         `;
 
         // Bind events after HTML is set
+        const toggleBtn = document.getElementById('globalMenuToggle');
+        if (toggleBtn) {
+          toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) sidebar.classList.toggle('open');
+          });
+        }
+
+        document.addEventListener('click', (e) => {
+          const sidebar = document.querySelector('.sidebar');
+          const toggle = document.getElementById('globalMenuToggle');
+          if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && (!toggle || !toggle.contains(e.target))) {
+            sidebar.classList.remove('open');
+          }
+        });
+
         const bell = document.getElementById('notifBell');
         const dropdown = document.getElementById('notifDropdown');
         if (bell && dropdown) {

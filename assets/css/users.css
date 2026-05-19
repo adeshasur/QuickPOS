@@ -19,7 +19,7 @@
 .kpi-card {
     background-color: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: var(--radius-lg);
     padding: 16px 20px;
     box-shadow: 0 4px 14px rgba(15,23,42,.03);
     display: flex;
