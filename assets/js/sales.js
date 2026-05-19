@@ -6,12 +6,27 @@
   let cart = [];
   let currentCat = 'all';
   let currentSearch = '';
+  let filteredProducts = [];
+  let searchSuggestList = [];
+  let searchSuggestActiveIndex = -1;
   let selectedCustomer = null;
   let productToCustomize = null;
   let priceEdited = false;
   let lastSale = null;
 
   const fmt = window.fmtLKR;
+
+  function notify(message, type = 'info') {
+    if (window.Notifications && typeof window.Notifications.showToast === 'function') {
+      window.Notifications.showToast(message, type);
+      return;
+    }
+    console.log(`[${type}] ${message}`);
+  }
+
+  function normalize(v) {
+    return String(v || '').toLowerCase().trim();
+  }
 
   function normalizeCategory(name) {
     return String(name || '').toLowerCase().replace(/\s+/g, '-');
@@ -42,11 +57,13 @@
       list = list.filter((p) => p.categoryKey === currentCat);
     }
     if (currentSearch) {
-      list = list.filter((p) => p.name.toLowerCase().includes(currentSearch));
+      list = list.filter((p) => getProductSearchText(p).includes(currentSearch));
     }
+    filteredProducts = list;
+    updateSearchMeta();
 
     if (!list.length) {
-      grid.innerHTML = '<div style="color:var(--text3);font-size:15px;padding:30px;grid-column:1/-1;text-align:center;">No products found</div>';
+      grid.innerHTML = '<div style="color:var(--text3);font-size:15px;padding:30px;grid-column:1/-1;text-align:center;">No products found. Try barcode, category, or Sinhala/English name.</div>';
       return;
     }
 
@@ -72,6 +89,29 @@
     });
   }
 
+  function getProductSearchText(p) {
+    return [
+      p.name,
+      p.barcode,
+      p.category_name,
+      p.description,
+      p.name_si,
+      p.name_ta
+    ].map(normalize).join(' ');
+  }
+
+  function updateSearchMeta() {
+    const meta = document.getElementById('searchMetaLabel');
+    if (!meta) return;
+    const q = currentSearch;
+    const cat = currentCat === 'all' ? 'All Categories' : currentCat.replace(/-/g, ' ');
+    if (!q) {
+      meta.textContent = `${filteredProducts.length} products in ${cat}`;
+      return;
+    }
+    meta.textContent = `${filteredProducts.length} matches for "${q}"`;
+  }
+
   function addToCart(productId, qty, price) {
     const p = products.find((x) => x.id === productId);
     if (!p) return;
@@ -80,7 +120,7 @@
     const currentQtyInCart = cart.filter((i) => i.id === productId).reduce((s, i) => s + Number(i.quantity), 0);
 
     if (currentQtyInCart + qty > Number(p.current_stock)) {
-      alert(`Max stock: ${p.current_stock}`);
+      notify(`Max stock: ${p.current_stock}`, 'warning');
       return;
     }
 
@@ -106,6 +146,35 @@
         cart = [];
       }
     }
+  }
+
+  function tryResumeHeldBill() {
+    const resumeId = localStorage.getItem('quickpos-resume-hold-id');
+    if (!resumeId) return;
+    localStorage.removeItem('quickpos-resume-hold-id');
+    let held = [];
+    try {
+      held = JSON.parse(localStorage.getItem('quickpos-held-bills') || '[]');
+      if (!Array.isArray(held)) held = [];
+    } catch (_err) {
+      held = [];
+    }
+    const idx = held.findIndex((h) => h.id === resumeId);
+    if (idx < 0) return;
+    const resumed = held.splice(idx, 1)[0];
+    localStorage.setItem('quickpos-held-bills', JSON.stringify(held));
+    cart = (resumed.cart || []).map((item) => ({
+      id: item.id,
+      name: item.name,
+      price: Number(item.price || 0),
+      quantity: Number(item.quantity ?? item.qty ?? 1),
+      unit: item.unit || 'pc'
+    }));
+    if (resumed.customer) {
+      selectedCustomer = customers.find((c) => c.id === resumed.customer.id) || resumed.customer;
+    }
+    saveCart();
+    notify('Held bill resumed into POS terminal', 'info');
   }
 
   function renderCart() {
@@ -150,7 +219,7 @@
     if (newQty <= 0) {
       cart.splice(index, 1);
     } else if (newQty + currentQtyOthers > Number(p.current_stock)) {
-      alert(`Max stock: ${p.current_stock}`);
+      notify(`Max stock: ${p.current_stock}`, 'warning');
       return;
     } else {
       item.quantity = newQty;
@@ -214,7 +283,7 @@
     payload.timestamp = new Date().toISOString();
     lastSale = payload;
 
-    // Close payment modals immediately — no popup window
+    // Close payment modals immediately - no popup window
     cart = [];
     saveCart();
     
@@ -338,23 +407,40 @@
       pill.classList.add('active');
       currentCat = pill.dataset.cat;
       renderProducts();
+      renderSearchSuggestions(document.getElementById('stockSearch')?.value || '');
     });
 
     const barcodeInput = document.getElementById('barcodeInput');
     const search = document.getElementById('stockSearch');
+    const suggest = document.getElementById('stockSuggest');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const focusScanBtn = document.getElementById('focusScanBtn');
 
     if (barcodeInput) {
-      barcodeInput.focus(); // On page load, automatically focus the barcode input field
+      barcodeInput.focus();
     }
 
-    // 1. Persistent Focus Management with Smart Exclusions
+    if (clearSearchBtn) {
+      clearSearchBtn.addEventListener('click', () => {
+        if (search) {
+          search.value = '';
+          currentSearch = '';
+          renderProducts();
+          renderSearchSuggestions('');
+          search.focus();
+        }
+      });
+    }
+    if (focusScanBtn) {
+      focusScanBtn.addEventListener('click', () => barcodeInput?.focus());
+    }
+
     function keepFocus() {
       if (!barcodeInput) return;
       const activeEl = document.activeElement;
-      // Exclude customer search, cash received, customize modal fields, card ref, and standard search bar
       const exemptIds = ['custSearch', 'amtReceived', 'custQty', 'custPrice', 'cardRefNo', 'stockSearch'];
       if (activeEl && exemptIds.includes(activeEl.id)) {
-        return; // Cashier is actively typing in a valid exempt input field
+        return;
       }
       barcodeInput.focus();
     }
@@ -366,102 +452,181 @@
       setTimeout(keepFocus, 50);
     });
 
-    // 2. Enter Key Event Listener with hardware scanner keyboard emulation
     if (barcodeInput) {
       barcodeInput.addEventListener('keydown', async (e) => {
         if (e.key === 'Enter') {
-          e.preventDefault(); // Prevent default form submission or page action
+          e.preventDefault();
           const val = barcodeInput.value.trim();
           if (!val) return;
 
           try {
-            // Trigger searchProductByBarcode API call
             const product = await window.api.searchProductByBarcode(val);
             if (product) {
-              // Smart Cart Logic: addToCart increments by 1 if product is already in cart
               addToCart(product.id, 1, product.selling_price);
-              // Instantly clear the barcode text input
               barcodeInput.value = '';
+              notify(`${product.name} added`, 'info');
             } else {
-              console.warn('Barcode not found:', val);
-              alert(`Barcode "${val}" not found in database.`);
-              barcodeInput.value = '';
+              const fallback = products.find((p) => getProductSearchText(p).includes(normalize(val)));
+              if (fallback) {
+                addToCart(fallback.id, 1, fallback.selling_price);
+                notify(`${fallback.name} added from quick match`, 'info');
+              } else {
+                notify(`Barcode "${val}" not found`, 'warning');
+              }
             }
+            barcodeInput.value = '';
           } catch (err) {
             console.error('Barcode search error:', err);
-            alert(`Error processing scan: ${err.message}`);
+            notify(`Error processing scan: ${err.message}`, 'warning');
             barcodeInput.value = '';
           }
         }
       });
     }
 
-    // 3. Name-based Quick Stock Search Event Listeners
+    function renderSearchSuggestions(raw) {
+      if (!search || !suggest) return;
+      const q = normalize(raw);
+      if (!q) {
+        suggest.classList.remove('open');
+        suggest.innerHTML = '';
+        searchSuggestList = [];
+        searchSuggestActiveIndex = -1;
+        return;
+      }
+      const baseList = currentCat === 'all' ? products : products.filter((p) => p.categoryKey === currentCat);
+      const ranked = baseList
+        .map((p) => {
+          const hay = getProductSearchText(p);
+          const name = normalize(p.name);
+          let score = -1;
+          if (name === q) score = 120;
+          else if (String(p.barcode || '').toLowerCase() === q) score = 110;
+          else if (name.startsWith(q)) score = 90;
+          else if (hay.includes(q)) score = 60;
+          return { p, score };
+        })
+        .filter((x) => x.score > -1)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 7)
+        .map((x) => x.p);
+      searchSuggestList = ranked;
+      searchSuggestActiveIndex = ranked.length ? 0 : -1;
+
+      if (!ranked.length) {
+        suggest.innerHTML = '<div class="search-suggest-item"><div><div class="ssi-name">No matches</div><div class="ssi-meta">Try another keyword</div></div></div>';
+        suggest.classList.add('open');
+        return;
+      }
+
+      suggest.innerHTML = ranked.map((p, idx) => `
+        <div class="search-suggest-item${idx === searchSuggestActiveIndex ? ' active' : ''}" data-suggest-idx="${idx}">
+          <div>
+            <div class="ssi-name">${p.name}</div>
+            <div class="ssi-meta">${p.category_name || 'General'} | Stock: ${Number(p.current_stock || 0)} | ${p.barcode || '-'}</div>
+          </div>
+          <div class="ssi-price">${fmt(p.selling_price || 0)}</div>
+        </div>
+      `).join('');
+      suggest.classList.add('open');
+
+      suggest.querySelectorAll('.search-suggest-item[data-suggest-idx]').forEach((itemEl) => {
+        itemEl.addEventListener('mousedown', (ev) => {
+          ev.preventDefault();
+          const idx = Number(itemEl.dataset.suggestIdx);
+          const p = searchSuggestList[idx];
+          if (!p) return;
+          addToCart(p.id, 1, p.selling_price);
+          notify(`${p.name} added`, 'info');
+          search.value = '';
+          currentSearch = '';
+          renderProducts();
+          renderSearchSuggestions('');
+          barcodeInput?.focus();
+        });
+      });
+    }
+
     if (search) {
       search.addEventListener('input', (e) => {
-        currentSearch = e.target.value.toLowerCase().trim();
+        currentSearch = normalize(e.target.value);
         renderProducts();
+        renderSearchSuggestions(e.target.value);
       });
 
       search.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          if (!searchSuggestList.length) return;
+          e.preventDefault();
+          const step = e.key === 'ArrowDown' ? 1 : -1;
+          searchSuggestActiveIndex = (searchSuggestActiveIndex + step + searchSuggestList.length) % searchSuggestList.length;
+          renderSearchSuggestions(search.value);
+          return;
+        }
         if (e.key === 'Enter') {
           e.preventDefault();
-          const val = search.value.toLowerCase().trim();
+          const val = normalize(search.value);
           if (!val) return;
 
-          // 1. Try exact barcode match
-          let p = products.find(x => String(x.barcode || '').toLowerCase() === val);
-          
-          // 2. Try exact name match
-          if (!p) p = products.find(x => x.name.toLowerCase() === val);
-
-          // 3. Try first match in current grid
+          let p = null;
+          if (searchSuggestList.length && searchSuggestActiveIndex >= 0) {
+            p = searchSuggestList[searchSuggestActiveIndex];
+          }
           if (!p) {
-            const list = products.filter(x => x.name.toLowerCase().includes(val));
-            if (list.length > 0) p = list[0];
+            p = filteredProducts[0] || products.find((x) => getProductSearchText(x).includes(val));
           }
 
           if (p) {
             addToCart(p.id, 1, p.selling_price);
+            notify(`${p.name} added`, 'info');
             search.value = '';
             currentSearch = '';
             renderProducts();
-            
-            // Redirect focus back to barcode scanner
-            setTimeout(() => {
-              if (barcodeInput) barcodeInput.focus();
-            }, 100);
+            renderSearchSuggestions('');
+            setTimeout(() => barcodeInput?.focus(), 100);
+          } else {
+            notify('No product matched this search', 'warning');
           }
         }
+        if (e.key === 'Escape') {
+          renderSearchSuggestions('');
+          search.blur();
+          barcodeInput?.focus();
+        }
+      });
+
+      search.addEventListener('blur', () => {
+        setTimeout(() => renderSearchSuggestions(''), 120);
       });
     }
 
     const custSearch = document.getElementById('custSearch');
     const custDrop = document.getElementById('custDropdown');
-    custSearch.addEventListener('input', (e) => {
-      const v = e.target.value.toLowerCase().trim();
-      if (!v) {
-        custDrop.classList.remove('open');
-        return;
-      }
-      const results = customers.filter((c) => c.name.toLowerCase().includes(v) || String(c.phone || '').includes(v)).slice(0, 5);
-      if (!results.length) {
-        custDrop.innerHTML = '<div class="cust-result" style="justify-content:center;color:var(--text3)">No customers found</div>';
-        custDrop.classList.add('open');
-        return;
-      }
-      custDrop.innerHTML = results.map((c) => `<div class="cust-result" data-id="${c.id}"><div><div class="cust-result-name">${c.name}</div><div class="cust-result-phone">${c.phone || ''}</div></div><div class="cust-result-bal">${fmt(c.balance || 0)}</div></div>`).join('');
-      custDrop.classList.add('open');
-      custDrop.querySelectorAll('.cust-result').forEach((row) => {
-        row.addEventListener('click', () => {
-          selectedCustomer = customers.find((c) => c.id === Number(row.dataset.id));
-          custSearch.value = '';
+    if (custSearch && custDrop) {
+      custSearch.addEventListener('input', (e) => {
+        const v = normalize(e.target.value);
+        if (!v) {
           custDrop.classList.remove('open');
-          renderCustomer();
+          return;
+        }
+        const results = customers.filter((c) => normalize(c.name).includes(v) || String(c.phone || '').includes(v)).slice(0, 6);
+        if (!results.length) {
+          custDrop.innerHTML = '<div class="cust-result" style="justify-content:center;color:var(--text3)">No customers found</div>';
+          custDrop.classList.add('open');
+          return;
+        }
+        custDrop.innerHTML = results.map((c) => `<div class="cust-result" data-id="${c.id}"><div><div class="cust-result-name">${c.name}</div><div class="cust-result-phone">${c.phone || ''}</div></div><div class="cust-result-bal">${fmt(c.balance || 0)}</div></div>`).join('');
+        custDrop.classList.add('open');
+        custDrop.querySelectorAll('.cust-result').forEach((row) => {
+          row.addEventListener('click', () => {
+            selectedCustomer = customers.find((c) => c.id === Number(row.dataset.id));
+            custSearch.value = '';
+            custDrop.classList.remove('open');
+            renderCustomer();
+          });
         });
       });
-    });
-
+    }
     document.getElementById('closeCustModal').addEventListener('click', () => document.getElementById('custModal').classList.remove('open'));
     document.getElementById('cancelCustModal').addEventListener('click', () => document.getElementById('custModal').classList.remove('open'));
 
@@ -479,14 +644,14 @@
       if (!productToCustomize) return;
       const qty = parseFloat(document.getElementById('custQty').value) || 0;
       const price = parseFloat(document.getElementById('custPrice').value) || 0;
-      if (qty <= 0) return alert('Enter valid quantity');
+      if (qty <= 0) return notify('Enter valid quantity', 'warning');
       addToCart(productToCustomize.id, qty, price);
       document.getElementById('custModal').classList.remove('open');
     });
 
     document.getElementById('cashBtn').addEventListener('click', () => {
       console.log('[SALES DEBUG] cashBtn clicked, cart.length:', cart.length);
-      if (!cart.length) { alert('Cart is empty! Add a product first.'); return; }
+      if (!cart.length) { notify('Cart is empty. Add a product first.', 'warning'); return; }
       document.getElementById('cashModalTotal').textContent = fmt(cartTotal());
       document.getElementById('amtReceived').value = '';
       document.getElementById('changeAmt').textContent = fmt(0);
@@ -495,7 +660,7 @@
 
     document.getElementById('cardBtn').addEventListener('click', () => {
       console.log('[SALES DEBUG] cardBtn clicked, cart.length:', cart.length);
-      if (!cart.length) { alert('Cart is empty! Add a product first.'); return; }
+      if (!cart.length) { notify('Cart is empty. Add a product first.', 'warning'); return; }
       document.getElementById('cardModalTotal').textContent = fmt(cartTotal());
       document.getElementById('cardRefNo').value = '';
       document.getElementById('cardModal').classList.add('open');
@@ -513,7 +678,7 @@
         setTimeout(() => { btn.disabled = false; }, 300);
       } catch (err) {
         btn.disabled = false;
-        alert(`Failed to save sale: ${err.message}`);
+        notify(`Failed to save sale: ${err.message}`, 'warning');
         btn.disabled = false;
         btn.textContent = 'Complete Sale';
       }
@@ -536,7 +701,7 @@
         setTimeout(() => { btn.disabled = false; }, 300);
       } catch (err) {
         btn.disabled = false;
-        alert(`Failed to save credit sale: ${err.message}`);
+        notify(`Failed to save credit sale: ${err.message}`, 'warning');
       }
     });
 
@@ -570,7 +735,8 @@
       if (rec < total) {
         btn.disabled = false;
         btn.textContent = 'Complete Sale';
-        return alert('Insufficient amount received');
+        notify('Insufficient amount received', 'warning');
+        return;
       }
       try {
         await completeSale('Cash', rec);
@@ -579,7 +745,7 @@
         setTimeout(() => { btn.disabled = false; }, 300);
       } catch (err) {
         btn.disabled = false;
-        alert(`Failed to save sale: ${err.message}`);
+        notify(`Failed to save sale: ${err.message}`, 'warning');
         btn.disabled = false;
         btn.textContent = 'Complete Sale';
       }
@@ -595,7 +761,7 @@
 
     document.getElementById('printDraftBtn').addEventListener('click', () => {
       console.log('[SALES DEBUG] printDraftBtn clicked, cart.length:', cart.length);
-      if (!cart.length) { alert('Cart is empty! Add a product first.'); return; }
+      if (!cart.length) { notify('Cart is empty. Add a product first.', 'warning'); return; }
       const total = cartTotal();
       const draftData = {
         billId: 'DRAFT',
@@ -607,7 +773,20 @@
       };
       triggerPrint(draftData);
     });
-    console.log('[SALES DEBUG] wireEvents() completed — all handlers attached');
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        search?.focus();
+        search?.select();
+      }
+      if (e.key === 'F2') {
+        e.preventDefault();
+        barcodeInput?.focus();
+        barcodeInput?.select();
+      }
+    });
+    console.log('[SALES DEBUG] wireEvents() completed - all handlers attached');
   }
 
   async function triggerPrint(saleData) {
@@ -713,7 +892,7 @@
         const res = await window.api.printReceiptSilent(options);
         if (res && !res.success) {
           console.error('[PRINT ERROR] Print failed:', res.failureReason);
-          // Sale is already saved — just log, do not alert
+          // Sale is already saved - just log, do not alert
         } else {
           console.log('[PRINT] Receipt printed successfully.');
         }
@@ -740,9 +919,12 @@
 
     try {
       await loadData();
+      tryResumeHeldBill();
+      renderCustomer();
       renderCart();
     } catch (err) {
-      alert(`Failed to load POS data: ${err.message}`);
+      notify(`Failed to load POS data: ${err.message}`, 'warning');
     }
   });
 })();
+

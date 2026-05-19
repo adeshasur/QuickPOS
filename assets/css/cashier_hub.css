@@ -5,8 +5,11 @@ body {
   margin: 0;
   font-family: 'Manrope', sans-serif;
 }
+.hub-main-content {
+  width: 100%;
+}
 .hub-shell {
-  min-height: 100vh;
+  min-height: calc(100vh - 86px);
   padding: 20px;
   display: grid;
   gap: var(--hub-gap);
@@ -111,4 +114,8 @@ body {
   .hub-kpis, .hub-grid { grid-template-columns: 1fr; }
   .hub-footer { flex-direction: column; }
   .end-shift-btn, .logout-btn-lite { width: 100%; }
+  .hub-main-content {
+    margin-left: 0;
+    width: 100%;
+  }
 }

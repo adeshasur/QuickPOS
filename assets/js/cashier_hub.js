@@ -14,6 +14,9 @@
   document.addEventListener('DOMContentLoaded', init);
 
   async function init() {
+    if (window.Components && typeof window.Components.init === 'function') {
+      window.Components.init({ title: 'Cashier Hub' });
+    }
     const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
     if (!user || user.role !== 'cashier') {
       window.location.href = 'login.html';
@@ -28,6 +31,7 @@
     bind();
     await refreshData();
     hydrateHoldBadge();
+    updateSubtitle();
     setInterval(updateShiftDuration, 1000);
     setInterval(refreshData, 30000);
   }
@@ -43,12 +47,19 @@
     document.getElementById('asyncModalClose').addEventListener('click', () => closeModal(false));
     document.getElementById('asyncModal').addEventListener('click', (e) => { if (e.target.id === 'asyncModal') closeModal(false); });
     window.addEventListener('storage', (e) => {
-      if (e.key === 'quickpos-held-bills') hydrateHoldBadge();
+      if (e.key === 'quickpos-held-bills') {
+        hydrateHoldBadge();
+        updateSubtitle();
+      }
     });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'F11') {
         e.preventDefault();
         resumeFirstHeld();
+      }
+      if (e.key === 'F8') {
+        e.preventDefault();
+        startSaleFlow();
       }
     });
   }
@@ -100,6 +111,17 @@
     }
     badge.style.display = 'flex';
     text.textContent = `${state.heldBills.length} held bill(s)`;
+  }
+
+  function updateSubtitle() {
+    const el = document.getElementById('hubSubtitle');
+    if (!el) return;
+    const heldCount = state.heldBills.length;
+    if (heldCount > 0) {
+      el.textContent = `${heldCount} held bill(s) waiting · Press F11 to resume`;
+      return;
+    }
+    el.textContent = 'Ready for fast retail flow';
   }
 
   async function startSaleFlow() {
@@ -227,7 +249,7 @@
       return;
     }
     localStorage.setItem('quickpos-resume-hold-id', state.heldBills[0].id);
-    window.location.href = 'cashier_dashboard.html';
+    window.location.href = 'sales.html';
   }
 
   function logout() {
