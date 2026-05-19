@@ -1,30 +1,11 @@
 /* ── Cashier Terminal CSS ── */
-:root {
-  --font: 'Manrope', system-ui, sans-serif;
-  --mono: 'DM Mono', monospace;
-  --primary: #1D2DBF;
-  --primary-dark: #16239a;
-  --primary-glow: rgba(29,45,191,0.10);
-  --accent: #FF9800;
-  --success: #10b981;
-  --danger: #ef4444;
-  --danger-light: #fef2f2;
-  --warning: #f59e0b;
-  --bg: #f0f4f8;
-  --surface: #fff;
-  --surface2: #f1f5f9;
-  --border: #e2e8f0;
-  --border2: #cbd5e1;
-  --text: #0f172a;
-  --text2: #475569;
-  --text3: #94a3b8;
-  --radius: 12px;
-  --radius-lg: 16px;
-  --shadow: 0 4px 20px rgba(15,23,42,0.07);
+body {
+  background: var(--bg-gradient) !important;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
-
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: var(--font); background: var(--bg); color: var(--text); height:100vh; overflow:hidden; display:flex; flex-direction:column; -webkit-font-smoothing:antialiased; }
 
 /* ── NAVBAR ── */
 .pos-navbar {
@@ -84,15 +65,18 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
 /* ── LEFT: CART PANEL (35%) ── */
 .cart-panel {
   width:35%; display:flex; flex-direction:column;
-  background:var(--bg); border-right:2px solid var(--border);
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1.5px solid var(--border);
   overflow:hidden;
 }
 
 /* Barcode Row */
 .barcode-row {
-  display:flex; align-items:center; gap:0;
-  background:var(--surface); border-bottom:1px solid var(--border);
-  padding:12px 16px; gap:10px; flex-shrink:0;
+  display:flex; align-items:center; gap:10px;
+  background: rgba(255, 255, 255, 0.55); border-bottom:1px solid var(--border);
+  padding:12px 16px; flex-shrink:0;
 }
 .barcode-icon-wrap {
   width:44px; height:44px; border-radius:10px;
@@ -119,7 +103,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
 /* Customer Bar */
 .customer-bar {
   display:flex; align-items:center; justify-content:space-between;
-  padding:8px 16px; background:var(--surface); border-bottom:1px solid var(--border);
+  padding:8px 16px; background: rgba(255, 255, 255, 0.4); border-bottom:1px solid var(--border);
   flex-shrink:0;
 }
 .customer-bar-left { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--text2); }
@@ -138,7 +122,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
 .cart-table-wrap { flex:1; overflow-y:auto; position:relative; }
 .cart-table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
 .cart-table thead th {
-  background:var(--surface2); padding:11px 14px; text-align:left;
+  background: rgba(241, 245, 249, 0.85); backdrop-filter: blur(8px); padding:11px 14px; text-align:left;
   font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase;
   letter-spacing:.06em; border-bottom:2px solid var(--border); position:sticky; top:0; z-index:5;
 }
@@ -186,7 +170,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
 
 /* Cart Summary */
 .cart-summary {
-  background:var(--surface); border-top:2px solid var(--border);
+  background: rgba(255, 255, 255, 0.55); border-top:1px solid var(--border);
   padding:12px 20px; display:flex; align-items:center; gap:16px; flex-shrink:0;
 }
 .summary-row { display:flex; flex-direction:column; align-items:center; }
@@ -204,7 +188,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
 /* Hotkey Footer */
 .hotkey-footer {
   display:flex; gap:8px; padding:12px 16px;
-  background:var(--surface); border-top:2px solid var(--border);
+  background: rgba(255, 255, 255, 0.45); border-top:1px solid var(--border);
   flex-shrink:0;
 }
 .hotkey-btn {
@@ -237,11 +221,12 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
 /* ── RIGHT: QUICK PANEL (65%) ── */
 .quick-panel {
   width:65%; display:flex; flex-direction:column;
-  background:var(--surface2); overflow:hidden;
+  background: transparent; overflow:hidden;
 }
 .quick-panel-header {
   display:flex; align-items:center; justify-content:space-between;
-  padding:12px 16px; background:var(--surface); border-bottom:1px solid var(--border);
+  padding:12px 16px; background: rgba(255, 255, 255, 0.45); border-bottom:1px solid var(--border);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   flex-shrink:0; gap:12px;
 }
 .quick-panel-title { font-size:14px; font-weight:800; color:var(--text); display:flex; align-items:center; gap:7px; white-space:nowrap; }
@@ -249,18 +234,18 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
 .q-tab {
   padding:8px 16px; border-radius:999px; font-family:var(--font);
   font-size:13px; font-weight:700; border:1px solid var(--border2);
-  background:var(--surface2); color:var(--text2); cursor:pointer; white-space:nowrap;
+  background: rgba(255, 255, 255, 0.5); color:var(--text2); cursor:pointer; white-space:nowrap;
   transition:all .2s ease;
 }
 .q-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
 .q-tab:hover:not(.active) { background:var(--border); }
 
-.quick-search-wrap { position:relative; padding:10px 14px; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; }
+.quick-search-wrap { position:relative; padding:10px 14px; background: rgba(255, 255, 255, 0.35); border-bottom:1px solid var(--border); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); flex-shrink:0; }
 .quick-search-wrap i { position:absolute; left:26px; top:50%; transform:translateY(-50%); color:var(--text3); font-size:14px; }
 .quick-search {
   width:100%; height:40px; border:2px solid var(--border2); border-radius:10px;
   padding:0 14px 0 38px; font-family:var(--font); font-size:14px;
-  background:var(--surface2); color:var(--text); outline:none; transition:border-color .2s;
+  background: rgba(255, 255, 255, 0.6); color:var(--text); outline:none; transition:border-color .2s;
 }
 .quick-search:focus { border-color:var(--primary); background:#fff; }
 
@@ -410,8 +395,37 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
 .pos-toast.error .pos-toast-dot { background:var(--danger); }
 .pos-toast.warn .pos-toast-dot { background:var(--warning); }
 
-/* Scrollbar */
-::-webkit-scrollbar { width:5px; height:5px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:var(--border2); border-radius:99px; }
-::-webkit-scrollbar-thumb:hover { background:var(--text3); }
+/* Sleek Glassmorphic Custom Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.01);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(29, 45, 191, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(29, 45, 191, 0.3);
+}
+
+/* Unified Button Interactions & Active Press States */
+.q-tab:active,
+.quick-card:active,
+.hotkey-btn:active,
+.barcode-search-btn:active,
+.qty-btn:active,
+.del-btn:active,
+.nav-btn:active,
+.cust-link-btn:active,
+.pay-footer-btn:active,
+.pay-modal-close:active,
+.cust-result-item:active {
+  transform: scale(0.97) !important;
+}
