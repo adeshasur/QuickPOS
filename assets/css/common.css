@@ -1,7 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
 
 /* === Unified Design System === */
@@ -42,8 +39,8 @@
     --radius-lg: 16px;
     --radius-xl: 24px;
     
-    /* Font */
-    --font: 'Manrope', 'Plus Jakarta Sans', 'Inter', 'Segoe UI', system-ui, sans-serif;
+    /* Font — Single-Font Architecture: Manrope only */
+    --font: 'Manrope', system-ui, sans-serif;
     --mono: 'DM Mono', monospace;
 }
 
@@ -58,6 +55,20 @@ body, button, input, select, textarea, table, th, td, option {
     font-family: var(--font);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tabular Numbers: Digits align perfectly for cashier-speed financial reading */
+table, th, td,
+.kpi-val, .kpi-label,
+.bal-val, .bal-badge,
+.total-amount, .sc-amount,
+.pc-price, .ci-total, .pay-row-val,
+.price-final, .price-base, .stock-ok, .stock-low, .alert-val,
+.unit-display-price, .amount-cell, .pp-val, .quick-btn,
+.stat-val, .rank, .item-qty, .alert-qty,
+.loyalty-val, .phone-val,
+[class*="-price"], [class*="-amount"], [class*="-total"], [class*="-val"] {
+    font-variant-numeric: tabular-nums;
 }
 
 html, body {

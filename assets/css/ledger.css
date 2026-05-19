@@ -319,7 +319,7 @@ tr:hover td { background: var(--surface2); }
 .modal-btn.primary { background: var(--primary); color: white; }
 
 .thermal-receipt {
-    font-family: 'Courier New', monospace;
+    font-family: var(--mono);
     width: 300px;
     margin: 0 auto;
     background: white;

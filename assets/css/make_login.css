@@ -32,7 +32,7 @@
    BODY
 ========================= */
 body{
-    font-family:'Inter',sans-serif;
+    font-family: var(--font, 'Manrope', system-ui, sans-serif);
     min-height:100vh;
     display:flex;
     align-items:center;

@@ -447,7 +447,7 @@
   margin: 0 auto;
   padding: 5px 2px;
   color: #000;
-  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--font);
   line-height: 1.2;
   font-size: 13px;
 }
