@@ -607,8 +607,8 @@
       document.getElementById('payConfirmBtn').disabled = true;
       const result = await window.api.saveSale(saleData);
       if (result.success) {
-        toast(`Sale saved — ${result.billId}`);
-        await window.api.exportThermalReceiptPdf({ ...saleData, billId: result.billId, timestamp: new Date().toISOString(), preview: true });
+        toast(`Sale saved - ${result.billId}`);
+        await window.api.printThermalReceipt({ ...saleData, billId: result.billId, timestamp: new Date().toISOString(), preview: true });
         showSaleLock(result.billId);
         closePayModal();
         cart = [];

@@ -421,6 +421,27 @@ ipcMain.handle('export-thermal-receipt-pdf', async (event, payload) => {
     return { success: true, path: save.filePath };
 });
 
+ipcMain.handle('print-thermal-receipt', async (event, payload) => {
+    return new Promise(async (resolve) => {
+        const printWin = new BrowserWindow({
+            show: false,
+            webPreferences: { nodeIntegration: false, contextIsolation: true }
+        });
+        const html = `<!doctype html><html><body style="margin:0;padding:0;">${buildThermalReceiptHtml(payload)}</body></html>`;
+        await printWin.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+        
+        printWin.webContents.print({
+            silent: true,
+            printBackground: true,
+            margins: { marginType: 'none' },
+            pageSize: { width: 80000, height: 297000 }
+        }, (success, failureReason) => {
+            printWin.close();
+            resolve({ success, failureReason });
+        });
+    });
+});
+
 ipcMain.handle('export-shift-summary-pdf', async (event, summary) => {
     const html = `<!doctype html><html><body style="font-family:Manrope,Arial,sans-serif;padding:24px;color:#111">
       <h2 style="margin:0 0 8px 0">Shift Summary (Z-Report)</h2>

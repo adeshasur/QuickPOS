@@ -1,12 +1,12 @@
-/* Font inherits from common.css — Manrope single-font architecture */
+﻿/* Font inherits from common.css â€” Manrope single-font architecture */
 
 .content{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:18px 20px;gap:14px}
-.page-header{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;box-shadow:0 6px 16px rgba(15,23,42,.05)}
+.page-header { flex-shrink: 0; display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;box-shadow:0 6px 16px rgba(15,23,42,.05)}
 .page-header-left{display:flex;flex-direction:column;gap:6px}
 .page-heading{font-size:18px;font-weight:800;color:var(--text)}
 .page-sub{font-size:13px;font-weight:500;color:var(--text3)}
 
-.settings-tabs {
+.settings-tabs { flex-shrink: 0; 
   display: flex;
   align-items: center;
   gap: 8px;
@@ -184,7 +184,7 @@
 .toast.success .toast-dot{background:var(--success)}
 .toast.error .toast-dot{background:var(--danger)}
 
-.settings-footer {
+.settings-footer { flex-shrink: 0; 
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -268,7 +268,7 @@
 }
 
 @media (max-width:768px){
-  .settings-footer {
+  .settings-footer { flex-shrink: 0; 
     flex-direction: column;
     align-items: stretch;
     gap: 14px;
@@ -285,4 +285,6 @@
     justify-content: center;
   }
 }
+
+
 
