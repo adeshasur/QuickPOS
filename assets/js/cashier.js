@@ -132,11 +132,10 @@
   function buildCategoryTabs() {
     const tabsEl = document.getElementById('quickFilterTabs');
 
-    // Build a map: category_id → short display name from allCategories
+    // Build a map: category_id → display name from allCategories
     const catNameMap = new Map();
     allCategories.forEach(c => {
-      // Truncate to 6 chars for tab brevity (e.g. 'Grocer' → 'Grocer')
-      catNameMap.set(String(c.id), c.name.length > 6 ? c.name.slice(0, 6) + '.' : c.name);
+      catNameMap.set(String(c.id), c.name);
     });
 
     // Collect unique category IDs actually used by products
