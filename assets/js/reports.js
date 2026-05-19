@@ -21,8 +21,6 @@
     const emptySalesRow = document.getElementById('emptySalesRow');
     const topItemsTableBody = document.getElementById('topItemsTableBody');
     const emptyItemsRow = document.getElementById('emptyItemsRow');
-    const inventoryTableBody = document.getElementById('inventoryTableBody');
-    const emptyInventoryRow = document.getElementById('emptyInventoryRow');
 
     const formatCurrency = window.fmtLKR;
 
@@ -87,11 +85,15 @@
         salesTableBody.innerHTML = '';
         
         sales.forEach(sale => {
+            const items = saleDetailsMap.get(sale.id) || [];
+            const itemCount = items.length;
+            const itemsText = `${itemCount} Item${itemCount !== 1 ? 's' : ''}`;
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="time-cell">${formatDisplayDate(sale.timestamp)}</td>
                 <td>${sale.bill_id}</td>
-                <td class="items-cell"><div class="items-list">Check detailed invoice</div></td>
+                <td class="items-cell"><div class="items-list">${itemsText}</div></td>
                 <td class="amount-cell">${formatCurrency(sale.total_amount)}</td>
             `;
             salesTableBody.appendChild(row);
@@ -126,42 +128,8 @@
         topItemsTableBody.innerHTML = top.map(([name, s]) => `
             <tr>
                 <td class="product-name-cell">${name}</td>
-                <td class="quantity-cell">${Number(s.qty).toFixed(2)}</td>
+                <td class="quantity-cell">${Math.round(s.qty)}</td>
                 <td class="revenue-cell">${formatCurrency(s.revenue)}</td>
-            </tr>
-        `).join('');
-    }
-
-    function renderProductActivity(sales) {
-        if (!inventoryTableBody) return;
-
-        const activity = new Map();
-        sales.forEach((sale) => {
-            const items = saleDetailsMap.get(sale.id) || [];
-            items.forEach((it) => {
-                const key = it.product_name || `Item #${it.product_id}`;
-                const prev = activity.get(key) || { qty: 0, latest: sale.timestamp };
-                prev.qty += Number(it.quantity || 0);
-                if (new Date(sale.timestamp) > new Date(prev.latest)) prev.latest = sale.timestamp;
-                activity.set(key, prev);
-            });
-        });
-
-        const rows = Array.from(activity.entries())
-            .sort((a, b) => new Date(b[1].latest) - new Date(a[1].latest))
-            .slice(0, 15);
-
-        if (!rows.length) {
-            if (emptyInventoryRow) emptyInventoryRow.style.display = '';
-            return;
-        }
-        if (emptyInventoryRow) emptyInventoryRow.style.display = 'none';
-
-        inventoryTableBody.innerHTML = rows.map(([name, a]) => `
-            <tr>
-                <td class="inventory-date-cell">${formatDisplayDate(a.latest)}</td>
-                <td class="item-name-cell">${name}</td>
-                <td class="quantity-added-cell">${Number(a.qty).toFixed(2)}</td>
             </tr>
         `).join('');
     }
@@ -174,7 +142,6 @@
         updateSummaryCards(totals);
         renderSalesHistory(baseSales);
         renderTopItems(baseSales);
-        renderProductActivity(baseSales);
     }
 
     async function init() {
