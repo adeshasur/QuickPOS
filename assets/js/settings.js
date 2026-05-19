@@ -13,7 +13,14 @@
     timeFormat: '12h',
     thermalPrinterName: '',
     autoPrint: 'true',
-    showLogo: 'false'
+    showLogo: 'false',
+    defaultPaymentMethod: 'Cash',
+    idleTimeoutMin: '0',
+    keyboardShortcuts: 'true',
+    barcodeScanSound: 'false',
+    lowStockAlertLevel: '10',
+    requireAdminForRefund: 'true',
+    receiptFooter: 'Thank you for shopping with us!'
   };
 
   let settings = { ...defaultSettings };
@@ -41,6 +48,13 @@
     document.getElementById('timeFormat').value = settings.timeFormat;
     document.getElementById('autoPrint').checked = settings.autoPrint === 'true';
     document.getElementById('showLogo').checked = settings.showLogo === 'true';
+    document.getElementById('defaultPaymentMethod').value = settings.defaultPaymentMethod || 'Cash';
+    document.getElementById('idleTimeoutMin').value = settings.idleTimeoutMin || '0';
+    document.getElementById('keyboardShortcuts').checked = settings.keyboardShortcuts !== 'false';
+    document.getElementById('barcodeScanSound').checked = settings.barcodeScanSound === 'true';
+    document.getElementById('lowStockAlertLevel').value = settings.lowStockAlertLevel || '10';
+    document.getElementById('requireAdminForRefund').checked = settings.requireAdminForRefund !== 'false';
+    document.getElementById('receiptFooter').value = settings.receiptFooter || 'Thank you for shopping with us!';
     document.querySelectorAll('.ver-card').forEach((c) => c.classList.toggle('selected', c.dataset.version === settings.systemVersion));
     // Restore saved printer selection
     const sel = document.getElementById('thermalPrinterName');
@@ -88,7 +102,14 @@
       systemVersion: document.querySelector('.ver-card.selected')?.dataset.version || 'pro',
       thermalPrinterName: document.getElementById('thermalPrinterName').value.trim(),
       autoPrint: String(document.getElementById('autoPrint').checked),
-      showLogo: String(document.getElementById('showLogo').checked)
+      showLogo: String(document.getElementById('showLogo').checked),
+      defaultPaymentMethod: document.getElementById('defaultPaymentMethod').value,
+      idleTimeoutMin: String(Math.max(0, parseInt(document.getElementById('idleTimeoutMin').value || '0', 10) || 0)),
+      keyboardShortcuts: String(document.getElementById('keyboardShortcuts').checked),
+      barcodeScanSound: String(document.getElementById('barcodeScanSound').checked),
+      lowStockAlertLevel: String(Math.max(0, parseInt(document.getElementById('lowStockAlertLevel').value || '10', 10) || 10)),
+      requireAdminForRefund: String(document.getElementById('requireAdminForRefund').checked),
+      receiptFooter: document.getElementById('receiptFooter').value.trim() || 'Thank you for shopping with us!'
     };
 
     if (!next.storeName) return showToast('Store Name is required', 'error');

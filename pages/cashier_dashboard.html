@@ -36,6 +36,10 @@
     </div>
 
     <div class="nav-right">
+      <button class="nav-btn" id="densityModeBtn" title="Toggle Dense Mode">
+        <i class="fa-solid fa-table-cells-large"></i>
+        <span>Dense</span>
+      </button>
       <div class="ui-preset-switch" id="uiPresetSwitch">
         <button class="ui-preset-btn active" data-ui-preset="minimal">Minimal</button>
         <button class="ui-preset-btn" data-ui-preset="contrast">Contrast</button>
@@ -78,10 +82,6 @@
         <i class="fa-solid fa-right-from-bracket"></i>
         <span>Logout</span>
       </button>
-      <button class="nav-btn" id="densityModeBtn" title="Toggle Dense Mode">
-        <i class="fa-solid fa-table-cells-large"></i>
-        <span>Dense</span>
-      </button>
     </div>
   </header>
 
@@ -113,20 +113,7 @@
           <i class="fa-solid fa-magnifying-glass"></i>
         </button>
       </div>
-      <div class="lane-status-bar">
-        <span class="lane-pill" id="laneStatusPill"><i class="fa-solid fa-circle"></i> Ready to Scan</span>
-        <span class="lane-meta" id="laneStatusMeta">0 items in cart</span>
-      </div>
-      <div class="scan-strip" id="scanStrip">
-        <div class="scan-strip-left">
-          <span class="scan-strip-label">Last Scan</span>
-          <strong id="lastScannedName">No item scanned yet</strong>
-        </div>
-        <div class="scan-strip-right">
-          <span id="lastScannedQty">Qty 0</span>
-          <span id="lastScannedAt">--:--</span>
-        </div>
-      </div>
+
 
       <!-- Customer Quick-Link Bar -->
       <div class="customer-bar">

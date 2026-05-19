@@ -1,9 +1,9 @@
 /* Font inherits from common.css — Manrope single-font architecture */
 
-.content{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:24px 32px;gap:20px}
-.page-header{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;box-shadow:0 4px 14px rgba(15,23,42,.04)}
+.content{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:18px 20px;gap:14px}
+.page-header{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;box-shadow:0 6px 16px rgba(15,23,42,.05)}
 .page-header-left{display:flex;flex-direction:column;gap:6px}
-.page-heading{font-size:20px;font-weight:700;color:var(--text)}
+.page-heading{font-size:18px;font-weight:800;color:var(--text)}
 .page-sub{font-size:13px;font-weight:500;color:var(--text3)}
 
 .kpi-grid {
@@ -17,9 +17,9 @@
 .kpi-card {
     background-color: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 16px 20px;
-    box-shadow: 0 4px 14px rgba(15,23,42,.03);
+    border-radius: 12px;
+    padding: 14px 14px;
+    box-shadow: 0 6px 16px rgba(15,23,42,.04);
     display: flex;
     align-items: center;
     gap: 16px;
@@ -86,15 +86,15 @@
 }
 
 .user-management-content{display:flex;flex-direction:column;overflow:visible}
-.staff-table-section{background:var(--surface);border-radius:14px;box-shadow:0 2px 4px rgba(0,0,0,.02);overflow:hidden;display:flex;flex-direction:column;flex:1;border:1px solid var(--border)}
-.section-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.staff-table-section{background:var(--surface);border-radius:12px;box-shadow:0 6px 16px rgba(15,23,42,.04);overflow:hidden;display:flex;flex-direction:column;flex:1;border:1px solid var(--border)}
+.section-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:var(--surface2);border-bottom:1px solid var(--border)}
 .section-title{font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
 .table-container{overflow-x:auto;overflow-y:visible}
 
 .staff-table{width:100%;border-collapse:collapse;min-width:760px}
 .staff-table thead{background-color:var(--surface2);position:sticky;top:0;z-index:10}
-.staff-table th{text-align:left;padding:14px 16px;color:var(--text2);font-weight:700;font-size:12px;border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:.05em}
-.staff-table td{padding:14px 16px;border-bottom:1px solid var(--border);color:var(--text);font-size:13px}
+.staff-table th{text-align:left;padding:12px 14px;color:var(--text2);font-weight:800;font-size:11px;border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:.05em}
+.staff-table td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--text);font-size:13px}
 .staff-table tbody tr:hover{background:var(--surface2)}
 
 .role-badge{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;display:inline-block}

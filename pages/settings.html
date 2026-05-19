@@ -73,7 +73,37 @@
               <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Show store logo on receipt</span><span class="toggle-desc">If a logo has been uploaded</span></div><label class="ts"><input type="checkbox" id="showLogo"><span class="ts-slider"></span></label></div>
             </div>
           </div>
-          <div class="scard" style="grid-column:1/-1">
+          <div class="settings-grid settings-grid-2">
+            <div class="scard">
+              <div class="scard-title">POS Behavior</div>
+              <div class="field">
+                <label class="field-label">Default Payment Method</label>
+                <select class="field-input" id="defaultPaymentMethod">
+                  <option value="Cash">Cash</option>
+                  <option value="Card">Card</option>
+                  <option value="Credit">Credit</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">Cashier Idle Auto-Lock (minutes)</label>
+                <input class="field-input" type="number" id="idleTimeoutMin" min="0" max="180" step="1" value="0">
+                <span class="field-hint">0 = disabled</span>
+              </div>
+              <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Enable keyboard shortcuts</span><span class="toggle-desc">F8/F9/F10/F11 quick actions</span></div><label class="ts"><input type="checkbox" id="keyboardShortcuts" checked><span class="ts-slider"></span></label></div>
+              <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Play scan sound</span><span class="toggle-desc">Audio cue on successful barcode scan</span></div><label class="ts"><input type="checkbox" id="barcodeScanSound"><span class="ts-slider"></span></label></div>
+            </div>
+            <div class="scard">
+              <div class="scard-title">Alerts & Controls</div>
+              <div class="field">
+                <label class="field-label">Low Stock Alert Level</label>
+                <input class="field-input" type="number" id="lowStockAlertLevel" min="0" max="10000" step="1" value="10">
+              </div>
+              <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Require Admin PIN for refunds</span><span class="toggle-desc">Extra safety at cashier refund flow</span></div><label class="ts"><input type="checkbox" id="requireAdminForRefund" checked><span class="ts-slider"></span></label></div>
+              <div class="field">
+                <label class="field-label">Receipt Footer Message</label>
+                <input class="field-input" type="text" id="receiptFooter" maxlength="80" placeholder="Thank you for shopping with us!">
+              </div>
+            </div>          <div class="scard" style="grid-column:1/-1">
             <div class="scard-title">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
               Printer Configuration
@@ -195,5 +225,6 @@
 <script src="../assets/js/settings.js"></script>
 </body>
 </html>
+
 
 

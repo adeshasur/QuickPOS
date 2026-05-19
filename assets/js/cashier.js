@@ -39,7 +39,6 @@
     // Load settings + data
     try {
       settings = await window.api.getSettings();
-      document.getElementById('navStoreName').textContent = settings.storeName || 'QuickPOS';
     } catch (_) {}
 
     await loadCategories();
@@ -50,7 +49,6 @@
     updateAttachedCustomerView();
     applyDensityMode(localStorage.getItem('quickpos-dense-mode') === '1');
     applyUiPreset(localStorage.getItem('quickpos-ui-preset') || 'minimal');
-    updateLaneStatus('Ready to Scan');
     focusBarcode();
   });
 
@@ -180,8 +178,6 @@
     renderCart();
     pulseCartFeedback();
     scanCount += 1;
-    updateLastScan(product);
-    updateLaneStatus(`${product.name} scanned`);
     toast(`${product.name} added`);
   }
 
@@ -264,29 +260,11 @@
     document.getElementById('summaryTax').textContent = `LKR ${fmt(tax)}`;
     document.getElementById('summaryTotal').textContent = `LKR ${fmt(total)}`;
     const lines = cart.length;
-    const meta = `${itemCount} qty • ${lines} lines`;
-    document.getElementById('laneStatusMeta').textContent = meta;
     const progress = document.getElementById('cartProgressBar');
     if (progress) {
       const pct = Math.min(100, (itemCount / 40) * 100);
       progress.style.width = `${pct}%`;
     }
-  }
-
-  function updateLastScan(product) {
-    const item = cart.find(c => c.id === product.id);
-    document.getElementById('lastScannedName').textContent = product.name || 'Scanned item';
-    document.getElementById('lastScannedQty').textContent = `Qty ${item ? item.qty : 1}`;
-    document.getElementById('lastScannedAt').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-
-  function updateLaneStatus(message) {
-    const pill = document.getElementById('laneStatusPill');
-    if (!pill) return;
-    pill.innerHTML = `<i class="fa-solid fa-circle"></i> ${message}`;
-    pill.style.transform = 'scale(1.03)';
-    setTimeout(() => { pill.style.transform = 'scale(1)'; }, 130);
-    updateShortcutHud();
   }
 
   function applyDensityMode(enabled) {
@@ -492,7 +470,6 @@
         toast(`UI: ${btn.dataset.uiPreset}`);
       });
     });
-    document.getElementById('laneStatusPill').addEventListener('click', () => setCheckoutFocusMode(!checkoutFocusMode));
 
     // Quick search
     document.getElementById('quickSearch').addEventListener('input', e => {
@@ -640,7 +617,6 @@
         document.getElementById('detachCustomerBtn').style.display = 'none';
         renderCart();
         await loadProducts(); // refresh stock counts on quick-grid
-        updateLaneStatus(`Bill ${result.billId} completed`);
         focusBarcode();       // return focus immediately after transaction
       }
     } catch (err) {
@@ -659,7 +635,6 @@
             document.getElementById('detachCustomerBtn').style.display = 'none';
             renderCart();
             await loadProducts();
-            updateLaneStatus(`Bill ${result.billId} completed with override`);
             focusBarcode();
             return;
           }
@@ -753,7 +728,6 @@
     document.getElementById('detachCustomerBtn').style.display = 'none';
     renderCart();
     renderHeldBills();
-    updateLaneStatus('Bill moved to Hold');
     toast('Bill held successfully');
   }
 
@@ -781,7 +755,6 @@
         document.getElementById('detachCustomerBtn').style.display = attachedCustomer ? '' : 'none';
         renderHeldBills();
         renderCart();
-        updateLaneStatus('Held bill resumed');
         toast('Held bill resumed');
       });
     });
@@ -909,7 +882,7 @@
       `).join('');
       
       const html = `
-        <div style="font-family: monospace; width: 300px; padding: 10px; font-size: 12px;">
+        <div style="font-family: 'Noto Sans Sinhala','Iskoola Pota','Manrope',sans-serif; width: 300px; padding: 10px; font-size: 12px;">
           <h3 style="text-align:center; margin: 0 0 5px 0;">QuickPOS</h3>
           <p style="text-align:center; margin: 0 0 10px 0;">DUPLICATE RECEIPT</p>
           <hr/>

@@ -389,7 +389,7 @@ function buildThermalReceiptHtml(payload) {
         return `<tr><td>${item.name}</td><td style="text-align:center">${item.qty}</td><td style="text-align:right">${subtotal.toFixed(2)}</td></tr>`;
     }).join('');
     return `
-      <div style="font-family: monospace; width: 280px; padding: 8px; font-size: 11px; color: #111;">
+      <div style="font-family: 'Noto Sans Sinhala','Iskoola Pota','Manrope',sans-serif; width: 280px; padding: 8px; font-size: 11px; color: #111;">
         <h3 style="margin:0;text-align:center;">QuickPOS</h3>
         <p style="margin:2px 0 8px 0;text-align:center;">THERMAL RECEIPT</p>
         <hr />

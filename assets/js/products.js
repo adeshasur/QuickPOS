@@ -8,6 +8,23 @@
   const fmt = window.fmtLKR;
   const calcFinal = (base, discount) => Math.max(0, Number(base || 0) - Number(discount || 0));
 
+  function singlishToSinhala(input) {
+    let t = (input || '').toLowerCase();
+    const map = [
+      ['aa', 'ා'], ['ae', 'ැ'], ['ai', 'ෛ'], ['au', 'ෞ'], ['ee', 'ී'], ['oo', 'ූ'],
+      ['ka', 'ක'], ['kha', 'ඛ'], ['ga', 'ග'], ['gha', 'ඝ'], ['nga', 'ඟ'],
+      ['cha', 'ච'], ['ja', 'ජ'], ['ta', 'ට'], ['tha', 'ත'], ['da', 'ද'], ['dha', 'ධ'],
+      ['na', 'න'], ['pa', 'ප'], ['pha', 'ඵ'], ['ba', 'බ'], ['bha', 'භ'], ['ma', 'ම'],
+      ['ya', 'ය'], ['ra', 'ර'], ['la', 'ල'], ['va', 'ව'], ['sa', 'ස'], ['sha', 'ශ'],
+      ['ha', 'හ'], ['fa', 'ෆ'], ['a', 'අ'], ['i', 'ඉ'], ['u', 'උ'], ['e', 'එ'], ['o', 'ඔ']
+    ];
+    map.sort((a, b) => b[0].length - a[0].length);
+    map.forEach(([en, si]) => {
+      t = t.split(en).join(si);
+    });
+    return t.replace(/\s+/g, ' ').trim();
+  }
+
   function openModal(id) { document.getElementById(id).classList.add('open'); }
   function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
@@ -183,6 +200,21 @@
       updatePreview('add');
       openModal('addModal');
     });
+
+    const addNameSinhalaBtn = document.getElementById('addNameSinhalaBtn');
+    if (addNameSinhalaBtn) {
+      addNameSinhalaBtn.addEventListener('click', () => {
+        const inp = document.getElementById('addName');
+        inp.value = singlishToSinhala(inp.value);
+      });
+    }
+    const editNameSinhalaBtn = document.getElementById('editNameSinhalaBtn');
+    if (editNameSinhalaBtn) {
+      editNameSinhalaBtn.addEventListener('click', () => {
+        const inp = document.getElementById('editName');
+        inp.value = singlishToSinhala(inp.value);
+      });
+    }
 
     document.getElementById('saveAddBtn').addEventListener('click', async () => {
       const barcode = document.getElementById('addBarcode').value.trim();

@@ -11,7 +11,7 @@ body, html, .inventory-container, input, select, button {
 .inventory-container {
     flex: 1;
     overflow-y: auto;
-    padding: 24px 32px;
+    padding: 18px 20px;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -23,13 +23,13 @@ body, html, .inventory-container, input, select, button {
     justify-content: space-between;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 12px 14px;
-    box-shadow: 0 4px 14px rgba(15,23,42,.04);
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: 0 6px 16px rgba(15,23,42,.05);
 }
 
 .page-header-left { display: flex; flex-direction: column; gap: 6px; }
-.page-heading { font-size: 20px; font-weight: 700; color: var(--text); }
+.page-heading { font-size: 18px; font-weight: 800; color: var(--text); }
 .page-sub { font-size: 13px; font-weight: 500; color: var(--text3); }
 
 .add-btn {
@@ -39,8 +39,8 @@ body, html, .inventory-container, input, select, button {
     background: var(--primary);
     color: #fff;
     border: none;
-    border-radius: 8px;
-    padding: 10px 16px;
+    border-radius: 10px;
+    padding: 9px 14px;
     font-size: 13px;
     font-weight: 700;
     font-family: var(--font);
@@ -323,8 +323,8 @@ body, html, .inventory-container, input, select, button {
 .stock-history-section {
     background-color: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 2px 4px rgba(0,0,0,.02);
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(15,23,42,.04);
     overflow: visible;
     display: flex;
     flex-direction: column;
@@ -332,7 +332,7 @@ body, html, .inventory-container, input, select, button {
 }
 
 .section-header {
-    padding: 12px 14px;
+    padding: 10px 12px;
     border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
@@ -371,11 +371,11 @@ body, html, .inventory-container, input, select, button {
 
 .stock-table th {
     text-align: left;
-    padding: 14px 16px;
+    padding: 12px 14px;
     background-color: var(--surface2);
     color: var(--text2);
-    font-weight: 700;
-    font-size: 12px;
+    font-weight: 800;
+    font-size: 11px;
     border-bottom: 1px solid var(--border);
     text-transform: uppercase;
     letter-spacing: .05em;
@@ -383,7 +383,7 @@ body, html, .inventory-container, input, select, button {
 }
 
 .stock-table td {
-    padding: 12px 16px;
+    padding: 12px 14px;
     border-bottom: 1px solid var(--border);
     font-size: 13px;
     color: var(--text);
