@@ -33,6 +33,28 @@
     return String(v || '').toLowerCase().trim();
   }
 
+  function hasSinhala(text) {
+    return /[\u0D80-\u0DFF]/.test(String(text || ''));
+  }
+
+  function toSinhalaFallback(text) {
+    if (!text) return '';
+    if (hasSinhala(text)) return String(text);
+    if (window.Singlish && typeof window.Singlish.convertProductName === 'function') {
+      return window.Singlish.convertProductName(String(text));
+    }
+    if (window.Singlish && typeof window.Singlish.convert === 'function') {
+      return window.Singlish.convert(String(text));
+    }
+    return String(text);
+  }
+
+  function displayName(entity) {
+    if (!entity) return '';
+    const preferred = entity.name_si || entity.name || entity.product_name || '';
+    return toSinhalaFallback(preferred);
+  }
+
   function categoryKey(name) {
     return normalize(name).replace(/\s+/g, '-');
   }
@@ -132,7 +154,7 @@
         <div class="product-card${out ? ' out-of-stock' : ''}" data-product-id="${p.id}">
           ${out ? '<div class="out-label">OUT</div>' : ''}
           <div class="pc-cat">${escapeHtml((p.category_name || 'General').toLowerCase())}</div>
-          <div class="pc-name">${escapeHtml(p.name)}${p.unit_type ? ` / ${escapeHtml(p.unit_type)}` : ''}</div>
+          <div class="pc-name">${escapeHtml(displayName(p))}${p.unit_type ? ` / ${escapeHtml(p.unit_type)}` : ''}</div>
           <div class="pc-price">${fmt(p.selling_price || 0)}</div>
           <div class="pc-footer"><span></span><span class="stock-badge ${stockClass(Number(p.current_stock || 0))}">${stockText(Number(p.current_stock || 0))}</span></div>
         </div>
@@ -167,7 +189,7 @@
 
     const currentQtyInCart = state.cart.filter((i) => i.id === productId).reduce((sum, i) => sum + Number(i.quantity), 0);
     if (currentQtyInCart + qty > Number(product.current_stock || 0)) {
-      notify(`Max stock reached for ${product.name}`, 'warning');
+      notify(`Max stock reached for ${displayName(product)}`, 'warning');
       return;
     }
 
@@ -177,7 +199,7 @@
     } else {
       state.cart.push({
         id: product.id,
-        name: product.name,
+        name: displayName(product),
         quantity: Number(qty),
         price: Number(price),
         unit: product.unit_type || 'pc'
@@ -189,7 +211,7 @@
     pulseCartFeedback();
 
     if (source === 'scan') {
-      notify(`${product.name} scanned`, 'info');
+      notify(`${displayName(product)} scanned`, 'info');
     }
   }
 
@@ -223,7 +245,7 @@
     }
 
     if (product && next + others > Number(product.current_stock || 0)) {
-      notify(`Max stock reached for ${product.name}`, 'warning');
+      notify(`Max stock reached for ${displayName(product)}`, 'warning');
       return;
     }
 
@@ -415,7 +437,7 @@
     state.productToCustomize = product;
     state.priceEdited = false;
 
-    document.getElementById('custModalTitle').textContent = product.name;
+    document.getElementById('custModalTitle').textContent = displayName(product);
     document.getElementById('unitPriceShow').textContent = fmt(product.selling_price || 0);
     document.getElementById('custQty').value = '1.00';
     document.getElementById('custPrice').value = Number(product.selling_price || 0).toFixed(2);
@@ -495,7 +517,7 @@
     suggest.innerHTML = state.suggestList.map((p, index) => `
       <div class="search-suggest-item${index === state.suggestActive ? ' active' : ''}" data-index="${index}">
         <div>
-          <div class="ssi-name">${escapeHtml(p.name)}</div>
+          <div class="ssi-name">${escapeHtml(displayName(p))}</div>
           <div class="ssi-meta">${escapeHtml(p.category_name || 'General')} | Stock: ${Number(p.current_stock || 0)} | ${escapeHtml(p.barcode || '-')}</div>
         </div>
         <div class="ssi-price">${fmt(p.selling_price || 0)}</div>
@@ -511,7 +533,7 @@
         const product = state.suggestList[index];
         if (!product) return;
         addToCart(product.id, 1, Number(product.selling_price || 0), 'manual');
-        notify(`${product.name} added`, 'info');
+        notify(`${displayName(product)} added`, 'info');
         const search = document.getElementById('stockSearch');
         if (search) {
           search.value = '';
@@ -817,7 +839,7 @@
         const product = state.suggestList[state.suggestActive] || state.filteredProducts[0];
         if (product) {
           addToCart(product.id, 1, Number(product.selling_price || 0), 'manual');
-          notify(`${product.name} added`, 'info');
+          notify(`${displayName(product)} added`, 'info');
           stockSearch.value = '';
           state.currentSearch = '';
           renderProducts();

@@ -1,6 +1,5 @@
 'use strict';
 (function () {
-  const TARGET_STORAGE_KEY = 'quickpos-shift-target-bills';
   const DEFAULT_BILL_TARGET = 50;
 
   const state = {
@@ -62,7 +61,6 @@
     bindIfPresent('hubEndShiftBtn', 'click', openEndShiftFlow);
     bindIfPresent('hubLogoutBtn', 'click', logout);
     bindIfPresent('resumeHeldBtn', 'click', resumeFirstHeld);
-    bindIfPresent('setTargetBtn', 'click', configureShiftTarget);
 
     bindIfPresent('asyncModalClose', 'click', () => closeModal(false));
     bindIfPresent('asyncModal', 'click', (e) => {
@@ -74,10 +72,6 @@
         hydrateHoldBadge();
         updateSubtitle();
         updateKpis(state.mySales);
-      }
-      if (e.key === TARGET_STORAGE_KEY) {
-        state.shiftTargetBills = resolveShiftTarget();
-        renderTargetProgress(state.mySales.length);
       }
     });
 
@@ -414,39 +408,15 @@
   }
 
   function resolveShiftTarget() {
-    const localTarget = Number(localStorage.getItem(TARGET_STORAGE_KEY) || 0);
-    if (localTarget > 0) return Math.round(localTarget);
-
     const settingKeys = ['cashierTargetBills', 'shiftTargetBills', 'dailyBillsTarget', 'cashierBillsTarget'];
     for (const key of settingKeys) {
       const val = Number(state.settings[key] || 0);
       if (val > 0) {
-        localStorage.setItem(TARGET_STORAGE_KEY, String(Math.round(val)));
         return Math.round(val);
       }
     }
 
     return DEFAULT_BILL_TARGET;
-  }
-
-  async function configureShiftTarget() {
-    const current = Math.max(1, Number(state.shiftTargetBills || DEFAULT_BILL_TARGET));
-    const next = await promptInteger('Set Shift Bill Target', 'Enter bill target for this shift', String(current), 'Save Target');
-    if (next === null) return;
-
-    state.shiftTargetBills = next;
-    localStorage.setItem(TARGET_STORAGE_KEY, String(next));
-
-    if (window.api.saveSetting) {
-      try {
-        await window.api.saveSetting('cashierTargetBills', String(next));
-      } catch (_err) {
-        // local target still applies even if setting save fails
-      }
-    }
-
-    renderTargetProgress(state.mySales.length);
-    showToast(`Shift target updated to ${next} bills`);
   }
 
   function hydrateHoldBadge() {

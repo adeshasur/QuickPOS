@@ -187,11 +187,11 @@
     });
 
     if (window.Singlish) {
-      window.Singlish.bindInput(
+      window.Singlish.bindImeInput(
         document.getElementById('addName'),
         () => true
       );
-      window.Singlish.bindInput(
+      window.Singlish.bindImeInput(
         document.getElementById('editName'),
         () => true
       );

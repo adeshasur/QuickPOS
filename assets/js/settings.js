@@ -19,6 +19,7 @@
     cashierAutoShiftStart: 'false',
     autoShiftOpeningFloat: '0',
     cashierHourlyPaymentTarget: '0',
+    cashierTargetBills: '50',
     keyboardShortcuts: 'true',
     barcodeScanSound: 'false',
     lowStockAlertLevel: '10',
@@ -56,6 +57,7 @@
     document.getElementById('cashierAutoShiftStart').checked = settings.cashierAutoShiftStart === 'true';
     document.getElementById('autoShiftOpeningFloat').value = settings.autoShiftOpeningFloat || '0';
     document.getElementById('cashierHourlyPaymentTarget').value = settings.cashierHourlyPaymentTarget || '0';
+    document.getElementById('cashierTargetBills').value = settings.cashierTargetBills || '50';
     document.getElementById('keyboardShortcuts').checked = settings.keyboardShortcuts !== 'false';
     document.getElementById('barcodeScanSound').checked = settings.barcodeScanSound === 'true';
     document.getElementById('lowStockAlertLevel').value = settings.lowStockAlertLevel || '10';
@@ -219,6 +221,7 @@
       cashierAutoShiftStart: String(document.getElementById('cashierAutoShiftStart').checked),
       autoShiftOpeningFloat: String(Math.max(0, parseFloat(document.getElementById('autoShiftOpeningFloat').value || '0') || 0)),
       cashierHourlyPaymentTarget: String(Math.max(0, parseFloat(document.getElementById('cashierHourlyPaymentTarget').value || '0') || 0)),
+      cashierTargetBills: String(Math.max(1, parseInt(document.getElementById('cashierTargetBills').value || '50', 10) || 50)),
       keyboardShortcuts: String(document.getElementById('keyboardShortcuts').checked),
       barcodeScanSound: String(document.getElementById('barcodeScanSound').checked),
       lowStockAlertLevel: String(Math.max(0, parseInt(document.getElementById('lowStockAlertLevel').value || '10', 10) || 10)),

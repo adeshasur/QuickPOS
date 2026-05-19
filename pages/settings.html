@@ -100,6 +100,11 @@
                 <input class="field-input" type="number" id="cashierHourlyPaymentTarget" min="0" max="10000000" step="0.01" value="0">
                 <span class="field-hint">0 = monitoring only, no target comparison</span>
               </div>
+              <div class="field">
+                <label class="field-label">Set Target (Bills per Shift)</label>
+                <input class="field-input" type="number" id="cashierTargetBills" min="1" max="10000" step="1" value="50">
+                <span class="field-hint">Displayed as read-only in Cashier Hub target panel</span>
+              </div>
               <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Enable keyboard shortcuts</span><span class="toggle-desc">F8/F9/F10/F11 quick actions</span></div><label class="ts"><input type="checkbox" id="keyboardShortcuts" checked><span class="ts-slider"></span></label></div>
               <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Play scan sound</span><span class="toggle-desc">Audio cue on successful barcode scan</span></div><label class="ts"><input type="checkbox" id="barcodeScanSound"><span class="ts-slider"></span></label></div>
             </div>

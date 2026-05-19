@@ -17,6 +17,50 @@ window.Singlish = (function () {
     ['supiri', 'සුපිරි']
   ]);
 
+  const productWordMap = new Map([
+    ['keeri', 'කීරි'],
+    ['samba', 'සම්බා'],
+    ['nadu', 'නාඩු'],
+    ['rice', 'සහල්'],
+    ['sahal', 'සහල්'],
+    ['haal', 'හාල්'],
+    ['white', 'සුදු'],
+    ['red', 'රතු'],
+    ['raw', 'කච්චි'],
+    ['parippu', 'පරිප්පු'],
+    ['dhal', 'පරිප්පු'],
+    ['sugar', 'සීනි'],
+    ['sini', 'සීනි'],
+    ['salt', 'ලුණු'],
+    ['lunu', 'ලුණු'],
+    ['milk', 'කිරි'],
+    ['kiri', 'කිරි'],
+    ['powder', 'පවුඩර්'],
+    ['tea', 'තේ'],
+    ['flour', 'පිටි'],
+    ['wheat', 'තිරිඟු'],
+    ['soap', 'සබන්'],
+    ['shampoo', 'ෂැම්පු'],
+    ['biscuit', 'බිස්කට්'],
+    ['cracker', 'ක්‍රැකර්'],
+    ['cream', 'ක්‍රීම්'],
+    ['noodles', 'නූඩ්ල්ස්'],
+    ['oil', 'තෙල්'],
+    ['coconut', 'පොල්'],
+    ['chilli', 'මිරිස්'],
+    ['miris', 'මිරිස්'],
+    ['turmeric', 'කහ'],
+    ['pepper', 'ගම්මිරිස්'],
+    ['kg', 'kg'],
+    ['g', 'g'],
+    ['l', 'L'],
+    ['ml', 'ml']
+  ]);
+  const candidateLexicon = Array.from(new Set([
+    ...Array.from(phraseMap.keys()),
+    ...Array.from(productWordMap.keys())
+  ]));
+
   const vowels = [
     { en: 'aee', si: 'ඈ', pilla: 'ෑ' },
     { en: 'ae', si: 'ඇ', pilla: 'ැ' },
@@ -111,6 +155,28 @@ window.Singlish = (function () {
     return tokens.map(convertWord).join('');
   }
 
+  function convertProductName(text) {
+    if (!text) return '';
+    const source = String(text);
+    if (/[\u0D80-\u0DFF]/.test(source)) return source;
+
+    let lower = source.toLowerCase();
+    for (const [roman, sinhala] of phraseMap.entries()) {
+      lower = lower.replaceAll(roman, sinhala);
+    }
+
+    const tokens = lower.split(/(\s+|[0-9./\-]+)/g).map((token) => {
+      const key = token.trim();
+      if (!key) return token;
+      if (/[\u0D80-\u0DFF]/.test(key)) return token;
+      if (productWordMap.has(key)) return productWordMap.get(key);
+      if (!/[a-z]/i.test(key)) return token;
+      return token; // Unknown words stay English to avoid wrong Sinhala spelling
+    });
+
+    return tokens.join('');
+  }
+
   function bindInput(inputEl, isEnabled) {
     if (!inputEl) return;
     const enabledFn = typeof isEnabled === 'function' ? isEnabled : () => true;
@@ -129,5 +195,165 @@ window.Singlish = (function () {
     });
   }
 
-  return { convert, bindInput };
+  function buildCandidates(token) {
+    const key = normalizeToken(token);
+    if (!key || key.length < 2) return [];
+    const direct = productWordMap.get(key);
+
+    const scored = candidateLexicon
+      .filter((entry) => entry.startsWith(key))
+      .slice(0, 8)
+      .map((entry) => ({
+        roman: entry,
+        sinhala: productWordMap.get(entry) || phraseMap.get(entry) || convert(entry)
+      }));
+
+    if (direct && !scored.some((row) => row.roman === key)) {
+      scored.unshift({ roman: key, sinhala: direct });
+    }
+
+    // Always provide a generic phonetic candidate for unknown words.
+    // This keeps IME behavior active even when the word is not in dictionary.
+    if (!scored.length) {
+      const fallback = convert(key);
+      if (fallback && fallback !== key) {
+        scored.unshift({ roman: key, sinhala: fallback });
+      }
+    }
+
+    return scored.slice(0, 8);
+  }
+
+  function normalizeToken(token) {
+    return String(token || '').toLowerCase().trim();
+  }
+
+  function bindImeInput(inputEl, isEnabled) {
+    if (!inputEl) return;
+    const enabledFn = typeof isEnabled === 'function' ? isEnabled : () => true;
+
+    const dropdown = document.createElement('div');
+    dropdown.style.position = 'fixed';
+    dropdown.style.zIndex = '2200';
+    dropdown.style.minWidth = '240px';
+    dropdown.style.maxWidth = '360px';
+    dropdown.style.maxHeight = '220px';
+    dropdown.style.overflowY = 'auto';
+    dropdown.style.background = '#ffffff';
+    dropdown.style.border = '1px solid #cbd5e1';
+    dropdown.style.borderRadius = '10px';
+    dropdown.style.boxShadow = '0 14px 30px rgba(15,23,42,0.14)';
+    dropdown.style.padding = '6px';
+    dropdown.style.display = 'none';
+    document.body.appendChild(dropdown);
+
+    let activeIndex = 0;
+    let candidates = [];
+
+    function hide() {
+      dropdown.style.display = 'none';
+      candidates = [];
+      activeIndex = 0;
+    }
+
+    function getCurrentToken() {
+      const cursor = inputEl.selectionStart || 0;
+      const left = inputEl.value.slice(0, cursor);
+      const match = left.match(/([A-Za-z]+)$/);
+      return match ? match[1] : '';
+    }
+
+    function replaceToken(value) {
+      const cursor = inputEl.selectionStart || 0;
+      const left = inputEl.value.slice(0, cursor);
+      const right = inputEl.value.slice(cursor);
+      const nextLeft = left.replace(/([A-Za-z]+)$/, value);
+      inputEl.value = `${nextLeft}${right}`;
+      const nextPos = nextLeft.length;
+      inputEl.setSelectionRange(nextPos, nextPos);
+      inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    function render() {
+      const rect = inputEl.getBoundingClientRect();
+      dropdown.style.left = `${rect.left}px`;
+      dropdown.style.top = `${rect.bottom + 6}px`;
+      dropdown.style.width = `${Math.max(rect.width, 240)}px`;
+      dropdown.innerHTML = candidates.map((row, idx) => `
+        <button type="button" data-idx="${idx}" style="
+          width:100%;text-align:left;border:none;border-radius:8px;padding:8px 10px;
+          background:${idx === activeIndex ? '#e0e7ff' : 'transparent'};cursor:pointer;
+          display:flex;justify-content:space-between;gap:10px;align-items:center;">
+          <span style="font-size:13px;font-weight:700;color:#0f172a;font-family:'Noto Sans Sinhala','Iskoola Pota',sans-serif;">${row.sinhala}</span>
+          <span style="font-size:11px;color:#64748b;">${row.roman}</span>
+        </button>
+      `).join('');
+      dropdown.style.display = candidates.length ? 'block' : 'none';
+
+      dropdown.querySelectorAll('button[data-idx]').forEach((btn) => {
+        btn.addEventListener('mousedown', (event) => {
+          event.preventDefault();
+          const row = candidates[Number(btn.dataset.idx)];
+          if (!row) return;
+          replaceToken(row.sinhala);
+          hide();
+          inputEl.focus();
+        });
+      });
+    }
+
+    inputEl.addEventListener('input', () => {
+      if (!enabledFn()) {
+        hide();
+        return;
+      }
+      const token = getCurrentToken();
+      candidates = buildCandidates(token);
+      activeIndex = 0;
+      render();
+    });
+
+    inputEl.addEventListener('keydown', (event) => {
+      if (!enabledFn() || !candidates.length) return;
+
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        activeIndex = (activeIndex + 1) % candidates.length;
+        render();
+        return;
+      }
+      if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        activeIndex = (activeIndex - 1 + candidates.length) % candidates.length;
+        render();
+        return;
+      }
+      if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault();
+        const row = candidates[activeIndex];
+        if (!row) return;
+        replaceToken(row.sinhala);
+        hide();
+      }
+      if (event.key === ' ') {
+        const row = candidates[activeIndex];
+        if (!row) return;
+        event.preventDefault();
+        replaceToken(`${row.sinhala} `);
+        hide();
+      }
+      if (event.key === 'Escape') {
+        hide();
+      }
+    });
+
+    inputEl.addEventListener('blur', () => {
+      setTimeout(hide, 120);
+    });
+
+    window.addEventListener('resize', hide);
+    window.addEventListener('scroll', hide, true);
+  }
+
+  return { convert, convertProductName, bindInput, bindImeInput };
 })();
