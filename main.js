@@ -88,9 +88,19 @@ function verifyPassword(stored, plain) {
     if (!stored) return false;
     if (!stored.startsWith('pbkdf2$')) return stored === plain;
 
-    const [, iterations, salt, hash] = stored.split('$');
-    const computed = crypto.pbkdf2Sync(plain, salt, Number(iterations), 64, 'sha512').toString('hex');
-    return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(computed, 'hex'));
+    const parts = stored.split('$');
+    // Expected format: pbkdf2$<iterations>$<salt>$<hash>
+    if (parts.length < 4) return false;
+    const [, iterStr, salt, hash] = parts;
+    const iterations = Number(iterStr);
+    if (!salt || !hash || isNaN(iterations) || iterations < 1) return false;
+
+    try {
+        const computed = crypto.pbkdf2Sync(plain, salt, iterations, 64, 'sha512').toString('hex');
+        return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(computed, 'hex'));
+    } catch (_) {
+        return false;
+    }
 }
 
 async function withTransaction(work) {
@@ -401,10 +411,25 @@ ipcMain.handle('get-printers', async (event) => {
 
 
 app.whenReady().then(async () => {
+    // Upgrade any remaining plain-text passwords
     const plainUsers = await allAsync("SELECT id, password FROM users WHERE password NOT LIKE 'pbkdf2$%'");
     for (const u of plainUsers) {
         await runAsync('UPDATE users SET password = ? WHERE id = ?', [hashPassword(u.password), u.id]);
     }
+
+    // Repair any malformed pbkdf2 hashes (e.g. written by external scripts during DB lock)
+    const allUsers = await allAsync("SELECT id, username, role, password FROM users WHERE password LIKE 'pbkdf2$%'");
+    for (const u of allUsers) {
+        const parts = u.password.split('$');
+        const iterations = Number(parts[1]);
+        if (parts.length < 4 || isNaN(iterations) || iterations < 1) {
+            // Hash is corrupt — reset to a safe default so user can login & change via Settings
+            const defaultPass = u.role === 'owner' ? '123' : '456';
+            console.warn(`[STARTUP] Repaired malformed hash for user: ${u.username} (role: ${u.role}) → reset to default`);
+            await runAsync('UPDATE users SET password = ? WHERE id = ?', [hashPassword(defaultPass), u.id]);
+        }
+    }
+
     createWindow();
 });
 
