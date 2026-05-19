@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickPOS — Cashier Terminal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link rel="stylesheet" href="../assets/css/cashier.css">
+</head>
+<body id="cashier-body">
+
+  <!-- ═══════════════════════════════════════
+       TOP NAVBAR  (Minimal — no sidebar)
+  ════════════════════════════════════════════ -->
+  <header class="pos-navbar">
+    <div class="nav-brand">
+      <div class="nav-logo-box">
+        <i class="fa-solid fa-cart-shopping"></i>
+      </div>
+      <div class="nav-brand-text">
+        <span class="nav-store-name" id="navStoreName">QuickPOS</span>
+        <span class="nav-mode-tag">Cashier Terminal</span>
+      </div>
+    </div>
+
+    <div class="nav-center">
+      <div class="shift-timer-wrap">
+        <i class="fa-regular fa-clock"></i>
+        <span class="shift-label">Shift Time</span>
+        <span class="shift-timer" id="shiftTimer">00:00:00</span>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <div class="cashier-badge">
+        <div class="cashier-avatar" id="cashierAvatar">C</div>
+        <div class="cashier-info">
+          <span class="cashier-name" id="cashierName">Cashier</span>
+          <span class="cashier-role-tag">POS Operator</span>
+        </div>
+      </div>
+      <button class="nav-btn danger-btn" id="logoutBtn" title="Logout">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════
+       MAIN POS WORKSPACE  — 60 / 40 SPLIT
+  ════════════════════════════════════════════ -->
+  <main class="pos-workspace">
+
+    <!-- ─────────────────────────────
+         LEFT PANEL  60%  —  CART
+    ──────────────────────────────── -->
+    <section class="cart-panel">
+
+      <!-- Barcode Scanner Input -->
+      <div class="barcode-row">
+        <div class="barcode-icon-wrap">
+          <i class="fa-solid fa-barcode"></i>
+        </div>
+        <input
+          type="text"
+          id="barcodeInput"
+          class="barcode-input"
+          placeholder="Scan barcode or type product code…"
+          autocomplete="off"
+          spellcheck="false"
+          autofocus
+        >
+        <button class="barcode-search-btn" id="barcodeSearchBtn" title="Search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </div>
+
+      <!-- Customer Quick-Link Bar -->
+      <div class="customer-bar">
+        <div class="customer-bar-left">
+          <i class="fa-solid fa-user-circle"></i>
+          <span class="cust-bar-label" id="customerLabel">Walk-in Customer</span>
+        </div>
+        <div class="customer-bar-right">
+          <button class="cust-link-btn" id="attachCustomerBtn">
+            <i class="fa-solid fa-link"></i> Attach Customer
+          </button>
+          <button class="cust-link-btn danger" id="detachCustomerBtn" style="display:none">
+            <i class="fa-solid fa-xmark"></i> Remove
+          </button>
+        </div>
+      </div>
+
+      <!-- Cart Table -->
+      <div class="cart-table-wrap">
+        <table class="cart-table" id="cartTable">
+          <thead>
+            <tr>
+              <th class="col-num">#</th>
+              <th class="col-name">Item</th>
+              <th class="col-qty">Qty</th>
+              <th class="col-price">Unit Price</th>
+              <th class="col-sub">Subtotal</th>
+              <th class="col-del"></th>
+            </tr>
+          </thead>
+          <tbody id="cartBody">
+            <!-- JS populated -->
+          </tbody>
+        </table>
+
+        <!-- Empty cart state -->
+        <div class="cart-empty" id="cartEmpty">
+          <div class="cart-empty-icon">
+            <i class="fa-solid fa-basket-shopping"></i>
+          </div>
+          <p class="cart-empty-title">Cart is empty</p>
+          <p class="cart-empty-sub">Scan a barcode or tap a product card to begin</p>
+        </div>
+      </div>
+
+      <!-- Cart Summary Strip -->
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span class="summary-label">Items</span>
+          <span class="summary-val" id="summaryItems">0</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-row">
+          <span class="summary-label">Subtotal</span>
+          <span class="summary-val mono" id="summarySubtotal">LKR 0.00</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Tax</span>
+          <span class="summary-val mono" id="summaryTax">LKR 0.00</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-row total-row">
+          <span class="summary-label total-label">TOTAL</span>
+          <span class="summary-val total-amount" id="summaryTotal">LKR 0.00</span>
+        </div>
+      </div>
+
+      <!-- Action Hotkey Footer -->
+      <footer class="hotkey-footer">
+        <button class="hotkey-btn cash-btn" id="payCashBtn">
+          <kbd>F8</kbd>
+          <div class="hotkey-btn-content">
+            <i class="fa-solid fa-money-bill-wave"></i>
+            <span>Cash</span>
+          </div>
+        </button>
+        <button class="hotkey-btn card-btn" id="payCardBtn">
+          <kbd>F9</kbd>
+          <div class="hotkey-btn-content">
+            <i class="fa-solid fa-credit-card"></i>
+            <span>Card</span>
+          </div>
+        </button>
+        <button class="hotkey-btn credit-btn" id="payCreditBtn">
+          <kbd>F10</kbd>
+          <div class="hotkey-btn-content">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            <span>Credit</span>
+          </div>
+        </button>
+        <button class="hotkey-btn hold-btn" id="holdBtn">
+          <kbd>F11</kbd>
+          <div class="hotkey-btn-content">
+            <i class="fa-solid fa-pause"></i>
+            <span>Hold</span>
+          </div>
+        </button>
+        <button class="hotkey-btn clear-btn" id="clearCartBtn">
+          <kbd>Esc</kbd>
+          <div class="hotkey-btn-content">
+            <i class="fa-solid fa-trash-can"></i>
+            <span>Clear</span>
+          </div>
+        </button>
+      </footer>
+
+    </section><!-- /cart-panel -->
+
+    <!-- ─────────────────────────────
+         RIGHT PANEL  40%  —  QUICK ADD
+    ──────────────────────────────── -->
+    <aside class="quick-panel">
+
+      <div class="quick-panel-header">
+        <span class="quick-panel-title">
+          <i class="fa-solid fa-grid-2"></i> Quick Add
+        </span>
+        <div class="quick-filter-tabs" id="quickFilterTabs">
+          <button class="q-tab active" data-cat="all">All</button>
+          <!-- Category tabs injected by JS -->
+        </div>
+      </div>
+
+      <div class="quick-search-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="quickSearch" class="quick-search" placeholder="Search products…" autocomplete="off">
+      </div>
+
+      <div class="quick-grid" id="quickGrid">
+        <!-- Product cards injected by JS -->
+      </div>
+
+      <!-- Quick-add empty state -->
+      <div class="quick-empty" id="quickEmpty" style="display:none">
+        <i class="fa-solid fa-box-open"></i>
+        <p>No products found</p>
+      </div>
+
+    </aside><!-- /quick-panel -->
+
+  </main><!-- /pos-workspace -->
+
+  <!-- ═══════════════════════════════════════
+       PAYMENT MODAL
+  ════════════════════════════════════════════ -->
+  <div class="pay-modal-overlay" id="payModalOverlay">
+    <div class="pay-modal" id="payModal">
+      <div class="pay-modal-header">
+        <div class="pay-modal-title">
+          <i class="fa-solid fa-cash-register"></i>
+          <span id="payModalTitle">Process Payment</span>
+        </div>
+        <button class="pay-modal-close" id="payModalClose">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="pay-modal-body">
+        <div class="pay-amount-display">
+          <span class="pay-amount-label">Amount Due</span>
+          <span class="pay-amount-value" id="payAmountDue">LKR 0.00</span>
+        </div>
+
+        <div class="pay-method-row" id="payMethodRow">
+          <span class="pay-method-label">Payment Method</span>
+          <span class="pay-method-tag" id="payMethodTag">Cash</span>
+        </div>
+
+        <div class="pay-input-group" id="receivedGroup">
+          <label class="pay-input-label">Amount Received</label>
+          <div class="pay-input-wrap">
+            <span class="pay-currency">LKR</span>
+            <input type="number" id="receivedInput" class="pay-input" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="quick-amounts" id="quickAmounts">
+            <!-- Quick denomination buttons injected by JS -->
+          </div>
+        </div>
+
+        <div class="pay-change-row" id="changeRow">
+          <span class="pay-change-label">Change</span>
+          <span class="pay-change-value" id="changeValue">LKR 0.00</span>
+        </div>
+
+        <div class="pay-ref-group" id="refGroup" style="display:none">
+          <label class="pay-input-label">Reference / Card No.</label>
+          <input type="text" id="refInput" class="pay-ref-input" placeholder="Last 4 digits or ref number…">
+        </div>
+      </div>
+
+      <div class="pay-modal-footer">
+        <button class="pay-footer-btn cancel-btn" id="payModalCancelBtn">Cancel</button>
+        <button class="pay-footer-btn confirm-btn" id="payConfirmBtn">
+          <i class="fa-solid fa-check"></i> Confirm Payment
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       CUSTOMER ATTACH MODAL
+  ════════════════════════════════════════════ -->
+  <div class="pay-modal-overlay" id="custModalOverlay">
+    <div class="pay-modal" id="custModal" style="max-width:440px">
+      <div class="pay-modal-header">
+        <div class="pay-modal-title">
+          <i class="fa-solid fa-user-plus"></i>
+          <span>Attach Customer</span>
+        </div>
+        <button class="pay-modal-close" id="custModalClose">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="pay-modal-body">
+        <div class="pay-input-group">
+          <label class="pay-input-label">Search by name or phone</label>
+          <div class="pay-input-wrap">
+            <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3)"></i>
+            <input type="text" id="custSearch" class="pay-input" style="padding-left:40px" placeholder="Type to search customers…" autocomplete="off">
+          </div>
+        </div>
+        <div class="cust-result-list" id="custResultList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="pos-toast" id="posToast">
+    <div class="pos-toast-dot"></div>
+    <span id="posToastMsg">Item added</span>
+  </div>
+
+  <script src="../assets/js/cashier.js"></script>
+</body>
+</html>
