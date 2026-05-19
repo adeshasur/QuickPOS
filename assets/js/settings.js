@@ -11,7 +11,9 @@
     shiftHours: '08:00 - 16:00',
     dateFormat: 'DD/MM/YYYY',
     timeFormat: '12h',
-    thermalPrinterName: ''
+    thermalPrinterName: '',
+    autoPrint: 'true',
+    showLogo: 'false'
   };
 
   let settings = { ...defaultSettings };
@@ -37,6 +39,8 @@
     document.getElementById('currencyToggle').checked = settings.currencySymbol === 'LKR';
     document.getElementById('dateFormat').value = settings.dateFormat;
     document.getElementById('timeFormat').value = settings.timeFormat;
+    document.getElementById('autoPrint').checked = settings.autoPrint === 'true';
+    document.getElementById('showLogo').checked = settings.showLogo === 'true';
     document.querySelectorAll('.ver-card').forEach((c) => c.classList.toggle('selected', c.dataset.version === settings.systemVersion));
     // Restore saved printer selection
     const sel = document.getElementById('thermalPrinterName');
@@ -82,7 +86,9 @@
       dateFormat: document.getElementById('dateFormat').value,
       timeFormat: document.getElementById('timeFormat').value,
       systemVersion: document.querySelector('.ver-card.selected')?.dataset.version || 'pro',
-      thermalPrinterName: document.getElementById('thermalPrinterName').value.trim()
+      thermalPrinterName: document.getElementById('thermalPrinterName').value.trim(),
+      autoPrint: String(document.getElementById('autoPrint').checked),
+      showLogo: String(document.getElementById('showLogo').checked)
     };
 
     if (!next.storeName) return showToast('Store Name is required', 'error');
