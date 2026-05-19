@@ -44,8 +44,10 @@
     await loadCategories();
     await loadProducts();
     await loadCustomers();
+    hydrateHeldBills();
     bindEvents();
     renderHeldBills();
+    tryAutoResumeHeldBill();
     updateAttachedCustomerView();
     applyDensityMode(localStorage.getItem('quickpos-dense-mode') === '1');
     applyUiPreset(localStorage.getItem('quickpos-ui-preset') || 'minimal');
@@ -728,6 +730,7 @@
     document.getElementById('detachCustomerBtn').style.display = 'none';
     renderCart();
     renderHeldBills();
+    syncHeldBills();
     toast('Bill held successfully');
   }
 
@@ -754,10 +757,42 @@
         updateAttachedCustomerView();
         document.getElementById('detachCustomerBtn').style.display = attachedCustomer ? '' : 'none';
         renderHeldBills();
+        syncHeldBills();
         renderCart();
         toast('Held bill resumed');
       });
     });
+  }
+
+  function hydrateHeldBills() {
+    try {
+      const raw = localStorage.getItem('quickpos-held-bills');
+      heldBills = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(heldBills)) heldBills = [];
+    } catch (_) {
+      heldBills = [];
+    }
+  }
+
+  function syncHeldBills() {
+    localStorage.setItem('quickpos-held-bills', JSON.stringify(heldBills));
+  }
+
+  function tryAutoResumeHeldBill() {
+    const targetId = localStorage.getItem('quickpos-resume-hold-id');
+    if (!targetId) return;
+    localStorage.removeItem('quickpos-resume-hold-id');
+    const idx = heldBills.findIndex(h => h.id === targetId);
+    if (idx < 0) return;
+    const resumed = heldBills.splice(idx, 1)[0];
+    cart = resumed.cart.map(i => ({ ...i }));
+    attachedCustomer = resumed.customer ? { ...resumed.customer } : null;
+    updateAttachedCustomerView();
+    document.getElementById('detachCustomerBtn').style.display = attachedCustomer ? '' : 'none';
+    syncHeldBills();
+    renderHeldBills();
+    renderCart();
+    toast('Held bill resumed from Cashier Hub');
   }
 
   // ── QUICK ACTIONS DROPDOWN & MODALS SYSTEM ─────────────────────────

@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickPOS - Cashier Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link rel="stylesheet" href="../assets/css/common.css">
+  <link rel="stylesheet" href="../assets/css/sidebar.css">
+  <link rel="stylesheet" href="../assets/css/cashier_hub.css">
+</head>
+<body class="dashboard-body">
+  <div id="sidebar-container"></div>
+  <div class="main-content hub-main-content">
+  <main class="hub-shell">
+    <header class="hub-topbar glass-card">
+      <div>
+        <h1 class="hub-title">Cashier Hub</h1>
+        <p class="hub-sub" id="hubSubtitle">Ready for fast retail flow</p>
+      </div>
+      <div class="hub-profile">
+        <div class="hub-avatar" id="hubAvatar">C</div>
+        <div>
+          <div class="hub-cashier" id="hubCashierName">Cashier</div>
+          <div class="hub-role">POS Operator</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="hub-kpis">
+      <article class="kpi-card glass-card">
+        <span class="kpi-label">Today's Personal Sales</span>
+        <span class="kpi-value" id="kpiSales">LKR 0.00</span>
+      </article>
+      <article class="kpi-card glass-card">
+        <span class="kpi-label">Bills Processed</span>
+        <span class="kpi-value" id="kpiBills">0</span>
+      </article>
+      <article class="kpi-card glass-card">
+        <span class="kpi-label">Shift Active</span>
+        <span class="kpi-value" id="kpiDuration">00:00:00</span>
+      </article>
+    </section>
+
+    <section class="hub-grid">
+      <button class="hub-tile glass-card" id="hubNewSaleBtn">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <strong>New Sale / POS Terminal</strong>
+        <span>Start serving a customer immediately</span>
+      </button>
+      <button class="hub-tile glass-card" id="hubReprintBtn">
+        <i class="fa-solid fa-receipt"></i>
+        <strong>Reprint & View Past Sales</strong>
+        <span>Only your bills, fast receipt reprints</span>
+      </button>
+      <button class="hub-tile glass-card" id="hubProductLookupBtn">
+        <i class="fa-solid fa-boxes-stacked"></i>
+        <strong>Product Directory (Read-Only)</strong>
+        <span>Price, stock, and description lookup</span>
+      </button>
+      <button class="hub-tile glass-card" id="hubCustomerLookupBtn">
+        <i class="fa-solid fa-users"></i>
+        <strong>Customer & Credit Lookup</strong>
+        <span>Loyalty points and credit visibility</span>
+      </button>
+    </section>
+
+    <aside class="hold-badge glass-card" id="holdFloatingBadge" style="display:none">
+      <i class="fa-solid fa-layer-group"></i>
+      <span id="holdBadgeText">0 held bills</span>
+      <button id="resumeHeldBtn" class="mini-btn">Resume</button>
+    </aside>
+
+    <footer class="hub-footer glass-card">
+      <button class="end-shift-btn" id="hubEndShiftBtn">
+        <i class="fa-solid fa-circle-stop"></i>
+        End Shift & Blind Cash Drop
+      </button>
+      <button class="logout-btn-lite" id="hubLogoutBtn">Logout</button>
+    </footer>
+  </main>
+  </div>
+
+  <div class="async-modal" id="asyncModal" aria-hidden="true">
+    <div class="async-modal-box glass-card">
+      <div class="async-modal-head">
+        <h3 id="asyncModalTitle">Modal</h3>
+        <button id="asyncModalClose" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="async-modal-body" id="asyncModalBody"></div>
+      <div class="async-modal-actions" id="asyncModalActions"></div>
+    </div>
+  </div>
+
+  <div class="hub-toast" id="hubToast"></div>
+
+  <script src="../assets/js/components.js"></script>
+  <script src="../assets/js/cashier_hub.js"></script>
+</body>
+</html>
