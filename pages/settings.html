@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -6,7 +6,7 @@
 <title>QuickPOS Pro - Settings</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 <link rel="stylesheet" href="../assets/css/common.css">
@@ -28,17 +28,17 @@
       </div>
     </div>
 
-    <div class="settings-shell">
-      <aside class="tab-nav">
-        <button class="tab-btn active" data-tab="store"><span class="material-symbols-rounded">store</span>Store Info</button>
-        <button class="tab-btn" data-tab="version"><span class="material-symbols-rounded">deployed_code</span>System Version</button>
-        <button class="tab-btn" data-tab="security"><span class="material-symbols-rounded">shield_lock</span>Security</button>
-        <button class="tab-btn" data-tab="local"><span class="material-symbols-rounded">public</span>Localization</button>
-        <button class="tab-btn" data-tab="system"><span class="material-symbols-rounded">memory</span>System Info</button>
-        <div class="tab-divider"></div>
-        <button class="tab-danger-btn" data-tab="danger"><span class="material-symbols-rounded">warning</span>Danger Zone</button>
-      </aside>
+    <!-- Top Horizontal Tabbed Layout -->
+    <nav class="settings-tabs">
+      <button class="settings-tab-btn active" data-tab="store"><span class="material-symbols-rounded">store</span>Store Info</button>
+      <button class="settings-tab-btn" data-tab="version"><span class="material-symbols-rounded">deployed_code</span>System Version</button>
+      <button class="settings-tab-btn" data-tab="security"><span class="material-symbols-rounded">shield_lock</span>Security</button>
+      <button class="settings-tab-btn" data-tab="local"><span class="material-symbols-rounded">public</span>Localization</button>
+      <button class="settings-tab-btn" data-tab="system"><span class="material-symbols-rounded">memory</span>System Info</button>
+      <button class="settings-tab-btn tab-danger" data-tab="danger"><span class="material-symbols-rounded">warning</span>Danger Zone</button>
+    </nav>
 
+    <div class="settings-shell">
       <section class="panels">
         <div class="panel active" id="panel-store">
           <div class="panel-title"><span class="material-symbols-rounded">store</span>Store Information</div>
@@ -172,6 +172,18 @@
           </div>
         </div>
       </section>
+
+      <!-- Bottom Actions Footer -->
+      <footer class="settings-footer">
+        <div class="shortcut-hint">
+          <span class="hint-dot" style="width:8px;height:8px;border-radius:50%;background:var(--primary);display:inline-block;margin-right:6px;"></span>
+          Press <kbd>Ctrl</kbd> + <kbd>S</kbd> to save settings
+        </div>
+        <div class="footer-buttons">
+          <button class="footer-btn reset-btn" id="resetBtn">Reset Defaults</button>
+          <button class="footer-btn save-btn" id="saveBtn">Save Settings</button>
+        </div>
+      </footer>
     </div>
   </div>
 </div>

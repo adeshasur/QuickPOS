@@ -1,12 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuickPOS Pro - User Management</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
     <link rel="stylesheet" href="../assets/css/common.css">
@@ -28,6 +28,37 @@
                 <button id="createUserBtn" class="modal-btn submit create-user-btn">Create User</button>
             </div>
 
+            <!-- 3-Card KPI Grid -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon blue">
+                        <span class="material-symbols-rounded">groups</span>
+                    </div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Total Staff</span>
+                        <span class="kpi-val" id="totalStaffCount">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon green">
+                        <span class="material-symbols-rounded">how_to_reg</span>
+                    </div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Active Users</span>
+                        <span class="kpi-val" id="activeUsersCount">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon orange">
+                        <span class="material-symbols-rounded">badge</span>
+                    </div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Cashiers</span>
+                        <span class="kpi-val" id="cashiersCount">0</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="user-management-content">
                 <div class="staff-table-section">
                     <div class="section-header">
@@ -36,7 +67,7 @@
                     <div class="table-container">
                         <table class="staff-table">
                             <thead>
-                                <tr><th>User ID</th><th>Full Name</th><th>Username</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+                                <tr><th>User ID</th><th>Full Name</th><th>Username</th><th>Role</th><th>Contact Info</th><th>Status</th><th>Actions</th></tr>
                             </thead>
                             <tbody id="staffTableBody"></tbody>
                         </table>

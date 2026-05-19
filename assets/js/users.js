@@ -10,6 +10,20 @@
     async function loadUsers() {
         try {
             users = await window.api.getUsers();
+            
+            // Calculate KPI metrics
+            const totalStaff = users.length;
+            const activeUsers = users.length;
+            const cashiers = users.filter(u => u.role === 'cashier').length;
+
+            const totalStaffCount = document.getElementById('totalStaffCount');
+            const activeUsersCount = document.getElementById('activeUsersCount');
+            const cashiersCount = document.getElementById('cashiersCount');
+
+            if (totalStaffCount) totalStaffCount.textContent = totalStaff;
+            if (activeUsersCount) activeUsersCount.textContent = activeUsers;
+            if (cashiersCount) cashiersCount.textContent = cashiers;
+
             renderStaffTable();
         } catch (err) {
             console.error('Error loading users:', err);
@@ -18,25 +32,39 @@
 
     function renderStaffTable(filteredUsers = users) {
         if(!staffTableBody) return;
-        staffTableBody.innerHTML = filteredUsers.map(user => `
-            <tr>
-                <td class="user-id-cell">#${String(user.id).padStart(3, '0')}</td>
-                <td class="name-cell">${user.name}</td>
-                <td class="username-cell">@${user.username}</td>
-                <td><span class="role-badge role-${user.role}">${user.role}</span></td>
-                <td><div class="status-badge status-active"><span class="status-dot"></span>active</div></td>
-                <td class="actions-cell">
-                    <div class="action-buttons">
-                        <button class="action-btn edit-btn" onclick="editUser(${user.id})">
-                            <span class="material-symbols-rounded s18">edit</span>
-                        </button>
-                        <button class="action-btn delete-btn" onclick="deleteUser(${user.id})">
-                            <span class="material-symbols-rounded s18">delete</span>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
+        const loggedUser = JSON.parse(localStorage.getItem('quickpos-user')) || {};
+
+        staffTableBody.innerHTML = filteredUsers.map(user => {
+            const isSelf = user.username === loggedUser.username || user.id === loggedUser.id;
+            const contactEmail = `${user.username.toLowerCase()}@quickpos.com`;
+
+            const deleteBtnHtml = isSelf
+                ? `<button class="action-btn delete-btn" style="opacity: 0.35; cursor: not-allowed;" title="Cannot delete your own active session account" disabled onclick="event.stopPropagation()">
+                       <span class="material-symbols-rounded s18">delete</span>
+                   </button>`
+                : `<button class="action-btn delete-btn" onclick="deleteUser(${user.id})">
+                       <span class="material-symbols-rounded s18">delete</span>
+                   </button>`;
+
+            return `
+                <tr>
+                    <td class="user-id-cell">#${String(user.id).padStart(3, '0')}</td>
+                    <td class="name-cell">${user.name}</td>
+                    <td class="username-cell">@${user.username}</td>
+                    <td><span class="role-badge role-${user.role}">${user.role}</span></td>
+                    <td><span class="contact-email">${contactEmail}</span></td>
+                    <td><div class="status-badge status-active"><span class="status-dot"></span>active</div></td>
+                    <td class="actions-cell">
+                        <div class="action-buttons">
+                            <button class="action-btn edit-btn" onclick="editUser(${user.id})">
+                                <span class="material-symbols-rounded s18">edit</span>
+                            </button>
+                            ${deleteBtnHtml}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     }
 
     window.editUser = (id) => {
