@@ -70,11 +70,11 @@
             <div class="tb-actions">${actions}</div>
               <div class="tb-right">
                 <div class="tb-chip" id="globalTopClock">00:00:00 AM</div>
-                <div class="tb-refresh" id="topbarRefreshBtn" title="Sync Data">
+                <div class="tb-refresh tb-icon-tile" id="topbarRefreshBtn" title="Sync Data">
                   <i class="fa-solid fa-arrows-rotate"></i>
                 </div>
                 <div class="notif-wrapper">
-                  <div class="tb-notifications" id="notifBell" title="Low Stock Alerts">
+                  <div class="tb-notifications tb-icon-tile" id="notifBell" title="Low Stock Alerts">
                     <i class="fa-solid fa-bell"></i>
                     <span class="notif-badge" id="topbarNotifBadge" style="display:none;">0</span>
                   </div>
@@ -86,7 +86,7 @@
                     <div class="nd-footer" onclick="location.href='inventory.html'">View All Inventory</div>
                   </div>
                 </div>
-                <div class="avatar">${avatarText}</div>
+                <div class="avatar avatar-square">${avatarText}</div>
               </div>
           </div>
           <div id="toast-container" class="toast-container"></div>

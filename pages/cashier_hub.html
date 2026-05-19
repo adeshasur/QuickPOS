@@ -18,20 +18,6 @@
   <div id="topbar-container"></div>
   <main class="hub-shell">
     <section class="hub-intro">
-      <header class="hub-topbar glass-card">
-        <div class="hub-head-left">
-          <h1 class="hub-title">Shift Command Center</h1>
-          <p class="hub-sub" id="hubSubtitle">Ready for fast retail flow</p>
-        </div>
-        <div class="hub-profile">
-          <div class="hub-avatar" id="hubAvatar">C</div>
-          <div>
-            <div class="hub-cashier" id="hubCashierName">Cashier</div>
-            <div class="hub-role">POS Operator</div>
-          </div>
-        </div>
-      </header>
-
       <section class="hub-kpis">
         <article class="kpi-card glass-card">
           <div class="kpi-icon"><i class="fa-solid fa-money-bill-trend-up"></i></div>
@@ -47,6 +33,23 @@
           <div class="kpi-icon"><i class="fa-solid fa-stopwatch"></i></div>
           <span class="kpi-label">Shift Active</span>
           <span class="kpi-value" id="kpiDuration">00:00:00</span>
+        </article>
+        <article class="kpi-card glass-card">
+          <div class="kpi-icon"><i class="fa-solid fa-cash-register"></i></div>
+          <span class="kpi-label">Cash in Drawer</span>
+          <span class="kpi-value" id="kpiDrawerCash">LKR 0.00</span>
+        </article>
+        <article class="kpi-card glass-card">
+          <div class="kpi-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+          <span class="kpi-label">Expected vs Actual</span>
+          <span class="kpi-value" id="kpiExpectedVsActual">LKR 0.00</span>
+          <span class="kpi-meta kpi-meta-normal" id="kpiExpectedVsActualState">MATCH</span>
+        </article>
+        <article class="kpi-card glass-card">
+          <div class="kpi-icon"><i class="fa-solid fa-layer-group"></i></div>
+          <span class="kpi-label">Pending Holds</span>
+          <span class="kpi-value" id="kpiPendingHolds">0</span>
+          <span class="kpi-meta kpi-meta-normal" id="kpiPendingHoldsState">CLEAR</span>
         </article>
       </section>
     </section>
@@ -66,6 +69,28 @@
             <div class="chart-empty" id="hourlyChartEmpty">No sales yet in this shift.</div>
           </div>
           <div class="hourly-axis" id="hourlyAxis"></div>
+        </article>
+
+        <article class="hub-panel glass-card">
+          <div class="panel-head">
+            <div>
+              <h3>Cashier Terminal Rows</h3>
+              <p>Sinhala-ready rows with fixed action and price columns</p>
+            </div>
+          </div>
+          <div class="terminal-table-wrap">
+            <table class="terminal-table">
+              <thead>
+                <tr>
+                  <th>භාණ්ඩය</th>
+                  <th>ප්‍රමාණය</th>
+                  <th>මිල</th>
+                  <th>ක්‍රියාව</th>
+                </tr>
+              </thead>
+              <tbody id="terminalTableBody"></tbody>
+            </table>
+          </div>
         </article>
 
         <div class="analytics-bottom-row">

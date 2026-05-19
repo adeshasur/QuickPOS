@@ -33,8 +33,10 @@
     state.user = user;
     state.shiftStart = localStorage.getItem('quickpos-shift-start');
 
-    document.getElementById('hubCashierName').textContent = user.name || 'Cashier';
-    document.getElementById('hubAvatar').textContent = (user.name || 'C')[0].toUpperCase();
+    const hubCashierName = document.getElementById('hubCashierName');
+    const hubAvatar = document.getElementById('hubAvatar');
+    if (hubCashierName) hubCashierName.textContent = user.name || 'Cashier';
+    if (hubAvatar) hubAvatar.textContent = (user.name || 'C')[0].toUpperCase();
 
     bind();
     hydrateHoldBadge();
@@ -71,6 +73,7 @@
       if (e.key === 'quickpos-held-bills') {
         hydrateHoldBadge();
         updateSubtitle();
+        updateKpis(state.mySales);
       }
       if (e.key === TARGET_STORAGE_KEY) {
         state.shiftTargetBills = resolveShiftTarget();
@@ -118,6 +121,7 @@
     renderPaymentMix(state.mySales);
     renderTargetProgress(state.mySales.length);
     renderRecentHoldBills();
+    renderTerminalRows(state.mySales);
   }
 
   function getCashierSalesForToday() {
@@ -141,9 +145,58 @@
 
   function updateKpis(mySales) {
     const total = mySales.reduce((sum, sale) => sum + Number(sale.total_amount || 0), 0);
+    const cashSales = mySales.reduce((sum, sale) => {
+      return sum + (normalizePaymentMethod(sale.payment_method) === 'Cash' ? Number(sale.total_amount || 0) : 0);
+    }, 0);
+    const openingFloat = Number(localStorage.getItem('quickpos-shift-float') || 0);
+    const expectedDrawer = openingFloat + cashSales;
+    const actualDrawer = Number(localStorage.getItem('quickpos-drawer-actual') || expectedDrawer);
+    const variance = actualDrawer - expectedDrawer;
+    const pendingHolds = Array.isArray(state.heldBills) ? state.heldBills.length : 0;
+
     document.getElementById('kpiSales').textContent = `LKR ${fmt(total)}`;
     document.getElementById('kpiBills').textContent = String(mySales.length);
+    document.getElementById('kpiDrawerCash').textContent = `LKR ${fmt(actualDrawer)}`;
+    document.getElementById('kpiExpectedVsActual').textContent = `LKR ${fmt(Math.abs(variance))}`;
+    document.getElementById('kpiPendingHolds').textContent = String(pendingHolds);
+
+    const varianceStateEl = document.getElementById('kpiExpectedVsActualState');
+    if (varianceStateEl) {
+      if (Math.abs(variance) < 0.01) {
+        varianceStateEl.textContent = 'MATCH';
+        setKpiMetaState(varianceStateEl, 'normal');
+      } else {
+        varianceStateEl.textContent = variance > 0 ? 'OVER' : 'SHORT';
+        setKpiMetaState(varianceStateEl, 'warn');
+      }
+    }
+
+    const holdsStateEl = document.getElementById('kpiPendingHoldsState');
+    if (holdsStateEl) {
+      if (pendingHolds > 0) {
+        holdsStateEl.textContent = `${pendingHolds} WAITING`;
+        setKpiMetaState(holdsStateEl, 'danger');
+      } else {
+        holdsStateEl.textContent = 'CLEAR';
+        setKpiMetaState(holdsStateEl, 'normal');
+      }
+    }
+
     updateShiftDuration();
+  }
+
+  function setKpiMetaState(element, stateName) {
+    if (!element) return;
+    element.classList.remove('kpi-meta-normal', 'kpi-meta-warn', 'kpi-meta-danger');
+    if (stateName === 'warn') {
+      element.classList.add('kpi-meta-warn');
+      return;
+    }
+    if (stateName === 'danger') {
+      element.classList.add('kpi-meta-danger');
+      return;
+    }
+    element.classList.add('kpi-meta-normal');
   }
 
   function updateShiftDuration() {
@@ -438,6 +491,48 @@
     }).join('');
   }
 
+  function renderTerminalRows(mySales) {
+    const body = document.getElementById('terminalTableBody');
+    if (!body) return;
+
+    const rows = [];
+    for (const sale of mySales) {
+      const items = Array.isArray(sale.items) ? sale.items : [];
+      for (const item of items) {
+        rows.push({
+          name: item.product_name || item.name || 'භාණ්ඩය',
+          qty: Number(item.quantity || item.qty || 0),
+          subtotal: Number(item.subtotal || 0),
+          billId: sale.bill_id || `#${sale.id || ''}`
+        });
+      }
+    }
+
+    const latest = rows.slice(-8).reverse();
+    if (!latest.length) {
+      body.innerHTML = `
+        <tr>
+          <td colspan="4" class="terminal-sub" style="padding:14px 10px;text-align:center;">No terminal items yet for this shift.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    body.innerHTML = latest.map((row) => {
+      return `
+        <tr>
+          <td>
+            <span class="terminal-name" title="${escapeAttr(row.name)}">${escapeHtml(row.name)}</span>
+            <div class="terminal-sub">${escapeHtml(row.billId)}</div>
+          </td>
+          <td><span class="terminal-qty">${formatQty(row.qty)}</span></td>
+          <td><span class="terminal-price">LKR ${fmt(row.subtotal)}</span></td>
+          <td><button class="terminal-action" type="button">ADD</button></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
   function updateSubtitle() {
     const subtitle = document.getElementById('hubSubtitle');
     if (!subtitle) return;
@@ -466,6 +561,7 @@
         const openingFloat = Math.max(0, Number(state.settings.autoShiftOpeningFloat || 0));
         localStorage.setItem('quickpos-shift-start', new Date().toISOString());
         localStorage.setItem('quickpos-shift-float', String(openingFloat));
+        localStorage.setItem('quickpos-drawer-actual', String(openingFloat));
         state.shiftStart = localStorage.getItem('quickpos-shift-start');
         showToast(`Auto shift started (Float: LKR ${fmt(openingFloat)})`);
       } else {
@@ -473,6 +569,7 @@
         if (amount === null) return;
         localStorage.setItem('quickpos-shift-start', new Date().toISOString());
         localStorage.setItem('quickpos-shift-float', String(Number(amount || 0)));
+        localStorage.setItem('quickpos-drawer-actual', String(Number(amount || 0)));
         state.shiftStart = localStorage.getItem('quickpos-shift-start');
       }
     }
@@ -629,6 +726,7 @@
     const floatAmount = Number(localStorage.getItem('quickpos-shift-float') || 0);
     const expectedDrawer = floatAmount + cashTotal;
     const variance = Number(drawerCount) - expectedDrawer;
+    localStorage.setItem('quickpos-drawer-actual', String(Number(drawerCount)));
 
     const summary = {
       cashierName: state.user.name,
@@ -653,6 +751,7 @@
 
     localStorage.removeItem('quickpos-shift-start');
     localStorage.removeItem('quickpos-shift-float');
+    localStorage.removeItem('quickpos-drawer-actual');
     state.shiftStart = null;
 
     updateShiftDuration();

@@ -509,42 +509,73 @@ ipcMain.handle('save-sale', async (event, saleData) => withTransaction(async () 
 }));
 
 function buildThermalReceiptHtml(payload) {
+    const esc = (value) => String(value || '').replace(/[&<>'"]/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '\'': '&#39;',
+        '"': '&quot;'
+    }[char]));
+
     const itemsHtml = (payload.items || []).map((item) => {
-        const subtotal = Number(item.qty || 0) * Number(item.price || 0);
+        const qty = Number(item.qty || 0);
+        const subtotal = qty * Number(item.price || 0);
         return `
           <tr>
-            <td style="padding:3px 0; word-break:break-word">${item.name}</td>
-            <td style="padding:3px 0; text-align:center">${Number(item.qty || 0).toFixed(2).replace(/\\.00$/, '')}</td>
-            <td style="padding:3px 0; text-align:right">${subtotal.toFixed(2)}</td>
+            <td style="padding:4px 0; font-size:11px; line-height:1.45; color:#0f172a; font-weight:700; word-break:break-word; overflow-wrap:anywhere;">
+              ${esc(item.name)}
+            </td>
+            <td style="padding:4px 0; text-align:center; font-size:11px; line-height:1.4; color:#0f172a; font-weight:700;">
+              ${qty.toFixed(2).replace(/\\.00$/, '')}
+            </td>
+            <td style="padding:4px 0; text-align:right; font-size:11px; line-height:1.4; color:#0f172a; font-weight:800;">
+              ${subtotal.toFixed(2)}
+            </td>
           </tr>`;
     }).join('');
 
     const paidAmount = Number(payload.received || payload.total || 0);
     const totalAmount = Number(payload.total || 0);
     const changeDue = Math.max(0, paidAmount - totalAmount);
+    const receiptDate = new Date(payload.timestamp || Date.now()).toLocaleString();
 
     return `
-      <div style="font-family: 'Noto Sans Sinhala','Iskoola Pota','Manrope',sans-serif; width: 302px; max-width: 302px; padding: 8px 10px; font-size: 11px; color: #111;">
+      <div style="font-family:'Noto Sans Sinhala','Iskoola Pota',sans-serif; width:302px; max-width:302px; padding:8px 10px; color:#0f172a; background:#ffffff;">
         <div style="text-align:center; margin-bottom:6px;">
-          <div style="font-size:17px; font-weight:800; letter-spacing:.2px;">QuickPOS Supermarket</div>
-          <div style="font-size:10px; margin-top:2px;">80mm Digital Thermal Receipt</div>
+          <div style="font-size:16px; line-height:1.25; font-weight:800; color:#0f172a;">QuickPOS Pro</div>
+          <div style="font-size:10px; line-height:1.35; font-weight:700; color:#0f172a;">සිංහල බිල්පත</div>
         </div>
-        <div style="border-top:1px dashed #000; margin:6px 0;"></div>
-        <p style="margin:2px 0;">Bill: <strong>${payload.billId || '-'}</strong></p>
-        <p style="margin:2px 0;">Cashier: ${payload.cashier || 'Cashier'}</p>
-        <p style="margin:2px 0;">Date: ${new Date(payload.timestamp || Date.now()).toLocaleString()}</p>
-        <p style="margin:2px 0;">Payment: ${payload.method || '-'}</p>
-        <div style="border-top:1px dashed #000; margin:6px 0;"></div>
-        <table style="width:100%; font-size:11px; border-collapse:collapse;">
-          <thead><tr><th style="text-align:left;">Item</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Sub</th></tr></thead>
+
+        <div style="border-top:1px dashed #0f172a; margin:6px 0;"></div>
+        <p style="margin:2px 0; font-size:11px; line-height:1.35; color:#0f172a;"><strong>Bill:</strong> ${esc(payload.billId || '-')}</p>
+        <p style="margin:2px 0; font-size:11px; line-height:1.35; color:#0f172a;"><strong>Cashier:</strong> ${esc(payload.cashier || 'Cashier')}</p>
+        <p style="margin:2px 0; font-size:11px; line-height:1.35; color:#0f172a;"><strong>Date:</strong> ${esc(receiptDate)}</p>
+        <p style="margin:2px 0; font-size:11px; line-height:1.35; color:#0f172a;"><strong>Payment:</strong> ${esc(payload.method || '-')}</p>
+        <div style="border-top:1px dashed #0f172a; margin:6px 0;"></div>
+
+        <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+          <colgroup>
+            <col style="width:58%;">
+            <col style="width:14%;">
+            <col style="width:28%;">
+          </colgroup>
+          <thead>
+            <tr>
+              <th style="text-align:left; font-size:10px; line-height:1.35; color:#0f172a; font-weight:800; padding:2px 0;">භාණ්ඩය</th>
+              <th style="text-align:center; font-size:10px; line-height:1.35; color:#0f172a; font-weight:800; padding:2px 0;">ප්‍ර.</th>
+              <th style="text-align:right; font-size:10px; line-height:1.35; color:#0f172a; font-weight:800; padding:2px 0;">මුදල</th>
+            </tr>
+          </thead>
           <tbody>${itemsHtml}</tbody>
         </table>
-        <div style="border-top:1px solid #000; border-bottom:1px solid #000; margin:8px 0; padding:5px 0;">
-          <p style="margin:2px 0;text-align:right;font-weight:800; font-size:14px;">TOTAL: LKR ${totalAmount.toFixed(2)}</p>
-          <p style="margin:2px 0;text-align:right;">PAID: LKR ${paidAmount.toFixed(2)}</p>
-          <p style="margin:2px 0;text-align:right;">CHANGE: LKR ${changeDue.toFixed(2)}</p>
+
+        <div style="border-top:1px solid #0f172a; border-bottom:1px solid #0f172a; margin:8px 0; padding:6px 0;">
+          <p style="margin:2px 0; text-align:right; font-size:13px; line-height:1.35; color:#0f172a; font-weight:800;">එකතුව: LKR ${totalAmount.toFixed(2)}</p>
+          <p style="margin:2px 0; text-align:right; font-size:11px; line-height:1.35; color:#0f172a; font-weight:700;">ගෙවූ මුදල: LKR ${paidAmount.toFixed(2)}</p>
+          <p style="margin:2px 0; text-align:right; font-size:11px; line-height:1.35; color:#0f172a; font-weight:700;">ඉතුරු: LKR ${changeDue.toFixed(2)}</p>
         </div>
-        <p style="text-align:center;margin-top:10px; font-size:12px; font-weight:700;">Thank you! Come Again.</p>
+
+        <p style="text-align:center; margin-top:8px; font-size:11px; line-height:1.35; color:#0f172a; font-weight:700;">ස්තුතියි. නැවත එන්න.</p>
       </div>`;
 }
 
