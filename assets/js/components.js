@@ -204,7 +204,7 @@
     const menuItems = document.querySelectorAll('.menu-item');
     menuItems.forEach(item => {
         item.classList.remove('active');
-        if (item.dataset.page && currentPage.includes(item.dataset.page)) item.classList.add('active');
+        if (item.dataset.page && currentPage === item.dataset.page) item.classList.add('active');
     });
 
     const logoutBtn = document.getElementById('sidebarLogoutBtn');

@@ -375,7 +375,22 @@ ipcMain.handle('record-credit-payment', async (event, paymentData) => withTransa
     return { success: true, remainingBalance: newBalance };
 }));
 
-ipcMain.handle('get-sales-history', async () => allAsync('SELECT * FROM sales ORDER BY timestamp DESC'));
+ipcMain.handle('get-sales-history', async () => {
+    const sales = await allAsync('SELECT * FROM sales ORDER BY timestamp DESC');
+    const items = await allAsync('SELECT sale_id, product_name, product_id, quantity, subtotal FROM sale_items');
+    const itemsBySaleId = {};
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (!itemsBySaleId[item.sale_id]) {
+            itemsBySaleId[item.sale_id] = [];
+        }
+        itemsBySaleId[item.sale_id].push(item);
+    }
+    for (let i = 0; i < sales.length; i++) {
+        sales[i].items = itemsBySaleId[sales[i].id] || [];
+    }
+    return sales;
+});
 ipcMain.handle('get-sale-details', async (event, saleId) => allAsync('SELECT * FROM sale_items WHERE sale_id = ?', [saleId]));
 
 ipcMain.handle('get-printers', async (event) => {

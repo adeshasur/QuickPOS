@@ -1,4 +1,4 @@
-﻿(function() {
+(function() {
     'use strict';
 
     const $ = id => document.getElementById(id);
@@ -41,9 +41,12 @@
         const searchInput = $('searchInput');
         const salesBody = $('salesBody');
         const emptyState = $('emptyState');
-        const summaryRow = $('summaryRow');
 
-        if (!salesBody || !emptyState || !summaryRow) return;
+        const kpiTotalInvoices = $('kpiTotalInvoices');
+        const kpiTotalRevenue = $('kpiTotalRevenue');
+        const kpiTodaySales = $('kpiTodaySales');
+
+        if (!salesBody || !emptyState) return;
 
         const pay = payFilter ? payFilter.value : '';
         const q = searchInput ? searchInput.value.trim().toLowerCase() : '';
@@ -55,11 +58,17 @@
             return true;
         });
 
+        // Compute KPIs based on filtered/active sales
         const totalAmt = list.reduce((sum, x) => sum + Number(x.total_amount || 0), 0);
-        summaryRow.innerHTML = `
-            <div class="sum-pill">Bills: <span class="val">${list.length}</span></div>
-            <div class="sum-pill">Total Revenue: <span class="val green">${fmtLKR(totalAmt)}</span></div>
-        `;
+        const todayStr = new Date().toISOString().split('T')[0];
+        const todaySalesAmt = list
+            .filter(s => new Date(s.timestamp).toISOString().split('T')[0] === todayStr)
+            .reduce((sum, x) => sum + Number(x.total_amount || 0), 0);
+
+        // Update KPI values in the DOM
+        if (kpiTotalInvoices) kpiTotalInvoices.textContent = list.length;
+        if (kpiTotalRevenue) kpiTotalRevenue.textContent = fmtLKR(totalAmt);
+        if (kpiTodaySales) kpiTodaySales.textContent = fmtLKR(todaySalesAmt);
 
         if (!list.length) {
             salesBody.innerHTML = '';
@@ -69,18 +78,30 @@
 
         emptyState.style.display = 'none';
 
-        salesBody.innerHTML = list.map(s => `
-            <tr onclick="openReceipt('${s.bill_id}')">
-                <td><span class="inv-id">${s.bill_id}</span></td>
-                <td>${new Date(s.timestamp).toLocaleDateString()} · ${new Date(s.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
-                <td>Detailed Invoice Available</td>
-                <td><span class="pay-badge ${String(s.payment_method || '').toLowerCase()}">${s.payment_method}</span></td>
-                <td class="amount-cell">${fmtLKR(s.total_amount)}</td>
-                <td style="text-align:right;">
-                    <button class="row-btn" onclick="event.stopPropagation(); openReceipt('${s.bill_id}')"><span class="material-symbols-rounded">print</span></button>
-                </td>
-            </tr>
-        `).join('');
+        salesBody.innerHTML = list.map(s => {
+            let itemsPreview = '0 Items';
+            if (s.items && s.items.length > 0) {
+                const names = s.items.map(i => i.product_name || `Item #${i.product_id}`);
+                if (names.length <= 2) {
+                    itemsPreview = names.join(', ');
+                } else {
+                    itemsPreview = `${names.slice(0, 2).join(', ')} (+${names.length - 2} items)`;
+                }
+            }
+
+            return `
+                <tr onclick="openReceipt('${s.bill_id}')">
+                    <td><span class="inv-id">${s.bill_id}</span></td>
+                    <td>${new Date(s.timestamp).toLocaleDateString()} · ${new Date(s.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+                    <td>${itemsPreview}</td>
+                    <td><span class="pay-badge ${String(s.payment_method || '').toLowerCase()}">${s.payment_method}</span></td>
+                    <td class="amount-cell">${fmtLKR(s.total_amount)}</td>
+                    <td style="text-align:right;">
+                        <button class="row-btn" onclick="event.stopPropagation(); openReceipt('${s.bill_id}')"><span class="material-symbols-rounded">print</span></button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     };
 
     window.openReceipt = async function(billId) {
