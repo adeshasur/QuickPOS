@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
 
 /* === Unified Design System === */
 :root {
@@ -41,7 +40,8 @@
     
     /* Font — Single-Font Architecture: Manrope only */
     --font: 'Manrope', system-ui, sans-serif;
-    --mono: 'DM Mono', monospace;
+    --mono: 'Manrope', system-ui, sans-serif;
+    --font-mono: 'Manrope', system-ui, sans-serif;
 }
 
 * {
@@ -69,6 +69,7 @@ table, th, td,
 .loyalty-val, .phone-val,
 [class*="-price"], [class*="-amount"], [class*="-total"], [class*="-val"] {
     font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
 }
 
 html, body {
