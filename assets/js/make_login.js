@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.user.role === "owner") {
                 window.location.href = "owner_dashboard.html";
             } else {
-                window.location.href = "sales.html";
+                window.location.href = "cashier_dashboard.html";
             }
         } catch (err) {
             errorBox.textContent = 'Connection error: ' + err.message;
