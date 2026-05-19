@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const os = require('os');
 
 process.env.QUICKPOS_DB_DIR = app.getPath('userData');
 const db = require('./database.js');
@@ -138,6 +139,20 @@ ipcMain.handle('login-auth', async (event, { username, password, role }) => {
             canViewReports: Number(row.can_view_reports || 0) === 1
         }
     };
+});
+
+ipcMain.handle('verify-admin-pin', async (event, pin) => {
+    try {
+        const rows = await allAsync("SELECT * FROM users WHERE role IN ('owner', 'admin')");
+        for (const row of rows) {
+            if (verifyPassword(row.password, pin) || row.password === pin) {
+                return { success: true, user: row.name };
+            }
+        }
+        return { success: false, message: 'Invalid Admin PIN' };
+    } catch (err) {
+        return { success: false, message: err.message };
+    }
 });
 
 ipcMain.handle('backup-database', async () => {
@@ -329,10 +344,14 @@ ipcMain.handle('save-setting', async (event, key, value) => {
 ipcMain.handle('save-sale', async (event, saleData) => withTransaction(async () => {
     if (!Array.isArray(saleData.items) || saleData.items.length === 0) throw new Error('Cannot save an empty sale.');
 
+    const insufficient = [];
     for (const item of saleData.items) {
         const product = await getAsync('SELECT id, name, current_stock FROM products WHERE id = ?', [item.id]);
         if (!product) throw new Error(`Product not found (ID: ${item.id})`);
-        if (Number(product.current_stock) < Number(item.qty)) throw new Error(`Insufficient stock for ${product.name}`);
+        if (Number(product.current_stock) < Number(item.qty)) insufficient.push(product.name);
+    }
+    if (insufficient.length && !saleData.allowStockOverride) {
+        throw new Error(`INSUFFICIENT_STOCK: ${insufficient.join(', ')}`);
     }
 
     const finalBillId = saleData.billId || await getNextBillId();
@@ -351,11 +370,9 @@ ipcMain.handle('save-sale', async (event, saleData) => withTransaction(async () 
             [saleInsert.lastID, item.id, item.name, item.qty, item.price, subtotal]
         );
 
-        const stockUpdate = await runAsync(
-            'UPDATE products SET current_stock = current_stock - ? WHERE id = ? AND current_stock >= ?',
-            [item.qty, item.id, item.qty]
-        );
-
+        const stockUpdate = saleData.allowStockOverride
+            ? await runAsync('UPDATE products SET current_stock = current_stock - ? WHERE id = ?', [item.qty, item.id])
+            : await runAsync('UPDATE products SET current_stock = current_stock - ? WHERE id = ? AND current_stock >= ?', [item.qty, item.id, item.qty]);
         if (stockUpdate.changes !== 1) throw new Error(`Failed to update stock for product ${item.name}`);
     }
 
@@ -365,6 +382,71 @@ ipcMain.handle('save-sale', async (event, saleData) => withTransaction(async () 
 
     return { success: true, id: saleInsert.lastID, billId: finalBillId };
 }));
+
+function buildThermalReceiptHtml(payload) {
+    const itemsHtml = (payload.items || []).map((item) => {
+        const subtotal = Number(item.qty || 0) * Number(item.price || 0);
+        return `<tr><td>${item.name}</td><td style="text-align:center">${item.qty}</td><td style="text-align:right">${subtotal.toFixed(2)}</td></tr>`;
+    }).join('');
+    return `
+      <div style="font-family: monospace; width: 280px; padding: 8px; font-size: 11px; color: #111;">
+        <h3 style="margin:0;text-align:center;">QuickPOS</h3>
+        <p style="margin:2px 0 8px 0;text-align:center;">THERMAL RECEIPT</p>
+        <hr />
+        <p style="margin:2px 0;">Bill: ${payload.billId || '-'}</p>
+        <p style="margin:2px 0;">Cashier: ${payload.cashier || 'Cashier'}</p>
+        <p style="margin:2px 0;">Date: ${new Date(payload.timestamp || Date.now()).toLocaleString()}</p>
+        <hr />
+        <table style="width:100%; font-size:11px;">
+          <thead><tr><th style="text-align:left;">Item</th><th>Qty</th><th style="text-align:right;">Sub</th></tr></thead>
+          <tbody>${itemsHtml}</tbody>
+        </table>
+        <hr />
+        <p style="margin:2px 0;text-align:right;font-weight:bold;">TOTAL: LKR ${Number(payload.total || 0).toFixed(2)}</p>
+        <p style="text-align:center;margin-top:10px;">Thank you!</p>
+      </div>`;
+}
+
+ipcMain.handle('export-thermal-receipt-pdf', async (event, payload) => {
+    const win = new BrowserWindow({ show: false, webPreferences: { nodeIntegration: false, contextIsolation: true } });
+    const html = `<!doctype html><html><body>${buildThermalReceiptHtml(payload)}</body></html>`;
+    await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    const pdfData = await win.webContents.printToPDF({ printBackground: true, pageSize: 'A4' });
+    win.close();
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const defaultPath = path.join(os.homedir(), 'Documents', `receipt-${payload.billId || stamp}.pdf`);
+    const save = await dialog.showSaveDialog({ title: 'Save Thermal Receipt PDF', defaultPath, filters: [{ name: 'PDF', extensions: ['pdf'] }] });
+    if (save.canceled || !save.filePath) return { success: false, cancelled: true };
+    fs.writeFileSync(save.filePath, pdfData);
+    return { success: true, path: save.filePath };
+});
+
+ipcMain.handle('export-shift-summary-pdf', async (event, summary) => {
+    const html = `<!doctype html><html><body style="font-family:Manrope,Arial,sans-serif;padding:24px;color:#111">
+      <h2 style="margin:0 0 8px 0">Shift Summary (Z-Report)</h2>
+      <p style="margin:0 0 14px 0">Cashier: ${summary.cashierName || '-'} | Started: ${summary.startedTime || '-'} | Duration: ${summary.duration || '-'}</p>
+      <table style="width:100%;border-collapse:collapse">
+        <tr><td style="padding:8px;border:1px solid #dbe1ea">Cash Sales</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right">LKR ${Number(summary.cashTotal || 0).toFixed(2)}</td></tr>
+        <tr><td style="padding:8px;border:1px solid #dbe1ea">Card Sales</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right">LKR ${Number(summary.cardTotal || 0).toFixed(2)}</td></tr>
+        <tr><td style="padding:8px;border:1px solid #dbe1ea">Credit Sales</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right">LKR ${Number(summary.creditTotal || 0).toFixed(2)}</td></tr>
+        <tr><td style="padding:8px;border:1px solid #dbe1ea">Items Sold</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right">${Number(summary.itemsSold || 0).toFixed(0)}</td></tr>
+        <tr><td style="padding:8px;border:1px solid #dbe1ea;font-weight:700">Total Revenue</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right;font-weight:700">LKR ${Number(summary.revenueTotal || 0).toFixed(2)}</td></tr>
+      </table>
+    </body></html>`;
+    const win = new BrowserWindow({ show: false, webPreferences: { nodeIntegration: false, contextIsolation: true } });
+    await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    const pdfData = await win.webContents.printToPDF({ printBackground: true, pageSize: 'A4' });
+    win.close();
+    const stamp = new Date().toISOString().slice(0, 10);
+    const save = await dialog.showSaveDialog({
+        title: 'Save Shift Summary PDF',
+        defaultPath: path.join(os.homedir(), 'Documents', `shift-summary-${stamp}.pdf`),
+        filters: [{ name: 'PDF', extensions: ['pdf'] }]
+    });
+    if (save.canceled || !save.filePath) return { success: false, cancelled: true };
+    fs.writeFileSync(save.filePath, pdfData);
+    return { success: true, path: save.filePath };
+});
 
 ipcMain.handle('record-credit-payment', async (event, paymentData) => withTransaction(async () => {
     const sale = await getAsync('SELECT * FROM sales WHERE id = ? AND payment_method = ?', [paymentData.saleId, 'Credit']);

@@ -40,10 +40,13 @@ contextBridge.exposeInMainWorld('api', {
 
     // Security & Logic
     loginAuth: (creds) => ipcRenderer.invoke('login-auth', creds),
+    verifyAdminPin: (pin) => ipcRenderer.invoke('verify-admin-pin', pin),
     backupDatabase: () => ipcRenderer.invoke('backup-database'),
     restoreDatabase: () => ipcRenderer.invoke('restore-database'),
     getExpiredItems: () => ipcRenderer.invoke('get-expired-items'),
     // Printing
     printReceiptSilent: (options) => ipcRenderer.invoke('print-receipt-silent', options),
-    getPrinters: () => ipcRenderer.invoke('get-printers')
+    getPrinters: () => ipcRenderer.invoke('get-printers'),
+    exportShiftSummaryPdf: (summary) => ipcRenderer.invoke('export-shift-summary-pdf', summary),
+    exportThermalReceiptPdf: (payload) => ipcRenderer.invoke('export-thermal-receipt-pdf', payload)
 });

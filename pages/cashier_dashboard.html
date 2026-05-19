@@ -36,6 +36,37 @@
     </div>
 
     <div class="nav-right">
+      <div class="ui-preset-switch" id="uiPresetSwitch">
+        <button class="ui-preset-btn active" data-ui-preset="minimal">Minimal</button>
+        <button class="ui-preset-btn" data-ui-preset="contrast">Contrast</button>
+        <button class="ui-preset-btn" data-ui-preset="compact">Compact</button>
+      </div>
+      <!-- Quick Actions Dropdown -->
+      <div class="actions-dropdown-wrap">
+        <button class="nav-btn actions-btn" id="actionsDropdownBtn" title="Quick Actions">
+          <i class="fa-solid fa-ellipsis-vertical"></i>
+          <span>Actions</span>
+        </button>
+        <div class="actions-dropdown-menu" id="actionsDropdownMenu">
+          <button class="dropdown-item" id="actAddCustomerBtn">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Add New Customer</span>
+          </button>
+          <button class="dropdown-item" id="actRecentSalesBtn">
+            <i class="fa-solid fa-receipt"></i>
+            <span>Recent Transactions</span>
+          </button>
+          <button class="dropdown-item" id="actReturnRefundBtn">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span>Process Return/Refund</span>
+          </button>
+          <button class="dropdown-item" id="actShiftSummaryBtn">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>End Shift Summary</span>
+          </button>
+        </div>
+      </div>
+
       <div class="cashier-badge">
         <div class="cashier-avatar" id="cashierAvatar">C</div>
         <div class="cashier-info">
@@ -46,6 +77,10 @@
       <button class="nav-btn danger-btn" id="logoutBtn" title="Logout">
         <i class="fa-solid fa-right-from-bracket"></i>
         <span>Logout</span>
+      </button>
+      <button class="nav-btn" id="densityModeBtn" title="Toggle Dense Mode">
+        <i class="fa-solid fa-table-cells-large"></i>
+        <span>Dense</span>
       </button>
     </div>
   </header>
@@ -78,12 +113,29 @@
           <i class="fa-solid fa-magnifying-glass"></i>
         </button>
       </div>
+      <div class="lane-status-bar">
+        <span class="lane-pill" id="laneStatusPill"><i class="fa-solid fa-circle"></i> Ready to Scan</span>
+        <span class="lane-meta" id="laneStatusMeta">0 items in cart</span>
+      </div>
+      <div class="scan-strip" id="scanStrip">
+        <div class="scan-strip-left">
+          <span class="scan-strip-label">Last Scan</span>
+          <strong id="lastScannedName">No item scanned yet</strong>
+        </div>
+        <div class="scan-strip-right">
+          <span id="lastScannedQty">Qty 0</span>
+          <span id="lastScannedAt">--:--</span>
+        </div>
+      </div>
 
       <!-- Customer Quick-Link Bar -->
       <div class="customer-bar">
         <div class="customer-bar-left">
           <i class="fa-solid fa-user-circle"></i>
-          <span class="cust-bar-label" id="customerLabel">Walk-in Customer</span>
+          <div class="cust-context">
+            <span class="cust-bar-label" id="customerLabel">Walk-in Customer</span>
+            <span class="cust-points" id="customerPoints">Loyalty: -</span>
+          </div>
         </div>
         <div class="customer-bar-right">
           <button class="cust-link-btn" id="attachCustomerBtn">
@@ -92,6 +144,16 @@
           <button class="cust-link-btn danger" id="detachCustomerBtn" style="display:none">
             <i class="fa-solid fa-xmark"></i> Remove
           </button>
+        </div>
+      </div>
+
+      <div class="hold-panel" id="holdPanel">
+        <div class="hold-panel-head">
+          <span><i class="fa-solid fa-layer-group"></i> Held Bills</span>
+          <span class="hold-count" id="holdCount">0</span>
+        </div>
+        <div class="hold-list" id="holdList">
+          <p class="hold-empty">No held bills</p>
         </div>
       </div>
 
@@ -143,6 +205,9 @@
           <span class="summary-label total-label">TOTAL</span>
           <span class="summary-val total-amount" id="summaryTotal">LKR 0.00</span>
         </div>
+      </div>
+      <div class="cart-total-progress">
+        <div class="cart-total-progress-bar" id="cartProgressBar"></div>
       </div>
 
       <!-- Action Hotkey Footer -->
@@ -219,6 +284,21 @@
     </aside><!-- /quick-panel -->
 
   </main><!-- /pos-workspace -->
+  <div class="shortcut-hud" id="shortcutHud">
+    <span><kbd>F8</kbd> Cash</span>
+    <span><kbd>F9</kbd> Card</span>
+    <span><kbd>F10</kbd> Credit</span>
+    <span><kbd>F11</kbd> Hold</span>
+    <span><kbd>Ctrl+D</kbd> Dense</span>
+    <span><kbd>Ctrl+J</kbd> Focus Checkout</span>
+  </div>
+  <div class="sale-lock-overlay" id="saleLockOverlay">
+    <div class="sale-lock-card">
+      <i class="fa-solid fa-circle-check"></i>
+      <h3>Payment Successful</h3>
+      <p id="saleLockBill">Bill Completed</p>
+    </div>
+  </div>
 
   <!-- ═══════════════════════════════════════
        PAYMENT MODAL
@@ -254,6 +334,23 @@
           </div>
           <div class="quick-amounts" id="quickAmounts">
             <!-- Quick denomination buttons injected by JS -->
+          </div>
+          <div class="pay-numpad" id="payNumpad">
+            <button class="pad-key" data-key="7">7</button>
+            <button class="pad-key" data-key="8">8</button>
+            <button class="pad-key" data-key="9">9</button>
+            <button class="pad-key ghost" data-key="clear">C</button>
+            <button class="pad-key" data-key="4">4</button>
+            <button class="pad-key" data-key="5">5</button>
+            <button class="pad-key" data-key="6">6</button>
+            <button class="pad-key ghost" data-key="backspace"><i class="fa-solid fa-delete-left"></i></button>
+            <button class="pad-key" data-key="1">1</button>
+            <button class="pad-key" data-key="2">2</button>
+            <button class="pad-key" data-key="3">3</button>
+            <button class="pad-key ghost" data-key="exact">Exact</button>
+            <button class="pad-key span-2" data-key="0">0</button>
+            <button class="pad-key" data-key=".">.</button>
+            <button class="pad-key success" data-key="enter"><i class="fa-solid fa-check"></i></button>
           </div>
         </div>
 
@@ -302,6 +399,225 @@
         <div class="cust-result-list" id="custResultList">
           <!-- Populated by JS -->
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       ADD NEW CUSTOMER MODAL
+  ════════════════════════════════════════════ -->
+  <div class="pay-modal-overlay" id="actAddCustomerModalOverlay">
+    <div class="pay-modal" id="actAddCustomerModal" style="max-width:440px">
+      <div class="pay-modal-header">
+        <div class="pay-modal-title">
+          <i class="fa-solid fa-user-plus"></i>
+          <span>Add New Customer</span>
+        </div>
+        <button class="pay-modal-close" id="actAddCustomerClose">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="pay-modal-body">
+        <div class="pay-input-group" style="margin-bottom:16px">
+          <label class="pay-input-label">Full Name</label>
+          <input type="text" id="newCustName" class="pay-ref-input" placeholder="e.g. Ruwan Perera" autocomplete="off" style="width:100%">
+        </div>
+        <div class="pay-input-group">
+          <label class="pay-input-label">Phone Number</label>
+          <input type="text" id="newCustPhone" class="pay-ref-input" placeholder="e.g. 0771234567" autocomplete="off" style="width:100%">
+        </div>
+      </div>
+      <div class="pay-modal-footer">
+        <button class="pay-footer-btn cancel-btn" id="actAddCustomerCancel">Cancel</button>
+        <button class="pay-footer-btn confirm-btn" id="actAddCustomerConfirm">
+          <i class="fa-solid fa-check"></i> Register Customer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       RECENT TRANSACTIONS MODAL
+  ════════════════════════════════════════════ -->
+  <div class="pay-modal-overlay" id="actRecentSalesModalOverlay">
+    <div class="pay-modal" id="actRecentSalesModal" style="max-width:680px">
+      <div class="pay-modal-header">
+        <div class="pay-modal-title">
+          <i class="fa-solid fa-receipt"></i>
+          <span>Today's Transactions</span>
+        </div>
+        <button class="pay-modal-close" id="actRecentSalesClose">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="pay-modal-body" style="padding:0">
+        <div class="table-container" style="max-height:380px; overflow-y:auto; border-radius:0">
+          <table class="cart-table" style="margin:0">
+            <thead>
+              <tr>
+                <th style="border-radius:0">Invoice ID</th>
+                <th>Total</th>
+                <th>Method</th>
+                <th>Cashier</th>
+                <th>Time</th>
+                <th style="text-align:center; border-radius:0">Action</th>
+              </tr>
+            </thead>
+            <tbody id="recentSalesBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       PROCESS RETURN/REFUND MODAL
+  ════════════════════════════════════════════ -->
+  <div class="pay-modal-overlay" id="actReturnRefundModalOverlay">
+    <div class="pay-modal" id="actReturnRefundModal" style="max-width:620px">
+      <div class="pay-modal-header">
+        <div class="pay-modal-title">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span>Process Return & Refund</span>
+        </div>
+        <button class="pay-modal-close" id="actReturnRefundClose">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="pay-modal-body">
+        <div class="pay-input-group" style="flex-direction:row; gap:10px; align-items:flex-end; margin-bottom:20px">
+          <div style="flex:1">
+            <label class="pay-input-label">Enter Invoice ID</label>
+            <input type="text" id="refundInvoiceSearch" class="pay-ref-input" placeholder="e.g. INV-20260519-0001" style="width:100%">
+          </div>
+          <button class="pay-footer-btn confirm-btn" id="refundInvoiceSearchBtn" style="height:44px; padding:0 24px">
+            <i class="fa-solid fa-magnifying-glass"></i> Search
+          </button>
+        </div>
+        
+        <div id="refundInvoiceDetailsWrap" style="display:none">
+          <div class="refund-meta-summary" style="margin-bottom:16px; padding:12px; background:rgba(29,45,191,0.05); border-radius:8px; font-size:13px; color:var(--text2)">
+            <div><strong>Customer:</strong> <span id="refundCustLabel">Ruwan Perera</span></div>
+            <div><strong>Total Paid:</strong> <span id="refundTotalLabel" class="mono">LKR 0.00</span></div>
+            <div><strong>Date:</strong> <span id="refundDateLabel">2026-05-19</span></div>
+          </div>
+          
+          <div class="table-container" style="max-height:220px; overflow-y:auto; margin-bottom:20px">
+            <table class="cart-table">
+              <thead>
+                <tr>
+                  <th>Item Name</th>
+                  <th>Unit Price</th>
+                  <th>Qty Sold</th>
+                  <th style="width:120px; text-align:center">Return Qty</th>
+                </tr>
+              </thead>
+              <tbody id="refundItemsBody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="pay-modal-footer" style="padding:0">
+            <button class="pay-footer-btn cancel-btn" id="actReturnRefundCancel" style="margin-left:auto">Cancel</button>
+            <button class="pay-footer-btn confirm-btn danger-theme" id="actReturnRefundSubmit" style="background:var(--danger)">
+              <i class="fa-solid fa-check"></i> Process Refund
+            </button>
+          </div>
+        </div>
+        
+        <div id="refundEmptyState" style="text-align:center; padding:40px 20px; color:var(--text3)">
+          <i class="fa-solid fa-file-invoice-dollar" style="font-size:36px; margin-bottom:12px; opacity:0.5"></i>
+          <p style="font-size:13px">Search for a valid invoice above to fetch sold items.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       ADMIN PIN MODAL
+  ════════════════════════════════════════════ -->
+  <div class="pay-modal-overlay" id="adminPinModalOverlay" style="z-index: 11000">
+    <div class="pay-modal" id="adminPinModal" style="max-width:340px">
+      <div class="pay-modal-header">
+        <div class="pay-modal-title" style="color:var(--danger)">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Admin PIN Required</span>
+        </div>
+        <button class="pay-modal-close" id="adminPinClose">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="pay-modal-body" style="text-align:center">
+        <p style="font-size:13px; color:var(--text2); margin-bottom:16px">This action requires Admin authorization. Please enter your secure PIN.</p>
+        <input type="password" id="adminPinInput" class="pay-ref-input mono" placeholder="••••" style="width:140px; text-align:center; font-size:24px; letter-spacing:8px" maxlength="10" autocomplete="new-password">
+        <div id="adminPinError" style="color:var(--danger); font-size:12px; margin-top:8px; display:none">Invalid Admin PIN!</div>
+      </div>
+      <div class="pay-modal-footer">
+        <button class="pay-footer-btn cancel-btn" id="adminPinCancel">Cancel</button>
+        <button class="pay-footer-btn confirm-btn" id="adminPinSubmit" style="background:var(--danger)">
+          Verify PIN
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       END SHIFT SUMMARY MODAL
+  ════════════════════════════════════════════ -->
+  <div class="pay-modal-overlay" id="actShiftSummaryModalOverlay">
+    <div class="pay-modal" id="actShiftSummaryModal" style="max-width:480px">
+      <div class="pay-modal-header">
+        <div class="pay-modal-title">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>End Shift Drawer Summary</span>
+        </div>
+        <button class="pay-modal-close" id="actShiftSummaryClose">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="pay-modal-body">
+        <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px">
+          <div style="display:flex; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid var(--border)">
+            <span style="color:var(--text2); font-weight:600">POS Operator:</span>
+            <span id="shiftCashierName" style="color:var(--text); font-weight:700">Ruwan Perera</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid var(--border)">
+            <span style="color:var(--text2); font-weight:600">Shift Started:</span>
+            <span id="shiftStartedTime" style="color:var(--text); font-weight:700">10:15 AM</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid var(--border)">
+            <span style="color:var(--text2); font-weight:600">Duration:</span>
+            <span id="shiftDurationLabel" style="color:var(--text); font-weight:700">03h 45m</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid var(--border); font-size:15px">
+            <span style="color:var(--text2); font-weight:600">Cash Sales:</span>
+            <span id="shiftCashSales" class="mono" style="color:var(--text); font-weight:700">LKR 0.00</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid var(--border); font-size:15px">
+            <span style="color:var(--text2); font-weight:600">Card Sales:</span>
+            <span id="shiftCardSales" class="mono" style="color:var(--text); font-weight:700">LKR 0.00</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid var(--border); font-size:15px">
+            <span style="color:var(--text2); font-weight:600">Credit Sales:</span>
+            <span id="shiftCreditSales" class="mono" style="color:var(--text); font-weight:700">LKR 0.00</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding-top:8px; font-size:18px">
+            <span style="color:var(--primary); font-weight:800">Total Drawer Revenue:</span>
+            <span id="shiftTotalRevenue" class="mono" style="color:var(--primary); font-weight:800">LKR 0.00</span>
+          </div>
+        </div>
+      </div>
+      <div class="pay-modal-footer">
+        <button class="pay-footer-btn cancel-btn" id="actShiftSummaryCancel">Keep Open</button>
+        <button class="pay-footer-btn cancel-btn" id="actShiftSummaryExportPdf">
+          <i class="fa-solid fa-file-pdf"></i> Export PDF
+        </button>
+        <button class="pay-footer-btn confirm-btn danger-theme" id="actShiftSummaryCloseShift" style="background:var(--danger)">
+          <i class="fa-solid fa-lock"></i> End Shift & Logout
+        </button>
       </div>
     </div>
   </div>
