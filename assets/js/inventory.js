@@ -104,7 +104,7 @@
             const category = categories.find(c => c.id === item.category_id);
             
             return `
-                <tr style="${isExpired ? 'background-color: #FFF5F5;' : ''}">
+                <tr class="${isExpired ? 'expired-row' : ''}">
                     <td><strong>${item.name}</strong></td>
                     <td>${category ? category.name : 'N/A'}</td>
                     <td>${item.current_stock} ${item.unit_type || 'units'}</td>
@@ -112,8 +112,10 @@
                     <td>${formatCurrency(item.selling_price || 0)}</td>
                     <td>${formatDate(item.expiry_date)}</td>
                     <td><span class="expiry-badge ${expiryInfo.class}">${expiryInfo.status}</span></td>
-                    <td style="${daysLeft < 0 ? 'color: red;' : daysLeft <= 30 ? 'color: orange;' : 'color: green;'}">
-                        ${daysLeft < 0 ? 'Expired!' : daysLeft > 365 ? 'Good' : `${daysLeft} days left`}
+                    <td>
+                        <span class="days-badge ${daysLeft < 0 ? 'expired' : daysLeft <= 30 ? 'expiring' : 'safe'}">
+                            ${daysLeft < 0 ? 'Expired!' : daysLeft > 365 ? 'Stable' : `${daysLeft}d left`}
+                        </span>
                     </td>
                     <td>
                         ${canEditInventory

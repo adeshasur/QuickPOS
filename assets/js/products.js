@@ -123,13 +123,41 @@
     chk.addEventListener('change', () => {
       unit.disabled = !chk.checked;
       row.classList.toggle('disabled', !chk.checked);
-      if (!chk.checked) unit.value = '';
+      if (!chk.checked) {
+        unit.value = '';
+        row.querySelectorAll('.unit-chip').forEach(c => c.classList.remove('active'));
+      }
     });
   }
 
   function bindEvents() {
     const searchInput = document.getElementById('productSearch');
     const catFilter = document.getElementById('categoryFilter');
+
+    // Unit chips click listener
+    document.querySelectorAll('.unit-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const targetId = chip.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        if (!input) return;
+        
+        const prefix = targetId === 'addUnit' ? 'add' : 'edit';
+        const chk = document.getElementById(`${prefix}Weighted`);
+        const row = document.getElementById(`${prefix}UnitRow`);
+        
+        if (chk && !chk.checked) {
+          chk.checked = true;
+          input.disabled = false;
+          row.classList.remove('disabled');
+        }
+        
+        input.value = chip.textContent.trim();
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        
+        chip.parentElement.querySelectorAll('.unit-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+      });
+    });
 
     if (searchInput) {
       searchInput.addEventListener('input', () => {
@@ -148,6 +176,7 @@
       document.getElementById('addWeighted').checked = false;
       document.getElementById('addUnit').disabled = true;
       document.getElementById('addUnitRow').classList.add('disabled');
+      document.querySelectorAll('#addUnitRow .unit-chip').forEach(c => c.classList.remove('active'));
       document.getElementById('addStock').value = '0';
       document.getElementById('addAlert').value = '5';
       document.getElementById('addDiscount').value = '0';
@@ -201,6 +230,9 @@
         document.getElementById('editUnit').value = p.unit_type || '';
         document.getElementById('editUnit').disabled = Number(p.is_weighted) !== 1;
         document.getElementById('editUnitRow').classList.toggle('disabled', Number(p.is_weighted) !== 1);
+        document.querySelectorAll('#editUnitRow .unit-chip').forEach(c => {
+          c.classList.toggle('active', c.textContent.trim() === (p.unit_type || ''));
+        });
         updatePreview('edit');
         openModal('editModal');
       }

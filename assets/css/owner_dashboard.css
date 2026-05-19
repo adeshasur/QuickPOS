@@ -1,3 +1,7 @@
+:root {
+  --font: 'Manrope', 'Plus Jakarta Sans', 'Inter', sans-serif;
+}
+
 /* ─── DASHBOARD TOPBAR FILTERS ─── */
 .tb-filters{display:flex;align-items:center;gap:8px;margin-left:auto}
 .tb-welcome{display:none;align-items:center;gap:10px;margin-left:auto;animation:welcomeFadeIn 0.5s ease-out forwards}
@@ -80,8 +84,8 @@
 
 .kpi-label {
   font-size: 12px;
-  font-weight: 700;
-  color: var(--text-light);
+  font-weight: 800; /* Increased weight for premium look */
+  color: var(--text2); /* Darkened from var(--text-light) for high contrast */
   text-transform: uppercase;
   letter-spacing: .08em;
   margin-bottom: 8px;
@@ -92,14 +96,14 @@
 
 .kpi-label i {
   font-size: 11px;
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .kpi-val {
   font-size: 28px; /* scaled slightly down to 28px so large LKR amounts never overflow or wrap */
   font-weight: 800;
   color: var(--text);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font); /* Render with Manrope typography */
   letter-spacing: -.03em;
   line-height: 1;
   margin-bottom: 10px;
@@ -111,16 +115,16 @@
   align-items: center;
   flex-wrap: nowrap; /* keep strictly on one single line */
   gap: 4px;
-  font-weight: 600;
-  color: var(--text-light);
+  font-weight: 700; /* Increased weight for legibility */
+  color: var(--text2); /* Darkened from var(--text-light) for high contrast */
   line-height: 1.4;
   margin-top: auto; /* push meta to the bottom to align perfectly */
 }
 
 .kpi-sub {
   font-size: 11px;
-  color: var(--text3);
-  font-weight: 500;
+  color: var(--text2); /* Darkened from var(--text-3) to boost contrast */
+  font-weight: 600; /* Increased weight */
   white-space: nowrap;
 }
 

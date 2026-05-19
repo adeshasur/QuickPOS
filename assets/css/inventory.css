@@ -392,17 +392,72 @@ body, html, .inventory-container, input, select, button {
 
 .stock-table tr:hover { background-color: var(--surface2); }
 
+/* Elegant Glassmorphic Expiry Badges */
 .expiry-badge {
-    padding: 4px 10px;
-    border-radius: 999px;
+    padding: 5px 12px;
+    border-radius: 20px;
     font-size: 11px;
     font-weight: 700;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+.expiry-badge.good {
+    background-color: rgba(16, 185, 129, 0.08);
+    color: var(--success);
+    border-color: rgba(16, 185, 129, 0.15);
+}
+.expiry-badge.expiring {
+    background-color: rgba(245, 158, 11, 0.08);
+    color: var(--warning);
+    border-color: rgba(245, 158, 11, 0.15);
+}
+.expiry-badge.expired {
+    background-color: rgba(239, 68, 68, 0.08);
+    color: var(--danger);
+    border-color: rgba(239, 68, 68, 0.15);
 }
 
-.expiry-badge.good { background-color: #D1FAE5; color: #065F46; }
-.expiry-badge.expiring { background-color: #FEF3C7; color: #92400E; }
-.expiry-badge.expired { background-color: #FEE2E2; color: #991B1B; }
+/* Days Left Status Badges (Glassmorphic) */
+.days-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.01);
+    border: 1px solid transparent;
+}
+.days-badge.safe {
+    background-color: rgba(16, 185, 129, 0.08);
+    color: var(--success);
+    border-color: rgba(16, 185, 129, 0.15);
+}
+.days-badge.expiring {
+    background-color: rgba(245, 158, 11, 0.08);
+    color: var(--warning);
+    border-color: rgba(245, 158, 11, 0.15);
+}
+.days-badge.expired {
+    background-color: rgba(239, 68, 68, 0.08);
+    color: var(--danger);
+    border-color: rgba(239, 68, 68, 0.15);
+}
+
+/* Expired row subtle wash highlight */
+tr.expired-row td {
+    background-color: rgba(239, 68, 68, 0.03) !important;
+}
+tr.expired-row:hover td {
+    background-color: rgba(239, 68, 68, 0.06) !important;
+}
 
 .empty-state {
     display: flex;

@@ -116,20 +116,24 @@ body.dashboard-body {
     min-width: 0;
 }
 
-/* Scrollbar styling */
+/* Sleek Glassmorphic Custom Scrollbar styling */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
 ::-webkit-scrollbar-track {
-    background: transparent;
+    background: rgba(15, 23, 42, 0.01);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 ::-webkit-scrollbar-thumb {
-    background: var(--border2);
+    background: rgba(29, 45, 191, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 10px;
+    transition: background 0.3s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--text3);
+    background: rgba(29, 45, 191, 0.3);
 }
 
 /* === Global Topbar === */
