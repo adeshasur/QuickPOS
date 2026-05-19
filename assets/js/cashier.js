@@ -125,8 +125,21 @@
   }
 
   function categoryIcon(catId) {
-    const icons = ['box', 'apple-whole', 'bread-slice', 'fish', 'bottle-water', 'tag'];
-    return icons[(catId || 0) % icons.length];
+    if (!allCategories || !allCategories.length) return 'box';
+    const cat = allCategories.find(c => c.id === catId);
+    if (!cat || !cat.name) return 'box';
+    const name = cat.name.toLowerCase();
+
+    if (name.includes('grocer') || name.includes('spice') || name.includes('food')) return 'basket-shopping';
+    if (name.includes('beverage') || name.includes('drink') || name.includes('juice') || name.includes('water')) return 'bottle-water';
+    if (name.includes('bakery') || name.includes('bread') || name.includes('cake') || name.includes('biscuit')) return 'bread-slice';
+    if (name.includes('personal') || name.includes('care') || name.includes('cosmetic') || name.includes('soap') || name.includes('shampoo')) return 'soap';
+    if (name.includes('vegetable') || name.includes('fruit') || name.includes('veg') || name.includes('farm')) return 'apple-whole';
+    if (name.includes('fish') || name.includes('meat') || name.includes('seafood') || name.includes('chicken')) return 'fish';
+    if (name.includes('household') || name.includes('clean') || name.includes('detergent')) return 'hand-sparkles';
+    if (name.includes('pharmacy') || name.includes('medicine') || name.includes('health')) return 'briefcase-medical';
+    
+    return 'box';
   }
 
   function buildCategoryTabs() {
