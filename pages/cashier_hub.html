@@ -17,56 +17,167 @@
   <div class="main-content hub-main-content">
   <div id="topbar-container"></div>
   <main class="hub-shell">
-    <header class="hub-topbar glass-card">
-      <div>
-        <h1 class="hub-title">Cashier Hub</h1>
-        <p class="hub-sub" id="hubSubtitle">Ready for fast retail flow</p>
-      </div>
-      <div class="hub-profile">
-        <div class="hub-avatar" id="hubAvatar">C</div>
-        <div>
-          <div class="hub-cashier" id="hubCashierName">Cashier</div>
-          <div class="hub-role">POS Operator</div>
+    <section class="hub-intro">
+      <header class="hub-topbar glass-card">
+        <div class="hub-head-left">
+          <h1 class="hub-title">Shift Command Center</h1>
+          <p class="hub-sub" id="hubSubtitle">Ready for fast retail flow</p>
         </div>
-      </div>
-    </header>
+        <div class="hub-profile">
+          <div class="hub-avatar" id="hubAvatar">C</div>
+          <div>
+            <div class="hub-cashier" id="hubCashierName">Cashier</div>
+            <div class="hub-role">POS Operator</div>
+          </div>
+        </div>
+      </header>
 
-    <section class="hub-kpis">
-      <article class="kpi-card glass-card">
-        <span class="kpi-label">Today's Personal Sales</span>
-        <span class="kpi-value" id="kpiSales">LKR 0.00</span>
-      </article>
-      <article class="kpi-card glass-card">
-        <span class="kpi-label">Bills Processed</span>
-        <span class="kpi-value" id="kpiBills">0</span>
-      </article>
-      <article class="kpi-card glass-card">
-        <span class="kpi-label">Shift Active</span>
-        <span class="kpi-value" id="kpiDuration">00:00:00</span>
-      </article>
+      <section class="hub-kpis">
+        <article class="kpi-card glass-card">
+          <div class="kpi-icon"><i class="fa-solid fa-money-bill-trend-up"></i></div>
+          <span class="kpi-label">Today's Personal Sales</span>
+          <span class="kpi-value" id="kpiSales">LKR 0.00</span>
+        </article>
+        <article class="kpi-card glass-card">
+          <div class="kpi-icon"><i class="fa-solid fa-receipt"></i></div>
+          <span class="kpi-label">Bills Processed</span>
+          <span class="kpi-value" id="kpiBills">0</span>
+        </article>
+        <article class="kpi-card glass-card">
+          <div class="kpi-icon"><i class="fa-solid fa-stopwatch"></i></div>
+          <span class="kpi-label">Shift Active</span>
+          <span class="kpi-value" id="kpiDuration">00:00:00</span>
+        </article>
+      </section>
     </section>
 
-    <section class="hub-grid">
-      <button class="hub-tile glass-card" id="hubNewSaleBtn">
-        <i class="fa-solid fa-cart-shopping"></i>
-        <strong>New Sale / POS Terminal</strong>
-        <span>Start serving a customer immediately</span>
-      </button>
-      <button class="hub-tile glass-card" id="hubReprintBtn">
-        <i class="fa-solid fa-receipt"></i>
-        <strong>Reprint & View Past Sales</strong>
-        <span>Only your bills, fast receipt reprints</span>
-      </button>
-      <button class="hub-tile glass-card" id="hubProductLookupBtn">
-        <i class="fa-solid fa-boxes-stacked"></i>
-        <strong>Product Directory (Read-Only)</strong>
-        <span>Price, stock, and description lookup</span>
-      </button>
-      <button class="hub-tile glass-card" id="hubCustomerLookupBtn">
-        <i class="fa-solid fa-users"></i>
-        <strong>Customer & Credit Lookup</strong>
-        <span>Loyalty points and credit visibility</span>
-      </button>
+    <section class="hub-columns">
+      <div class="hub-column hub-analytics">
+        <article class="hub-panel glass-card">
+          <div class="panel-head">
+            <div>
+              <h3>Hourly Sales Trend</h3>
+              <p>Sales from shift start by each hour</p>
+            </div>
+            <span class="panel-pill" id="hourlyPeakBadge">Peak: --</span>
+          </div>
+          <div class="line-chart-wrap">
+            <svg id="hourlyChart" class="line-chart" viewBox="0 0 700 240" preserveAspectRatio="none"></svg>
+            <div class="chart-empty" id="hourlyChartEmpty">No sales yet in this shift.</div>
+          </div>
+          <div class="hourly-axis" id="hourlyAxis"></div>
+        </article>
+
+        <div class="analytics-bottom-row">
+          <article class="hub-panel glass-card">
+            <div class="panel-head">
+              <div>
+                <h3>Payment Method Mix</h3>
+                <p>Cash vs Card vs Credit split</p>
+              </div>
+            </div>
+            <div class="paymix-wrap">
+              <div class="donut-chart" id="paymentDonut">
+                <div class="donut-center">
+                  <span id="payMixTotal">LKR 0.00</span>
+                  <small>Total</small>
+                </div>
+              </div>
+              <div class="paymix-legend" id="paymentLegend"></div>
+            </div>
+          </article>
+
+          <article class="hub-panel glass-card">
+            <div class="panel-head">
+              <div>
+                <h3>Recent Hold Bills</h3>
+                <p>Tap any hold bill to resume quickly</p>
+              </div>
+            </div>
+            <div class="recent-holds" id="recentHoldList"></div>
+          </article>
+        </div>
+      </div>
+
+      <aside class="hub-column hub-actions-column">
+        <article class="hub-panel glass-card target-panel">
+          <div class="panel-head">
+            <div>
+              <h3>Target vs Achievement</h3>
+              <p>Cashier bills progress for this shift</p>
+            </div>
+            <button class="mini-btn ghost-btn" id="setTargetBtn">Set Target</button>
+          </div>
+          <div class="target-figure">
+            <strong id="targetProcessed">0</strong>
+            <span>/ <span id="targetTotal">50</span> Bills</span>
+          </div>
+          <div class="target-bar">
+            <div id="targetProgressFill"></div>
+          </div>
+          <div class="target-meta">
+            <span id="targetPercent">0%</span>
+            <span id="targetHint">0 bills remaining</span>
+          </div>
+        </article>
+
+        <article class="hub-panel glass-card">
+          <div class="panel-head">
+            <div>
+              <h3>Quick Action Center</h3>
+              <p>High-speed cashier controls</p>
+            </div>
+          </div>
+          <div class="action-grid">
+            <button class="action-tile" id="hubNewSaleBtn">
+              <i class="fa-solid fa-cart-shopping"></i>
+              <div>
+                <strong>New Sale</strong>
+                <span>Open POS Terminal</span>
+              </div>
+              <em>F8</em>
+            </button>
+            <button class="action-tile" id="hubReprintBtn">
+              <i class="fa-solid fa-receipt"></i>
+              <div>
+                <strong>Past Sales</strong>
+                <span>Reprint receipts</span>
+              </div>
+              <em>BILLS</em>
+            </button>
+            <button class="action-tile" id="hubProductLookupBtn">
+              <i class="fa-solid fa-boxes-stacked"></i>
+              <div>
+                <strong>Products</strong>
+                <span>Read-only lookup</span>
+              </div>
+              <em>LOOKUP</em>
+            </button>
+            <button class="action-tile" id="hubCustomerLookupBtn">
+              <i class="fa-solid fa-users"></i>
+              <div>
+                <strong>Customers</strong>
+                <span>Credit & loyalty</span>
+              </div>
+              <em>CRM</em>
+            </button>
+          </div>
+        </article>
+
+        <article class="hub-panel glass-card ops-panel">
+          <div class="panel-head">
+            <div>
+              <h3>Live Shift Snapshot</h3>
+              <p>Realtime payment intake</p>
+            </div>
+          </div>
+          <div class="ops-list">
+            <div class="ops-row"><span>Cash</span><strong id="shiftCashTotal">LKR 0.00</strong></div>
+            <div class="ops-row"><span>Card</span><strong id="shiftCardTotal">LKR 0.00</strong></div>
+            <div class="ops-row"><span>Credit</span><strong id="shiftCreditTotal">LKR 0.00</strong></div>
+          </div>
+        </article>
+      </aside>
     </section>
 
     <aside class="hold-badge glass-card" id="holdFloatingBadge" style="display:none">
@@ -75,13 +186,6 @@
       <button id="resumeHeldBtn" class="mini-btn">Resume</button>
     </aside>
 
-    <footer class="hub-footer glass-card">
-      <button class="end-shift-btn" id="hubEndShiftBtn">
-        <i class="fa-solid fa-circle-stop"></i>
-        End Shift & Blind Cash Drop
-      </button>
-      <button class="logout-btn-lite" id="hubLogoutBtn">Logout</button>
-    </footer>
   </main>
   </div>
 

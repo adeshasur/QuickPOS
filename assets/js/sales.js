@@ -1,20 +1,25 @@
 (function () {
   'use strict';
 
-  let products = [];
-  let customers = [];
-  let cart = [];
-  let currentCat = 'all';
-  let currentSearch = '';
-  let filteredProducts = [];
-  let searchSuggestList = [];
-  let searchSuggestActiveIndex = -1;
-  let selectedCustomer = null;
-  let productToCustomize = null;
-  let priceEdited = false;
-  let lastSale = null;
+  const state = {
+    categories: [],
+    products: [],
+    customers: [],
+    cart: [],
+    selectedCustomer: null,
+    currentCat: 'all',
+    currentSearch: '',
+    filteredProducts: [],
+    suggestList: [],
+    suggestActive: -1,
+    heldBills: [],
+    productToCustomize: null,
+    priceEdited: false,
+    lastSale: null,
+    overrideResolver: null
+  };
 
-  const fmt = window.fmtLKR;
+  const fmt = window.fmtLKR || ((n) => `LKR ${Number(n || 0).toFixed(2)}`);
 
   function notify(message, type = 'info') {
     if (window.Notifications && typeof window.Notifications.showToast === 'function') {
@@ -28,161 +33,211 @@
     return String(v || '').toLowerCase().trim();
   }
 
-  function normalizeCategory(name) {
-    return String(name || '').toLowerCase().replace(/\s+/g, '-');
-  }
-
-  function stockClass(s) {
-    if (s <= 0) return 'out';
-    if (s < 10) return 'low';
-    return 'ok';
-  }
-
-  function stockText(s) {
-    if (s <= 0) return 'OUT';
-    if (s < 10) return `Low: ${s}`;
-    return `${s}`;
+  function categoryKey(name) {
+    return normalize(name).replace(/\s+/g, '-');
   }
 
   function cartTotal() {
-    return cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
+    return state.cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
+  }
+
+  function persistCart() {
+    localStorage.setItem('quickpos-current-cart', JSON.stringify(state.cart));
+  }
+
+  function hydrateCart() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('quickpos-current-cart') || '[]');
+      state.cart = Array.isArray(saved) ? saved.map((it) => ({
+        id: it.id,
+        name: it.name,
+        quantity: Number(it.quantity || it.qty || 0),
+        price: Number(it.price || 0),
+        unit: it.unit || 'pc'
+      })) : [];
+    } catch (_err) {
+      state.cart = [];
+    }
+  }
+
+  function persistHeldBills() {
+    localStorage.setItem('quickpos-held-bills', JSON.stringify(state.heldBills));
+  }
+
+  function hydrateHeldBills() {
+    try {
+      const held = JSON.parse(localStorage.getItem('quickpos-held-bills') || '[]');
+      state.heldBills = Array.isArray(held) ? held : [];
+    } catch (_err) {
+      state.heldBills = [];
+    }
+  }
+
+  function updateSearchMeta() {
+    const meta = document.getElementById('searchMetaLabel');
+    if (!meta) return;
+    const catLabel = state.currentCat === 'all' ? 'all categories' : state.currentCat.replace(/-/g, ' ');
+    if (!state.currentSearch) {
+      meta.textContent = `${state.filteredProducts.length} products in ${catLabel}`;
+      return;
+    }
+    meta.textContent = `${state.filteredProducts.length} matches for "${state.currentSearch}"`;
+  }
+
+  function stockClass(stock) {
+    if (stock <= 0) return 'out';
+    if (stock < 10) return 'low';
+    return 'ok';
+  }
+
+  function stockText(stock) {
+    if (stock <= 0) return 'OUT';
+    if (stock < 10) return `Low: ${stock}`;
+    return String(stock);
+  }
+
+  function productSearchText(product) {
+    return [
+      product.name,
+      product.barcode,
+      product.category_name,
+      product.description,
+      product.name_si,
+      product.name_ta
+    ].map(normalize).join(' ');
+  }
+
+  function getFilteredProducts() {
+    let list = state.products;
+    if (state.currentCat !== 'all') list = list.filter((p) => p.categoryKey === state.currentCat);
+    if (state.currentSearch) list = list.filter((p) => productSearchText(p).includes(state.currentSearch));
+    return list;
   }
 
   function renderProducts() {
     const grid = document.getElementById('productsGrid');
     if (!grid) return;
 
-    let list = products;
-    if (currentCat !== 'all') {
-      list = list.filter((p) => p.categoryKey === currentCat);
-    }
-    if (currentSearch) {
-      list = list.filter((p) => getProductSearchText(p).includes(currentSearch));
-    }
-    filteredProducts = list;
+    state.filteredProducts = getFilteredProducts();
     updateSearchMeta();
 
-    if (!list.length) {
-      grid.innerHTML = '<div style="color:var(--text3);font-size:15px;padding:30px;grid-column:1/-1;text-align:center;">No products found. Try barcode, category, or Sinhala/English name.</div>';
+    if (!state.filteredProducts.length) {
+      grid.innerHTML = '<div style="color:var(--text3);font-size:15px;padding:30px;grid-column:1/-1;text-align:center;">No products found. Try barcode, category, or description.</div>';
       return;
     }
 
-    grid.innerHTML = '';
-    list.forEach((p) => {
-      const out = Number(p.current_stock) <= 0;
-      const card = document.createElement('div');
-      card.className = `product-card${out ? ' out-of-stock' : ''}`;
-      card.innerHTML = `
-        ${out ? '<div class="out-label">OUT</div>' : ''}
-        <div class="pc-cat">${(p.category_name || 'General').toLowerCase()}</div>
-        <div class="pc-name">${p.name}${p.unit_type ? ` / ${p.unit_type}` : ''}</div>
-        <div class="pc-price">${fmt(p.selling_price || 0)}</div>
-        <div class="pc-footer"><span></span><span class="stock-badge ${stockClass(Number(p.current_stock))}">${stockText(Number(p.current_stock))}</span></div>
+    grid.innerHTML = state.filteredProducts.map((p) => {
+      const out = Number(p.current_stock || 0) <= 0;
+      return `
+        <div class="product-card${out ? ' out-of-stock' : ''}" data-product-id="${p.id}">
+          ${out ? '<div class="out-label">OUT</div>' : ''}
+          <div class="pc-cat">${escapeHtml((p.category_name || 'General').toLowerCase())}</div>
+          <div class="pc-name">${escapeHtml(p.name)}${p.unit_type ? ` / ${escapeHtml(p.unit_type)}` : ''}</div>
+          <div class="pc-price">${fmt(p.selling_price || 0)}</div>
+          <div class="pc-footer"><span></span><span class="stock-badge ${stockClass(Number(p.current_stock || 0))}">${stockText(Number(p.current_stock || 0))}</span></div>
+        </div>
       `;
+    }).join('');
 
-      if (!out) {
-        card.addEventListener('click', () => {
-          addToCart(p.id, 1, Number(p.selling_price || 0));
-        });
-      }
-      grid.appendChild(card);
+    grid.querySelectorAll('.product-card').forEach((card) => {
+      card.addEventListener('click', () => {
+        const productId = Number(card.dataset.productId);
+        const product = state.products.find((p) => p.id === productId);
+        if (!product || Number(product.current_stock || 0) <= 0) return;
+        if (Number(product.is_weighted || 0) === 1) {
+          openCustomize(product.id);
+        } else {
+          addToCart(product.id, 1, Number(product.selling_price || 0), 'manual');
+        }
+      });
     });
   }
 
-  function getProductSearchText(p) {
-    return [
-      p.name,
-      p.barcode,
-      p.category_name,
-      p.description,
-      p.name_si,
-      p.name_ta
-    ].map(normalize).join(' ');
+  function pulseCartFeedback() {
+    const cart = document.querySelector('.cart-section');
+    if (!cart) return;
+    cart.classList.remove('scan-pulse');
+    void cart.offsetWidth;
+    cart.classList.add('scan-pulse');
   }
 
-  function updateSearchMeta() {
-    const meta = document.getElementById('searchMetaLabel');
-    if (!meta) return;
-    const q = currentSearch;
-    const cat = currentCat === 'all' ? 'All Categories' : currentCat.replace(/-/g, ' ');
-    if (!q) {
-      meta.textContent = `${filteredProducts.length} products in ${cat}`;
-      return;
-    }
-    meta.textContent = `${filteredProducts.length} matches for "${q}"`;
-  }
+  function addToCart(productId, qty, price, source = 'manual') {
+    const product = state.products.find((p) => p.id === productId);
+    if (!product) return;
 
-  function addToCart(productId, qty, price) {
-    const p = products.find((x) => x.id === productId);
-    if (!p) return;
-
-    const existing = cart.find((i) => i.id === productId && Number(i.price) === Number(price));
-    const currentQtyInCart = cart.filter((i) => i.id === productId).reduce((s, i) => s + Number(i.quantity), 0);
-
-    if (currentQtyInCart + qty > Number(p.current_stock)) {
-      notify(`Max stock: ${p.current_stock}`, 'warning');
+    const currentQtyInCart = state.cart.filter((i) => i.id === productId).reduce((sum, i) => sum + Number(i.quantity), 0);
+    if (currentQtyInCart + qty > Number(product.current_stock || 0)) {
+      notify(`Max stock reached for ${product.name}`, 'warning');
       return;
     }
 
+    const existing = state.cart.find((item) => item.id === productId && Number(item.price) === Number(price));
     if (existing) {
-      existing.quantity = Number((existing.quantity + qty).toFixed(2));
+      existing.quantity = Number((existing.quantity + qty).toFixed(3));
     } else {
-      cart.push({ id: p.id, name: p.name, price, quantity: qty, unit: p.unit_type || 'pc' });
+      state.cart.push({
+        id: product.id,
+        name: product.name,
+        quantity: Number(qty),
+        price: Number(price),
+        unit: product.unit_type || 'pc'
+      });
     }
-    saveCart();
+
+    persistCart();
+    renderCart();
+    pulseCartFeedback();
+
+    if (source === 'scan') {
+      notify(`${product.name} scanned`, 'info');
+    }
+  }
+
+  function removeCartItem(index) {
+    const row = document.querySelector(`.cart-item[data-index="${index}"]`);
+    if (row) {
+      row.classList.add('row-removing');
+      setTimeout(() => {
+        state.cart.splice(index, 1);
+        persistCart();
+        renderCart();
+      }, 180);
+      return;
+    }
+    state.cart.splice(index, 1);
+    persistCart();
     renderCart();
   }
 
-  function saveCart() {
-    localStorage.setItem('quickpos-current-cart', JSON.stringify(cart));
-  }
+  function changeQty(index, delta) {
+    const item = state.cart[index];
+    if (!item) return;
 
-  function loadCart() {
-    const saved = localStorage.getItem('quickpos-current-cart');
-    if (saved) {
-      try {
-        cart = JSON.parse(saved);
-      } catch (e) {
-        cart = [];
-      }
-    }
-  }
+    const product = state.products.find((p) => p.id === item.id);
+    const next = Number((item.quantity + delta).toFixed(3));
+    const others = state.cart.filter((_, i) => i !== index).filter((i) => i.id === item.id).reduce((sum, i) => sum + Number(i.quantity), 0);
 
-  function tryResumeHeldBill() {
-    const resumeId = localStorage.getItem('quickpos-resume-hold-id');
-    if (!resumeId) return;
-    localStorage.removeItem('quickpos-resume-hold-id');
-    let held = [];
-    try {
-      held = JSON.parse(localStorage.getItem('quickpos-held-bills') || '[]');
-      if (!Array.isArray(held)) held = [];
-    } catch (_err) {
-      held = [];
+    if (next <= 0) {
+      removeCartItem(index);
+      return;
     }
-    const idx = held.findIndex((h) => h.id === resumeId);
-    if (idx < 0) return;
-    const resumed = held.splice(idx, 1)[0];
-    localStorage.setItem('quickpos-held-bills', JSON.stringify(held));
-    cart = (resumed.cart || []).map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: Number(item.price || 0),
-      quantity: Number(item.quantity ?? item.qty ?? 1),
-      unit: item.unit || 'pc'
-    }));
-    if (resumed.customer) {
-      selectedCustomer = customers.find((c) => c.id === resumed.customer.id) || resumed.customer;
+
+    if (product && next + others > Number(product.current_stock || 0)) {
+      notify(`Max stock reached for ${product.name}`, 'warning');
+      return;
     }
-    saveCart();
-    notify('Held bill resumed into POS terminal', 'info');
+
+    item.quantity = next;
+    persistCart();
+    renderCart();
   }
 
   function renderCart() {
-    const el = document.getElementById('cartItems');
-    if (!el) return;
+    const wrap = document.getElementById('cartItems');
+    if (!wrap) return;
 
-    if (!cart.length) {
-      el.innerHTML = '<div class="empty-cart"><p>Cart is empty</p><small>Tap a product to add</small></div>';
+    if (!state.cart.length) {
+      wrap.innerHTML = '<div class="empty-cart"><p>Cart is empty</p><small>Tap a product to add</small></div>';
       document.getElementById('itemCount').textContent = '0';
       document.getElementById('totalAmount').textContent = fmt(0);
       return;
@@ -190,74 +245,355 @@
 
     let total = 0;
     let count = 0;
-    el.innerHTML = cart.map((item, i) => {
+    wrap.innerHTML = state.cart.map((item, i) => {
       const sub = Number(item.price) * Number(item.quantity);
       total += sub;
       count += Number(item.quantity);
-      return `<div class="cart-item">
-        <div class="ci-info"><div class="ci-name">${item.name}</div><div class="ci-unit">${Number(item.quantity) % 1 === 0 ? Number(item.quantity) : Number(item.quantity).toFixed(2)} ${item.unit} x ${fmt(item.price)}</div></div>
-        <div class="ci-controls"><button class="qty-btn" onclick="changeQty(${i},-1)">-</button><span class="qty-num">${Number(item.quantity) % 1 === 0 ? Number(item.quantity) : Number(item.quantity).toFixed(2)}</span><button class="qty-btn" onclick="changeQty(${i},1)">+</button></div>
-        <div class="ci-total">${fmt(sub)}</div>
-      </div>`;
+      return `
+        <div class="cart-item" data-index="${i}">
+          <div class="ci-info">
+            <div class="ci-name">${escapeHtml(item.name)}</div>
+            <div class="ci-unit">${formatQty(item.quantity)} ${escapeHtml(item.unit)} x ${fmt(item.price)}</div>
+          </div>
+          <div class="ci-controls">
+            <button class="qty-btn" data-action="dec" data-index="${i}">-</button>
+            <span class="qty-num">${formatQty(item.quantity)}</span>
+            <button class="qty-btn" data-action="inc" data-index="${i}">+</button>
+            <button class="remove-btn" data-index="${i}" title="Remove"><i class="fa-solid fa-trash"></i></button>
+          </div>
+          <div class="ci-total">${fmt(sub)}</div>
+        </div>
+      `;
     }).join('');
 
-    document.getElementById('itemCount').textContent = count % 1 === 0 ? count : count.toFixed(2);
+    wrap.querySelectorAll('.qty-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const index = Number(btn.dataset.index);
+        changeQty(index, btn.dataset.action === 'inc' ? 1 : -1);
+      });
+    });
+
+    wrap.querySelectorAll('.remove-btn').forEach((btn) => {
+      btn.addEventListener('click', () => removeCartItem(Number(btn.dataset.index)));
+    });
+
+    document.getElementById('itemCount').textContent = formatQty(count);
     document.getElementById('totalAmount').textContent = fmt(total);
   }
 
-  window.changeQty = function changeQty(index, delta) {
-    const item = cart[index];
-    if (!item) return;
+  function renderCustomer() {
+    const display = document.getElementById('custDisplay');
+    const creditBtn = document.getElementById('creditBtn');
 
-    const p = products.find((x) => x.id === item.id);
-    const newQty = Number((item.quantity + delta).toFixed(2));
-    const currentQtyOthers = cart
-      .filter((_, i) => i !== index)
-      .filter((i) => i.id === item.id)
-      .reduce((s, i) => s + Number(i.quantity), 0);
+    if (!display || !creditBtn) return;
 
-    if (newQty <= 0) {
-      cart.splice(index, 1);
-    } else if (newQty + currentQtyOthers > Number(p.current_stock)) {
-      notify(`Max stock: ${p.current_stock}`, 'warning');
+    if (!state.selectedCustomer) {
+      display.innerHTML = '<div class="walkin-tag">Walk-in customer - credit unavailable</div>';
+      creditBtn.disabled = true;
+      renderCustomerLedger();
       return;
-    } else {
-      item.quantity = newQty;
     }
 
-    saveCart();
+    display.innerHTML = `
+      <div class="selected-cust">
+        <div class="sc-avatar">${escapeHtml(String(state.selectedCustomer.name || 'C').slice(0, 1).toUpperCase())}</div>
+        <div class="sc-info">
+          <div class="sc-name">${escapeHtml(state.selectedCustomer.name)}</div>
+          <div class="sc-bal">Balance: ${fmt(state.selectedCustomer.balance || 0)} | Loyalty: ${Number(state.selectedCustomer.loyalty_points || 0)}</div>
+        </div>
+        <button class="sc-clear" id="clearCustomerBtn">x</button>
+      </div>
+    `;
+    creditBtn.disabled = false;
+
+    const clearBtn = document.getElementById('clearCustomerBtn');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        state.selectedCustomer = null;
+        renderCustomer();
+      });
+    }
+
+    renderCustomerLedger();
+  }
+
+  function renderCustomerLedger() {
+    const ledger = document.getElementById('customerLedgerSummary');
+    if (!ledger) return;
+
+    if (!state.selectedCustomer) {
+      ledger.innerHTML = '<span class="ledger-name">Customer: Walk-in</span><span class="ledger-points">Loyalty: -</span>';
+      return;
+    }
+
+    ledger.innerHTML = `
+      <span class="ledger-name">Customer: ${escapeHtml(state.selectedCustomer.name)}</span>
+      <span class="ledger-points">Loyalty: ${Number(state.selectedCustomer.loyalty_points || 0)} pts</span>
+    `;
+  }
+
+  function renderHoldTray() {
+    const list = document.getElementById('holdList');
+    const count = document.getElementById('holdCount');
+    if (!list || !count) return;
+
+    count.textContent = String(state.heldBills.length);
+    if (!state.heldBills.length) {
+      list.innerHTML = '<div class="hold-empty">No held bills</div>';
+      return;
+    }
+
+    list.innerHTML = state.heldBills.map((bill) => {
+      const itemCount = (bill.cart || []).reduce((sum, i) => sum + Number(i.quantity || i.qty || 0), 0);
+      const label = bill.customer?.name || 'Walk-in';
+      return `<button class="hold-chip" data-hold-id="${bill.id}">${escapeHtml(label)} · ${formatQty(itemCount)} items · ${escapeHtml(bill.at || '')}</button>`;
+    }).join('');
+
+    list.querySelectorAll('.hold-chip').forEach((chip) => {
+      chip.addEventListener('click', async () => {
+        const billId = chip.dataset.holdId;
+        if (state.cart.length && !(await confirmAction('Replace current cart with held bill?'))) return;
+        resumeHeldBill(billId);
+      });
+    });
+  }
+
+  function holdCurrentBill() {
+    if (!state.cart.length) {
+      notify('Cart is empty. Nothing to hold.', 'warning');
+      return;
+    }
+
+    state.heldBills.push({
+      id: `H${Date.now()}`,
+      cart: state.cart.map((i) => ({ ...i })),
+      customer: state.selectedCustomer ? { ...state.selectedCustomer } : null,
+      at: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+
+    state.cart = [];
+    state.selectedCustomer = null;
+    persistCart();
+    persistHeldBills();
     renderCart();
-  };
+    renderCustomer();
+    renderHoldTray();
+    notify('Bill held successfully', 'info');
+  }
 
-  function renderCustomer() {
-    const el = document.getElementById('custDisplay');
-    const btn = document.getElementById('creditBtn');
-    if (!el || !btn) return;
+  function resumeHeldBill(holdId) {
+    const index = state.heldBills.findIndex((b) => b.id === holdId);
+    if (index < 0) return;
+    const bill = state.heldBills.splice(index, 1)[0];
+    state.cart = (bill.cart || []).map((item) => ({
+      id: item.id,
+      name: item.name,
+      quantity: Number(item.quantity || item.qty || 0),
+      price: Number(item.price || 0),
+      unit: item.unit || 'pc'
+    }));
+    state.selectedCustomer = bill.customer ? { ...bill.customer } : null;
 
-    if (selectedCustomer) {
-      el.innerHTML = `<div class="selected-cust"><div class="sc-info"><div class="sc-name">${selectedCustomer.name}</div><div class="sc-bal">Balance: ${fmt(selectedCustomer.balance || 0)}</div></div><button class="sc-clear" onclick="clearCustomer()">x</button></div>`;
-      btn.disabled = false;
-    } else {
-      el.innerHTML = '<div class="walkin-tag">Walk-in customer - credit unavailable</div>';
-      btn.disabled = true;
+    persistCart();
+    persistHeldBills();
+    renderCart();
+    renderCustomer();
+    renderHoldTray();
+    notify('Held bill resumed', 'info');
+  }
+
+  function tryResumeHeldBill() {
+    const resumeId = localStorage.getItem('quickpos-resume-hold-id');
+    if (!resumeId) return;
+    localStorage.removeItem('quickpos-resume-hold-id');
+    resumeHeldBill(resumeId);
+  }
+
+  function openCustomize(productId) {
+    const product = state.products.find((p) => p.id === productId);
+    if (!product) return;
+    state.productToCustomize = product;
+    state.priceEdited = false;
+
+    document.getElementById('custModalTitle').textContent = product.name;
+    document.getElementById('unitPriceShow').textContent = fmt(product.selling_price || 0);
+    document.getElementById('custQty').value = '1.00';
+    document.getElementById('custPrice').value = Number(product.selling_price || 0).toFixed(2);
+    openModal('custModal');
+  }
+
+  function openModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.add('open');
+  }
+
+  function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.remove('open');
+  }
+
+  function renderCategories() {
+    const el = document.getElementById('catPills');
+    if (!el) return;
+
+    el.innerHTML = `
+      <button class="cat-pill ${state.currentCat === 'all' ? 'active' : ''}" data-cat="all" style="--hue:225">
+        <div class="cat-icon-badge"><i class="fa-solid fa-border-all"></i></div>
+        <span class="cat-name">All</span>
+      </button>
+    `;
+
+    state.categories.forEach((category) => {
+      const key = categoryKey(category.name);
+      const btn = document.createElement('button');
+      btn.className = `cat-pill ${state.currentCat === key ? 'active' : ''}`;
+      btn.dataset.cat = key;
+      btn.style.setProperty('--hue', String(Math.abs(hashCode(category.name) % 360)));
+      btn.innerHTML = `<div class="cat-icon-badge"><i class="fa-solid fa-tag"></i></div><span class="cat-name">${escapeHtml(category.name)}</span>`;
+      el.appendChild(btn);
+    });
+  }
+
+  function buildSearchSuggestions(query) {
+    const suggest = document.getElementById('stockSuggest');
+    if (!suggest) return;
+
+    const q = normalize(query);
+    if (!q) {
+      state.suggestList = [];
+      state.suggestActive = -1;
+      suggest.innerHTML = '';
+      suggest.classList.remove('open');
+      return;
+    }
+
+    const base = state.currentCat === 'all' ? state.products : state.products.filter((p) => p.categoryKey === state.currentCat);
+    state.suggestList = base
+      .map((product) => {
+        const hay = productSearchText(product);
+        const name = normalize(product.name);
+        let score = -1;
+        if (normalize(product.barcode) === q) score = 100;
+        else if (name === q) score = 95;
+        else if (name.startsWith(q)) score = 85;
+        else if (hay.includes(q)) score = 60;
+        return { product, score };
+      })
+      .filter((row) => row.score > -1)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8)
+      .map((row) => row.product);
+
+    state.suggestActive = state.suggestList.length ? 0 : -1;
+
+    if (!state.suggestList.length) {
+      suggest.innerHTML = '<div class="search-suggest-item"><div><div class="ssi-name">No matches</div><div class="ssi-meta">Try another term</div></div></div>';
+      suggest.classList.add('open');
+      return;
+    }
+
+    suggest.innerHTML = state.suggestList.map((p, index) => `
+      <div class="search-suggest-item${index === state.suggestActive ? ' active' : ''}" data-index="${index}">
+        <div>
+          <div class="ssi-name">${escapeHtml(p.name)}</div>
+          <div class="ssi-meta">${escapeHtml(p.category_name || 'General')} | Stock: ${Number(p.current_stock || 0)} | ${escapeHtml(p.barcode || '-')}</div>
+        </div>
+        <div class="ssi-price">${fmt(p.selling_price || 0)}</div>
+      </div>
+    `).join('');
+
+    suggest.classList.add('open');
+
+    suggest.querySelectorAll('.search-suggest-item[data-index]').forEach((item) => {
+      item.addEventListener('mousedown', (event) => {
+        event.preventDefault();
+        const index = Number(item.dataset.index);
+        const product = state.suggestList[index];
+        if (!product) return;
+        addToCart(product.id, 1, Number(product.selling_price || 0), 'manual');
+        notify(`${product.name} added`, 'info');
+        const search = document.getElementById('stockSearch');
+        if (search) {
+          search.value = '';
+          state.currentSearch = '';
+        }
+        renderProducts();
+        buildSearchSuggestions('');
+        document.getElementById('barcodeInput')?.focus();
+      });
+    });
+  }
+
+  function updateChangeDue() {
+    const total = cartTotal();
+    const received = Number(parseFloat(document.getElementById('amtReceived').value) || 0);
+    document.getElementById('changeAmt').textContent = fmt(Math.max(0, received - total));
+  }
+
+  function setReceivedAmount(amount) {
+    document.getElementById('amtReceived').value = Number(amount || 0).toFixed(2);
+    updateChangeDue();
+  }
+
+  function applyNumpadKey(key) {
+    const input = document.getElementById('amtReceived');
+    if (!input) return;
+    const current = String(input.value || '');
+
+    if (key === 'clear') {
+      input.value = '';
+      updateChangeDue();
+      return;
+    }
+
+    if (key === 'bksp') {
+      input.value = current.slice(0, -1);
+      updateChangeDue();
+      return;
+    }
+
+    if (key === '.') {
+      if (current.includes('.')) return;
+      input.value = current ? `${current}.` : '0.';
+      updateChangeDue();
+      return;
+    }
+
+    input.value = `${current}${key}`;
+    updateChangeDue();
+  }
+
+  async function saveSaleWithOverride(payload) {
+    try {
+      return await window.api.saveSale(payload);
+    } catch (error) {
+      const message = String(error?.message || error || 'Sale failed');
+      if (message.startsWith('INSUFFICIENT_STOCK') && !payload.allowStockOverride) {
+        notify(message.replace('INSUFFICIENT_STOCK:', 'Stock warning:'), 'warning');
+        const allowed = await showOverridePrompt(message.replace('INSUFFICIENT_STOCK:', '').trim());
+        if (!allowed) throw new Error('Sale cancelled by cashier.');
+        payload.allowStockOverride = true;
+        payload.overrideReason = 'Cashier override from POS terminal';
+        return await window.api.saveSale(payload);
+      }
+      throw error;
     }
   }
 
-  window.clearCustomer = function clearCustomer() {
-    selectedCustomer = null;
-    renderCustomer();
-  };
+  function showOverridePrompt(message) {
+    document.getElementById('overrideMessage').textContent = message || 'Low stock detected';
+    openModal('overrideModal');
+    return new Promise((resolve) => {
+      state.overrideResolver = resolve;
+    });
+  }
 
-  function openCustomize(pid) {
-    const p = products.find((x) => x.id === pid);
-    if (!p) return;
-    productToCustomize = p;
-    priceEdited = false;
-    document.getElementById('custModalTitle').textContent = p.name;
-    document.getElementById('unitPriceShow').textContent = fmt(p.selling_price || 0);
-    document.getElementById('custQty').value = '1.00';
-    document.getElementById('custPrice').value = Number(p.selling_price || 0).toFixed(2);
-    document.getElementById('custModal').classList.add('open');
+  function closeOverridePrompt(result) {
+    closeModal('overrideModal');
+    if (state.overrideResolver) {
+      state.overrideResolver(result);
+      state.overrideResolver = null;
+    }
   }
 
   async function completeSale(method, receivedAmount, refNo) {
@@ -267,111 +603,112 @@
 
     const payload = {
       billId: null,
-      customerId: selectedCustomer ? selectedCustomer.id : null,
+      customerId: state.selectedCustomer ? state.selectedCustomer.id : null,
       total,
       method,
       received: Number(receivedAmount || 0),
       balanceDue,
       refNo: refNo || null,
       cashier: user.name || 'Unknown',
-      items: cart.map((item) => ({ id: item.id, name: item.name, qty: item.quantity, price: item.price }))
+      allowStockOverride: false,
+      items: state.cart.map((item) => ({
+        id: item.id,
+        name: item.name,
+        qty: Number(item.quantity),
+        price: Number(item.price)
+      }))
     };
 
-    const saved = await window.api.saveSale(payload);
+    const saved = await saveSaleWithOverride(payload);
 
     payload.billId = saved.billId;
     payload.timestamp = new Date().toISOString();
-    lastSale = payload;
+    state.lastSale = payload;
+    if (saved.stockOverrideUsed) {
+      notify('Stock override applied and audit logged for this sale', 'warning');
+    }
 
-    // Close payment modals immediately - no popup window
-    cart = [];
-    saveCart();
-    
-    // Close payment modals immediately
-    document.getElementById('cashModal').classList.remove('open');
-    document.getElementById('cardModal').classList.remove('open');
+    state.cart = [];
+    state.selectedCustomer = null;
+    persistCart();
+    renderCustomer();
+    renderCart();
 
-    // Print bill directly and silently
-    console.log('[PRINT] Auto-printing invoice:', lastSale.billId);
-    triggerPrint(lastSale);
+    closeModal('cashModal');
+    closeModal('cardModal');
+
+    await triggerPrint(state.lastSale);
+
+    if (window.api.generateThermalReceiptPdfAuto) {
+      try {
+        await window.api.generateThermalReceiptPdfAuto(state.lastSale);
+      } catch (err) {
+        console.warn('Auto PDF generation failed:', err.message);
+      }
+    }
 
     await loadData();
+    renderProducts();
     renderCart();
+
+    document.getElementById('scAmount').textContent = fmt(total);
+    document.getElementById('scMsg').textContent = `Invoice ${saved.billId} saved successfully`;
+    openModal('saleCompleteModal');
   }
 
-  const categoryThemeMap = {
-    'all': { icon: 'fa-solid fa-border-all', hue: '225' }, // Brand blue
-    'rice': { icon: 'fa-solid fa-wheat-awn', hue: '38' }, // Warm amber
-    'grain': { icon: 'fa-solid fa-wheat-awn', hue: '38' },
-    'beverages': { icon: 'fa-solid fa-bottle-water', hue: '198' }, // Cool blue
-    'dairy': { icon: 'fa-solid fa-egg', hue: '48' }, // Warm yellow
-    'egg': { icon: 'fa-solid fa-egg', hue: '48' },
-    'bakery': { icon: 'fa-solid fa-bread-slice', hue: '28' }, // Warm orange/brown
-    'bread': { icon: 'fa-solid fa-bread-slice', hue: '28' },
-    'snacks': { icon: 'fa-solid fa-cookie-bite', hue: '335' }, // Pinkish rose
-    'sweet': { icon: 'fa-solid fa-cookie-bite', hue: '335' },
-    'frozen': { icon: 'fa-solid fa-snowflake', hue: '175' }, // Cool cyan
-    'spices': { icon: 'fa-solid fa-pepper-hot', hue: '0' }, // Spicy red
-    'condiments': { icon: 'fa-solid fa-pepper-hot', hue: '0' },
-    'canned': { icon: 'fa-solid fa-box-open', hue: '15' }, // Brown
-    'packaged': { icon: 'fa-solid fa-box-open', hue: '15' },
-    'personal': { icon: 'fa-solid fa-soap', hue: '265' }, // Lavender purple
-    'care': { icon: 'fa-solid fa-soap', hue: '265' },
-    'cleaning': { icon: 'fa-solid fa-broom', hue: '155' }, // Clean teal/green
-    'baby': { icon: 'fa-solid fa-baby', hue: '310' }, // Soft pink
-    'pet': { icon: 'fa-solid fa-dog', hue: '125' }, // Greenish
-    'fruits': { icon: 'fa-solid fa-apple-whole', hue: '5' }, // Bright fruit red
-    'vegetables': { icon: 'fa-solid fa-carrot', hue: '135' }, // Fresh vegetable green
-    'meat': { icon: 'fa-solid fa-drumstick-bite', hue: '350' }, // Red-salmon
-    'seafood': { icon: 'fa-solid fa-fish', hue: '210' }, // Oceanic blue
-    'breakfast': { icon: 'fa-solid fa-bowl-food', hue: '33' }, // Golden
-    'health': { icon: 'fa-solid fa-heart-pulse', hue: '345' }, // Pink-red
-    'wellness': { icon: 'fa-solid fa-heart-pulse', hue: '345' },
-    'household': { icon: 'fa-solid fa-plug', hue: '220' } // Grey-blue
-  };
+  async function triggerPrint(saleData) {
+    if (!saleData) return;
 
-  function getCategoryMeta(name) {
-    const key = normalizeCategory(name);
-    if (categoryThemeMap[key]) return categoryThemeMap[key];
-    
-    // Check keys as substrings
-    for (const [k, v] of Object.entries(categoryThemeMap)) {
-      if (key.includes(k) || k.includes(key)) return v;
-    }
-    
-    // Deterministic hue hashing for any custom category
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const hue = Math.abs(hash % 360);
-    return { icon: 'fa-solid fa-tag', hue: String(hue) };
-  }
-
-  function renderCategories(rows) {
-    const el = document.getElementById('catPills');
-    if (!el) return;
-    
-    const allMeta = getCategoryMeta('all');
-    el.innerHTML = `
-      <button class="cat-pill active" data-cat="all" style="--hue: ${allMeta.hue}">
-        <div class="cat-icon-badge"><i class="${allMeta.icon}"></i></div>
-        <span class="cat-name">All</span>
-      </button>
-    `;
-    
-    rows.forEach((c) => {
-      const btn = document.createElement('button');
-      btn.className = 'cat-pill';
-      btn.dataset.cat = normalizeCategory(c.name);
-      const meta = getCategoryMeta(c.name);
-      btn.style.setProperty('--hue', meta.hue);
-      btn.innerHTML = `
-        <div class="cat-icon-badge"><i class="${meta.icon}"></i></div>
-        <span class="cat-name">${c.name}</span>
+    const itemsHtml = (saleData.items || []).map((item) => {
+      const qty = Number(item.qty || item.quantity || 0);
+      const sub = qty * Number(item.price || 0);
+      return `
+        <tr class="rt-item-row">
+          <td colspan="2">${escapeHtml(item.name)}</td>
+          <td class="rt-price">${sub.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        </tr>
+        <tr class="rt-detail-row">
+          <td colspan="3">${formatQty(qty)} x ${Number(item.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        </tr>
       `;
-      el.appendChild(btn);
-    });
+    }).join('');
+
+    const change = saleData.received ? Math.max(0, Number(saleData.received) - Number(saleData.total)) : 0;
+    const html = `
+      <div class="receipt">
+        <div class="receipt-header">
+          <div class="receipt-logo">QuickPOS Supermarket</div>
+          <div class="receipt-info">No. 45/A, Galle Road, Colombo 03<br>Tel: 011 234 5678</div>
+        </div>
+        <div class="receipt-divider"></div>
+        <div class="receipt-meta">
+          <div><strong>${saleData.isDraft ? 'ESTIMATE' : 'TAX INVOICE'}</strong></div>
+          <div>Date: ${new Date(saleData.timestamp).toLocaleDateString()} | Time: ${new Date(saleData.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+          <div>No: <strong>${escapeHtml(saleData.billId || '-')}</strong> | Staff: ${escapeHtml(saleData.cashier || 'Cashier')}</div>
+        </div>
+        <div class="receipt-divider"></div>
+        <table class="receipt-table"><tbody>${itemsHtml}</tbody></table>
+        <div class="receipt-divider double"></div>
+        <div class="receipt-totals">
+          <div class="total-row grand-total"><span>NET TOTAL</span><span>LKR ${Number(saleData.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></div>
+        </div>
+        ${!saleData.isDraft ? `<div class="payment-info"><div class="total-row"><span>Paid via ${escapeHtml(saleData.method || '-')}</span><span>${Number(saleData.received || saleData.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></div>${saleData.method === 'Cash' ? `<div class="total-row"><span>Change</span><span>${change.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></div>` : ''}</div>` : ''}
+        <div class="receipt-footer">
+          <div class="footer-msg">Thank You! Come Again.</div>
+          <div class="footer-sub">${saleData.isDraft ? 'Draft Receipt - Not a Tax Invoice' : 'Software by Antigravity Pro'}</div>
+          <div class="barcode-placeholder">${saleData.billId === 'DRAFT' ? 'DRAFT' : '*' + saleData.billId + '*'}</div>
+        </div>
+      </div>
+    `;
+
+    try {
+      const dbSettings = await window.api.getSettings();
+      const printerName = dbSettings.thermalPrinterName || '';
+      const options = printerName ? { deviceName: printerName, html } : { html };
+      await window.api.printReceiptSilent(options);
+    } catch (err) {
+      console.error('Print error:', err.message);
+    }
   }
 
   async function loadData() {
@@ -381,550 +718,394 @@
       window.api.getCustomers()
     ]);
 
-    const categoryById = new Map(categoryRows.map((c) => [c.id, c]));
-    products = productRows.map((p) => ({
-      ...p,
-      category_name: categoryById.get(p.category_id)?.name || 'General',
-      categoryKey: normalizeCategory(categoryById.get(p.category_id)?.name || 'general')
-    }));
-    customers = customerRows;
-    renderCategories(categoryRows);
-    renderProducts();
-    renderCustomer();
+    const categoryMap = new Map((categoryRows || []).map((c) => [c.id, c]));
+
+    state.categories = categoryRows || [];
+    state.products = (productRows || []).map((p) => {
+      const category = categoryMap.get(p.category_id);
+      const categoryName = category?.name || 'General';
+      return {
+        ...p,
+        category_name: categoryName,
+        categoryKey: categoryKey(categoryName)
+      };
+    });
+    state.customers = customerRows || [];
   }
 
+  async function confirmAction(message) {
+    return Promise.resolve(window.confirm(message));
+  }
 
-  function wireEvents() {
-    console.log('[SALES DEBUG] wireEvents() started');
-    const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
-    const nameEl = document.getElementById('cashierNameDisplay');
-    if (nameEl) nameEl.textContent = `${user.role === 'owner' ? 'Owner' : 'Cashier'}: ${user.name || 'User'}`;
-
-    document.getElementById('catPills').addEventListener('click', (e) => {
-      const pill = e.target.closest('.cat-pill');
-      if (!pill) return;
-      document.querySelectorAll('.cat-pill').forEach((p) => p.classList.remove('active'));
-      pill.classList.add('active');
-      currentCat = pill.dataset.cat;
-      renderProducts();
-      renderSearchSuggestions(document.getElementById('stockSearch')?.value || '');
-    });
-
+  function bindEvents() {
+    const catPills = document.getElementById('catPills');
     const barcodeInput = document.getElementById('barcodeInput');
-    const search = document.getElementById('stockSearch');
-    const suggest = document.getElementById('stockSuggest');
-    const clearSearchBtn = document.getElementById('clearSearchBtn');
-    const focusScanBtn = document.getElementById('focusScanBtn');
+    const stockSearch = document.getElementById('stockSearch');
+    const custSearch = document.getElementById('custSearch');
+    const custDropdown = document.getElementById('custDropdown');
 
-    if (barcodeInput) {
-      barcodeInput.focus();
-    }
-
-    if (clearSearchBtn) {
-      clearSearchBtn.addEventListener('click', () => {
-        if (search) {
-          search.value = '';
-          currentSearch = '';
-          renderProducts();
-          renderSearchSuggestions('');
-          search.focus();
-        }
-      });
-    }
-    if (focusScanBtn) {
-      focusScanBtn.addEventListener('click', () => barcodeInput?.focus());
-    }
-
-    function keepFocus() {
-      if (!barcodeInput) return;
-      const activeEl = document.activeElement;
-      const exemptIds = ['custSearch', 'amtReceived', 'custQty', 'custPrice', 'cardRefNo', 'stockSearch'];
-      if (activeEl && exemptIds.includes(activeEl.id)) {
-        return;
-      }
-      barcodeInput.focus();
-    }
-
-    document.addEventListener('click', () => {
-      setTimeout(keepFocus, 50);
-    });
-    document.addEventListener('focusin', () => {
-      setTimeout(keepFocus, 50);
+    catPills.addEventListener('click', (event) => {
+      const btn = event.target.closest('.cat-pill');
+      if (!btn) return;
+      state.currentCat = btn.dataset.cat || 'all';
+      renderCategories();
+      renderProducts();
+      buildSearchSuggestions(stockSearch.value);
     });
 
-    if (barcodeInput) {
-      barcodeInput.addEventListener('keydown', async (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          const val = barcodeInput.value.trim();
-          if (!val) return;
+    document.getElementById('toggleDensityBtn').addEventListener('click', () => {
+      const active = document.body.classList.toggle('sales-dense');
+      localStorage.setItem('quickpos-sales-dense', active ? '1' : '0');
+    });
 
-          try {
-            const product = await window.api.searchProductByBarcode(val);
-            if (product) {
-              addToCart(product.id, 1, product.selling_price);
-              barcodeInput.value = '';
-              notify(`${product.name} added`, 'info');
-            } else {
-              const fallback = products.find((p) => getProductSearchText(p).includes(normalize(val)));
-              if (fallback) {
-                addToCart(fallback.id, 1, fallback.selling_price);
-                notify(`${fallback.name} added from quick match`, 'info');
-              } else {
-                notify(`Barcode "${val}" not found`, 'warning');
-              }
-            }
-            barcodeInput.value = '';
-          } catch (err) {
-            console.error('Barcode search error:', err);
-            notify(`Error processing scan: ${err.message}`, 'warning');
-            barcodeInput.value = '';
+    document.getElementById('focusScanBtn').addEventListener('click', () => {
+      barcodeInput.focus();
+      barcodeInput.select();
+    });
+
+    document.getElementById('clearSearchBtn').addEventListener('click', () => {
+      stockSearch.value = '';
+      state.currentSearch = '';
+      renderProducts();
+      buildSearchSuggestions('');
+      stockSearch.focus();
+    });
+
+    barcodeInput.addEventListener('keydown', async (event) => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      const code = barcodeInput.value.trim();
+      if (!code) return;
+
+      try {
+        const product = await window.api.searchProductByBarcode(code);
+        if (product) {
+          addToCart(product.id, 1, Number(product.selling_price || 0), 'scan');
+        } else {
+          const fallback = state.products.find((p) => productSearchText(p).includes(normalize(code)));
+          if (fallback) {
+            addToCart(fallback.id, 1, Number(fallback.selling_price || 0), 'scan');
+          } else {
+            notify(`Barcode "${code}" not found`, 'warning');
           }
         }
-      });
-    }
+      } catch (err) {
+        notify(`Scan failed: ${err.message}`, 'warning');
+      }
 
-    function renderSearchSuggestions(raw) {
-      if (!search || !suggest) return;
-      const q = normalize(raw);
+      barcodeInput.value = '';
+    });
+
+    stockSearch.addEventListener('input', (event) => {
+      state.currentSearch = normalize(event.target.value);
+      renderProducts();
+      buildSearchSuggestions(event.target.value);
+    });
+
+    stockSearch.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        if (!state.suggestList.length) return;
+        event.preventDefault();
+        const step = event.key === 'ArrowDown' ? 1 : -1;
+        state.suggestActive = (state.suggestActive + step + state.suggestList.length) % state.suggestList.length;
+        buildSearchSuggestions(stockSearch.value);
+        return;
+      }
+
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const product = state.suggestList[state.suggestActive] || state.filteredProducts[0];
+        if (product) {
+          addToCart(product.id, 1, Number(product.selling_price || 0), 'manual');
+          notify(`${product.name} added`, 'info');
+          stockSearch.value = '';
+          state.currentSearch = '';
+          renderProducts();
+          buildSearchSuggestions('');
+          barcodeInput.focus();
+        } else {
+          notify('No matching product', 'warning');
+        }
+      }
+
+      if (event.key === 'Escape') {
+        buildSearchSuggestions('');
+        barcodeInput.focus();
+      }
+    });
+
+    stockSearch.addEventListener('blur', () => {
+      setTimeout(() => buildSearchSuggestions(''), 120);
+    });
+
+    custSearch.addEventListener('input', (event) => {
+      const q = normalize(event.target.value);
       if (!q) {
-        suggest.classList.remove('open');
-        suggest.innerHTML = '';
-        searchSuggestList = [];
-        searchSuggestActiveIndex = -1;
-        return;
-      }
-      const baseList = currentCat === 'all' ? products : products.filter((p) => p.categoryKey === currentCat);
-      const ranked = baseList
-        .map((p) => {
-          const hay = getProductSearchText(p);
-          const name = normalize(p.name);
-          let score = -1;
-          if (name === q) score = 120;
-          else if (String(p.barcode || '').toLowerCase() === q) score = 110;
-          else if (name.startsWith(q)) score = 90;
-          else if (hay.includes(q)) score = 60;
-          return { p, score };
-        })
-        .filter((x) => x.score > -1)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 7)
-        .map((x) => x.p);
-      searchSuggestList = ranked;
-      searchSuggestActiveIndex = ranked.length ? 0 : -1;
-
-      if (!ranked.length) {
-        suggest.innerHTML = '<div class="search-suggest-item"><div><div class="ssi-name">No matches</div><div class="ssi-meta">Try another keyword</div></div></div>';
-        suggest.classList.add('open');
+        custDropdown.classList.remove('open');
         return;
       }
 
-      suggest.innerHTML = ranked.map((p, idx) => `
-        <div class="search-suggest-item${idx === searchSuggestActiveIndex ? ' active' : ''}" data-suggest-idx="${idx}">
+      const results = state.customers
+        .filter((c) => normalize(c.name).includes(q) || normalize(c.phone).includes(q))
+        .slice(0, 6);
+
+      if (!results.length) {
+        custDropdown.innerHTML = '<div class="cust-result" style="justify-content:center;color:var(--text3)">No customers found</div>';
+        custDropdown.classList.add('open');
+        return;
+      }
+
+      custDropdown.innerHTML = results.map((c) => `
+        <div class="cust-result" data-id="${c.id}">
           <div>
-            <div class="ssi-name">${p.name}</div>
-            <div class="ssi-meta">${p.category_name || 'General'} | Stock: ${Number(p.current_stock || 0)} | ${p.barcode || '-'}</div>
+            <div class="cust-result-name">${escapeHtml(c.name)}</div>
+            <div class="cust-result-phone">${escapeHtml(c.phone || '')}</div>
           </div>
-          <div class="ssi-price">${fmt(p.selling_price || 0)}</div>
+          <div class="cust-result-bal">${fmt(c.balance || 0)}</div>
         </div>
       `).join('');
-      suggest.classList.add('open');
+      custDropdown.classList.add('open');
 
-      suggest.querySelectorAll('.search-suggest-item[data-suggest-idx]').forEach((itemEl) => {
-        itemEl.addEventListener('mousedown', (ev) => {
-          ev.preventDefault();
-          const idx = Number(itemEl.dataset.suggestIdx);
-          const p = searchSuggestList[idx];
-          if (!p) return;
-          addToCart(p.id, 1, p.selling_price);
-          notify(`${p.name} added`, 'info');
-          search.value = '';
-          currentSearch = '';
-          renderProducts();
-          renderSearchSuggestions('');
-          barcodeInput?.focus();
+      custDropdown.querySelectorAll('.cust-result[data-id]').forEach((row) => {
+        row.addEventListener('click', () => {
+          state.selectedCustomer = state.customers.find((c) => c.id === Number(row.dataset.id)) || null;
+          custDropdown.classList.remove('open');
+          custSearch.value = '';
+          renderCustomer();
         });
       });
-    }
+    });
 
-    if (search) {
-      search.addEventListener('input', (e) => {
-        currentSearch = normalize(e.target.value);
-        renderProducts();
-        renderSearchSuggestions(e.target.value);
-      });
-
-      search.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-          if (!searchSuggestList.length) return;
-          e.preventDefault();
-          const step = e.key === 'ArrowDown' ? 1 : -1;
-          searchSuggestActiveIndex = (searchSuggestActiveIndex + step + searchSuggestList.length) % searchSuggestList.length;
-          renderSearchSuggestions(search.value);
-          return;
-        }
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          const val = normalize(search.value);
-          if (!val) return;
-
-          let p = null;
-          if (searchSuggestList.length && searchSuggestActiveIndex >= 0) {
-            p = searchSuggestList[searchSuggestActiveIndex];
-          }
-          if (!p) {
-            p = filteredProducts[0] || products.find((x) => getProductSearchText(x).includes(val));
-          }
-
-          if (p) {
-            addToCart(p.id, 1, p.selling_price);
-            notify(`${p.name} added`, 'info');
-            search.value = '';
-            currentSearch = '';
-            renderProducts();
-            renderSearchSuggestions('');
-            setTimeout(() => barcodeInput?.focus(), 100);
-          } else {
-            notify('No product matched this search', 'warning');
-          }
-        }
-        if (e.key === 'Escape') {
-          renderSearchSuggestions('');
-          search.blur();
-          barcodeInput?.focus();
-        }
-      });
-
-      search.addEventListener('blur', () => {
-        setTimeout(() => renderSearchSuggestions(''), 120);
-      });
-    }
-
-    const custSearch = document.getElementById('custSearch');
-    const custDrop = document.getElementById('custDropdown');
-    if (custSearch && custDrop) {
-      custSearch.addEventListener('input', (e) => {
-        const v = normalize(e.target.value);
-        if (!v) {
-          custDrop.classList.remove('open');
-          return;
-        }
-        const results = customers.filter((c) => normalize(c.name).includes(v) || String(c.phone || '').includes(v)).slice(0, 6);
-        if (!results.length) {
-          custDrop.innerHTML = '<div class="cust-result" style="justify-content:center;color:var(--text3)">No customers found</div>';
-          custDrop.classList.add('open');
-          return;
-        }
-        custDrop.innerHTML = results.map((c) => `<div class="cust-result" data-id="${c.id}"><div><div class="cust-result-name">${c.name}</div><div class="cust-result-phone">${c.phone || ''}</div></div><div class="cust-result-bal">${fmt(c.balance || 0)}</div></div>`).join('');
-        custDrop.classList.add('open');
-        custDrop.querySelectorAll('.cust-result').forEach((row) => {
-          row.addEventListener('click', () => {
-            selectedCustomer = customers.find((c) => c.id === Number(row.dataset.id));
-            custSearch.value = '';
-            custDrop.classList.remove('open');
-            renderCustomer();
-          });
-        });
-      });
-    }
-    document.getElementById('closeCustModal').addEventListener('click', () => document.getElementById('custModal').classList.remove('open'));
-    document.getElementById('cancelCustModal').addEventListener('click', () => document.getElementById('custModal').classList.remove('open'));
-
+    document.getElementById('closeCustModal').addEventListener('click', () => closeModal('custModal'));
+    document.getElementById('cancelCustModal').addEventListener('click', () => closeModal('custModal'));
     document.getElementById('custQty').addEventListener('input', () => {
-      if (priceEdited || !productToCustomize) return;
-      const q = parseFloat(document.getElementById('custQty').value) || 0;
-      document.getElementById('custPrice').value = (q * Number(productToCustomize.selling_price || 0)).toFixed(2);
+      if (state.priceEdited || !state.productToCustomize) return;
+      const qty = Number(parseFloat(document.getElementById('custQty').value) || 0);
+      document.getElementById('custPrice').value = (qty * Number(state.productToCustomize.selling_price || 0)).toFixed(2);
     });
-
     document.getElementById('custPrice').addEventListener('input', () => {
-      priceEdited = true;
+      state.priceEdited = true;
     });
-
     document.getElementById('addCustToCart').addEventListener('click', () => {
-      if (!productToCustomize) return;
-      const qty = parseFloat(document.getElementById('custQty').value) || 0;
-      const price = parseFloat(document.getElementById('custPrice').value) || 0;
-      if (qty <= 0) return notify('Enter valid quantity', 'warning');
-      addToCart(productToCustomize.id, qty, price);
-      document.getElementById('custModal').classList.remove('open');
+      if (!state.productToCustomize) return;
+      const qty = Number(parseFloat(document.getElementById('custQty').value) || 0);
+      const totalPrice = Number(parseFloat(document.getElementById('custPrice').value) || 0);
+      if (qty <= 0 || totalPrice <= 0) {
+        notify('Enter a valid quantity/price', 'warning');
+        return;
+      }
+      const unitPrice = totalPrice / qty;
+      addToCart(state.productToCustomize.id, qty, unitPrice, 'manual');
+      closeModal('custModal');
     });
 
     document.getElementById('cashBtn').addEventListener('click', () => {
-      console.log('[SALES DEBUG] cashBtn clicked, cart.length:', cart.length);
-      if (!cart.length) { notify('Cart is empty. Add a product first.', 'warning'); return; }
+      if (!state.cart.length) {
+        notify('Cart is empty. Add products first.', 'warning');
+        return;
+      }
       document.getElementById('cashModalTotal').textContent = fmt(cartTotal());
       document.getElementById('amtReceived').value = '';
       document.getElementById('changeAmt').textContent = fmt(0);
-      document.getElementById('cashModal').classList.add('open');
+      openModal('cashModal');
     });
 
     document.getElementById('cardBtn').addEventListener('click', () => {
-      console.log('[SALES DEBUG] cardBtn clicked, cart.length:', cart.length);
-      if (!cart.length) { notify('Cart is empty. Add a product first.', 'warning'); return; }
+      if (!state.cart.length) {
+        notify('Cart is empty. Add products first.', 'warning');
+        return;
+      }
       document.getElementById('cardModalTotal').textContent = fmt(cartTotal());
       document.getElementById('cardRefNo').value = '';
-      document.getElementById('cardModal').classList.add('open');
-      setTimeout(() => document.getElementById('cardRefNo').focus(), 300);
+      openModal('cardModal');
+      setTimeout(() => document.getElementById('cardRefNo').focus(), 150);
     });
 
-    document.getElementById('finalizeCard').addEventListener('click', async (e) => {
-      const btn = e.currentTarget;
-      if (btn.disabled) return; // Block double-click
-      btn.disabled = true;
-      btn.textContent = 'Processing...';
-      const ref = document.getElementById('cardRefNo').value.trim();
+    document.getElementById('holdSaleBtn').addEventListener('click', holdCurrentBill);
+
+    document.getElementById('closeCashModal').addEventListener('click', () => closeModal('cashModal'));
+    document.getElementById('cancelCashModal').addEventListener('click', () => closeModal('cashModal'));
+    document.getElementById('closeCardModal').addEventListener('click', () => closeModal('cardModal'));
+    document.getElementById('cancelCardModal').addEventListener('click', () => closeModal('cardModal'));
+
+    document.getElementById('amtReceived').addEventListener('input', updateChangeDue);
+
+    document.querySelectorAll('.quick-btn[data-set]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const setVal = btn.dataset.set;
+        if (setVal === 'exact') {
+          setReceivedAmount(cartTotal());
+          return;
+        }
+        setReceivedAmount(Number(setVal || 0));
+      });
+    });
+
+    document.querySelectorAll('#cashNumpad .np-btn').forEach((btn) => {
+      btn.addEventListener('click', () => applyNumpadKey(btn.dataset.key));
+    });
+
+    document.getElementById('finalizeCash').addEventListener('click', async () => {
+      const total = cartTotal();
+      const received = Number(parseFloat(document.getElementById('amtReceived').value) || 0);
+      if (received < total) {
+        notify('Received amount is less than total', 'warning');
+        return;
+      }
       try {
-        await completeSale('Card', cartTotal(), ref);
-        setTimeout(() => { btn.disabled = false; }, 300);
+        await completeSale('Cash', received);
       } catch (err) {
-        btn.disabled = false;
         notify(`Failed to save sale: ${err.message}`, 'warning');
-        btn.disabled = false;
-        btn.textContent = 'Complete Sale';
       }
     });
 
-    document.getElementById('cardRefNo').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') document.getElementById('finalizeCard').click();
+    document.getElementById('finalizeCard').addEventListener('click', async () => {
+      const ref = document.getElementById('cardRefNo').value.trim();
+      try {
+        await completeSale('Card', cartTotal(), ref);
+      } catch (err) {
+        notify(`Failed to save card sale: ${err.message}`, 'warning');
+      }
     });
 
-    document.getElementById('closeCardModal').addEventListener('click', () => document.getElementById('cardModal').classList.remove('open'));
-    document.getElementById('cancelCardModal').addEventListener('click', () => document.getElementById('cardModal').classList.remove('open'));
-
-    document.getElementById('creditBtn').addEventListener('click', async (e) => {
-      const btn = e.currentTarget;
-      if (btn.disabled || !cart.length || !selectedCustomer) return;
-      btn.disabled = true;
-      btn.blur();
+    document.getElementById('creditBtn').addEventListener('click', async () => {
+      if (!state.selectedCustomer) {
+        notify('Attach a customer for credit sale', 'warning');
+        return;
+      }
       try {
         await completeSale('Credit', 0);
-        setTimeout(() => { btn.disabled = false; }, 300);
       } catch (err) {
-        btn.disabled = false;
         notify(`Failed to save credit sale: ${err.message}`, 'warning');
       }
     });
 
-
-
-    document.getElementById('closeCashModal').addEventListener('click', () => document.getElementById('cashModal').classList.remove('open'));
-    document.getElementById('cancelCashModal').addEventListener('click', () => document.getElementById('cashModal').classList.remove('open'));
-
-    const updateChange = () => {
-      const total = cartTotal();
-      const rec = parseFloat(document.getElementById('amtReceived').value) || 0;
-      document.getElementById('changeAmt').textContent = fmt(Math.max(0, rec - total));
-    };
-
-    document.getElementById('amtReceived').addEventListener('input', updateChange);
-    document.querySelectorAll('.quick-btn').forEach((b) => {
-      b.addEventListener('click', () => {
-        const cur = parseFloat(document.getElementById('amtReceived').value) || 0;
-        document.getElementById('amtReceived').value = (cur + parseFloat(b.dataset.add)).toFixed(2);
-        updateChange();
-      });
-    });
-
-    document.getElementById('finalizeCash').addEventListener('click', async (e) => {
-      const btn = e.currentTarget;
-      if (btn.disabled) return; // Block double-click
-      btn.disabled = true;
-      btn.textContent = 'Processing...';
-      const total = cartTotal();
-      const rec = parseFloat(document.getElementById('amtReceived').value) || 0;
-      if (rec < total) {
-        btn.disabled = false;
-        btn.textContent = 'Complete Sale';
-        notify('Insufficient amount received', 'warning');
+    document.getElementById('printDraftBtn').addEventListener('click', async () => {
+      if (!state.cart.length) {
+        notify('Cart is empty. Add products first.', 'warning');
         return;
       }
-      try {
-        await completeSale('Cash', rec);
-        // Do NOT re-enable the button here if successful. Modal is closing.
-        // It prevents double-clicking while the modal is fading out.
-        setTimeout(() => { btn.disabled = false; }, 300);
-      } catch (err) {
-        btn.disabled = false;
-        notify(`Failed to save sale: ${err.message}`, 'warning');
-        btn.disabled = false;
-        btn.textContent = 'Complete Sale';
-      }
-    });
-
-    document.getElementById('scDone').addEventListener('click', () => {
-      document.getElementById('saleCompleteModal').classList.remove('open');
-    });
-
-    document.getElementById('printReceiptBtn').addEventListener('click', () => {
-      triggerPrint(lastSale);
-    });
-
-    document.getElementById('printDraftBtn').addEventListener('click', () => {
-      console.log('[SALES DEBUG] printDraftBtn clicked, cart.length:', cart.length);
-      if (!cart.length) { notify('Cart is empty. Add a product first.', 'warning'); return; }
-      const total = cartTotal();
       const draftData = {
         billId: 'DRAFT',
         timestamp: new Date().toISOString(),
         method: 'DRAFT',
-        total: total,
-        items: cart.map(i => ({ name: i.name, qty: i.quantity, price: i.price })),
+        total: cartTotal(),
+        items: state.cart.map((i) => ({ name: i.name, qty: i.quantity, price: i.price })),
         isDraft: true
       };
-      triggerPrint(draftData);
+      await triggerPrint(draftData);
     });
 
-    document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        search?.focus();
-        search?.select();
-      }
-      if (e.key === 'F2') {
-        e.preventDefault();
-        barcodeInput?.focus();
-        barcodeInput?.select();
+    document.getElementById('scDone').addEventListener('click', () => closeModal('saleCompleteModal'));
+    document.getElementById('printReceiptBtn').addEventListener('click', () => triggerPrint(state.lastSale));
+
+    document.getElementById('closeOverrideModal').addEventListener('click', () => closeOverridePrompt(false));
+    document.getElementById('cancelOverrideBtn').addEventListener('click', () => closeOverridePrompt(false));
+    document.getElementById('confirmOverrideBtn').addEventListener('click', () => closeOverridePrompt(true));
+
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.cust-search-wrap')) {
+        custDropdown.classList.remove('open');
       }
     });
-    console.log('[SALES DEBUG] wireEvents() completed - all handlers attached');
+
+    document.addEventListener('keydown', (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        stockSearch.focus();
+        stockSearch.select();
+        return;
+      }
+
+      if (event.key === 'F2') {
+        event.preventDefault();
+        barcodeInput.focus();
+        barcodeInput.select();
+        return;
+      }
+
+      if (event.key === 'F8') {
+        event.preventDefault();
+        document.getElementById('cashBtn').click();
+        return;
+      }
+
+      if (event.key === 'F9') {
+        event.preventDefault();
+        document.getElementById('cardBtn').click();
+        return;
+      }
+
+      if (event.key === 'F10') {
+        event.preventDefault();
+        document.getElementById('creditBtn').click();
+        return;
+      }
+
+      if (event.key === 'F11') {
+        event.preventDefault();
+        holdCurrentBill();
+      }
+    });
+
+    if (localStorage.getItem('quickpos-sales-dense') === '1') {
+      document.body.classList.add('sales-dense');
+    }
+
+    barcodeInput.focus();
   }
 
-  async function triggerPrint(saleData) {
-    if (!saleData) return;
-    const area = document.getElementById('print-area');
-    if (!area) return;
-    console.log('[PRINT DEBUG] triggerPrint called with:', saleData);
+  function formatQty(value) {
+    return Number(value) % 1 === 0 ? String(Number(value)) : Number(value).toFixed(2);
+  }
 
-    // ... (rest of itemsHtml generation)
-    const itemsHtml = saleData.items.map(i => {
-      const qty = Number(i.qty || i.quantity);
-      const formattedQty = qty % 1 === 0 ? qty : qty.toFixed(2);
-      const itemTotal = (Number(i.price) * qty).toLocaleString('en-US', { minimumFractionDigits: 2 });
-      
-      return `
-        <tr class="rt-item-row">
-          <td colspan="2">${i.name}</td>
-          <td class="rt-price">${itemTotal}</td>
-        </tr>
-        <tr class="rt-detail-row">
-          <td colspan="3">${formattedQty} ${i.unit || ''} x ${Number(i.price).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-        </tr>
-      `;
-    }).join('');
+  function escapeHtml(value) {
+    return String(value || '').replace(/[&<>"']/g, (char) => {
+      if (char === '&') return '&amp;';
+      if (char === '<') return '&lt;';
+      if (char === '>') return '&gt;';
+      if (char === '"') return '&quot;';
+      return '&#39;';
+    });
+  }
 
-    const changeReturned = saleData.received ? Math.max(0, saleData.received - saleData.total) : 0;
-
-    area.innerHTML = `
-      <div class="receipt">
-        <div class="receipt-header">
-          <div class="receipt-logo">QuickPOS Supermarket</div>
-          <div class="receipt-info">
-            No. 45/A, Galle Road, Colombo 03<br>
-            Tel: 011 234 5678 | 077 123 4567<br>
-          </div>
-        </div>
-
-        <div class="receipt-divider"></div>
-
-        <div class="receipt-meta">
-          <div>${saleData.isDraft ? '<strong>*** ESTIMATE ***</strong>' : '<strong>TAX INVOICE</strong>'}</div>
-          <div>Date: ${new Date(saleData.timestamp).toLocaleDateString()} | Time: ${new Date(saleData.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-          <div>No: <strong>${saleData.billId}</strong> | Staff: ${saleData.cashier || (JSON.parse(localStorage.getItem('quickpos-user') || '{}').name) || 'Sunil Perera'}</div>
-        </div>
-
-        <div class="receipt-divider"></div>
-
-        <table class="receipt-table">
-          <tbody>
-            ${itemsHtml}
-          </tbody>
-        </table>
-
-        <div class="receipt-divider double"></div>
-
-        <div class="receipt-totals">
-          <div class="total-row grand-total">
-            <span>NET TOTAL</span>
-            <span>LKR ${saleData.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-          </div>
-        </div>
-
-        ${!saleData.isDraft ? `
-          <div class="payment-info">
-            <div class="total-row">
-              <span>Paid via ${saleData.method}</span>
-              <span>${(saleData.received || saleData.total).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-            </div>
-            ${saleData.method === 'Cash' ? `
-              <div class="total-row">
-                <span>Change</span>
-                <span>${changeReturned.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-              </div>
-            ` : ''}
-          </div>
-        ` : ''}
-
-        <div class="receipt-footer">
-          <div class="footer-msg">ස්තූතියි! නැවත එන්න.</div>
-          <div class="footer-msg">Thank You! Come Again.</div>
-          <div class="footer-sub">
-            ${saleData.isDraft ? 'Draft Receipt - Not a Tax Invoice' : 'Software by Antigravity Pro'}
-          </div>
-          <div class="barcode-placeholder">
-            ${saleData.billId === 'DRAFT' ? 'DRAFT' : '*' + saleData.billId + '*'}
-          </div>
-        </div>
-      </div>
-    `;
-
-    console.log('[PRINT] Receipt HTML ready, sending to printer...');
-
-    // Double RAF + 200ms: ensure receipt content is fully painted before print
-    requestAnimationFrame(() => requestAnimationFrame(async () => {
-      await new Promise(r => setTimeout(r, 200));
-      try {
-        // Load configured printer name from settings
-        const dbSettings = await window.api.getSettings();
-        const printerName = dbSettings.thermalPrinterName || '';
-        const options = printerName ? { deviceName: printerName } : {};
-        console.log('[PRINT] Using printer:', printerName || '(system default)');
-
-        const res = await window.api.printReceiptSilent(options);
-        if (res && !res.success) {
-          console.error('[PRINT ERROR] Print failed:', res.failureReason);
-          // Sale is already saved - just log, do not alert
-        } else {
-          console.log('[PRINT] Receipt printed successfully.');
-        }
-      } catch (err) {
-        console.error('[PRINT ERROR] Exception during print:', err.message);
-      } finally {
-        area.innerHTML = '';
-      }
-    }));
+  function hashCode(value) {
+    const str = String(value || '');
+    let hash = 0;
+    for (let i = 0; i < str.length; i += 1) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return hash;
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    // Initialize standard components
-    Components.init({ title: 'Make a Sale' });
+    if (window.Components && typeof window.Components.init === 'function') {
+      window.Components.init({ title: 'Make a Sale' });
+    }
 
-    wireEvents();
-    loadCart();
+    hydrateCart();
+    hydrateHeldBills();
+    bindEvents();
 
-    // Listen for refresh event
     document.addEventListener('quickpos:refresh', async () => {
-      console.log('Sales page refreshing data...');
       await loadData();
+      renderCategories();
+      renderProducts();
+      renderCustomer();
+      renderHoldTray();
     });
 
     try {
       await loadData();
       tryResumeHeldBill();
+      renderCategories();
+      renderProducts();
       renderCustomer();
       renderCart();
+      renderHoldTray();
     } catch (err) {
       notify(`Failed to load POS data: ${err.message}`, 'warning');
     }
   });
 })();
-

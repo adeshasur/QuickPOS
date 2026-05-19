@@ -48,6 +48,8 @@ contextBridge.exposeInMainWorld('api', {
     printReceiptSilent: (options) => ipcRenderer.invoke('print-receipt-silent', options),
     getPrinters: () => ipcRenderer.invoke('get-printers'),
     exportShiftSummaryPdf: (summary) => ipcRenderer.invoke('export-shift-summary-pdf', summary),
+    recordShiftReconciliation: (payload) => ipcRenderer.invoke('record-shift-reconciliation', payload),
     exportThermalReceiptPdf: (payload) => ipcRenderer.invoke('export-thermal-receipt-pdf', payload),
+    generateThermalReceiptPdfAuto: (payload) => ipcRenderer.invoke('generate-thermal-receipt-pdf-auto', payload),
     printThermalReceipt: (payload) => ipcRenderer.invoke('print-thermal-receipt', payload)
 });

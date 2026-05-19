@@ -16,6 +16,9 @@
     showLogo: 'false',
     defaultPaymentMethod: 'Cash',
     idleTimeoutMin: '0',
+    cashierAutoShiftStart: 'false',
+    autoShiftOpeningFloat: '0',
+    cashierHourlyPaymentTarget: '0',
     keyboardShortcuts: 'true',
     barcodeScanSound: 'false',
     lowStockAlertLevel: '10',
@@ -50,6 +53,9 @@
     document.getElementById('showLogo').checked = settings.showLogo === 'true';
     document.getElementById('defaultPaymentMethod').value = settings.defaultPaymentMethod || 'Cash';
     document.getElementById('idleTimeoutMin').value = settings.idleTimeoutMin || '0';
+    document.getElementById('cashierAutoShiftStart').checked = settings.cashierAutoShiftStart === 'true';
+    document.getElementById('autoShiftOpeningFloat').value = settings.autoShiftOpeningFloat || '0';
+    document.getElementById('cashierHourlyPaymentTarget').value = settings.cashierHourlyPaymentTarget || '0';
     document.getElementById('keyboardShortcuts').checked = settings.keyboardShortcuts !== 'false';
     document.getElementById('barcodeScanSound').checked = settings.barcodeScanSound === 'true';
     document.getElementById('lowStockAlertLevel').value = settings.lowStockAlertLevel || '10';
@@ -80,6 +86,111 @@
     document.getElementById('sysSales').textContent = sales.length;
     document.getElementById('sysCustomers').textContent = customers.length;
     document.getElementById('sysCache').textContent = 'SQLite';
+    renderCashierHourlyInsight(sales);
+  }
+
+  function localDateKey(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  function formatLkr(value) {
+    return `LKR ${Number(value || 0).toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`;
+  }
+
+  function renderCashierHourlyInsight(allSales) {
+    const container = document.getElementById('cashierHourlyInsight');
+    if (!container) return;
+
+    const autoShiftOn = settings.cashierAutoShiftStart === 'true';
+    const openingFloat = Math.max(0, Number(settings.autoShiftOpeningFloat || 0));
+    const hourlyTarget = Math.max(0, Number(settings.cashierHourlyPaymentTarget || 0));
+    const todayKey = localDateKey(new Date());
+    const todaySales = (allSales || []).filter((sale) => localDateKey(sale.timestamp || sale.date || Date.now()) === todayKey);
+
+    const cashierMap = new Map();
+    todaySales.forEach((sale) => {
+      const name = String(sale.cashier_name || 'System');
+      if (!cashierMap.has(name)) {
+        cashierMap.set(name, { revenue: 0, bills: 0, hours: new Set() });
+      }
+      const row = cashierMap.get(name);
+      const amount = Number(sale.total_amount || 0);
+      row.revenue += amount;
+      row.bills += 1;
+      const hour = new Date(sale.timestamp || sale.date || Date.now()).getHours();
+      if (!Number.isNaN(hour)) row.hours.add(hour);
+    });
+
+    const rows = Array.from(cashierMap.entries()).map(([name, row]) => {
+      const activeHours = Math.max(1, row.hours.size);
+      const avgPerHour = row.revenue / activeHours;
+      const targetPct = hourlyTarget > 0 ? Math.round((avgPerHour / hourlyTarget) * 100) : 0;
+      return {
+        name,
+        bills: row.bills,
+        revenue: row.revenue,
+        activeHours,
+        avgPerHour,
+        targetPct
+      };
+    }).sort((a, b) => b.revenue - a.revenue);
+
+    const globalHours = new Set(todaySales.map((sale) => new Date(sale.timestamp || sale.date || Date.now()).getHours()));
+    const totalRevenue = rows.reduce((sum, row) => sum + row.revenue, 0);
+    const overallAvgPerHour = totalRevenue / Math.max(1, globalHours.size || 1);
+
+    const summary = `
+      <div class="sys-info-row"><span class="sys-info-label">Cashier Auto Shift</span><span class="sys-info-val">${autoShiftOn ? 'ON' : 'OFF'}</span></div>
+      <div class="sys-info-row"><span class="sys-info-label">Auto Shift Opening Float</span><span class="sys-info-val">${formatLkr(openingFloat)}</span></div>
+      <div class="sys-info-row"><span class="sys-info-label">Hourly Payment Target</span><span class="sys-info-val">${hourlyTarget > 0 ? formatLkr(hourlyTarget) : 'Not Set'}</span></div>
+      <div class="sys-info-row"><span class="sys-info-label">Overall Avg Per Hour (Today)</span><span class="sys-info-val">${todaySales.length ? formatLkr(overallAvgPerHour) : 'No sales yet'}</span></div>
+    `;
+
+    if (!rows.length) {
+      container.innerHTML = `
+        ${summary}
+        <div class="cashier-hourly-empty">No cashier payments recorded yet for today.</div>
+      `;
+      return;
+    }
+
+    container.innerHTML = `
+      ${summary}
+      <div class="cashier-hourly-wrap">
+        <table class="cashier-hourly-table">
+          <thead>
+            <tr>
+              <th>Cashier</th>
+              <th style="text-align:right">Bills</th>
+              <th style="text-align:right">Active Hours</th>
+              <th style="text-align:right">Total</th>
+              <th style="text-align:right">Avg / Hour</th>
+              <th style="text-align:right">Target</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((row) => `
+              <tr>
+                <td>${escapeHtml(row.name)}</td>
+                <td style="text-align:right">${row.bills}</td>
+                <td style="text-align:right">${row.activeHours}</td>
+                <td style="text-align:right">${formatLkr(row.revenue)}</td>
+                <td style="text-align:right">${formatLkr(row.avgPerHour)}</td>
+                <td style="text-align:right">${hourlyTarget > 0 ? `${row.targetPct}%` : '-'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
   }
 
   async function loadSettings() {
@@ -105,6 +216,9 @@
       showLogo: String(document.getElementById('showLogo').checked),
       defaultPaymentMethod: document.getElementById('defaultPaymentMethod').value,
       idleTimeoutMin: String(Math.max(0, parseInt(document.getElementById('idleTimeoutMin').value || '0', 10) || 0)),
+      cashierAutoShiftStart: String(document.getElementById('cashierAutoShiftStart').checked),
+      autoShiftOpeningFloat: String(Math.max(0, parseFloat(document.getElementById('autoShiftOpeningFloat').value || '0') || 0)),
+      cashierHourlyPaymentTarget: String(Math.max(0, parseFloat(document.getElementById('cashierHourlyPaymentTarget').value || '0') || 0)),
       keyboardShortcuts: String(document.getElementById('keyboardShortcuts').checked),
       barcodeScanSound: String(document.getElementById('barcodeScanSound').checked),
       lowStockAlertLevel: String(Math.max(0, parseInt(document.getElementById('lowStockAlertLevel').value || '10', 10) || 10)),
@@ -152,6 +266,7 @@
     document.getElementById('cashierPasswordConfirm').value = '';
 
     localStorage.setItem('quickpos-shift-time', next.shiftHours);
+    await refreshSystemStats();
     showToast('Settings saved successfully');
   }
 
@@ -161,6 +276,7 @@
       await saveKV(k, v);
     }
     setFields();
+    await refreshSystemStats();
     showToast('Settings reset to defaults');
   }
 
@@ -200,7 +316,7 @@
       try {
         const printers = await window.api.getPrinters();
         const current = sel.value;
-        sel.innerHTML = '<option value="">— System Default Printer —</option>';
+        sel.innerHTML = '<option value="">-- System Default Printer --</option>';
         printers.forEach(p => {
           const opt = document.createElement('option');
           opt.value = p.name;
@@ -252,6 +368,16 @@
     });
   }
 
+  function escapeHtml(value) {
+    return String(value || '').replace(/[&<>'"]/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '\'': '&#39;',
+      '"': '&quot;'
+    }[char]));
+  }
+
   document.addEventListener('DOMContentLoaded', async () => {
     const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
     if (!user || user.role === 'cashier') {
@@ -272,3 +398,4 @@
     }
   });
 })();
+

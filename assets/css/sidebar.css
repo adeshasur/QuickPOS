@@ -30,6 +30,25 @@
     z-index: 1000;
 }
 
+@media (min-width: 1025px) {
+    body.sidebar-collapsible .sidebar {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    body.sidebar-collapsible.sidebar-hidden .sidebar {
+        transform: translateX(-100%);
+        opacity: 0;
+        pointer-events: none;
+        box-shadow: none;
+    }
+
+    body.sidebar-collapsible:not(.sidebar-hidden) .sidebar {
+        transform: translateX(0);
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
 /* Logo Area */
 .logo {
     display: flex;

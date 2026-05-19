@@ -89,6 +89,17 @@
                 <input class="field-input" type="number" id="idleTimeoutMin" min="0" max="180" step="1" value="0">
                 <span class="field-hint">0 = disabled</span>
               </div>
+              <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Cashier Auto Shift Start</span><span class="toggle-desc">Start shift automatically when cashier opens POS</span></div><label class="ts"><input type="checkbox" id="cashierAutoShiftStart"><span class="ts-slider"></span></label></div>
+              <div class="field">
+                <label class="field-label">Auto Shift Opening Float (LKR)</label>
+                <input class="field-input" type="number" id="autoShiftOpeningFloat" min="0" max="1000000" step="0.01" value="0">
+                <span class="field-hint">Used only when auto shift is enabled</span>
+              </div>
+              <div class="field">
+                <label class="field-label">Cashier Hourly Payment Target (LKR)</label>
+                <input class="field-input" type="number" id="cashierHourlyPaymentTarget" min="0" max="10000000" step="0.01" value="0">
+                <span class="field-hint">0 = monitoring only, no target comparison</span>
+              </div>
               <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Enable keyboard shortcuts</span><span class="toggle-desc">F8/F9/F10/F11 quick actions</span></div><label class="ts"><input type="checkbox" id="keyboardShortcuts" checked><span class="ts-slider"></span></label></div>
               <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Play scan sound</span><span class="toggle-desc">Audio cue on successful barcode scan</span></div><label class="ts"><input type="checkbox" id="barcodeScanSound"><span class="ts-slider"></span></label></div>
             </div>
@@ -112,7 +123,7 @@
               <div class="field" style="flex:1">
                 <label class="field-label">Thermal Printer Name</label>
                 <select class="field-input" id="thermalPrinterName">
-                  <option value="">— System Default Printer —</option>
+                  <option value="">-- System Default Printer --</option>
                 </select>
                 <span class="field-hint">Select your receipt printer. Leave on default if unsure.</span>
               </div>
@@ -189,6 +200,12 @@
               <div class="sys-info-row"><span class="sys-info-label">Customers</span><span class="sys-info-val" id="sysCustomers">-</span></div>
               <div class="sys-info-row"><span class="sys-info-label">Cache Size</span><span class="sys-info-val" id="sysCache">-</span></div>
             </div>
+            <div class="scard span-2">
+              <div class="scard-title">Cashier Hourly Payment Monitor</div>
+              <div id="cashierHourlyInsight">
+                <div style="text-align:center;padding:20px 0;color:var(--text3);font-size:13px;">Loading hourly cashier metrics...</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -225,6 +242,7 @@
 <script src="../assets/js/settings.js"></script>
 </body>
 </html>
+
 
 
 

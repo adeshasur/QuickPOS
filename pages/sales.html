@@ -1,16 +1,16 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QuickPOS Pro — Make a Sale</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-    <link rel="stylesheet" href="../assets/css/common.css">
-    <link rel="stylesheet" href="../assets/css/sidebar.css">
-    <link rel="stylesheet" href="../assets/css/sales.css">
+<title>QuickPOS Pro - Make a Sale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link rel="stylesheet" href="../assets/css/common.css">
+<link rel="stylesheet" href="../assets/css/sidebar.css">
+<link rel="stylesheet" href="../assets/css/sales.css">
 </head>
 <body class="dashboard-body">
 
@@ -33,11 +33,14 @@
             <div class="search-suggest" id="stockSuggest"></div>
           </div>
         </div>
+
         <div class="toolbar-row toolbar-row-meta">
           <div class="search-meta-chip" id="searchMetaLabel">Showing all products</div>
+          <button class="toolbar-chip-btn" id="toggleDensityBtn" type="button">Dense Mode</button>
           <button class="toolbar-chip-btn" id="focusScanBtn" type="button">Focus Scan</button>
           <button class="toolbar-chip-btn" id="clearSearchBtn" type="button">Clear Search</button>
         </div>
+
         <div class="cat-pills" id="catPills">
           <button class="cat-pill active" data-cat="all" style="--hue: 225">
             <div class="cat-icon-badge"><i class="fa-solid fa-border-all"></i></div>
@@ -57,13 +60,23 @@
       <div class="customer-zone">
         <div class="cust-search-wrap">
           <span class="cust-search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-          <input class="cust-search-input" id="custSearch" placeholder="Search customer by name or phone…">
+          <input class="cust-search-input" id="custSearch" placeholder="Search customer by name or phone...">
           <div class="cust-dropdown" id="custDropdown"></div>
         </div>
         <div id="custDisplay">
           <div class="walkin-tag">
             <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Walk-in customer — credit unavailable
+            Walk-in customer - credit unavailable
+          </div>
+        </div>
+
+        <div class="hold-tray" id="holdTray">
+          <div class="hold-tray-head">
+            <span>Held Bills</span>
+            <span class="hold-count" id="holdCount">0</span>
+          </div>
+          <div class="hold-tray-list" id="holdList">
+            <div class="hold-empty">No held bills</div>
           </div>
         </div>
       </div>
@@ -77,6 +90,10 @@
       </div>
 
       <div class="cart-footer">
+        <div class="customer-ledger" id="customerLedgerSummary">
+          <span class="ledger-name">Customer: Walk-in</span>
+          <span class="ledger-points">Loyalty: -</span>
+        </div>
         <div class="total-row">
           <span class="total-label">Total</span>
           <div class="total-dots"></div>
@@ -98,6 +115,10 @@
           <button class="pay-btn credit" id="creditBtn" disabled>
             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
             CREDIT
+          </button>
+          <button class="pay-btn hold-sale wide" id="holdSaleBtn">
+            <svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            HOLD (F11)
           </button>
         </div>
       </div>
@@ -149,14 +170,31 @@
         <input class="field-input" type="number" id="amtReceived" step="0.01" min="0" placeholder="0.00">
       </div>
       <div class="quick-btns">
-        <button class="quick-btn" data-add="100">+100</button>
-        <button class="quick-btn" data-add="500">+500</button>
-        <button class="quick-btn" data-add="1000">+1,000</button>
-        <button class="quick-btn" data-add="5000">+5,000</button>
+        <button class="quick-btn" data-set="100">LKR 100</button>
+        <button class="quick-btn" data-set="500">LKR 500</button>
+        <button class="quick-btn" data-set="1000">LKR 1000</button>
+        <button class="quick-btn" data-set="5000">LKR 5000</button>
+        <button class="quick-btn exact-btn" data-set="exact">Exact</button>
+      </div>
+      <div class="cash-numpad" id="cashNumpad">
+        <button class="np-btn" data-key="7">7</button>
+        <button class="np-btn" data-key="8">8</button>
+        <button class="np-btn" data-key="9">9</button>
+        <button class="np-btn alt" data-key="bksp">⌫</button>
+        <button class="np-btn" data-key="4">4</button>
+        <button class="np-btn" data-key="5">5</button>
+        <button class="np-btn" data-key="6">6</button>
+        <button class="np-btn alt" data-key="clear">C</button>
+        <button class="np-btn" data-key="1">1</button>
+        <button class="np-btn" data-key="2">2</button>
+        <button class="np-btn" data-key="3">3</button>
+        <button class="np-btn" data-key=".">.</button>
+        <button class="np-btn wide" data-key="0">0</button>
+        <button class="np-btn" data-key="00">00</button>
       </div>
       <div class="divider"></div>
-      <div class="pay-row">
-        <span class="pay-row-label">Change</span>
+      <div class="change-due-box">
+        <span class="change-due-label">CHANGE DUE</span>
         <span class="pay-row-val change" id="changeAmt">LKR 0.00</span>
       </div>
     </div>
@@ -192,6 +230,26 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="overrideModal">
+  <div class="modal-box" style="max-width:430px">
+    <div class="modal-top">
+      <div class="modal-title">Stock Override</div>
+      <button class="modal-close" id="closeOverrideModal"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="walkin-tag" style="border-color:var(--warning);color:var(--warning)">
+        <svg viewBox="0 0 24 24"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        <span id="overrideMessage">Low stock detected</span>
+      </div>
+      <p style="font-size:13px;color:var(--text2);margin-top:14px">Continue with supervisor-approved override and keep an audit trail?</p>
+    </div>
+    <div class="modal-actions">
+      <button class="mact-btn cancel" id="cancelOverrideBtn">Cancel</button>
+      <button class="mact-btn confirm" id="confirmOverrideBtn">Override and Continue</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="saleCompleteModal">
   <div class="sale-complete-box">
     <div class="sc-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
@@ -215,4 +273,3 @@
 <script src="../assets/js/sales.js"></script>
 </body>
 </html>
-

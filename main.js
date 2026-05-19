@@ -196,12 +196,43 @@ ipcMain.handle('restore-database', async () => {
 });
 
 ipcMain.handle('add-product', async (event, p) => {
-    const result = await runAsync(
-        `INSERT INTO products (barcode, name, category_id, cost_price, selling_price, current_stock, unit_type, expiry_date)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [p.barcode, p.name, p.categoryId, p.cost, p.price, p.stock, p.unit, p.expiry]
-    );
-    return { id: result.lastID };
+    return withTransaction(async () => {
+        const result = await runAsync(
+            `INSERT INTO products (barcode, name, category_id, cost_price, selling_price, current_stock, unit_type, expiry_date, alert_level, is_weighted)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                p.barcode,
+                p.name,
+                p.categoryId,
+                Number(p.cost || 0),
+                Number(p.price || 0),
+                Number(p.stock || 0),
+                p.unit,
+                p.expiry || null,
+                Number(p.alertLevel || 10),
+                p.isWeighted ? 1 : 0
+            ]
+        );
+
+        const openingStock = Number(p.stock || 0);
+        if (openingStock > 0) {
+            await runAsync(
+                `INSERT INTO inventory_batches (product_id, batch_code, received_qty, remaining_qty, cost_price, selling_price, expiry_date)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [
+                    result.lastID,
+                    `OPEN-${result.lastID}-${Date.now()}`,
+                    openingStock,
+                    openingStock,
+                    Number(p.cost || 0),
+                    Number(p.price || 0),
+                    p.expiry || null
+                ]
+            );
+        }
+
+        return { id: result.lastID };
+    });
 });
 
 ipcMain.handle('get-products', async () => allAsync('SELECT * FROM products'));
@@ -220,22 +251,68 @@ ipcMain.handle('delete-product', async (event, id) => {
 });
 
 ipcMain.handle('add-stock', async (event, { productId, quantity, costPrice, sellingPrice, expiryDate }) => {
-    await runAsync(
-        'UPDATE products SET current_stock = current_stock + ?, cost_price = ?, selling_price = ?, expiry_date = ? WHERE id = ?',
-        [quantity, costPrice, sellingPrice, expiryDate, productId]
-    );
-    return { success: true };
+    return withTransaction(async () => {
+        const qty = Number(quantity || 0);
+        if (qty <= 0) throw new Error('Stock quantity must be greater than zero.');
+
+        await runAsync(
+            `INSERT INTO inventory_batches (product_id, batch_code, received_qty, remaining_qty, cost_price, selling_price, expiry_date)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+                productId,
+                `GRN-${productId}-${Date.now()}`,
+                qty,
+                qty,
+                Number(costPrice || 0),
+                Number(sellingPrice || 0),
+                expiryDate || null
+            ]
+        );
+
+        await runAsync(
+            'UPDATE products SET current_stock = current_stock + ?, cost_price = ?, selling_price = ?, expiry_date = ? WHERE id = ?',
+            [qty, Number(costPrice || 0), Number(sellingPrice || 0), expiryDate || null, productId]
+        );
+        return { success: true };
+    });
 });
 
 ipcMain.handle('discard-stock', async (event, { productId, quantity }) => {
-    const product = await getAsync('SELECT current_stock FROM products WHERE id = ?', [productId]);
-    if (!product) throw new Error('Product not found');
-    const newStock = Math.max(0, Number(product.current_stock || 0) - Number(quantity || 0));
-    await runAsync(
-        'UPDATE products SET current_stock = ? WHERE id = ?',
-        [newStock, productId]
-    );
-    return { success: true, newStock };
+    return withTransaction(async () => {
+        const discardQty = Number(quantity || 0);
+        if (discardQty <= 0) throw new Error('Discard quantity must be greater than zero.');
+
+        await ensureLegacyBatchCoverage(productId);
+        let needed = discardQty;
+
+        const batches = await allAsync(
+            `SELECT id, remaining_qty
+             FROM inventory_batches
+             WHERE product_id = ? AND remaining_qty > 0
+             ORDER BY CASE WHEN expiry_date IS NULL OR expiry_date = '' THEN 1 ELSE 0 END ASC,
+                      expiry_date ASC,
+                      created_at ASC,
+                      id ASC`,
+            [productId]
+        );
+
+        for (let i = 0; i < batches.length && needed > 0; i += 1) {
+            const b = batches[i];
+            const takeQty = Math.min(needed, Number(b.remaining_qty || 0));
+            if (takeQty <= 0) continue;
+            await runAsync('UPDATE inventory_batches SET remaining_qty = remaining_qty - ? WHERE id = ?', [takeQty, b.id]);
+            needed -= takeQty;
+        }
+
+        const actualDiscard = discardQty - Math.max(0, needed);
+        await runAsync(
+            'UPDATE products SET current_stock = MAX(0, current_stock - ?) WHERE id = ?',
+            [actualDiscard, productId]
+        );
+
+        const product = await getAsync('SELECT current_stock FROM products WHERE id = ?', [productId]);
+        return { success: true, newStock: Number(product?.current_stock || 0), discarded: actualDiscard };
+    });
 });
 
 ipcMain.handle('search-barcode', async (event, barcode) => getAsync('SELECT * FROM products WHERE barcode = ?', [barcode]));
@@ -357,22 +434,62 @@ ipcMain.handle('save-sale', async (event, saleData) => withTransaction(async () 
     const finalBillId = saleData.billId || await getNextBillId();
 
     const saleInsert = await runAsync(
-        `INSERT INTO sales (bill_id, customer_id, total_amount, payment_method, received_amount, balance_amount, ref_no, cashier_name)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO sales (bill_id, customer_id, total_amount, payment_method, received_amount, balance_amount, ref_no, cashier_name, gross_profit)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)`,
         [finalBillId, saleData.customerId, saleData.total, saleData.method, saleData.received, saleData.balanceDue, saleData.refNo, saleData.cashier]
     );
 
+    let grossProfitTotal = 0;
+    let overrideCount = 0;
+
     for (const item of saleData.items) {
-        const subtotal = Number(item.qty) * Number(item.price);
-        await runAsync(
+        const qty = Number(item.qty || 0);
+        const unitPrice = Number(item.price || 0);
+        const subtotal = qty * unitPrice;
+
+        const product = await getAsync(
+            'SELECT id, name, cost_price, current_stock FROM products WHERE id = ?',
+            [item.id]
+        );
+        if (!product) throw new Error(`Product not found (ID: ${item.id})`);
+
+        const saleItemInsert = await runAsync(
             `INSERT INTO sale_items (sale_id, product_id, product_name, quantity, unit_price, subtotal)
              VALUES (?, ?, ?, ?, ?, ?)`,
-            [saleInsert.lastID, item.id, item.name, item.qty, item.price, subtotal]
+            [saleInsert.lastID, item.id, item.name, qty, unitPrice, subtotal]
+        );
+
+        const allocation = await allocateFifoBatchesForSale({
+            saleId: saleInsert.lastID,
+            saleItemId: saleItemInsert.lastID,
+            product,
+            requestedQty: qty,
+            allowStockOverride: Boolean(saleData.allowStockOverride),
+            cashierName: saleData.cashier,
+            overrideNote: saleData.overrideReason || null
+        });
+
+        const itemCostTotal = Number(allocation.costTotal || 0);
+        const itemProfit = subtotal - itemCostTotal;
+        grossProfitTotal += itemProfit;
+        if (allocation.allocations.some((x) => x.override)) overrideCount += 1;
+
+        await runAsync(
+            `UPDATE sale_items
+             SET cost_per_unit = ?, cost_total = ?, profit_total = ?, batch_trace = ?
+             WHERE id = ?`,
+            [
+                qty > 0 ? (itemCostTotal / qty) : 0,
+                itemCostTotal,
+                itemProfit,
+                JSON.stringify(allocation.allocations),
+                saleItemInsert.lastID
+            ]
         );
 
         const stockUpdate = saleData.allowStockOverride
-            ? await runAsync('UPDATE products SET current_stock = current_stock - ? WHERE id = ?', [item.qty, item.id])
-            : await runAsync('UPDATE products SET current_stock = current_stock - ? WHERE id = ? AND current_stock >= ?', [item.qty, item.id, item.qty]);
+            ? await runAsync('UPDATE products SET current_stock = current_stock - ? WHERE id = ?', [qty, item.id])
+            : await runAsync('UPDATE products SET current_stock = current_stock - ? WHERE id = ? AND current_stock >= ?', [qty, item.id, qty]);
         if (stockUpdate.changes !== 1) throw new Error(`Failed to update stock for product ${item.name}`);
     }
 
@@ -380,38 +497,202 @@ ipcMain.handle('save-sale', async (event, saleData) => withTransaction(async () 
         await runAsync('UPDATE customers SET balance = COALESCE(balance, 0) + ? WHERE id = ?', [saleData.balanceDue, saleData.customerId]);
     }
 
-    return { success: true, id: saleInsert.lastID, billId: finalBillId };
+    await runAsync('UPDATE sales SET gross_profit = ? WHERE id = ?', [grossProfitTotal, saleInsert.lastID]);
+
+    return {
+        success: true,
+        id: saleInsert.lastID,
+        billId: finalBillId,
+        grossProfit: grossProfitTotal,
+        stockOverrideUsed: overrideCount > 0
+    };
 }));
 
 function buildThermalReceiptHtml(payload) {
     const itemsHtml = (payload.items || []).map((item) => {
         const subtotal = Number(item.qty || 0) * Number(item.price || 0);
-        return `<tr><td>${item.name}</td><td style="text-align:center">${item.qty}</td><td style="text-align:right">${subtotal.toFixed(2)}</td></tr>`;
+        return `
+          <tr>
+            <td style="padding:3px 0; word-break:break-word">${item.name}</td>
+            <td style="padding:3px 0; text-align:center">${Number(item.qty || 0).toFixed(2).replace(/\\.00$/, '')}</td>
+            <td style="padding:3px 0; text-align:right">${subtotal.toFixed(2)}</td>
+          </tr>`;
     }).join('');
+
+    const paidAmount = Number(payload.received || payload.total || 0);
+    const totalAmount = Number(payload.total || 0);
+    const changeDue = Math.max(0, paidAmount - totalAmount);
+
     return `
-      <div style="font-family: 'Noto Sans Sinhala','Iskoola Pota','Manrope',sans-serif; width: 280px; padding: 8px; font-size: 11px; color: #111;">
-        <h3 style="margin:0;text-align:center;">QuickPOS</h3>
-        <p style="margin:2px 0 8px 0;text-align:center;">THERMAL RECEIPT</p>
-        <hr />
-        <p style="margin:2px 0;">Bill: ${payload.billId || '-'}</p>
+      <div style="font-family: 'Noto Sans Sinhala','Iskoola Pota','Manrope',sans-serif; width: 302px; max-width: 302px; padding: 8px 10px; font-size: 11px; color: #111;">
+        <div style="text-align:center; margin-bottom:6px;">
+          <div style="font-size:17px; font-weight:800; letter-spacing:.2px;">QuickPOS Supermarket</div>
+          <div style="font-size:10px; margin-top:2px;">80mm Digital Thermal Receipt</div>
+        </div>
+        <div style="border-top:1px dashed #000; margin:6px 0;"></div>
+        <p style="margin:2px 0;">Bill: <strong>${payload.billId || '-'}</strong></p>
         <p style="margin:2px 0;">Cashier: ${payload.cashier || 'Cashier'}</p>
         <p style="margin:2px 0;">Date: ${new Date(payload.timestamp || Date.now()).toLocaleString()}</p>
-        <hr />
-        <table style="width:100%; font-size:11px;">
-          <thead><tr><th style="text-align:left;">Item</th><th>Qty</th><th style="text-align:right;">Sub</th></tr></thead>
+        <p style="margin:2px 0;">Payment: ${payload.method || '-'}</p>
+        <div style="border-top:1px dashed #000; margin:6px 0;"></div>
+        <table style="width:100%; font-size:11px; border-collapse:collapse;">
+          <thead><tr><th style="text-align:left;">Item</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Sub</th></tr></thead>
           <tbody>${itemsHtml}</tbody>
         </table>
-        <hr />
-        <p style="margin:2px 0;text-align:right;font-weight:bold;">TOTAL: LKR ${Number(payload.total || 0).toFixed(2)}</p>
-        <p style="text-align:center;margin-top:10px;">Thank you!</p>
+        <div style="border-top:1px solid #000; border-bottom:1px solid #000; margin:8px 0; padding:5px 0;">
+          <p style="margin:2px 0;text-align:right;font-weight:800; font-size:14px;">TOTAL: LKR ${totalAmount.toFixed(2)}</p>
+          <p style="margin:2px 0;text-align:right;">PAID: LKR ${paidAmount.toFixed(2)}</p>
+          <p style="margin:2px 0;text-align:right;">CHANGE: LKR ${changeDue.toFixed(2)}</p>
+        </div>
+        <p style="text-align:center;margin-top:10px; font-size:12px; font-weight:700;">Thank you! Come Again.</p>
       </div>`;
+}
+
+async function ensureLegacyBatchCoverage(productId) {
+    const product = await getAsync(
+        'SELECT id, current_stock, cost_price, selling_price, expiry_date FROM products WHERE id = ?',
+        [productId]
+    );
+    if (!product) return;
+
+    const sumRow = await getAsync(
+        'SELECT COALESCE(SUM(remaining_qty), 0) AS batch_stock FROM inventory_batches WHERE product_id = ?',
+        [productId]
+    );
+
+    const productStock = Number(product.current_stock || 0);
+    const batchStock = Number(sumRow?.batch_stock || 0);
+    const delta = Number((productStock - batchStock).toFixed(6));
+
+    if (delta > 0.000001) {
+        await runAsync(
+            `INSERT INTO inventory_batches (product_id, batch_code, received_qty, remaining_qty, cost_price, selling_price, expiry_date)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+                productId,
+                `LEGACY-${productId}-${Date.now()}`,
+                delta,
+                delta,
+                Number(product.cost_price || 0),
+                Number(product.selling_price || 0),
+                product.expiry_date || null
+            ]
+        );
+    }
+}
+
+async function allocateFifoBatchesForSale({
+    saleId,
+    saleItemId,
+    product,
+    requestedQty,
+    allowStockOverride,
+    cashierName,
+    overrideNote
+}) {
+    await ensureLegacyBatchCoverage(product.id);
+
+    let needed = Number(requestedQty || 0);
+    if (needed <= 0) {
+        return { costTotal: 0, allocations: [], availableStock: 0 };
+    }
+
+    const availableRow = await getAsync(
+        'SELECT COALESCE(SUM(remaining_qty), 0) AS qty FROM inventory_batches WHERE product_id = ?',
+        [product.id]
+    );
+    const availableStock = Number(availableRow?.qty || 0);
+
+    if (availableStock + 0.000001 < needed && !allowStockOverride) {
+        throw new Error(`INSUFFICIENT_STOCK: ${product.name}`);
+    }
+
+    const fifoBatches = await allAsync(
+        `SELECT id, remaining_qty, cost_price, expiry_date, created_at
+         FROM inventory_batches
+         WHERE product_id = ? AND remaining_qty > 0
+         ORDER BY CASE WHEN expiry_date IS NULL OR expiry_date = '' THEN 1 ELSE 0 END ASC,
+                  expiry_date ASC,
+                  created_at ASC,
+                  id ASC`,
+        [product.id]
+    );
+
+    const allocations = [];
+    let costTotal = 0;
+
+    for (let i = 0; i < fifoBatches.length && needed > 0; i += 1) {
+        const batch = fifoBatches[i];
+        const batchRemaining = Number(batch.remaining_qty || 0);
+        if (batchRemaining <= 0) continue;
+
+        const takeQty = Math.min(needed, batchRemaining);
+        if (takeQty <= 0) continue;
+
+        await runAsync('UPDATE inventory_batches SET remaining_qty = remaining_qty - ? WHERE id = ?', [takeQty, batch.id]);
+
+        const costPrice = Number(batch.cost_price || 0);
+        const subtotalCost = takeQty * costPrice;
+        costTotal += subtotalCost;
+
+        await runAsync(
+            `INSERT INTO sale_item_batches (sale_id, sale_item_id, product_id, batch_id, qty, cost_price, subtotal_cost)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [saleId, saleItemId, product.id, batch.id, takeQty, costPrice, subtotalCost]
+        );
+
+        allocations.push({
+            batchId: batch.id,
+            qty: takeQty,
+            costPrice,
+            expiryDate: batch.expiry_date || null
+        });
+
+        needed -= takeQty;
+    }
+
+    if (needed > 0) {
+        if (!allowStockOverride) {
+            throw new Error(`INSUFFICIENT_STOCK: ${product.name}`);
+        }
+
+        const fallbackCostPrice = Number(product.cost_price || 0);
+        const overrideSubtotalCost = needed * fallbackCostPrice;
+        costTotal += overrideSubtotalCost;
+
+        await runAsync(
+            `INSERT INTO sale_item_batches (sale_id, sale_item_id, product_id, batch_id, qty, cost_price, subtotal_cost)
+             VALUES (?, ?, ?, NULL, ?, ?, ?)`,
+            [saleId, saleItemId, product.id, needed, fallbackCostPrice, overrideSubtotalCost]
+        );
+
+        await runAsync(
+            `INSERT INTO stock_override_audit (sale_id, product_id, requested_qty, available_qty, override_qty, cashier_name, note)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [saleId, product.id, Number(requestedQty || 0), availableStock, needed, cashierName || 'Cashier', overrideNote || null]
+        );
+
+        allocations.push({
+            batchId: null,
+            qty: needed,
+            costPrice: fallbackCostPrice,
+            override: true
+        });
+        needed = 0;
+    }
+
+    return { costTotal, allocations, availableStock };
 }
 
 ipcMain.handle('export-thermal-receipt-pdf', async (event, payload) => {
     const win = new BrowserWindow({ show: false, webPreferences: { nodeIntegration: false, contextIsolation: true } });
-    const html = `<!doctype html><html><body>${buildThermalReceiptHtml(payload)}</body></html>`;
+    const html = `<!doctype html><html><body style="margin:0;padding:0;background:#fff;">${buildThermalReceiptHtml(payload)}</body></html>`;
     await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
-    const pdfData = await win.webContents.printToPDF({ printBackground: true, pageSize: 'A4' });
+    const pdfData = await win.webContents.printToPDF({
+        printBackground: true,
+        margins: { top: 0, bottom: 0, left: 0, right: 0 },
+        pageSize: { width: 80000, height: 220000 }
+    });
     win.close();
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
     const defaultPath = path.join(os.homedir(), 'Documents', `receipt-${payload.billId || stamp}.pdf`);
@@ -419,6 +700,25 @@ ipcMain.handle('export-thermal-receipt-pdf', async (event, payload) => {
     if (save.canceled || !save.filePath) return { success: false, cancelled: true };
     fs.writeFileSync(save.filePath, pdfData);
     return { success: true, path: save.filePath };
+});
+
+ipcMain.handle('generate-thermal-receipt-pdf-auto', async (event, payload) => {
+    const win = new BrowserWindow({ show: false, webPreferences: { nodeIntegration: false, contextIsolation: true } });
+    const html = `<!doctype html><html><body style="margin:0;padding:0;background:#fff;">${buildThermalReceiptHtml(payload)}</body></html>`;
+    await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    const pdfData = await win.webContents.printToPDF({
+        printBackground: true,
+        margins: { top: 0, bottom: 0, left: 0, right: 0 },
+        pageSize: { width: 80000, height: 220000 }
+    });
+    win.close();
+
+    const outDir = path.join(os.homedir(), 'Documents', 'QuickPOS', 'ThermalReceipts');
+    fs.mkdirSync(outDir, { recursive: true });
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const outPath = path.join(outDir, `receipt-${payload.billId || stamp}.pdf`);
+    fs.writeFileSync(outPath, pdfData);
+    return { success: true, path: outPath };
 });
 
 ipcMain.handle('print-thermal-receipt', async (event, payload) => {
@@ -434,7 +734,7 @@ ipcMain.handle('print-thermal-receipt', async (event, payload) => {
             silent: true,
             printBackground: true,
             margins: { marginType: 'none' },
-            pageSize: { width: 80000, height: 297000 }
+            pageSize: { width: 80000, height: 220000 }
         }, (success, failureReason) => {
             printWin.close();
             resolve({ success, failureReason });
@@ -451,6 +751,10 @@ ipcMain.handle('export-shift-summary-pdf', async (event, summary) => {
         <tr><td style="padding:8px;border:1px solid #dbe1ea">Card Sales</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right">LKR ${Number(summary.cardTotal || 0).toFixed(2)}</td></tr>
         <tr><td style="padding:8px;border:1px solid #dbe1ea">Credit Sales</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right">LKR ${Number(summary.creditTotal || 0).toFixed(2)}</td></tr>
         <tr><td style="padding:8px;border:1px solid #dbe1ea">Items Sold</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right">${Number(summary.itemsSold || 0).toFixed(0)}</td></tr>
+        <tr><td style="padding:8px;border:1px solid #dbe1ea">Opening Float</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right">LKR ${Number(summary.openingFloat || 0).toFixed(2)}</td></tr>
+        <tr><td style="padding:8px;border:1px solid #dbe1ea">Expected Drawer</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right">LKR ${Number(summary.expectedDrawer || 0).toFixed(2)}</td></tr>
+        <tr><td style="padding:8px;border:1px solid #dbe1ea">Actual Drawer</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right">LKR ${Number(summary.actualDrawer || 0).toFixed(2)}</td></tr>
+        <tr><td style="padding:8px;border:1px solid #dbe1ea">Variance</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right; color:${Number(summary.variance || 0) === 0 ? '#111' : '#dc2626'}">LKR ${Number(summary.variance || 0).toFixed(2)}</td></tr>
         <tr><td style="padding:8px;border:1px solid #dbe1ea;font-weight:700">Total Revenue</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right;font-weight:700">LKR ${Number(summary.revenueTotal || 0).toFixed(2)}</td></tr>
       </table>
     </body></html>`;
@@ -468,6 +772,30 @@ ipcMain.handle('export-shift-summary-pdf', async (event, summary) => {
     fs.writeFileSync(save.filePath, pdfData);
     return { success: true, path: save.filePath };
 });
+
+ipcMain.handle('record-shift-reconciliation', async (event, payload) => withTransaction(async () => {
+    const result = await runAsync(
+        `INSERT INTO shift_reconciliations (
+            cashier_name, shift_start, shift_end, opening_float, cash_sales, card_sales, credit_sales,
+            total_sales, expected_drawer, actual_drawer, variance, items_sold, notes
+         ) VALUES (?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+            payload.cashierName || 'Cashier',
+            payload.shiftStart || null,
+            Number(payload.openingFloat || 0),
+            Number(payload.cashTotal || 0),
+            Number(payload.cardTotal || 0),
+            Number(payload.creditTotal || 0),
+            Number(payload.revenueTotal || 0),
+            Number(payload.expectedDrawer || 0),
+            Number(payload.actualDrawer || 0),
+            Number(payload.variance || 0),
+            Number(payload.itemsSold || 0),
+            payload.notes || null
+        ]
+    );
+    return { success: true, id: result.lastID };
+}));
 
 ipcMain.handle('record-credit-payment', async (event, paymentData) => withTransaction(async () => {
     const sale = await getAsync('SELECT * FROM sales WHERE id = ? AND payment_method = ?', [paymentData.saleId, 'Credit']);
@@ -490,7 +818,7 @@ ipcMain.handle('record-credit-payment', async (event, paymentData) => withTransa
 
 ipcMain.handle('get-sales-history', async () => {
     const sales = await allAsync('SELECT * FROM sales ORDER BY timestamp DESC');
-    const items = await allAsync('SELECT sale_id, product_name, product_id, quantity, subtotal FROM sale_items');
+    const items = await allAsync('SELECT sale_id, product_name, product_id, quantity, unit_price, subtotal, cost_total, profit_total, batch_trace FROM sale_items');
     const itemsBySaleId = {};
     for (let i = 0; i < items.length; i++) {
         const item = items[i];

@@ -2,6 +2,11 @@
   'use strict';
 
   let isNavigating = false;
+  const CASHIER_SIDEBAR_PREF_KEY = 'quickpos-cashier-sidebar-hidden';
+
+  function isMobileSidebarViewport() {
+    return window.matchMedia('(max-width: 1024px)').matches;
+  }
 
   function getCurrentUser() {
     const raw = localStorage.getItem('quickpos-user') || localStorage.getItem('quickposUser');
@@ -51,6 +56,7 @@
       const actions = options.actions || '';
       const topbarContainer = document.getElementById('topbar-container');
       const user = getCurrentUser();
+      const isCashier = user.role === 'cashier';
       const avatarSeed = String(user.name || user.username || 'U').trim();
       const avatarText = avatarSeed.slice(0, 2).toUpperCase();
 
@@ -88,20 +94,81 @@
 
         // Bind events after HTML is set
         const toggleBtn = document.getElementById('globalMenuToggle');
+
+        const syncCashierSidebarPreference = () => {
+          if (!isCashier) return;
+          if (isMobileSidebarViewport()) {
+            document.body.classList.remove('sidebar-hidden');
+            return;
+          }
+          const hiddenPref = localStorage.getItem(CASHIER_SIDEBAR_PREF_KEY) === '1';
+          document.body.classList.toggle('sidebar-hidden', hiddenPref);
+        };
+
+        const updateMenuToggleVisual = () => {
+          if (!toggleBtn) return;
+          const sidebar = document.querySelector('.sidebar');
+          const isOpen = isMobileSidebarViewport()
+            ? !!(sidebar && sidebar.classList.contains('open'))
+            : !(isCashier && document.body.classList.contains('sidebar-hidden'));
+          toggleBtn.title = isOpen ? 'Hide Menu' : 'Show Menu';
+          toggleBtn.classList.toggle('is-collapsed', !isOpen);
+        };
+
+        const setSidebarVisible = (visible) => {
+          const sidebar = document.querySelector('.sidebar');
+          if (isMobileSidebarViewport()) {
+            if (sidebar) sidebar.classList.toggle('open', visible);
+            updateMenuToggleVisual();
+            return;
+          }
+
+          if (!isCashier) {
+            updateMenuToggleVisual();
+            return;
+          }
+
+          document.body.classList.toggle('sidebar-hidden', !visible);
+          if (sidebar) sidebar.classList.remove('open');
+          localStorage.setItem(CASHIER_SIDEBAR_PREF_KEY, visible ? '0' : '1');
+          updateMenuToggleVisual();
+        };
+
+        if (isCashier) {
+          document.body.classList.add('sidebar-collapsible');
+          syncCashierSidebarPreference();
+        } else {
+          document.body.classList.remove('sidebar-collapsible');
+          document.body.classList.remove('sidebar-hidden');
+        }
+
         if (toggleBtn) {
+          updateMenuToggleVisual();
           toggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             const sidebar = document.querySelector('.sidebar');
-            if (sidebar) sidebar.classList.toggle('open');
+            const currentlyVisible = isMobileSidebarViewport()
+              ? !!(sidebar && sidebar.classList.contains('open'))
+              : !(isCashier && document.body.classList.contains('sidebar-hidden'));
+            setSidebarVisible(!currentlyVisible);
           });
         }
 
         document.addEventListener('click', (e) => {
           const sidebar = document.querySelector('.sidebar');
           const toggle = document.getElementById('globalMenuToggle');
+          if (!isMobileSidebarViewport()) return;
           if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && (!toggle || !toggle.contains(e.target))) {
             sidebar.classList.remove('open');
+            updateMenuToggleVisual();
           }
+        });
+
+        window.addEventListener('resize', () => {
+          syncCashierSidebarPreference();
+          const sidebar = document.querySelector('.sidebar');
+          if (sidebar && isMobileSidebarViewport()) sidebar.classList.remove('open');
+          updateMenuToggleVisual();
         });
 
         const bell = document.getElementById('notifBell');
@@ -198,9 +265,9 @@
           <a href="cashier_hub.html" class="menu-item cashier-only" data-page="cashier_hub"><i class="fa-solid fa-border-all"></i> Cashier Hub</a>
           <a href="sales.html" class="menu-item cashier-only" data-page="sales"><i class="fa-solid fa-cash-register"></i> POS Terminal</a>
           <a href="sales.html" class="menu-item owner-sale-link" data-page="sales"><i class="fa-solid fa-cart-plus"></i> Make a Sale</a>
-          <a href="categories.html" class="menu-item" data-page="categories"><i class="fa-solid fa-tags"></i> Categories</a>
-          <a href="products.html" class="menu-item" data-page="products"><i class="fa-solid fa-box-open"></i> Products</a>
-          <a href="inventory.html" class="menu-item" data-page="inventory"><i class="fa-solid fa-warehouse"></i> Inventory <span id="lowStockBadge" style="display:none;margin-left:auto;padding:2px 8px;border-radius:999px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;"></span></a>
+          <a href="categories.html" class="menu-item cashier-hide" data-page="categories"><i class="fa-solid fa-tags"></i> Categories</a>
+          <a href="products.html" class="menu-item cashier-hide" data-page="products"><i class="fa-solid fa-box-open"></i> Products</a>
+          <a href="inventory.html" class="menu-item cashier-hide" data-page="inventory"><i class="fa-solid fa-warehouse"></i> Inventory <span id="lowStockBadge" style="display:none;margin-left:auto;padding:2px 8px;border-radius:999px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;"></span></a>
           <a href="customers.html" class="menu-item" data-page="customers"><i class="fa-solid fa-users"></i> Customers</a>
           <a href="ledger.html" class="menu-item" data-page="ledger"><i class="fa-solid fa-book"></i> Credit Ledger</a>
           <a href="sales_reports.html" class="menu-item" data-page="sales_reports"><i class="fa-solid fa-history"></i> Invoice History</a>
@@ -219,6 +286,7 @@
     if (user.role === 'cashier') {
       document.querySelectorAll('.owner-only').forEach((el) => el.style.display = 'none');
       document.querySelectorAll('.owner-sale-link').forEach((el) => el.style.display = 'none');
+      document.querySelectorAll('.cashier-hide').forEach((el) => el.style.display = 'none');
       if (!user.canViewReports) {
         document.querySelectorAll('.reports-allowed').forEach((el) => el.style.display = 'none');
       }

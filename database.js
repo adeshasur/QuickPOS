@@ -83,6 +83,66 @@ db.serialize(() => {
         FOREIGN KEY (product_id) REFERENCES products (id)
     )`);
 
+    db.run(`CREATE TABLE IF NOT EXISTS inventory_batches (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_id INTEGER NOT NULL,
+        batch_code TEXT,
+        received_qty REAL NOT NULL,
+        remaining_qty REAL NOT NULL,
+        cost_price REAL NOT NULL DEFAULT 0,
+        selling_price REAL NOT NULL DEFAULT 0,
+        expiry_date DATE,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS sale_item_batches (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sale_id INTEGER NOT NULL,
+        sale_item_id INTEGER NOT NULL,
+        product_id INTEGER NOT NULL,
+        batch_id INTEGER,
+        qty REAL NOT NULL,
+        cost_price REAL NOT NULL DEFAULT 0,
+        subtotal_cost REAL NOT NULL DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (sale_id) REFERENCES sales (id) ON DELETE CASCADE,
+        FOREIGN KEY (sale_item_id) REFERENCES sale_items (id) ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products (id),
+        FOREIGN KEY (batch_id) REFERENCES inventory_batches (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS stock_override_audit (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sale_id INTEGER,
+        product_id INTEGER NOT NULL,
+        requested_qty REAL NOT NULL,
+        available_qty REAL NOT NULL DEFAULT 0,
+        override_qty REAL NOT NULL DEFAULT 0,
+        cashier_name TEXT,
+        note TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (sale_id) REFERENCES sales (id) ON DELETE SET NULL,
+        FOREIGN KEY (product_id) REFERENCES products (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS shift_reconciliations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        cashier_name TEXT NOT NULL,
+        shift_start DATETIME,
+        shift_end DATETIME DEFAULT CURRENT_TIMESTAMP,
+        opening_float REAL NOT NULL DEFAULT 0,
+        cash_sales REAL NOT NULL DEFAULT 0,
+        card_sales REAL NOT NULL DEFAULT 0,
+        credit_sales REAL NOT NULL DEFAULT 0,
+        total_sales REAL NOT NULL DEFAULT 0,
+        expected_drawer REAL NOT NULL DEFAULT 0,
+        actual_drawer REAL NOT NULL DEFAULT 0,
+        variance REAL NOT NULL DEFAULT 0,
+        items_sold REAL NOT NULL DEFAULT 0,
+        notes TEXT
+    )`);
+
     db.run(`CREATE TABLE IF NOT EXISTS settings (
         key TEXT PRIMARY KEY,
         value TEXT
@@ -98,6 +158,12 @@ db.serialize(() => {
     db.run("ALTER TABLE customers ADD COLUMN loyalty_points INTEGER DEFAULT 0", (err) => {
         // Ignore error if column already exists
     });
+
+    db.run("ALTER TABLE sale_items ADD COLUMN cost_per_unit REAL DEFAULT 0", () => {});
+    db.run("ALTER TABLE sale_items ADD COLUMN cost_total REAL DEFAULT 0", () => {});
+    db.run("ALTER TABLE sale_items ADD COLUMN profit_total REAL DEFAULT 0", () => {});
+    db.run("ALTER TABLE sale_items ADD COLUMN batch_trace TEXT", () => {});
+    db.run("ALTER TABLE sales ADD COLUMN gross_profit REAL DEFAULT 0", () => {});
 }); // end outer db.serialize
 
 
