@@ -314,7 +314,34 @@ window.Singlish = (function () {
     });
 
     inputEl.addEventListener('keydown', (event) => {
-      if (!enabledFn() || !candidates.length) return;
+      if (!enabledFn()) return;
+
+      const commitTokenWithFallback = (appendSpace) => {
+        const token = getCurrentToken();
+        if (!token) return false;
+        const row = candidates[activeIndex];
+        const picked = row ? row.sinhala : convert(token);
+        if (!picked || picked === token) return false;
+        replaceToken(appendSpace ? `${picked} ` : picked);
+        hide();
+        return true;
+      };
+
+      if (event.key === 'Enter' || event.key === 'Tab') {
+        if (commitTokenWithFallback(false)) {
+          event.preventDefault();
+          return;
+        }
+      }
+
+      if (event.key === ' ') {
+        if (commitTokenWithFallback(true)) {
+          event.preventDefault();
+          return;
+        }
+      }
+
+      if (!candidates.length) return;
 
       if (event.key === 'ArrowDown') {
         event.preventDefault();
@@ -327,20 +354,6 @@ window.Singlish = (function () {
         activeIndex = (activeIndex - 1 + candidates.length) % candidates.length;
         render();
         return;
-      }
-      if (event.key === 'Enter' || event.key === 'Tab') {
-        event.preventDefault();
-        const row = candidates[activeIndex];
-        if (!row) return;
-        replaceToken(row.sinhala);
-        hide();
-      }
-      if (event.key === ' ') {
-        const row = candidates[activeIndex];
-        if (!row) return;
-        event.preventDefault();
-        replaceToken(`${row.sinhala} `);
-        hide();
       }
       if (event.key === 'Escape') {
         hide();

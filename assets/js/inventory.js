@@ -68,7 +68,10 @@
 
     function renderStockTable() {
         const currentUser = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
-        const canEditInventory = currentUser && currentUser.role === 'owner';
+        const canEditInventory = currentUser && ['owner', 'cashier'].includes(currentUser.role);
+        const canEditProducts = currentUser && currentUser.role === 'owner';
+        const canDiscardStock = currentUser && currentUser.role === 'owner';
+        const showActionColumn = currentUser && currentUser.role === 'owner';
         let filteredItems = [...products];
         
         // Apply expiry filter
@@ -93,7 +96,7 @@
         if (!tbody) return;
         
         if (filteredItems.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">No stock items found</div></td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="${showActionColumn ? 9 : 8}"><div class="empty-state">No stock items found</div></td></tr>`;
             return;
         }
         
@@ -117,18 +120,19 @@
                             ${daysLeft < 0 ? 'Expired!' : daysLeft > 365 ? 'Stable' : `${daysLeft}d left`}
                         </span>
                     </td>
-                    <td>
+                    ${showActionColumn ? `<td>
                         ${canEditInventory
                           ? `<div style="display:flex;gap:6px;align-items:center;">
-                               <button class="tbl-btn edit" onclick="location.href='products.html'" title="Edit Product">
+                               ${canEditProducts ? `<button class="tbl-btn edit" onclick="location.href='products.html'" title="Edit Product">
                                    <span class="material-symbols-rounded" style="font-size:16px;">edit</span>
-                               </button>
+                               </button>` : ''}
+                               ${canDiscardStock ? `
                                <button class="tbl-btn discard-btn" onclick="window.discardStockBatch(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.current_stock})" title="Discard / Write-off Stock">
                                    <span class="material-symbols-rounded" style="font-size:16px;">delete_sweep</span>
-                               </button>
+                               </button>` : ''}
                              </div>`
                           : '<span style="color: var(--text3); font-size:12px; font-weight:600;">View Only</span>'}
-                    </td>
+                    </td>` : ''}
                 </tr>
             `;
         }).join('');
@@ -283,10 +287,10 @@
                     });
                     
                     if (window.Notifications) {
-                        window.Notifications.showToast(`Restocked ${quantity} units successfully!`, 'success');
+                        window.Notifications.showToast(`Updated inventory by ${quantity} units successfully!`, 'success');
                         await window.Notifications.refresh();
                     } else {
-                        alert('Stock added successfully!');
+                        alert('Inventory updated successfully!');
                     }
 
                     // Reset form and close modal

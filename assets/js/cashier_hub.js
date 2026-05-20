@@ -20,7 +20,21 @@
 
   async function init() {
     if (window.Components && typeof window.Components.init === 'function') {
-      window.Components.init({ title: 'Cashier Hub' });
+      window.Components.init({
+        title: 'Cashier Hub',
+        actions: `
+          <div class="shift-control topbar-shift-control">
+            <div class="shift-control-copy">
+              <span class="shift-eyebrow">Shift</span>
+              <strong id="shiftStatusText">Off</strong>
+            </div>
+            <button class="shift-toggle-btn" id="shiftToggleBtn" type="button" aria-pressed="false">
+              <span class="shift-toggle-track"><span class="shift-toggle-knob"></span></span>
+              <span class="shift-toggle-label">Start</span>
+            </button>
+          </div>
+        `
+      });
     }
 
     const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
@@ -60,6 +74,7 @@
     bindIfPresent('hubCustomerLookupBtn', 'click', openCustomerLookupModal);
     bindIfPresent('hubEndShiftBtn', 'click', openEndShiftFlow);
     bindIfPresent('hubLogoutBtn', 'click', logout);
+    bindIfPresent('shiftToggleBtn', 'click', toggleShift);
     bindIfPresent('resumeHeldBtn', 'click', resumeFirstHeld);
 
     bindIfPresent('asyncModalClose', 'click', () => closeModal(false));
@@ -110,8 +125,9 @@
     state.shiftTargetBills = resolveShiftTarget();
 
     state.mySales = getCashierSalesForToday();
+    syncShiftState();
     updateKpis(state.mySales);
-    renderHourlyTrend(state.mySales);
+    renderHourlyTrend();
     renderPaymentMix(state.mySales);
     renderTargetProgress(state.mySales.length);
     renderRecentHoldBills();
@@ -127,14 +143,6 @@
       if (saleDate !== today) return false;
       return normalizeText(sale.cashier_name) === cashierName;
     });
-  }
-
-  function getShiftStartDate() {
-    const start = state.shiftStart ? new Date(state.shiftStart) : null;
-    if (start && !Number.isNaN(start.getTime())) return start;
-
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
   }
 
   function updateKpis(mySales) {
@@ -154,54 +162,39 @@
     document.getElementById('kpiExpectedVsActual').textContent = `LKR ${fmt(Math.abs(variance))}`;
     document.getElementById('kpiPendingHolds').textContent = String(pendingHolds);
 
-    const varianceStateEl = document.getElementById('kpiExpectedVsActualState');
-    if (varianceStateEl) {
-      if (Math.abs(variance) < 0.01) {
-        varianceStateEl.textContent = 'MATCH';
-        setKpiMetaState(varianceStateEl, 'normal');
-      } else {
-        varianceStateEl.textContent = variance > 0 ? 'OVER' : 'SHORT';
-        setKpiMetaState(varianceStateEl, 'warn');
-      }
-    }
-
-    const holdsStateEl = document.getElementById('kpiPendingHoldsState');
-    if (holdsStateEl) {
-      if (pendingHolds > 0) {
-        holdsStateEl.textContent = `${pendingHolds} WAITING`;
-        setKpiMetaState(holdsStateEl, 'danger');
-      } else {
-        holdsStateEl.textContent = 'CLEAR';
-        setKpiMetaState(holdsStateEl, 'normal');
-      }
-    }
-
     updateShiftDuration();
   }
 
-  function setKpiMetaState(element, stateName) {
-    if (!element) return;
-    element.classList.remove('kpi-meta-normal', 'kpi-meta-warn', 'kpi-meta-danger');
-    if (stateName === 'warn') {
-      element.classList.add('kpi-meta-warn');
-      return;
+  function syncShiftState() {
+    state.shiftStart = localStorage.getItem('quickpos-shift-start');
+    updateShiftToggle();
+  }
+
+  function updateShiftToggle() {
+    const toggle = document.getElementById('shiftToggleBtn');
+    const statusText = document.getElementById('shiftStatusText');
+    const label = toggle ? toggle.querySelector('.shift-toggle-label') : null;
+    const isActive = Boolean(state.shiftStart);
+
+    if (toggle) {
+      toggle.classList.toggle('is-active', isActive);
+      toggle.setAttribute('aria-pressed', String(isActive));
     }
-    if (stateName === 'danger') {
-      element.classList.add('kpi-meta-danger');
-      return;
-    }
-    element.classList.add('kpi-meta-normal');
+    if (statusText) statusText.textContent = isActive ? 'On' : 'Off';
+    if (label) label.textContent = isActive ? 'End' : 'Start';
   }
 
   function updateShiftDuration() {
     if (!state.shiftStart) {
       document.getElementById('kpiDuration').textContent = '00:00:00';
+      updateShiftToggle();
       return;
     }
 
     const start = new Date(state.shiftStart);
     if (Number.isNaN(start.getTime())) {
       document.getElementById('kpiDuration').textContent = '00:00:00';
+      updateShiftToggle();
       return;
     }
 
@@ -210,61 +203,63 @@
     const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
     const s = String(diff % 60).padStart(2, '0');
     document.getElementById('kpiDuration').textContent = `${h}:${m}:${s}`;
+    updateShiftToggle();
   }
 
-  function renderHourlyTrend(mySales) {
+  function renderHourlyTrend() {
     const chart = document.getElementById('hourlyChart');
     const axis = document.getElementById('hourlyAxis');
     const empty = document.getElementById('hourlyChartEmpty');
     const peakBadge = document.getElementById('hourlyPeakBadge');
+    const legend = document.getElementById('hourlyLegend');
 
-    if (!chart || !axis || !empty || !peakBadge) return;
+    if (!chart || !axis || !empty || !peakBadge || !legend) return;
 
     const now = new Date();
-    const shiftStart = getShiftStartDate();
-    const bucketStart = new Date(shiftStart);
-    bucketStart.setMinutes(0, 0, 0);
+    const today = localDateKey(now);
+    const yesterdayDate = new Date(now);
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterday = localDateKey(yesterdayDate);
+    const cashierName = normalizeText(state.user.name);
 
-    const bucketEnd = new Date(now);
-    bucketEnd.setMinutes(0, 0, 0);
+    const todayValues = Array(24).fill(0);
+    const yesterdayValues = Array(24).fill(0);
 
-    const buckets = [];
-    const cursor = new Date(bucketStart);
-    while (cursor <= bucketEnd && buckets.length < 24) {
-      buckets.push({
-        key: cursor.getTime(),
-        label: `${String(cursor.getHours()).padStart(2, '0')}:00`,
-        value: 0
-      });
-      cursor.setHours(cursor.getHours() + 1);
-    }
+    state.sales.forEach((sale) => {
+      if (normalizeText(sale.cashier_name) !== cashierName) return;
 
-    const bucketIndex = new Map(buckets.map((bucket, index) => [bucket.key, index]));
-    mySales.forEach((sale) => {
       const stamp = new Date(sale.timestamp || sale.date || Date.now());
       if (Number.isNaN(stamp.getTime())) return;
-      if (stamp < shiftStart || stamp > now) return;
 
-      stamp.setMinutes(0, 0, 0);
-      const key = stamp.getTime();
-      if (!bucketIndex.has(key)) return;
-      buckets[bucketIndex.get(key)].value += Number(sale.total_amount || 0);
+      const dateKey = localDateKey(stamp);
+      const hour = stamp.getHours();
+      const amount = Number(sale.total_amount || 0);
+
+      if (dateKey === today) todayValues[hour] += amount;
+      if (dateKey === yesterday) yesterdayValues[hour] += amount;
     });
 
-    const visibleBuckets = buckets.length > 10 ? buckets.slice(-10) : buckets;
-    const values = visibleBuckets.map((bucket) => bucket.value);
-    const maxValue = Math.max(...values, 1);
-
-    const hasSales = values.some((value) => value > 0);
+    const allValues = [...todayValues, ...yesterdayValues];
+    const maxValue = Math.max(...allValues, 1);
+    const todayTotal = todayValues.reduce((sum, value) => sum + value, 0);
+    const yesterdayTotal = yesterdayValues.reduce((sum, value) => sum + value, 0);
+    const hasSales = allValues.some((value) => value > 0);
     empty.classList.toggle('show', !hasSales);
 
-    let peak = { label: '--', value: 0 };
-    visibleBuckets.forEach((bucket) => {
-      if (bucket.value > peak.value) {
-        peak = { label: bucket.label, value: bucket.value };
+    let peak = { label: '--', value: 0, day: 'Today' };
+    todayValues.forEach((value, hour) => {
+      if (value > peak.value) {
+        peak = { label: `${String(hour).padStart(2, '0')}:00`, value, day: 'Today' };
       }
     });
-    peakBadge.textContent = peak.value > 0 ? `Peak: ${peak.label} | LKR ${fmt(peak.value)}` : 'Peak: --';
+    yesterdayValues.forEach((value, hour) => {
+      if (value > peak.value) {
+        peak = { label: `${String(hour).padStart(2, '0')}:00`, value, day: 'Yesterday' };
+      }
+    });
+    peakBadge.textContent = peak.value > 0
+      ? `${peak.day} peak: ${peak.label} | LKR ${fmt(peak.value)}`
+      : `Today: LKR ${fmt(todayTotal)}`;
 
     const width = 700;
     const height = 240;
@@ -274,29 +269,38 @@
     const bottom = 34;
     const chartWidth = width - left - right;
     const chartHeight = height - top - bottom;
-    const stepX = visibleBuckets.length > 1 ? chartWidth / (visibleBuckets.length - 1) : 0;
+    const stepX = chartWidth / 23;
 
-    const points = visibleBuckets.map((bucket, index) => {
+    const buildPoints = (values) => values.map((value, index) => {
       const x = left + (stepX * index);
-      const y = top + (chartHeight - ((bucket.value / maxValue) * chartHeight));
-      return { x, y, value: bucket.value, label: bucket.label };
+      const y = top + (chartHeight - ((value / maxValue) * chartHeight));
+      return { x, y, value, label: `${String(index).padStart(2, '0')}:00` };
     });
 
-    const linePath = points.map((point, idx) => `${idx === 0 ? 'M' : 'L'} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`).join(' ');
-    const areaPath = points.length
-      ? `${linePath} L ${points[points.length - 1].x.toFixed(2)} ${(top + chartHeight).toFixed(2)} L ${points[0].x.toFixed(2)} ${(top + chartHeight).toFixed(2)} Z`
-      : '';
+    const todayPoints = buildPoints(todayValues);
+    const yesterdayPoints = buildPoints(yesterdayValues);
+    const pathFromPoints = (points) => points.map((point, idx) => `${idx === 0 ? 'M' : 'L'} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`).join(' ');
+    const todayPath = pathFromPoints(todayPoints);
+    const yesterdayPath = pathFromPoints(yesterdayPoints);
+    const areaPath = `${todayPath} L ${todayPoints[todayPoints.length - 1].x.toFixed(2)} ${(top + chartHeight).toFixed(2)} L ${todayPoints[0].x.toFixed(2)} ${(top + chartHeight).toFixed(2)} Z`;
 
     const gridLines = [0, 1, 2, 3].map((idx) => {
       const y = top + ((chartHeight / 3) * idx);
       return `<line x1="${left}" y1="${y.toFixed(2)}" x2="${(left + chartWidth).toFixed(2)}" y2="${y.toFixed(2)}" stroke="rgba(148,163,184,0.35)" stroke-dasharray="4 4" />`;
     }).join('');
 
-    const circles = points.map((point) => `
+    const todayCircles = todayPoints.map((point) => `
       <circle cx="${point.x.toFixed(2)}" cy="${point.y.toFixed(2)}" r="4" fill="#ffffff" stroke="var(--primary)" stroke-width="2">
-        <title>${point.label} - LKR ${fmt(point.value)}</title>
+        <title>Today ${point.label} - LKR ${fmt(point.value)}</title>
       </circle>
     `).join('');
+    const yesterdayCircles = yesterdayPoints
+      .filter((_, index) => index % 2 === 0)
+      .map((point) => `
+        <circle cx="${point.x.toFixed(2)}" cy="${point.y.toFixed(2)}" r="3" fill="#ffffff" stroke="#10b981" stroke-width="2">
+          <title>Yesterday ${point.label} - LKR ${fmt(point.value)}</title>
+        </circle>
+      `).join('');
 
     chart.innerHTML = `
       <defs>
@@ -307,14 +311,21 @@
       </defs>
       ${gridLines}
       <path d="${areaPath}" fill="url(#hourAreaGrad)"></path>
-      <path d="${linePath}" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-      ${circles}
+      <path d="${yesterdayPath}" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8 7"></path>
+      <path d="${todayPath}" fill="none" stroke="var(--primary)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      ${yesterdayCircles}
+      ${todayCircles}
     `;
 
-    axis.style.setProperty('--axis-count', String(Math.max(visibleBuckets.length, 1)));
-    axis.innerHTML = visibleBuckets.map((bucket, index) => {
-      const showLabel = visibleBuckets.length <= 6 || index % 2 === 0 || index === visibleBuckets.length - 1;
-      return `<span class="hour-label">${showLabel ? bucket.label : ''}</span>`;
+    legend.innerHTML = `
+      <span><i class="legend-line today"></i>Today: LKR ${fmt(todayTotal)}</span>
+      <span><i class="legend-line yesterday"></i>Yesterday: LKR ${fmt(yesterdayTotal)}</span>
+    `;
+
+    axis.style.setProperty('--axis-count', '24');
+    axis.innerHTML = Array.from({ length: 24 }, (_, hour) => {
+      const showLabel = hour % 3 === 0 || hour === 23;
+      return `<span class="hour-label">${showLabel ? `${String(hour).padStart(2, '0')}:00` : ''}</span>`;
     }).join('');
   }
 
@@ -515,7 +526,21 @@
     subtitle.textContent = 'Ready for fast retail flow';
   }
 
-  async function startSaleFlow() {
+  async function toggleShift() {
+    syncShiftState();
+    if (state.shiftStart) {
+      await openEndShiftFlow();
+      return;
+    }
+
+    const started = await ensureShiftStarted();
+    if (!started) return;
+
+    showToast('Shift started');
+    await refreshData();
+  }
+
+  async function ensureShiftStarted() {
     if (!localStorage.getItem('quickpos-shift-start')) {
       if (!Object.keys(state.settings || {}).length && window.api.getSettings) {
         try {
@@ -536,13 +561,22 @@
         showToast(`Auto shift started (Float: LKR ${fmt(openingFloat)})`);
       } else {
         const amount = await promptNumber('Start New Shift', 'Enter starting cash float (LKR)', '0.00', 'Start Shift');
-        if (amount === null) return;
+        if (amount === null) return false;
         localStorage.setItem('quickpos-shift-start', new Date().toISOString());
         localStorage.setItem('quickpos-shift-float', String(Number(amount || 0)));
         localStorage.setItem('quickpos-drawer-actual', String(Number(amount || 0)));
         state.shiftStart = localStorage.getItem('quickpos-shift-start');
       }
     }
+
+    syncShiftState();
+    updateShiftDuration();
+    return true;
+  }
+
+  async function startSaleFlow() {
+    const started = await ensureShiftStarted();
+    if (!started) return;
 
     window.location.href = 'sales.html';
   }
@@ -668,6 +702,12 @@
   }
 
   async function openEndShiftFlow() {
+    syncShiftState();
+    if (!state.shiftStart) {
+      showToast('Start shift first');
+      return;
+    }
+
     const mySales = getCashierSalesForToday();
 
     let cashTotal = 0;
@@ -724,6 +764,7 @@
     localStorage.removeItem('quickpos-drawer-actual');
     state.shiftStart = null;
 
+    updateShiftToggle();
     updateShiftDuration();
     showToast(`Shift closed. Drawer variance: LKR ${fmt(variance)}`);
     await refreshData();

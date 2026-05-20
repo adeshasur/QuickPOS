@@ -267,7 +267,7 @@
           <a href="sales.html" class="menu-item owner-sale-link" data-page="sales"><i class="fa-solid fa-cart-plus"></i> Make a Sale</a>
           <a href="categories.html" class="menu-item cashier-hide" data-page="categories"><i class="fa-solid fa-tags"></i> Categories</a>
           <a href="products.html" class="menu-item cashier-hide" data-page="products"><i class="fa-solid fa-box-open"></i> Products</a>
-          <a href="inventory.html" class="menu-item cashier-hide" data-page="inventory"><i class="fa-solid fa-warehouse"></i> Inventory <span id="lowStockBadge" style="display:none;margin-left:auto;padding:2px 8px;border-radius:999px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;"></span></a>
+          <a href="inventory.html" class="menu-item" data-page="inventory"><i class="fa-solid fa-warehouse"></i> Inventory <span id="lowStockBadge" style="display:none;margin-left:auto;padding:2px 8px;border-radius:999px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;"></span></a>
           <a href="customers.html" class="menu-item" data-page="customers"><i class="fa-solid fa-users"></i> Customers</a>
           <a href="ledger.html" class="menu-item" data-page="ledger"><i class="fa-solid fa-book"></i> Credit Ledger</a>
           <a href="sales_reports.html" class="menu-item" data-page="sales_reports"><i class="fa-solid fa-history"></i> Invoice History</a>

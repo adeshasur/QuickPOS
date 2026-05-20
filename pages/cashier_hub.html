@@ -43,13 +43,11 @@
           <div class="kpi-icon"><i class="fa-solid fa-scale-balanced"></i></div>
           <span class="kpi-label">Expected vs Actual</span>
           <span class="kpi-value" id="kpiExpectedVsActual">LKR 0.00</span>
-          <span class="kpi-meta kpi-meta-normal" id="kpiExpectedVsActualState">MATCH</span>
         </article>
         <article class="kpi-card glass-card">
           <div class="kpi-icon"><i class="fa-solid fa-layer-group"></i></div>
           <span class="kpi-label">Pending Holds</span>
           <span class="kpi-value" id="kpiPendingHolds">0</span>
-          <span class="kpi-meta kpi-meta-normal" id="kpiPendingHoldsState">CLEAR</span>
         </article>
       </section>
     </section>
@@ -60,14 +58,15 @@
           <div class="panel-head">
             <div>
               <h3>Hourly Sales Trend</h3>
-              <p>Sales from shift start by each hour</p>
+              <p>Full-day hourly sales: today vs yesterday</p>
             </div>
-            <span class="panel-pill" id="hourlyPeakBadge">Peak: --</span>
+            <span class="panel-pill" id="hourlyPeakBadge">Today: LKR 0.00</span>
           </div>
           <div class="line-chart-wrap">
             <svg id="hourlyChart" class="line-chart" viewBox="0 0 700 240" preserveAspectRatio="none"></svg>
-            <div class="chart-empty" id="hourlyChartEmpty">No sales yet in this shift.</div>
+            <div class="chart-empty" id="hourlyChartEmpty">No sales found for today or yesterday.</div>
           </div>
+          <div class="chart-legend" id="hourlyLegend"></div>
           <div class="hourly-axis" id="hourlyAxis"></div>
         </article>
 
