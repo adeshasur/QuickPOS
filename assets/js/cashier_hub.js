@@ -132,6 +132,7 @@
     renderTargetProgress(state.mySales.length);
     renderRecentHoldBills();
     renderTerminalRows(state.mySales);
+    renderCashierGlance(state.mySales);
   }
 
   function getCashierSalesForToday() {
@@ -512,6 +513,32 @@
         </tr>
       `;
     }).join('');
+  }
+
+  function renderCashierGlance(mySales) {
+    const lastBillEl = document.getElementById('glanceLastBill');
+    const avgBillEl = document.getElementById('glanceAvgBill');
+    const itemsSoldEl = document.getElementById('glanceItemsSold');
+    const lowStockEl = document.getElementById('glanceLowStock');
+    if (!lastBillEl || !avgBillEl || !itemsSoldEl || !lowStockEl) return;
+
+    const total = mySales.reduce((sum, sale) => sum + Number(sale.total_amount || 0), 0);
+    const itemsSold = mySales.reduce((sum, sale) => {
+      return sum + (Array.isArray(sale.items)
+        ? sale.items.reduce((itemSum, item) => itemSum + Number(item.quantity || item.qty || 0), 0)
+        : 0);
+    }, 0);
+    const lastSale = [...mySales].sort((a, b) => {
+      return new Date(b.timestamp || b.date || 0) - new Date(a.timestamp || a.date || 0);
+    })[0];
+    const lowStockCount = state.products.filter((product) => {
+      return Number(product.current_stock || 0) <= Number(product.alert_level || 0);
+    }).length;
+
+    lastBillEl.textContent = lastSale ? (lastSale.bill_id || `#${lastSale.id || ''}`) : '--';
+    avgBillEl.textContent = `LKR ${fmt(mySales.length ? total / mySales.length : 0)}`;
+    itemsSoldEl.textContent = formatQty(itemsSold);
+    lowStockEl.textContent = String(lowStockCount);
   }
 
   function updateSubtitle() {

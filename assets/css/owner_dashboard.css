@@ -53,74 +53,94 @@
 .content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
 /* ─── KPI GRID ─── */
-.kpi-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; width:100%; }
+.kpi-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; width:100%; }
 
 .kpi-card {
-  background: var(--surface);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  border-top: none; /* remove top border to look entirely flat, uniform and clean */
-  border-radius: 16px;
-  padding: 18px 16px;
+  --kpi-accent: #2563eb;
+  --kpi-accent-2: #1d4ed8;
+  min-height: 76px;
+  background: linear-gradient(135deg, var(--kpi-accent) 0%, var(--kpi-accent-2) 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 11px 12px;
   position: relative;
   overflow: hidden;
-  transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  transition: transform .22s ease;
+  box-shadow: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px;
+  grid-template-rows: auto auto 1fr;
+  align-items: center;
+  column-gap: 8px;
   animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.kpi-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08); }
+.kpi-card:hover { transform: translateY(-2px); box-shadow: none; }
+
+.kpi-card.blue { --kpi-accent: #2563eb; --kpi-accent-2: #1d4ed8; }
+.kpi-card.green { --kpi-accent: #7c3aed; --kpi-accent-2: #5b21b6; }
+.kpi-card.pink { --kpi-accent: #0891b2; --kpi-accent-2: #0e7490; }
+.kpi-card.teal { --kpi-accent: #16a34a; --kpi-accent-2: #15803d; }
+.kpi-card.amber { --kpi-accent: #f59e0b; --kpi-accent-2: #d97706; }
 
 .kpi-label {
-  font-size: 12px;
-  font-weight: 800; /* Increased weight for premium look */
-  color: var(--text2); /* Darkened from var(--text-light) for high contrast */
+  grid-column: 1;
+  font-size: 9px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.82);
   text-transform: uppercase;
-  letter-spacing: .08em;
-  margin-bottom: 8px;
+  letter-spacing: 0;
+  margin-bottom: 6px;
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
 }
 
 .kpi-label i {
-  font-size: 11px;
-  opacity: 0.9;
+  display: none;
 }
 
 .kpi-val {
-  font-size: 24px;
+  grid-column: 1;
+  font-size: clamp(20px, 1.35vw, 28px);
   font-weight: 800;
-  color: var(--text);
-  font-family: var(--font); /* Render with Manrope typography */
-  letter-spacing: -.03em;
+  color: #ffffff;
+  font-family: var(--font);
+  letter-spacing: 0;
   line-height: 1;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .kpi-meta {
-  font-size: 12px;
+  grid-column: 1 / -1;
+  font-size: 11px;
   display: flex;
   align-items: center;
-  flex-wrap: nowrap; /* keep strictly on one single line */
+  flex-wrap: nowrap;
   gap: 4px;
-  font-weight: 700; /* Increased weight for legibility */
-  color: var(--text2); /* Darkened from var(--text-light) for high contrast */
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.78);
   line-height: 1.4;
-  margin-top: auto; /* push meta to the bottom to align perfectly */
+  margin-top: auto;
+  min-width: 0;
 }
 
 .kpi-sub {
   font-size: 11px;
-  color: var(--text2); /* Darkened from var(--text-3) to boost contrast */
-  font-weight: 600; /* Increased weight */
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 700;
   white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .kpi-sub-separator {
-  color: var(--border2);
+  color: rgba(255, 255, 255, 0.45);
   font-size: 10px;
   margin: 0 2px;
   user-select: none;
@@ -129,8 +149,8 @@
 /* Absolute Floating Trend Badge */
 .kpi-trend-badge {
   position: absolute;
-  top: 18px;
-  right: 18px;
+  top: 8px;
+  right: 50px;
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -139,49 +159,45 @@
   padding: 3px 8px;
   border-radius: 20px;
   z-index: 10;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+  box-shadow: none;
 }
 
 .kpi-trend-badge.up {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
 }
 
 .kpi-trend-badge.down {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
 }
 
 .kpi-icon {
-  position: absolute;
-  bottom: -10px;
-  right: -10px;
-  opacity: .04;
-  transform: rotate(-10deg);
-  transition: all 0.3s ease;
-}
-
-.kpi-card:hover .kpi-icon {
-  opacity: 0.08;
-  transform: rotate(0deg) scale(1.1);
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  opacity: 1;
+  transform: none;
+  transition: none;
 }
 
 .kpi-icon svg {
-  width: 60px;
-  height: 60px;
+  width: 17px;
+  height: 17px;
   stroke: currentColor;
   fill: none;
-  stroke-width: 1.5;
+  stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-
-.kpi-card.blue .kpi-icon { color: var(--primary); }
-.kpi-card.green .kpi-icon { color: var(--success); }
-.kpi-card.pink .kpi-icon { color: #ec4899; }
-.kpi-card.teal .kpi-icon { color: #0d9488; }
-.kpi-card.amber .kpi-icon { color: var(--warning); }
-.kpi-card.purple .kpi-icon { color: var(--purple); }
 
 /* ─── GRID ROW ─── */
 .grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:12px}
