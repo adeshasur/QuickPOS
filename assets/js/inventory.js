@@ -7,6 +7,18 @@
     let searchTerm = "";
 
     const formatCurrency = window.fmtLKR;
+    const SINHALA_PRODUCT_UPDATES = {
+        '001': { name: 'කීරි සම්බා සහල් 5kg', expiryDate: '2027-02-28' },
+        '002': { name: 'නැවුම් කිරි 1L', expiryDate: '2026-05-27' },
+        '003': { name: 'මන්චි ක්‍රීම් ක්‍රැකර් 190g', expiryDate: '2026-11-15' },
+        '004': { name: 'කොකා කෝලා 1.5L', expiryDate: '2026-09-30' },
+        '005': { name: 'රතු ලූනු 1kg', expiryDate: '2026-06-05' },
+        '006': { name: 'ඇන්කර් කිරි පිටි 400g', expiryDate: '2027-01-20' },
+        '007': { name: 'ඇස්ට්‍රා මාගරින් 250g', expiryDate: '2026-08-18' },
+        '008': { name: 'ලයිෆ්බෝයි සබන් 100g', expiryDate: '2028-03-31' },
+        '009': { name: 'සන්සිල්ක් ෂැම්පු 180ml', expiryDate: '2028-12-31' },
+        '010': { name: 'සිලෝන් තේ 200g', expiryDate: '2027-04-30' }
+    };
 
     function formatDate(dateString) {
         if (!dateString) return 'N/A';
@@ -34,12 +46,50 @@
         try {
             categories = await window.api.getCategories();
             products = await window.api.getProducts();
+            await normalizeSinhalaInventoryData();
             populateProductDropdown();
             populateCategoryDropdown();
             renderStockTable();
         } catch (err) {
             console.error('Error loading inventory data:', err);
         }
+    }
+
+    async function normalizeSinhalaInventoryData() {
+        const updates = products
+            .map((product) => {
+                const mapped = SINHALA_PRODUCT_UPDATES[String(product.barcode || '').trim()];
+                if (!mapped) return null;
+                if (product.name === mapped.name && product.expiry_date === mapped.expiryDate) return null;
+
+                return {
+                    ...product,
+                    mappedName: mapped.name,
+                    mappedExpiryDate: mapped.expiryDate
+                };
+            })
+            .filter(Boolean);
+
+        if (!updates.length) return;
+
+        await Promise.all(updates.map((product) => window.api.updateProduct({
+            id: product.id,
+            barcode: product.barcode,
+            name: product.mappedName,
+            categoryId: product.category_id,
+            cost: product.cost_price,
+            price: product.selling_price,
+            alertLevel: product.alert_level,
+            unitType: product.unit_type,
+            isWeighted: Boolean(product.is_weighted),
+            expiryDate: product.mappedExpiryDate
+        })));
+
+        products = products.map((product) => {
+            const mapped = SINHALA_PRODUCT_UPDATES[String(product.barcode || '').trim()];
+            if (!mapped) return product;
+            return { ...product, name: mapped.name, expiry_date: mapped.expiryDate };
+        });
     }
 
     function populateCategoryDropdown() {
