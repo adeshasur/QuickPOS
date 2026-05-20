@@ -50,8 +50,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Handle Logout
     const logoutBtn = document.getElementById('sidebarLogoutBtn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to logout?')) {
+        logoutBtn.addEventListener('click', async () => {
+            const confirmed = window.appConfirm
+                ? await window.appConfirm('Are you sure you want to logout?', {
+                    title: 'Logout',
+                    okText: 'Logout',
+                    cancelText: 'Stay'
+                })
+                : confirm('Are you sure you want to logout?');
+
+            if (confirmed) {
                 localStorage.removeItem('quickpos-user');
                 window.location.href = 'login.html';
             }

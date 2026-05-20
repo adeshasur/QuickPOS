@@ -460,6 +460,103 @@ body.sidebar-collapsible.sidebar-hidden #sidebar-container {
     color: var(--warning);
 }
 
+.app-confirm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.38);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.app-confirm-modal.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.app-confirm-box {
+  width: min(420px, 100%);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 14px;
+  transform: translateY(10px) scale(0.98);
+  transition: transform 0.18s ease;
+}
+
+.app-confirm-modal.open .app-confirm-box {
+  transform: translateY(0) scale(1);
+}
+
+.app-confirm-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--primary-glow);
+  color: var(--primary);
+  font-size: 18px;
+}
+
+.app-confirm-copy h3 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.app-confirm-copy p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: var(--text2);
+}
+
+.app-confirm-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.app-confirm-btn {
+  min-width: 96px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--border2);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.app-confirm-btn.ghost {
+  background: #ffffff;
+  color: var(--text2);
+}
+
+.app-confirm-btn.primary {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.app-confirm-btn:focus-visible {
+  outline: 3px solid rgba(29, 45, 191, 0.18);
+  outline-offset: 2px;
+}
+
 @keyframes pulse-notif {
     0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
     70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }

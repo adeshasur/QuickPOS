@@ -34,6 +34,70 @@
     }, 45);
   }
 
+  function ensureConfirmModal() {
+    let modal = document.getElementById('appConfirmModal');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = 'appConfirmModal';
+    modal.className = 'app-confirm-modal';
+    modal.innerHTML = `
+      <div class="app-confirm-box" role="dialog" aria-modal="true" aria-labelledby="appConfirmTitle">
+        <div class="app-confirm-icon"><i class="fa-solid fa-circle-question"></i></div>
+        <div class="app-confirm-copy">
+          <h3 id="appConfirmTitle">Confirm Action</h3>
+          <p id="appConfirmMessage">Are you sure?</p>
+        </div>
+        <div class="app-confirm-actions">
+          <button type="button" class="app-confirm-btn ghost" id="appConfirmCancel">Cancel</button>
+          <button type="button" class="app-confirm-btn primary" id="appConfirmOk">OK</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  function appConfirm(message, options = {}) {
+    const modal = ensureConfirmModal();
+    const titleEl = modal.querySelector('#appConfirmTitle');
+    const messageEl = modal.querySelector('#appConfirmMessage');
+    const okBtn = modal.querySelector('#appConfirmOk');
+    const cancelBtn = modal.querySelector('#appConfirmCancel');
+
+    titleEl.textContent = options.title || 'Confirm Action';
+    messageEl.textContent = message || 'Are you sure?';
+    okBtn.textContent = options.okText || 'OK';
+    cancelBtn.textContent = options.cancelText || 'Cancel';
+
+    return new Promise((resolve) => {
+      const close = (value) => {
+        modal.classList.remove('open');
+        okBtn.removeEventListener('click', onOk);
+        cancelBtn.removeEventListener('click', onCancel);
+        modal.removeEventListener('click', onBackdrop);
+        document.removeEventListener('keydown', onKeydown);
+        resolve(value);
+      };
+      const onOk = () => close(true);
+      const onCancel = () => close(false);
+      const onBackdrop = (event) => {
+        if (event.target === modal) close(false);
+      };
+      const onKeydown = (event) => {
+        if (event.key === 'Escape') close(false);
+        if (event.key === 'Enter') close(true);
+      };
+
+      okBtn.addEventListener('click', onOk);
+      cancelBtn.addEventListener('click', onCancel);
+      modal.addEventListener('click', onBackdrop);
+      document.addEventListener('keydown', onKeydown);
+      modal.classList.add('open');
+      setTimeout(() => cancelBtn.focus(), 0);
+    });
+  }
+
   function bindSmoothNavigation() {
     document.addEventListener('click', (event) => {
       const link = event.target.closest('a[href]');
@@ -218,6 +282,7 @@
     return `LKR ${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
+  window.appConfirm = appConfirm;
   window.Components = Components;
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -302,8 +367,13 @@
 
     const logoutBtn = document.getElementById('sidebarLogoutBtn');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', () => {
-        if (confirm('Are you sure you want to logout?')) {
+      logoutBtn.addEventListener('click', async () => {
+        const confirmed = await appConfirm('Are you sure you want to logout?', {
+          title: 'Logout',
+          okText: 'Logout',
+          cancelText: 'Stay'
+        });
+        if (confirmed) {
           localStorage.removeItem('quickpos-user');
           smoothNavigate('login.html');
         }
