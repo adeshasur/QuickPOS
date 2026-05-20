@@ -8,22 +8,41 @@
 
     const formatCurrency = window.fmtLKR;
     const SINHALA_PRODUCT_UPDATES = {
-        '001': { name: 'කීරි සම්බා සහල් 5kg', expiryDate: '2027-02-28' },
-        '002': { name: 'නැවුම් කිරි 1L', expiryDate: '2026-05-27' },
+        '001': { name: 'කීරි සම්බා සහල් පැකට් 5kg', expiryDate: '2027-02-28' },
+        '002': { name: 'නැවුම් කිරි බෝතලය 1L', expiryDate: '2026-05-27' },
         '003': { name: 'මන්චි ක්‍රීම් ක්‍රැකර් 190g', expiryDate: '2026-11-15' },
-        '004': { name: 'කොකා කෝලා 1.5L', expiryDate: '2026-09-30' },
+        '004': { name: 'කොකා-කෝලා බෝතලය 1.5L', expiryDate: '2026-09-30' },
         '005': { name: 'රතු ලූනු 1kg', expiryDate: '2026-06-05' },
-        '006': { name: 'ඇන්කර් කිරි පිටි 400g', expiryDate: '2027-01-20' },
-        '007': { name: 'ඇස්ට්‍රා මාගරින් 250g', expiryDate: '2026-08-18' },
-        '008': { name: 'ලයිෆ්බෝයි සබන් 100g', expiryDate: '2028-03-31' },
-        '009': { name: 'සන්සිල්ක් ෂැම්පු 180ml', expiryDate: '2028-12-31' },
-        '010': { name: 'සිලෝන් තේ 200g', expiryDate: '2027-04-30' }
+        '006': { name: 'ඇන්කර් කිරිපිටි පැකට් 400g', expiryDate: '2027-01-20' },
+        '007': { name: 'ඇස්ට්‍රා මාගරින් ටබ් 250g', expiryDate: '2026-08-18' },
+        '008': { name: 'ලයිෆ්බෝයි සබන් කැටය 100g', expiryDate: '2028-03-31' },
+        '009': { name: 'සන්සිල්ක් ෂැම්පු බෝතලය 180ml', expiryDate: '2028-12-31' },
+        '010': { name: 'සිලෝන් තේ කොළ 200g', expiryDate: '2027-04-30' }
+    };
+    const CATEGORY_NAME_MAP = {
+        Groceries: 'සිල්ලර භාණ්ඩ',
+        Dairy: 'කිරි නිෂ්පාදන',
+        Bakery: 'බේකරි',
+        Beverages: 'පානයන්',
+        Vegetables: 'එළවළු',
+        'Personal Care': 'පුද්ගලික සත්කාර',
+        'Rice & Grains': 'සහල් හා ධාන්‍ය',
+        Snacks: 'ස්නැක්ස්'
+    };
+    const UNIT_LABELS = {
+        pkt: 'පැකට්',
+        bottle: 'බෝතල්',
+        kg: 'කි.ග්‍රෑ.',
+        tub: 'ටබ්',
+        bar: 'කැට',
+        pcs: 'ඒකක',
+        units: 'ඒකක'
     };
 
     function formatDate(dateString) {
         if (!dateString) return 'N/A';
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        return date.toLocaleDateString('si-LK', { year: 'numeric', month: 'short', day: 'numeric' });
     }
 
     function getDaysUntilExpiry(expiryDate) {
@@ -37,9 +56,18 @@
     }
 
     function getExpiryStatus(daysLeft) {
-        if (daysLeft < 0) return { status: "Expired", class: "expired", icon: "dangerous" };
-        if (daysLeft <= 30) return { status: "Expiring Soon", class: "expiring", icon: "warning" };
-        return { status: "Good", class: "good", icon: "check_circle" };
+        if (daysLeft < 0) return { status: "කල් ඉකුත්", class: "expired", icon: "dangerous" };
+        if (daysLeft <= 30) return { status: "ඉක්මනින් කල් ඉකුත්", class: "expiring", icon: "warning" };
+        return { status: "හොඳයි", class: "good", icon: "check_circle" };
+    }
+
+    function displayCategoryName(category) {
+        if (!category) return 'වර්ගයක් නැත';
+        return CATEGORY_NAME_MAP[category.name] || category.name;
+    }
+
+    function displayUnit(unitType) {
+        return UNIT_LABELS[String(unitType || 'units').trim()] || unitType || 'ඒකක';
     }
 
     async function loadData() {
@@ -159,15 +187,15 @@
             return `
                 <tr class="${isExpired ? 'expired-row' : ''}">
                     <td><strong>${item.name}</strong></td>
-                    <td>${category ? category.name : 'N/A'}</td>
-                    <td>${item.current_stock} ${item.unit_type || 'units'}</td>
+                    <td>${displayCategoryName(category)}</td>
+                    <td>${item.current_stock} ${displayUnit(item.unit_type)}</td>
                     <td>${formatCurrency(item.cost_price || 0)}</td>
                     <td>${formatCurrency(item.selling_price || 0)}</td>
                     <td>${formatDate(item.expiry_date)}</td>
                     <td><span class="expiry-badge ${expiryInfo.class}">${expiryInfo.status}</span></td>
                     <td>
                         <span class="days-badge ${daysLeft < 0 ? 'expired' : daysLeft <= 30 ? 'expiring' : 'safe'}">
-                            ${daysLeft < 0 ? 'Expired!' : daysLeft > 365 ? 'Stable' : `${daysLeft}d left`}
+                            ${daysLeft < 0 ? 'කල් ඉකුත්' : daysLeft > 365 ? 'ස්ථාවර' : `තව දින ${daysLeft}`}
                         </span>
                     </td>
                     ${showActionColumn ? `<td>
