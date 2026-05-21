@@ -8,6 +8,7 @@
   let deletingId = null;
   let chartInstance = null;
   let activeProductsCount = 0;
+  let sortMode = 'az';
 
   async function openModal(id) { document.getElementById(id).classList.add('open'); }
   async function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -174,7 +175,13 @@
     }
 
     tbody.innerHTML = [...categories]
-      .sort((a, b) => a.name.localeCompare(b.name))
+      .sort((a, b) => {
+        const aCount = counts.get(a.id) || 0;
+        const bCount = counts.get(b.id) || 0;
+        if (sortMode === 'most') return bCount - aCount || a.name.localeCompare(b.name);
+        if (sortMode === 'least') return aCount - bCount || a.name.localeCompare(b.name);
+        return a.name.localeCompare(b.name);
+      })
       .map((cat) => {
         const pCount = counts.get(cat.id) || 0;
         const statusClass = (cat.description === 'Inactive') ? 'inactive' : 'active';
@@ -283,6 +290,13 @@
 
     ['closeModalBtn', 'cancelModalBtn'].forEach((id) => document.getElementById(id).addEventListener('click', () => closeModal('categoryModal')));
     document.getElementById('cancelDeleteBtn').addEventListener('click', () => closeModal('deleteModal'));
+    const sortSelect = document.getElementById('categorySort');
+    if (sortSelect) {
+      sortSelect.addEventListener('change', () => {
+        sortMode = sortSelect.value;
+        render();
+      });
+    }
   }
 
   document.addEventListener('DOMContentLoaded', async () => {

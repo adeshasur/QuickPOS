@@ -352,9 +352,8 @@ tbody tr:last-child td{border-bottom:none}
   min-height: 96px;
   overflow: hidden;
   border: 1px solid rgba(218, 227, 239, 0.96) !important;
-  background:
-    linear-gradient(135deg, rgba(29, 45, 191, 0.08), rgba(16, 185, 129, 0.06) 48%, rgba(255, 152, 0, 0.08)),
-    #ffffff !important;
+  background: #ffffff !important;
+  isolation: isolate;
 }
 
 .category-hero::before {
@@ -362,7 +361,24 @@ tbody tr:last-child td{border-bottom:none}
 }
 
 .category-hero::after {
-  display: none;
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(115deg,
+      rgba(29, 45, 191, 0.14) 0%,
+      rgba(16, 185, 129, 0.13) 34%,
+      rgba(255, 152, 0, 0.16) 66%,
+      rgba(244, 63, 94, 0.11) 100%);
+  background-size: 260% 260%;
+  animation: categoryHeroGradient 9s ease-in-out infinite;
+}
+
+@keyframes categoryHeroGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .hero-eyebrow {
@@ -483,6 +499,36 @@ tbody tr:last-child td{border-bottom:none}
   font-size: 11px;
   font-weight: 800;
   white-space: nowrap;
+}
+
+.sort-select {
+  min-width: 148px;
+  height: 34px;
+  border: 1px solid rgba(29, 45, 191, 0.18);
+  border-radius: 999px;
+  background-color: #eef3ff;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d2dbf' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 7.5 10 12.5 15 7.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px;
+  color: #1d2dbf;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 0 34px 0 14px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  box-shadow: 0 8px 18px rgba(29, 45, 191, 0.08);
+}
+
+.sort-select:hover {
+  background-color: #e7eeff;
+  border-color: rgba(29, 45, 191, 0.28);
+}
+
+.sort-select:focus {
+  box-shadow: 0 0 0 4px rgba(29, 45, 191, 0.1);
 }
 
 .table-scroll {
