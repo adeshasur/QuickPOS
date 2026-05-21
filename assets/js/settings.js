@@ -105,7 +105,7 @@
     const auditEl = document.getElementById('supermarketAuditStats');
     if (!stockEl || !pricingEl || !auditEl) return;
 
-    const [suppliers, reorder, batches, discounts, adjustments, returnsRows, conversions, priceHistory, auditLog] = await Promise.all([
+    const [suppliers, reorder, batches, discounts, adjustments, returnsRows, conversions, priceHistory, auditLog, promotions, heldBills, voidBills, stockCounts, supplierReturns, deadStock, taxCategories, branches] = await Promise.all([
       window.api.getSuppliers ? window.api.getSuppliers() : [],
       window.api.getReorderList ? window.api.getReorderList() : [],
       window.api.getInventoryBatches ? window.api.getInventoryBatches() : [],
@@ -114,7 +114,15 @@
       window.api.getReturns ? window.api.getReturns() : [],
       window.api.getUnitConversions ? window.api.getUnitConversions() : [],
       window.api.getPriceHistory ? window.api.getPriceHistory() : [],
-      window.api.getAuditLog ? window.api.getAuditLog() : []
+      window.api.getAuditLog ? window.api.getAuditLog() : [],
+      window.api.getPromotions ? window.api.getPromotions() : [],
+      window.api.getHeldBills ? window.api.getHeldBills() : [],
+      window.api.getVoidBills ? window.api.getVoidBills() : [],
+      window.api.getStockCounts ? window.api.getStockCounts() : [],
+      window.api.getSupplierReturns ? window.api.getSupplierReturns() : [],
+      window.api.getDeadStockReport ? window.api.getDeadStockReport() : [],
+      window.api.getTaxCategories ? window.api.getTaxCategories() : [],
+      window.api.getBranches ? window.api.getBranches() : []
     ]);
 
     const expiringBatches = (batches || []).filter((batch) => {
@@ -128,16 +136,24 @@
       ${miniMetric('Active Batches', batches.length)}
       ${miniMetric('Expiring Batches', expiringBatches.length)}
       ${miniMetric('Reorder Items', reorder.length)}
+      ${miniMetric('Supplier Returns', supplierReturns.length)}
+      ${miniMetric('Branches', branches.length)}
     `;
     pricingEl.innerHTML = `
       ${miniMetric('Discount Rules', discounts.length)}
+      ${miniMetric('Promotions', promotions.length)}
       ${miniMetric('Unit Conversions', conversions.length)}
       ${miniMetric('Price Changes', priceHistory.length)}
+      ${miniMetric('Tax Categories', taxCategories.length)}
       ${miniMetric('Tax Rate', `${settings.taxPercentage || 0}%`)}
     `;
     auditEl.innerHTML = `
       ${miniMetric('Stock Adjustments', adjustments.length)}
       ${miniMetric('Returns', returnsRows.length)}
+      ${miniMetric('Held Bills', heldBills.length)}
+      ${miniMetric('Void Bills', voidBills.length)}
+      ${miniMetric('Stock Counts', stockCounts.length)}
+      ${miniMetric('Dead Stock Items', deadStock.length)}
       ${miniMetric('Audit Events', auditLog.length)}
       ${miniMetric('Refund Admin PIN', settings.requireAdminForRefund !== 'false' ? 'ON' : 'OFF')}
     `;

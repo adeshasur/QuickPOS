@@ -222,6 +222,174 @@ db.serialize(() => {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
+    db.run(`CREATE TABLE IF NOT EXISTS supplier_returns (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        supplier_id INTEGER,
+        product_id INTEGER NOT NULL,
+        batch_id INTEGER,
+        quantity REAL NOT NULL,
+        reason TEXT,
+        status TEXT DEFAULT 'pending',
+        user_name TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (supplier_id) REFERENCES suppliers (id),
+        FOREIGN KEY (product_id) REFERENCES products (id),
+        FOREIGN KEY (batch_id) REFERENCES inventory_batches (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS purchase_invoices (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        supplier_id INTEGER,
+        invoice_no TEXT,
+        grn_no TEXT,
+        invoice_total REAL DEFAULT 0,
+        received_total REAL DEFAULT 0,
+        status TEXT DEFAULT 'draft',
+        invoice_date DATE,
+        user_name TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (supplier_id) REFERENCES suppliers (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS promotions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        promo_type TEXT NOT NULL,
+        target_type TEXT DEFAULT 'product',
+        target_id INTEGER,
+        buy_qty REAL DEFAULT 0,
+        get_qty REAL DEFAULT 0,
+        discount_type TEXT DEFAULT 'amount',
+        discount_value REAL DEFAULT 0,
+        starts_at DATETIME,
+        ends_at DATETIME,
+        active INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS loyalty_transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        customer_id INTEGER NOT NULL,
+        sale_id INTEGER,
+        points INTEGER NOT NULL DEFAULT 0,
+        transaction_type TEXT NOT NULL,
+        note TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (customer_id) REFERENCES customers (id),
+        FOREIGN KEY (sale_id) REFERENCES sales (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS till_movements (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        movement_type TEXT NOT NULL,
+        amount REAL NOT NULL,
+        reason TEXT,
+        cashier_name TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS sale_payments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sale_id INTEGER NOT NULL,
+        payment_method TEXT NOT NULL,
+        amount REAL NOT NULL,
+        ref_no TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (sale_id) REFERENCES sales (id) ON DELETE CASCADE
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS void_bills (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sale_id INTEGER,
+        bill_id TEXT,
+        reason TEXT,
+        approved_by TEXT,
+        user_name TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (sale_id) REFERENCES sales (id) ON DELETE SET NULL
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS held_bills (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        hold_code TEXT UNIQUE,
+        customer_id INTEGER,
+        cart_json TEXT NOT NULL,
+        note TEXT,
+        cashier_name TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (customer_id) REFERENCES customers (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS tax_categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        rate REAL NOT NULL DEFAULT 0,
+        active INTEGER DEFAULT 1
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS branches (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        address TEXT,
+        phone TEXT,
+        active INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS stock_transfers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        from_branch_id INTEGER,
+        to_branch_id INTEGER,
+        product_id INTEGER NOT NULL,
+        quantity REAL NOT NULL,
+        status TEXT DEFAULT 'pending',
+        note TEXT,
+        user_name TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (from_branch_id) REFERENCES branches (id),
+        FOREIGN KEY (to_branch_id) REFERENCES branches (id),
+        FOREIGN KEY (product_id) REFERENCES products (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS stock_counts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        count_code TEXT UNIQUE,
+        status TEXT DEFAULT 'draft',
+        user_name TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        completed_at DATETIME
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS stock_count_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        stock_count_id INTEGER NOT NULL,
+        product_id INTEGER NOT NULL,
+        system_qty REAL NOT NULL DEFAULT 0,
+        counted_qty REAL NOT NULL DEFAULT 0,
+        variance_qty REAL NOT NULL DEFAULT 0,
+        note TEXT,
+        FOREIGN KEY (stock_count_id) REFERENCES stock_counts (id) ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS shelf_label_queue (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_id INTEGER NOT NULL,
+        label_type TEXT DEFAULT 'price',
+        status TEXT DEFAULT 'pending',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (product_id) REFERENCES products (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS scale_barcode_rules (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        prefix TEXT NOT NULL,
+        product_digits INTEGER DEFAULT 5,
+        value_digits INTEGER DEFAULT 5,
+        value_type TEXT DEFAULT 'weight',
+        active INTEGER DEFAULT 1
+    )`);
+
     db.run(`CREATE TABLE IF NOT EXISTS shift_reconciliations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         cashier_name TEXT NOT NULL,
@@ -272,6 +440,9 @@ db.serialize(() => {
     db.run("ALTER TABLE customers ADD COLUMN credit_limit REAL DEFAULT 0", () => {});
     db.run("ALTER TABLE customers ADD COLUMN credit_due_days INTEGER DEFAULT 30", () => {});
     db.run("ALTER TABLE products ADD COLUMN reorder_qty REAL DEFAULT 0", () => {});
+    db.run("ALTER TABLE products ADD COLUMN tax_category_id INTEGER", () => {});
+    db.run("ALTER TABLE products ADD COLUMN age_restricted INTEGER DEFAULT 0", () => {});
+    db.run("ALTER TABLE products ADD COLUMN age_limit INTEGER DEFAULT 0", () => {});
 }); // end outer db.serialize
 
 

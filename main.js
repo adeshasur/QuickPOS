@@ -758,6 +758,166 @@ ipcMain.handle('get-reorder-list', async () => allAsync(`
 
 ipcMain.handle('get-audit-log', async () => allAsync('SELECT * FROM audit_log ORDER BY created_at DESC LIMIT 500'));
 
+ipcMain.handle('save-promotion', async (event, p) => {
+    const result = await runAsync(
+        `INSERT INTO promotions (name, promo_type, target_type, target_id, buy_qty, get_qty, discount_type, discount_value, starts_at, ends_at, active)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [p.name, p.promoType, p.targetType || 'product', p.targetId || null, Number(p.buyQty || 0), Number(p.getQty || 0), p.discountType || 'amount', Number(p.discountValue || 0), p.startsAt || null, p.endsAt || null, p.active === false ? 0 : 1]
+    );
+    await logAudit('promotion', result.lastID, 'create', p, p.userName);
+    return { success: true, id: result.lastID };
+});
+ipcMain.handle('get-promotions', async () => allAsync('SELECT * FROM promotions ORDER BY active DESC, created_at DESC'));
+
+ipcMain.handle('record-till-movement', async (event, p) => {
+    const amount = Number(p.amount || 0);
+    if (!p.movementType || amount <= 0) throw new Error('Till movement type and amount are required.');
+    const result = await runAsync(
+        'INSERT INTO till_movements (movement_type, amount, reason, cashier_name) VALUES (?, ?, ?, ?)',
+        [p.movementType, amount, p.reason || '', p.cashierName || p.userName || 'System']
+    );
+    await logAudit('till', result.lastID, p.movementType, p, p.userName);
+    return { success: true, id: result.lastID };
+});
+ipcMain.handle('get-till-movements', async () => allAsync('SELECT * FROM till_movements ORDER BY created_at DESC LIMIT 500'));
+
+ipcMain.handle('save-sale-payments', async (event, payload) => {
+    const saleId = Number(payload.saleId || 0);
+    const payments = Array.isArray(payload.payments) ? payload.payments : [];
+    if (!saleId || !payments.length) throw new Error('Sale and payments are required.');
+    await runAsync('DELETE FROM sale_payments WHERE sale_id = ?', [saleId]);
+    for (const p of payments) {
+        await runAsync(
+            'INSERT INTO sale_payments (sale_id, payment_method, amount, ref_no) VALUES (?, ?, ?, ?)',
+            [saleId, p.method, Number(p.amount || 0), p.refNo || '']
+        );
+    }
+    await logAudit('sale', saleId, 'split_payments', payments, payload.userName);
+    return { success: true };
+});
+ipcMain.handle('get-sale-payments', async (event, saleId) => allAsync('SELECT * FROM sale_payments WHERE sale_id = ? ORDER BY id ASC', [saleId]));
+
+ipcMain.handle('void-bill', async (event, payload) => {
+    const sale = payload.saleId
+        ? await getAsync('SELECT * FROM sales WHERE id = ?', [payload.saleId])
+        : await getAsync('SELECT * FROM sales WHERE bill_id = ?', [payload.billId]);
+    if (!sale) throw new Error('Sale not found.');
+    const result = await runAsync(
+        'INSERT INTO void_bills (sale_id, bill_id, reason, approved_by, user_name) VALUES (?, ?, ?, ?, ?)',
+        [sale.id, sale.bill_id, payload.reason || '', payload.approvedBy || '', payload.userName || 'System']
+    );
+    await logAudit('sale', sale.id, 'void', payload, payload.userName);
+    return { success: true, id: result.lastID };
+});
+ipcMain.handle('get-void-bills', async () => allAsync('SELECT * FROM void_bills ORDER BY created_at DESC LIMIT 500'));
+
+ipcMain.handle('hold-bill', async (event, payload) => {
+    const code = payload.holdCode || `HOLD-${Date.now()}`;
+    const result = await runAsync(
+        'INSERT INTO held_bills (hold_code, customer_id, cart_json, note, cashier_name) VALUES (?, ?, ?, ?, ?)',
+        [code, payload.customerId || null, JSON.stringify(payload.cart || []), payload.note || '', payload.cashierName || 'System']
+    );
+    return { success: true, id: result.lastID, holdCode: code };
+});
+ipcMain.handle('get-held-bills', async () => allAsync('SELECT * FROM held_bills ORDER BY created_at DESC LIMIT 200'));
+ipcMain.handle('delete-held-bill', async (event, id) => {
+    await runAsync('DELETE FROM held_bills WHERE id = ?', [id]);
+    return { success: true };
+});
+
+ipcMain.handle('save-tax-category', async (event, payload) => {
+    const rate = Number(payload.rate || 0);
+    if (!payload.name || rate < 0) throw new Error('Tax name and valid rate are required.');
+    const result = await runAsync(
+        'INSERT INTO tax_categories (name, rate, active) VALUES (?, ?, ?)',
+        [payload.name, rate, payload.active === false ? 0 : 1]
+    );
+    return { success: true, id: result.lastID };
+});
+ipcMain.handle('get-tax-categories', async () => allAsync('SELECT * FROM tax_categories ORDER BY active DESC, name ASC'));
+
+ipcMain.handle('save-branch', async (event, payload) => {
+    const result = await runAsync(
+        'INSERT INTO branches (name, address, phone, active) VALUES (?, ?, ?, ?)',
+        [payload.name, payload.address || '', payload.phone || '', payload.active === false ? 0 : 1]
+    );
+    return { success: true, id: result.lastID };
+});
+ipcMain.handle('get-branches', async () => allAsync('SELECT * FROM branches ORDER BY active DESC, name ASC'));
+
+ipcMain.handle('record-stock-transfer', async (event, payload) => {
+    const result = await runAsync(
+        `INSERT INTO stock_transfers (from_branch_id, to_branch_id, product_id, quantity, status, note, user_name)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [payload.fromBranchId || null, payload.toBranchId || null, payload.productId, Number(payload.quantity || 0), payload.status || 'pending', payload.note || '', payload.userName || 'System']
+    );
+    await logAudit('stock_transfer', result.lastID, 'create', payload, payload.userName);
+    return { success: true, id: result.lastID };
+});
+ipcMain.handle('get-stock-transfers', async () => allAsync('SELECT * FROM stock_transfers ORDER BY created_at DESC LIMIT 500'));
+
+ipcMain.handle('save-stock-count', async (event, payload) => {
+    const code = payload.countCode || `COUNT-${Date.now()}`;
+    const result = await runAsync('INSERT INTO stock_counts (count_code, status, user_name) VALUES (?, ?, ?)', [code, payload.status || 'draft', payload.userName || 'System']);
+    for (const item of payload.items || []) {
+        const variance = Number(item.countedQty || 0) - Number(item.systemQty || 0);
+        await runAsync(
+            `INSERT INTO stock_count_items (stock_count_id, product_id, system_qty, counted_qty, variance_qty, note)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [result.lastID, item.productId, Number(item.systemQty || 0), Number(item.countedQty || 0), variance, item.note || '']
+        );
+    }
+    await logAudit('stock_count', result.lastID, 'create', payload, payload.userName);
+    return { success: true, id: result.lastID, countCode: code };
+});
+ipcMain.handle('get-stock-counts', async () => allAsync('SELECT * FROM stock_counts ORDER BY created_at DESC LIMIT 200'));
+
+ipcMain.handle('queue-shelf-label', async (event, payload) => {
+    const result = await runAsync('INSERT INTO shelf_label_queue (product_id, label_type, status) VALUES (?, ?, ?)', [payload.productId, payload.labelType || 'price', 'pending']);
+    return { success: true, id: result.lastID };
+});
+ipcMain.handle('get-shelf-label-queue', async () => allAsync(`
+    SELECT q.*, p.name, p.barcode, p.selling_price
+    FROM shelf_label_queue q
+    JOIN products p ON p.id = q.product_id
+    ORDER BY q.created_at DESC
+    LIMIT 500
+`));
+
+ipcMain.handle('save-scale-barcode-rule', async (event, payload) => {
+    const result = await runAsync(
+        'INSERT INTO scale_barcode_rules (prefix, product_digits, value_digits, value_type, active) VALUES (?, ?, ?, ?, ?)',
+        [payload.prefix, Number(payload.productDigits || 5), Number(payload.valueDigits || 5), payload.valueType || 'weight', payload.active === false ? 0 : 1]
+    );
+    return { success: true, id: result.lastID };
+});
+ipcMain.handle('get-scale-barcode-rules', async () => allAsync('SELECT * FROM scale_barcode_rules ORDER BY active DESC, prefix ASC'));
+
+ipcMain.handle('record-supplier-return', async (event, payload) => {
+    return withTransaction(async () => {
+        const qty = Number(payload.quantity || 0);
+        if (!payload.productId || qty <= 0) throw new Error('Product and quantity are required.');
+        const result = await runAsync(
+            `INSERT INTO supplier_returns (supplier_id, product_id, batch_id, quantity, reason, status, user_name)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [payload.supplierId || null, payload.productId, payload.batchId || null, qty, payload.reason || '', payload.status || 'pending', payload.userName || 'System']
+        );
+        await logAudit('supplier_return', result.lastID, 'create', payload, payload.userName);
+        return { success: true, id: result.lastID };
+    });
+});
+ipcMain.handle('get-supplier-returns', async () => allAsync('SELECT * FROM supplier_returns ORDER BY created_at DESC LIMIT 500'));
+
+ipcMain.handle('get-dead-stock-report', async () => allAsync(`
+    SELECT p.id, p.name, p.current_stock, p.selling_price, MAX(s.timestamp) AS last_sold_at
+    FROM products p
+    LEFT JOIN sale_items si ON si.product_id = p.id
+    LEFT JOIN sales s ON s.id = si.sale_id
+    GROUP BY p.id
+    HAVING last_sold_at IS NULL OR date(last_sold_at) <= date('now', '-60 days')
+    ORDER BY last_sold_at ASC, p.name ASC
+`));
+
 ipcMain.handle('update-product', async (event, p) => {
     const oldProduct = await getAsync('SELECT cost_price, selling_price FROM products WHERE id = ?', [p.id]);
     await runAsync(
