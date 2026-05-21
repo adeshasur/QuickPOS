@@ -20,6 +20,8 @@
 .view-pdf-btn:hover{background-color:#1f2937;transform:translateY(-1px)}
 .download-pdf-btn{background-color:#7c3aed;color:#fff}
 .download-pdf-btn:hover{background-color:#6d28d9;transform:translateY(-1px)}
+.category-pdf-btn{background-color:#0f766e;color:#fff;padding:7px 12px;font-size:12px}
+.category-pdf-btn:hover{background-color:#115e59;transform:translateY(-1px)}
 .print-btn{background-color:var(--success);color:#fff}
 .print-btn:hover{background-color:#0f8a63;transform:translateY(-1px)}
 
@@ -69,6 +71,10 @@
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
     background-color: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
 }
 
 .section-title {
@@ -92,20 +98,20 @@
     height: auto;
 }
 
-.sales-table, .top-items-table {
+.sales-table, .top-items-table, .category-report-table {
     width: 100%;
     border-collapse: collapse;
     min-width: 500px;
 }
 
-.sales-table thead, .top-items-table thead {
+.sales-table thead, .top-items-table thead, .category-report-table thead {
     background-color: var(--surface2);
     position: sticky;
     top: 0;
     z-index: 10;
 }
 
-.sales-table th, .top-items-table th {
+.sales-table th, .top-items-table th, .category-report-table th {
     text-align: left;
     padding: 14px 16px;
     color: var(--text2);
@@ -117,7 +123,7 @@
     letter-spacing: .05em;
 }
 
-.sales-table td, .top-items-table td {
+.sales-table td, .top-items-table td, .category-report-table td {
     padding: 12px 16px;
     border-bottom: 1px solid var(--border);
     color: var(--text);
@@ -126,7 +132,7 @@
     transition: background 0.15s ease;
 }
 
-.sales-table tbody tr:hover, .top-items-table tbody tr:hover {
+.sales-table tbody tr:hover, .top-items-table tbody tr:hover, .category-report-table tbody tr:hover {
     background-color: var(--surface2);
 }
 
@@ -175,7 +181,7 @@
 
 @media print {
   body{background-color:#fff;height:auto;overflow:visible}
-  .sidebar,.top-bar,.reports-header,.header-controls,.card-icon,.section-header .section-title span,.nav-items,.hamburger-btn{display:none}
+  .sidebar,.top-bar,.reports-header,.header-controls,.report-btn,.card-icon,.section-header .section-title span,.nav-items,.hamburger-btn{display:none}
   .main-content{margin:0;padding:0;width:100%}
   .content{padding:0;gap:0}
   .page-header{display:none}
@@ -203,8 +209,10 @@
   .summary-cards{grid-template-columns:1fr}
   .reports-header{flex-direction:column;align-items:flex-start;gap:12px}
   .header-controls{align-self:flex-start}
+  .section-header{align-items:flex-start;flex-direction:column}
+  .category-pdf-btn{width:100%;justify-content:center}
   .sales-table,.top-items-table{font-size:12px;min-width:500px}
-  .sales-table th,.sales-table td,.top-items-table th,.top-items-table td{padding:10px 12px}
+  .sales-table th,.sales-table td,.top-items-table th,.top-items-table td,.category-report-table th,.category-report-table td{padding:10px 12px}
 }
 @media (max-width:480px){
   .header-controls{flex-direction:column;width:100%}
@@ -246,8 +254,18 @@
 
 .sales-table th,
 .top-items-table th,
+.category-report-table th,
 .sales-table td,
-.top-items-table td {
+.top-items-table td,
+.category-report-table td {
   padding: 13px 15px;
+}
+
+.category-report-card {
+  margin-top: 0;
+}
+
+.category-report-table {
+  min-width: 720px;
 }
 
