@@ -112,6 +112,37 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="historyModalOverlay">
+        <div class="modal history-modal">
+            <div class="modal-header">
+                <div class="modal-title"><span class="material-symbols-rounded">work_history</span> Working & Salary History</div>
+                <button class="close-modal" id="closeHistoryModalBtn"><span class="material-symbols-rounded">close</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="history-summary-grid" id="historySummaryGrid"></div>
+                <div class="history-table-wrap">
+                    <table class="staff-table history-table">
+                        <thead>
+                            <tr>
+                                <th>Shift End</th>
+                                <th>Duration</th>
+                                <th>Sales</th>
+                                <th>Items</th>
+                                <th>Salary Basis</th>
+                                <th>Salary Earned</th>
+                                <th>Variance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" id="closeHistoryFooterBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../assets/js/notifications.js"></script>
     <script src="../assets/js/components.js"></script>
     <script src="../assets/js/users.js"></script>

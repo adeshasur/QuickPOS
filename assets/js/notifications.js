@@ -3,11 +3,11 @@
 
   const Notifications = {
     async refresh() {
-      if (!window.api?.getProducts) return;
+      if (!window.api?.getLowStockSummary) return;
       try {
-        const products = await window.api.getProducts();
-        const lowItems = (products || []).filter((p) => Number(p.current_stock || 0) >= 0 && Number(p.current_stock || 0) <= Number(p.alert_level || 0));
-        const lowCount = lowItems.length;
+        const summary = await window.api.getLowStockSummary();
+        const lowItems = summary.items || [];
+        const lowCount = Number(summary.count || 0);
 
         // Update badges
         const sidebarBadge = document.getElementById('lowStockBadge');
@@ -35,7 +35,16 @@
                   <div class="nd-item-stock">Only ${item.current_stock} left in stock.</div>
                 </div>
               </div>
-            `).join('');
+            `).join('') + (lowCount > lowItems.length ? `
+              <div class="nd-item" onclick="location.href='inventory.html'">
+                <div class="nd-item-icon"><i class="fa-solid fa-list"></i></div>
+                <div class="nd-item-info">
+                  <div class="nd-item-tag">More Alerts</div>
+                  <div class="nd-item-name">${lowCount - lowItems.length} more low-stock products</div>
+                  <div class="nd-item-stock">Open Inventory to review all items.</div>
+                </div>
+              </div>
+            ` : '');
           } else {
             list.innerHTML = '<div class="nd-empty">No new notifications</div>';
           }

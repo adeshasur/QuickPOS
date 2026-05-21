@@ -7,36 +7,17 @@
     let searchTerm = "";
 
     const formatCurrency = window.fmtLKR;
-    const SINHALA_PRODUCT_UPDATES = {
-        '001': { name: 'කීරි සම්බා සහල් පැකට් 5kg', expiryDate: '2027-02-28' },
-        '002': { name: 'නැවුම් කිරි බෝතලය 1L', expiryDate: '2026-05-27' },
-        '003': { name: 'මන්චි ක්‍රීම් ක්‍රැකර් 190g', expiryDate: '2026-11-15' },
-        '004': { name: 'කොකා-කෝලා බෝතලය 1.5L', expiryDate: '2026-09-30' },
-        '005': { name: 'රතු ලූනු 1kg', expiryDate: '2026-06-05' },
-        '006': { name: 'ඇන්කර් කිරිපිටි පැකට් 400g', expiryDate: '2027-01-20' },
-        '007': { name: 'ඇස්ට්‍රා මාගරින් ටබ් 250g', expiryDate: '2026-08-18' },
-        '008': { name: 'ලයිෆ්බෝයි සබන් කැටය 100g', expiryDate: '2028-03-31' },
-        '009': { name: 'සන්සිල්ක් ෂැම්පු බෝතලය 180ml', expiryDate: '2028-12-31' },
-        '010': { name: 'සිලෝන් තේ කොළ 200g', expiryDate: '2027-04-30' }
-    };
-    const CATEGORY_NAME_MAP = {
-        Groceries: 'සිල්ලර භාණ්ඩ',
-        Dairy: 'කිරි නිෂ්පාදන',
-        Bakery: 'බේකරි',
-        Beverages: 'පානයන්',
-        Vegetables: 'එළවළු',
-        'Personal Care': 'පුද්ගලික සත්කාර',
-        'Rice & Grains': 'සහල් හා ධාන්‍ය',
-        Snacks: 'ස්නැක්ස්'
-    };
     const UNIT_LABELS = {
-        pkt: 'පැකට්',
-        bottle: 'බෝතල්',
-        kg: 'කි.ග්‍රෑ.',
-        tub: 'ටබ්',
-        bar: 'කැට',
-        pcs: 'ඒකක',
-        units: 'ඒකක'
+        pkt: 'pkt',
+        bottle: 'bottle',
+        kg: 'kg',
+        g: 'g',
+        L: 'L',
+        ml: 'ml',
+        tub: 'tub',
+        bar: 'bar',
+        pcs: 'pcs',
+        units: 'units'
     };
 
     function formatDate(dateString) {
@@ -56,68 +37,30 @@
     }
 
     function getExpiryStatus(daysLeft) {
-        if (daysLeft < 0) return { status: "කල් ඉකුත්", class: "expired", icon: "dangerous" };
-        if (daysLeft <= 30) return { status: "ඉක්මනින් කල් ඉකුත්", class: "expiring", icon: "warning" };
-        return { status: "හොඳයි", class: "good", icon: "check_circle" };
+        if (daysLeft < 0) return { status: "Expired", class: "expired", icon: "dangerous" };
+        if (daysLeft <= 30) return { status: "Expiring Soon", class: "expiring", icon: "warning" };
+        return { status: "Good", class: "good", icon: "check_circle" };
     }
 
     function displayCategoryName(category) {
-        if (!category) return 'වර්ගයක් නැත';
-        return CATEGORY_NAME_MAP[category.name] || category.name;
+        if (!category) return 'Uncategorized';
+        return category.name;
     }
 
     function displayUnit(unitType) {
-        return UNIT_LABELS[String(unitType || 'units').trim()] || unitType || 'ඒකක';
+        return UNIT_LABELS[String(unitType || 'units').trim()] || unitType || 'units';
     }
 
     async function loadData() {
         try {
             categories = await window.api.getCategories();
             products = await window.api.getProducts();
-            await normalizeSinhalaInventoryData();
             populateProductDropdown();
             populateCategoryDropdown();
             renderStockTable();
         } catch (err) {
             console.error('Error loading inventory data:', err);
         }
-    }
-
-    async function normalizeSinhalaInventoryData() {
-        const updates = products
-            .map((product) => {
-                const mapped = SINHALA_PRODUCT_UPDATES[String(product.barcode || '').trim()];
-                if (!mapped) return null;
-                if (product.name === mapped.name && product.expiry_date === mapped.expiryDate) return null;
-
-                return {
-                    ...product,
-                    mappedName: mapped.name,
-                    mappedExpiryDate: mapped.expiryDate
-                };
-            })
-            .filter(Boolean);
-
-        if (!updates.length) return;
-
-        await Promise.all(updates.map((product) => window.api.updateProduct({
-            id: product.id,
-            barcode: product.barcode,
-            name: product.mappedName,
-            categoryId: product.category_id,
-            cost: product.cost_price,
-            price: product.selling_price,
-            alertLevel: product.alert_level,
-            unitType: product.unit_type,
-            isWeighted: Boolean(product.is_weighted),
-            expiryDate: product.mappedExpiryDate
-        })));
-
-        products = products.map((product) => {
-            const mapped = SINHALA_PRODUCT_UPDATES[String(product.barcode || '').trim()];
-            if (!mapped) return product;
-            return { ...product, name: mapped.name, expiry_date: mapped.expiryDate };
-        });
     }
 
     function populateCategoryDropdown() {
@@ -195,7 +138,7 @@
                     <td><span class="expiry-badge ${expiryInfo.class}">${expiryInfo.status}</span></td>
                     <td>
                         <span class="days-badge ${daysLeft < 0 ? 'expired' : daysLeft <= 30 ? 'expiring' : 'safe'}">
-                            ${daysLeft < 0 ? 'කල් ඉකුත්' : daysLeft > 365 ? 'ස්ථාවර' : `තව දින ${daysLeft}`}
+                            ${daysLeft < 0 ? 'Expired' : daysLeft > 365 ? 'Stable' : `${daysLeft} days left`}
                         </span>
                     </td>
                     ${showActionColumn ? `<td>

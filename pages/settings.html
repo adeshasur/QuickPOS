@@ -189,6 +189,23 @@
                 <input class="field-input" type="number" id="cashierHourlyPaymentTarget" min="0" max="10000000" step="0.01" value="0">
                 <span class="field-hint">0 = monitoring only, no target comparison</span>
               </div>
+              <div class="field-row">
+                <div class="field">
+                  <label class="field-label">Cashier Pay Basis</label>
+                  <select class="field-input" id="cashierSalaryBasis">
+                    <option value="hourly">Hourly</option>
+                    <option value="shift">Per Shift</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                  <span class="field-hint">Weekly/monthly salaries are prorated by shift duration.</span>
+                </div>
+                <div class="field">
+                  <label class="field-label">Cashier Pay Amount (LKR)</label>
+                  <input class="field-input" type="number" id="cashierSalaryAmount" min="0" max="10000000" step="0.01" value="0">
+                  <span class="field-hint">Hourly rate, shift pay, weekly salary, or monthly salary.</span>
+                </div>
+              </div>
               <div class="field">
                 <label class="field-label">Set Target (Bills per Shift)</label>
                 <input class="field-input" type="number" id="cashierTargetBills" min="1" max="10000" step="1" value="50">

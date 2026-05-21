@@ -363,6 +363,12 @@
     menuItems.forEach(item => {
         item.classList.remove('active');
         if (item.dataset.page && currentPage === item.dataset.page) item.classList.add('active');
+        item.addEventListener('click', (event) => {
+          const href = item.getAttribute('href');
+          if (!href || href === `${currentPage}.html`) return;
+          event.preventDefault();
+          smoothNavigate(href);
+        });
     });
 
     const logoutBtn = document.getElementById('sidebarLogoutBtn');

@@ -419,6 +419,26 @@
     }
   }
 
+  function calculateShiftSalary(startIso, endDate = new Date()) {
+    const basis = String(state.settings.cashierSalaryBasis || 'hourly');
+    const amount = Math.max(0, Number(state.settings.cashierSalaryAmount || 0));
+    const start = new Date(startIso || Date.now());
+    const durationHours = Math.max(0, (endDate - start) / (1000 * 60 * 60));
+    let earned = 0;
+
+    if (basis === 'shift') earned = amount;
+    else if (basis === 'weekly') earned = (amount / 45) * durationHours;
+    else if (basis === 'monthly') earned = (amount / 195) * durationHours;
+    else earned = amount * durationHours;
+
+    return {
+      salaryBasis: basis,
+      salaryAmount: amount,
+      salaryHours: durationHours,
+      salaryEarned: Number(earned.toFixed(2))
+    };
+  }
+
   function resolveShiftTarget() {
     const settingKeys = ['cashierTargetBills', 'shiftTargetBills', 'dailyBillsTarget', 'cashierBillsTarget'];
     for (const key of settingKeys) {
@@ -764,6 +784,7 @@
     const expectedDrawer = floatAmount + cashTotal;
     const variance = Number(drawerCount) - expectedDrawer;
     localStorage.setItem('quickpos-drawer-actual', String(Number(drawerCount)));
+    const salary = calculateShiftSalary(state.shiftStart, new Date());
 
     const summary = {
       cashierName: state.user.name,
@@ -778,7 +799,8 @@
       revenueTotal,
       expectedDrawer,
       actualDrawer: Number(drawerCount),
-      variance
+      variance,
+      ...salary
     };
 
     await window.api.exportShiftSummaryPdf(summary);
@@ -793,7 +815,7 @@
 
     updateShiftToggle();
     updateShiftDuration();
-    showToast(`Shift closed. Drawer variance: LKR ${fmt(variance)}`);
+    showToast(`Shift closed. Salary: LKR ${fmt(salary.salaryEarned)} | Variance: LKR ${fmt(variance)}`);
     await refreshData();
   }
 

@@ -3,7 +3,11 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('api', {
     // Products
     addProduct: (product) => ipcRenderer.invoke('add-product', product),
-    getProducts: () => ipcRenderer.invoke('get-products'),
+    getProducts: (options) => ipcRenderer.invoke('get-products', options),
+    getProductsPage: (options) => ipcRenderer.invoke('get-products-page', options),
+    getProductStats: () => ipcRenderer.invoke('get-product-stats'),
+    searchProducts: (options) => ipcRenderer.invoke('search-products', options),
+    getLowStockSummary: () => ipcRenderer.invoke('get-low-stock-summary'),
     updateProduct: (product) => ipcRenderer.invoke('update-product', product),
     deleteProduct: (id) => ipcRenderer.invoke('delete-product', id),
     addStock: (data) => ipcRenderer.invoke('add-stock', data),
@@ -27,6 +31,7 @@ contextBridge.exposeInMainWorld('api', {
     getUsers: () => ipcRenderer.invoke('get-users'),
     saveUser: (user) => ipcRenderer.invoke('save-user', user),
     deleteUser: (id) => ipcRenderer.invoke('delete-user', id),
+    getUserShiftHistory: (payload) => ipcRenderer.invoke('get-user-shift-history', payload),
 
     // Settings
     getSettings: () => ipcRenderer.invoke('get-settings'),
@@ -34,7 +39,8 @@ contextBridge.exposeInMainWorld('api', {
 
     // Sales (à¶¶à·’à¶½à·Š)
     saveSale: (saleData) => ipcRenderer.invoke('save-sale', saleData),
-    getSalesHistory: () => ipcRenderer.invoke('get-sales-history'),
+    getSalesHistory: (options) => ipcRenderer.invoke('get-sales-history', options),
+    getSalesPage: (options) => ipcRenderer.invoke('get-sales-page', options),
     getSaleDetails: (saleId) => ipcRenderer.invoke('get-sale-details', saleId),
     recordCreditPayment: (paymentData) => ipcRenderer.invoke('record-credit-payment', paymentData),
 

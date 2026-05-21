@@ -5,7 +5,20 @@
 
     const staffTableBody = document.getElementById('staffTableBody');
     const userModalOverlay = document.getElementById('userModalOverlay');
+    const historyModalOverlay = document.getElementById('historyModalOverlay');
     const submitUserBtn = document.getElementById('submitUserBtn');
+
+    const fmt = window.fmtLKR || ((n) => `LKR ${Number(n || 0).toFixed(2)}`);
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, (char) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[char]));
+    }
 
     async function loadUsers() {
         try {
@@ -59,6 +72,9 @@
                             <button class="action-btn edit-btn" onclick="editUser(${user.id})">
                                 <span class="material-symbols-rounded s18">edit</span>
                             </button>
+                            <button class="action-btn history-btn" onclick="viewUserHistory(${user.id})" title="Working & Salary History">
+                                <span class="material-symbols-rounded s18">work_history</span>
+                            </button>
                             ${deleteBtnHtml}
                         </div>
                     </td>
@@ -82,6 +98,49 @@
             submitUserBtn.dataset.userId = id;
         }
         if(userModalOverlay) userModalOverlay.classList.add('active');
+    };
+
+    window.viewUserHistory = async (id) => {
+        const user = users.find(u => u.id === id);
+        if (!user) return;
+
+        const summaryGrid = document.getElementById('historySummaryGrid');
+        const tbody = document.getElementById('historyTableBody');
+        summaryGrid.innerHTML = '<div class="history-loading">Loading history...</div>';
+        tbody.innerHTML = '';
+        historyModalOverlay.classList.add('active');
+
+        try {
+            const result = await window.api.getUserShiftHistory({ cashierName: user.name, limit: 100 });
+            const summary = result.summary || {};
+            const rows = result.rows || [];
+
+            summaryGrid.innerHTML = `
+                <div class="history-summary-card"><span>Staff</span><strong>${escapeHtml(user.name)}</strong></div>
+                <div class="history-summary-card"><span>Shifts</span><strong>${Number(summary.shift_count || 0).toLocaleString()}</strong></div>
+                <div class="history-summary-card"><span>Total Sales</span><strong>${fmt(summary.total_sales || 0)}</strong></div>
+                <div class="history-summary-card"><span>Total Salary</span><strong>${fmt(summary.total_salary || 0)}</strong></div>
+            `;
+
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">No shift history recorded yet.</div></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = rows.map((row) => `
+                <tr>
+                    <td>${row.shift_end ? new Date(row.shift_end).toLocaleString() : '-'}</td>
+                    <td>${escapeHtml(row.duration || '-')}</td>
+                    <td>${fmt(row.total_sales || 0)}</td>
+                    <td>${Number(row.items_sold || 0).toLocaleString()}</td>
+                    <td>${escapeHtml(row.salary_basis || '-')}</td>
+                    <td>${fmt(row.salary_earned || 0)}</td>
+                    <td class="${Number(row.variance || 0) === 0 ? '' : 'variance-warn'}">${fmt(row.variance || 0)}</td>
+                </tr>
+            `).join('');
+        } catch (err) {
+            summaryGrid.innerHTML = `<div class="history-loading error">Failed to load history: ${escapeHtml(err.message)}</div>`;
+        }
     };
 
     window.deleteUser = async (id) => {
@@ -156,6 +215,9 @@
         
         const cancelModalBtn = document.getElementById('cancelModalBtn');
         if(cancelModalBtn) cancelModalBtn.addEventListener('click', () => userModalOverlay.classList.remove('active'));
+
+        document.getElementById('closeHistoryModalBtn')?.addEventListener('click', () => historyModalOverlay.classList.remove('active'));
+        document.getElementById('closeHistoryFooterBtn')?.addEventListener('click', () => historyModalOverlay.classList.remove('active'));
 
         if(submitUserBtn) {
             submitUserBtn.addEventListener('click', handleUserSubmit);

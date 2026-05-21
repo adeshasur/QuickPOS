@@ -112,6 +112,8 @@
 .edit-btn:hover{background:var(--primary);border-color:var(--primary);color:#fff}
 .delete-btn{color:var(--danger)}
 .delete-btn:hover{background:var(--danger);border-color:var(--danger);color:#fff}
+.history-btn{color:#0f766e}
+.history-btn:hover{background:#0f766e;border-color:#0f766e;color:#fff}
 
 .create-user-btn{max-width:180px}
 
@@ -135,6 +137,18 @@
 .modal-btn.submit{background:var(--primary);color:#fff}
 .modal-btn.submit:hover{background:var(--primary-dark)}
 
+.history-modal{max-width:1040px}
+.history-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.history-summary-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.history-summary-card span{font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+.history-summary-card strong{font-size:16px;color:var(--text)}
+.history-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px}
+.history-table{min-width:900px}
+.history-loading{grid-column:1/-1;padding:14px;border:1px dashed var(--border2);border-radius:12px;color:var(--text2);font-weight:700;text-align:center}
+.history-loading.error{color:var(--danger)}
+.variance-warn{color:var(--danger);font-weight:800}
+.empty-state{text-align:center;padding:22px;color:var(--text3);font-weight:700}
+
 .toggle-switch{position:relative;display:inline-block;width:48px;height:28px}
 .toggle-checkbox{opacity:0;width:0;height:0}
 .toggle-slider{position:absolute;cursor:pointer;inset:0;background:var(--border2);transition:.2s;border-radius:24px}
@@ -149,4 +163,5 @@
   .create-user-btn{max-width:none;width:100%}
   .form-row{grid-template-columns:1fr}
   .modal{width:95%}
+  .history-summary-grid{grid-template-columns:1fr}
 }

@@ -129,6 +129,24 @@
     ].map(normalize).join(' ');
   }
 
+  function decorateProduct(product) {
+    const category = state.categories.find((c) => c.id === product.category_id);
+    const categoryName = category?.name || product.category_name || 'General';
+    return {
+      ...product,
+      category_name: categoryName,
+      categoryKey: categoryKey(categoryName)
+    };
+  }
+
+  function upsertProduct(product) {
+    const decorated = decorateProduct(product);
+    const existingIndex = state.products.findIndex((p) => p.id === decorated.id);
+    if (existingIndex >= 0) state.products[existingIndex] = decorated;
+    else state.products.unshift(decorated);
+    return decorated;
+  }
+
   function getFilteredProducts() {
     let list = state.products;
     if (state.currentCat !== 'all') list = list.filter((p) => p.categoryKey === state.currentCat);
@@ -476,7 +494,7 @@
     });
   }
 
-  function buildSearchSuggestions(query) {
+  async function buildSearchSuggestions(query) {
     const suggest = document.getElementById('stockSuggest');
     if (!suggest) return;
 
@@ -489,22 +507,15 @@
       return;
     }
 
-    const base = state.currentCat === 'all' ? state.products : state.products.filter((p) => p.categoryKey === state.currentCat);
-    state.suggestList = base
-      .map((product) => {
-        const hay = productSearchText(product);
-        const name = normalize(product.name);
-        let score = -1;
-        if (normalize(product.barcode) === q) score = 100;
-        else if (name === q) score = 95;
-        else if (name.startsWith(q)) score = 85;
-        else if (hay.includes(q)) score = 60;
-        return { product, score };
-      })
-      .filter((row) => row.score > -1)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 8)
-      .map((row) => row.product);
+    const category = state.currentCat === 'all'
+      ? null
+      : state.categories.find((c) => categoryKey(c.name) === state.currentCat);
+    const rows = await window.api.searchProducts({
+      query,
+      categoryId: category?.id || 0,
+      limit: 8
+    });
+    state.suggestList = (rows || []).map(upsertProduct);
 
     state.suggestActive = state.suggestList.length ? 0 : -1;
 
@@ -743,15 +754,7 @@
     const categoryMap = new Map((categoryRows || []).map((c) => [c.id, c]));
 
     state.categories = categoryRows || [];
-    state.products = (productRows || []).map((p) => {
-      const category = categoryMap.get(p.category_id);
-      const categoryName = category?.name || 'General';
-      return {
-        ...p,
-        category_name: categoryName,
-        categoryKey: categoryKey(categoryName)
-      };
-    });
+    state.products = (productRows || []).map(decorateProduct);
     state.customers = customerRows || [];
   }
 
@@ -802,9 +805,11 @@
       try {
         const product = await window.api.searchProductByBarcode(code);
         if (product) {
-          addToCart(product.id, 1, Number(product.selling_price || 0), 'scan');
+          const cached = upsertProduct(product);
+          addToCart(cached.id, 1, Number(cached.selling_price || 0), 'scan');
         } else {
-          const fallback = state.products.find((p) => productSearchText(p).includes(normalize(code)));
+          const matches = await window.api.searchProducts({ query: code, limit: 1 });
+          const fallback = matches?.length ? upsertProduct(matches[0]) : null;
           if (fallback) {
             addToCart(fallback.id, 1, Number(fallback.selling_price || 0), 'scan');
           } else {

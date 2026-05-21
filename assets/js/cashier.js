@@ -67,6 +67,25 @@
     shiftInterval = setInterval(tick, 1000);
   }
 
+  function calculateShiftSalary(startDate, endDate = new Date()) {
+    const basis = String(settings.cashierSalaryBasis || 'hourly');
+    const amount = Math.max(0, Number(settings.cashierSalaryAmount || 0));
+    const durationHours = Math.max(0, (endDate - startDate) / (1000 * 60 * 60));
+    let earned = 0;
+
+    if (basis === 'shift') earned = amount;
+    else if (basis === 'weekly') earned = (amount / 45) * durationHours;
+    else if (basis === 'monthly') earned = (amount / 195) * durationHours;
+    else earned = amount * durationHours;
+
+    return {
+      salaryBasis: basis,
+      salaryAmount: amount,
+      salaryHours: durationHours,
+      salaryEarned: Number(earned.toFixed(2))
+    };
+  }
+
   // ── FOCUS HELPER ────────────────────────────────────────
   function focusBarcode() {
     requestAnimationFrame(() => document.getElementById('barcodeInput').focus());
@@ -1109,6 +1128,7 @@
       document.getElementById('shiftCardSales').textContent = `LKR ${fmt(cardTotal)}`;
       document.getElementById('shiftCreditSales').textContent = `LKR ${fmt(creditTotal)}`;
       document.getElementById('shiftTotalRevenue').textContent = `LKR ${fmt(revenueTotal)}`;
+      const salary = calculateShiftSalary(shiftStartTime, new Date());
       pendingShiftSummary = {
         cashierName: user.name || 'POS Operator',
         startedTime: shiftStartTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -1117,7 +1137,8 @@
         cardTotal,
         creditTotal,
         revenueTotal,
-        itemsSold
+        itemsSold,
+        ...salary
       };
       
       shiftSummaryOverlay.classList.add('open');

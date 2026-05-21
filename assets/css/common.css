@@ -297,18 +297,20 @@ body.sidebar-collapsible.sidebar-hidden #sidebar-container {
 }
 .notif-badge {
     position: absolute;
-    top: -6px;
-    right: -6px;
+    top: -9px;
+    right: -10px;
     background: #ef4444;
     color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    width: 19px;
-    height: 19px;
-    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 800;
+    min-width: 25px;
+    height: 25px;
+    padding: 0 6px;
+    border-radius: 999px;
     display: flex;
     align-items: center;
     justify-content: center;
+    line-height: 1;
     border: 2px solid var(--surface);
     animation: pulse-notif 2s infinite;
 }

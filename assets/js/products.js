@@ -4,6 +4,11 @@
   let categories = [];
   let products = [];
   let deletingId = null;
+  let productStats = { total: 0, lowStock: 0, outOfStock: 0, totalValue: 0 };
+  let page = 1;
+  const pageSize = 100;
+  let totalProducts = 0;
+  let searchTimer = null;
 
   const fmt = window.fmtLKR;
   const calcFinal = (base, discount) => Math.max(0, Number(base || 0) - Number(discount || 0));
@@ -39,20 +44,15 @@
   }
 
   function updateKPICards() {
-    const total = products.length;
-    const lowStock = products.filter(p => Number(p.current_stock || 0) <= Number(p.alert_level || 0)).length;
-    const outOfStock = products.filter(p => Number(p.current_stock || 0) === 0).length;
-    const totalValue = products.reduce((acc, p) => acc + (Number(p.current_stock || 0) * Number(p.selling_price || 0)), 0);
-
     const totalEl = document.getElementById('totalProductsCount');
     const lowStockEl = document.getElementById('lowStockCount');
     const outOfStockEl = document.getElementById('outOfStockCount');
     const totalValueEl = document.getElementById('totalStockValue');
 
-    if (totalEl) totalEl.textContent = total;
-    if (lowStockEl) lowStockEl.textContent = lowStock;
-    if (outOfStockEl) outOfStockEl.textContent = outOfStock;
-    if (totalValueEl) totalValueEl.textContent = fmt(totalValue);
+    if (totalEl) totalEl.textContent = productStats.total.toLocaleString();
+    if (lowStockEl) lowStockEl.textContent = productStats.lowStock.toLocaleString();
+    if (outOfStockEl) outOfStockEl.textContent = productStats.outOfStock.toLocaleString();
+    if (totalValueEl) totalValueEl.textContent = fmt(productStats.totalValue);
   }
 
   function updatePreview(prefix) {
@@ -66,20 +66,7 @@
   function render() {
     const tbody = document.getElementById('productsTableBody');
     
-    // Get filter inputs
-    const query = (document.getElementById('productSearch')?.value || '').toLowerCase().trim();
-    const catFilterVal = document.getElementById('categoryFilter')?.value || '';
-
-    // Filter products list dynamically
-    const filteredProducts = products.filter((p) => {
-      const nameMatch = p.name.toLowerCase().includes(query);
-      const barcodeMatch = (p.barcode || '').toLowerCase().includes(query);
-      const queryMatch = !query || nameMatch || barcodeMatch;
-
-      const catMatch = !catFilterVal || p.category_id === Number(catFilterVal);
-
-      return queryMatch && catMatch;
-    });
+    const filteredProducts = products;
 
     if (!filteredProducts.length) {
       tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><p>No products found</p></div></td></tr>`;
@@ -109,13 +96,60 @@
         <td><div class="actions-cell"><button class="tbl-btn edit" data-id="${p.id}">Edit</button><button class="tbl-btn del" data-id="${p.id}">Delete</button></div></td>
       </tr>`;
     }).join('');
+
+    renderPager();
+  }
+
+  function ensurePager() {
+    let pager = document.getElementById('productsPager');
+    if (pager) return pager;
+    const wrap = document.querySelector('.table-wrap');
+    pager = document.createElement('div');
+    pager.id = 'productsPager';
+    pager.style.cssText = 'display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:12px 4px;font-size:13px;font-weight:700;color:var(--text2)';
+    if (wrap) wrap.appendChild(pager);
+    return pager;
+  }
+
+  function renderPager() {
+    const pager = ensurePager();
+    const totalPages = Math.max(1, Math.ceil(totalProducts / pageSize));
+    pager.innerHTML = `
+      <span>Page ${page.toLocaleString()} / ${totalPages.toLocaleString()} • ${totalProducts.toLocaleString()} products</span>
+      <button class="tbl-btn" id="productsPrevPage" ${page <= 1 ? 'disabled' : ''}>Prev</button>
+      <button class="tbl-btn" id="productsNextPage" ${page >= totalPages ? 'disabled' : ''}>Next</button>
+    `;
+    document.getElementById('productsPrevPage')?.addEventListener('click', async () => {
+      if (page <= 1) return;
+      page -= 1;
+      await reloadPageOnly();
+    });
+    document.getElementById('productsNextPage')?.addEventListener('click', async () => {
+      if (page >= totalPages) return;
+      page += 1;
+      await reloadPageOnly();
+    });
+  }
+
+  async function reloadPageOnly() {
+    const search = document.getElementById('productSearch')?.value || '';
+    const categoryId = document.getElementById('categoryFilter')?.value || '';
+    const result = await window.api.getProductsPage({
+      search,
+      categoryId,
+      limit: pageSize,
+      offset: (page - 1) * pageSize
+    });
+    products = result.items || [];
+    totalProducts = result.total || 0;
+    render();
   }
 
   async function reload() {
-    [categories, products] = await Promise.all([window.api.getCategories(), window.api.getProducts()]);
+    [categories, productStats] = await Promise.all([window.api.getCategories(), window.api.getProductStats()]);
     populateCategoryDropdowns();
     updateKPICards();
-    render();
+    await reloadPageOnly();
   }
 
   function bindWeightToggle(chkId, rowId, unitId) {
@@ -163,13 +197,18 @@
 
     if (searchInput) {
       searchInput.addEventListener('input', () => {
-        render();
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(async () => {
+          page = 1;
+          await reloadPageOnly();
+        }, 250);
       });
     }
 
     if (catFilter) {
-      catFilter.addEventListener('change', () => {
-        render();
+      catFilter.addEventListener('change', async () => {
+        page = 1;
+        await reloadPageOnly();
       });
     }
 
@@ -222,6 +261,7 @@
       });
 
       closeModal('addModal');
+      page = 1;
       await reload();
     });
 
@@ -283,7 +323,9 @@
       });
 
       closeModal('editModal');
-      await reload();
+      productStats = await window.api.getProductStats();
+      updateKPICards();
+      await reloadPageOnly();
     });
 
     document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
@@ -291,6 +333,8 @@
       await window.api.deleteProduct(deletingId);
       deletingId = null;
       closeModal('deleteModal');
+      productStats = await window.api.getProductStats();
+      updateKPICards();
       await reload();
     });
 

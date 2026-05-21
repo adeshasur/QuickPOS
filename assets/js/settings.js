@@ -19,6 +19,8 @@
     cashierAutoShiftStart: 'false',
     autoShiftOpeningFloat: '0',
     cashierHourlyPaymentTarget: '0',
+    cashierSalaryBasis: 'hourly',
+    cashierSalaryAmount: '0',
     cashierTargetBills: '50',
     keyboardShortcuts: 'true',
     barcodeScanSound: 'false',
@@ -58,6 +60,8 @@
     document.getElementById('cashierAutoShiftStart').checked = settings.cashierAutoShiftStart === 'true';
     document.getElementById('autoShiftOpeningFloat').value = settings.autoShiftOpeningFloat || '0';
     document.getElementById('cashierHourlyPaymentTarget').value = settings.cashierHourlyPaymentTarget || '0';
+    document.getElementById('cashierSalaryBasis').value = settings.cashierSalaryBasis || 'hourly';
+    document.getElementById('cashierSalaryAmount').value = settings.cashierSalaryAmount || '0';
     document.getElementById('cashierTargetBills').value = settings.cashierTargetBills || '50';
     document.getElementById('keyboardShortcuts').checked = settings.keyboardShortcuts !== 'false';
     document.getElementById('barcodeScanSound').checked = settings.barcodeScanSound === 'true';
@@ -81,12 +85,12 @@
   }
 
   async function refreshSystemStats() {
-    const [products, sales, customers] = await Promise.all([
-      window.api.getProducts(),
+    const [productStats, sales, customers] = await Promise.all([
+      window.api.getProductStats(),
       window.api.getSalesHistory(),
       window.api.getCustomers()
     ]);
-    document.getElementById('sysProducts').textContent = products.length;
+    document.getElementById('sysProducts').textContent = Number(productStats.total || 0).toLocaleString();
     document.getElementById('sysSales').textContent = sales.length;
     document.getElementById('sysCustomers').textContent = customers.length;
     document.getElementById('sysCache').textContent = 'SQLite';
@@ -145,6 +149,8 @@
     const autoShiftOn = settings.cashierAutoShiftStart === 'true';
     const openingFloat = Math.max(0, Number(settings.autoShiftOpeningFloat || 0));
     const hourlyTarget = Math.max(0, Number(settings.cashierHourlyPaymentTarget || 0));
+    const salaryBasis = settings.cashierSalaryBasis || 'hourly';
+    const salaryAmount = Math.max(0, Number(settings.cashierSalaryAmount || 0));
     const todayKey = localDateKey(new Date());
     const todaySales = (allSales || []).filter((sale) => localDateKey(sale.timestamp || sale.date || Date.now()) === todayKey);
 
@@ -184,6 +190,8 @@
       <div class="sys-info-row"><span class="sys-info-label">Cashier Auto Shift</span><span class="sys-info-val">${autoShiftOn ? 'ON' : 'OFF'}</span></div>
       <div class="sys-info-row"><span class="sys-info-label">Auto Shift Opening Float</span><span class="sys-info-val">${formatLkr(openingFloat)}</span></div>
       <div class="sys-info-row"><span class="sys-info-label">Hourly Payment Target</span><span class="sys-info-val">${hourlyTarget > 0 ? formatLkr(hourlyTarget) : 'Not Set'}</span></div>
+      <div class="sys-info-row"><span class="sys-info-label">Cashier Salary Basis</span><span class="sys-info-val">${escapeHtml(salaryBasis)}</span></div>
+      <div class="sys-info-row"><span class="sys-info-label">Cashier Salary Amount</span><span class="sys-info-val">${salaryAmount > 0 ? formatLkr(salaryAmount) : 'Not Set'}</span></div>
       <div class="sys-info-row"><span class="sys-info-label">Overall Avg Per Hour (Today)</span><span class="sys-info-val">${todaySales.length ? formatLkr(overallAvgPerHour) : 'No sales yet'}</span></div>
     `;
 
@@ -252,6 +260,8 @@
       cashierAutoShiftStart: String(document.getElementById('cashierAutoShiftStart').checked),
       autoShiftOpeningFloat: String(Math.max(0, parseFloat(document.getElementById('autoShiftOpeningFloat').value || '0') || 0)),
       cashierHourlyPaymentTarget: String(Math.max(0, parseFloat(document.getElementById('cashierHourlyPaymentTarget').value || '0') || 0)),
+      cashierSalaryBasis: document.getElementById('cashierSalaryBasis').value || 'hourly',
+      cashierSalaryAmount: String(Math.max(0, parseFloat(document.getElementById('cashierSalaryAmount').value || '0') || 0)),
       cashierTargetBills: String(Math.max(1, parseInt(document.getElementById('cashierTargetBills').value || '50', 10) || 50)),
       keyboardShortcuts: String(document.getElementById('keyboardShortcuts').checked),
       barcodeScanSound: String(document.getElementById('barcodeScanSound').checked),

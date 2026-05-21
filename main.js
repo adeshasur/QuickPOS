@@ -241,6 +241,34 @@ async function ensureGoogleDriveBackupSettings() {
     }
 }
 
+async function ensurePerformanceIndexes() {
+    const indexes = [
+        'CREATE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode)',
+        'CREATE INDEX IF NOT EXISTS idx_products_name ON products(name)',
+        'CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id)',
+        'CREATE INDEX IF NOT EXISTS idx_products_stock_alert ON products(current_stock, alert_level)',
+        'CREATE INDEX IF NOT EXISTS idx_products_expiry ON products(expiry_date)',
+        'CREATE INDEX IF NOT EXISTS idx_sales_timestamp ON sales(timestamp)',
+        'CREATE INDEX IF NOT EXISTS idx_sales_bill_id ON sales(bill_id)',
+        'CREATE INDEX IF NOT EXISTS idx_sales_cashier ON sales(cashier_name)',
+        'CREATE INDEX IF NOT EXISTS idx_sale_items_sale_id ON sale_items(sale_id)',
+        'CREATE INDEX IF NOT EXISTS idx_sale_items_product_id ON sale_items(product_id)',
+        'CREATE INDEX IF NOT EXISTS idx_batches_product_remaining ON inventory_batches(product_id, remaining_qty)'
+    ];
+
+    for (const sql of indexes) {
+        await runAsync(sql);
+    }
+}
+
+async function ensureShiftSalaryColumns() {
+    const columns = await allAsync('PRAGMA table_info(shift_reconciliations)');
+    const names = new Set(columns.map((col) => col.name));
+    if (!names.has('salary_basis')) await runAsync('ALTER TABLE shift_reconciliations ADD COLUMN salary_basis TEXT');
+    if (!names.has('salary_amount')) await runAsync('ALTER TABLE shift_reconciliations ADD COLUMN salary_amount REAL DEFAULT 0');
+    if (!names.has('salary_earned')) await runAsync('ALTER TABLE shift_reconciliations ADD COLUMN salary_earned REAL DEFAULT 0');
+}
+
 async function withTransaction(work) {
     await runAsync('BEGIN IMMEDIATE TRANSACTION');
     try {
@@ -382,7 +410,94 @@ ipcMain.handle('add-product', async (event, p) => {
     });
 });
 
-ipcMain.handle('get-products', async () => allAsync('SELECT * FROM products'));
+ipcMain.handle('get-products', async (event, options = {}) => {
+    const limit = Math.min(Math.max(Number(options.limit || 1000), 1), 5000);
+    return allAsync('SELECT * FROM products ORDER BY id DESC LIMIT ?', [limit]);
+});
+
+ipcMain.handle('get-products-page', async (event, options = {}) => {
+    const limit = Math.min(Math.max(Number(options.limit || 100), 1), 500);
+    const offset = Math.max(Number(options.offset || 0), 0);
+    const search = String(options.search || '').trim();
+    const categoryId = Number(options.categoryId || 0);
+    const where = [];
+    const params = [];
+
+    if (search) {
+        where.push('(name LIKE ? OR barcode LIKE ?)');
+        params.push(`%${search}%`, `%${search}%`);
+    }
+    if (categoryId) {
+        where.push('category_id = ?');
+        params.push(categoryId);
+    }
+
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+    const countRow = await getAsync(`SELECT COUNT(*) AS count FROM products ${whereSql}`, params);
+    const items = await allAsync(
+        `SELECT * FROM products ${whereSql} ORDER BY id DESC LIMIT ? OFFSET ?`,
+        [...params, limit, offset]
+    );
+    return { items, total: Number(countRow?.count || 0), limit, offset };
+});
+
+ipcMain.handle('search-products', async (event, options = {}) => {
+    const q = String(options.query || '').trim();
+    const categoryId = Number(options.categoryId || 0);
+    const limit = Math.min(Math.max(Number(options.limit || 50), 1), 100);
+    const where = [];
+    const params = [];
+
+    if (q) {
+        where.push('(barcode = ? OR barcode LIKE ? OR name LIKE ?)');
+        params.push(q, `${q}%`, `%${q}%`);
+    }
+    if (categoryId) {
+        where.push('category_id = ?');
+        params.push(categoryId);
+    }
+
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+    return allAsync(
+        `SELECT * FROM products ${whereSql} ORDER BY CASE WHEN barcode = ? THEN 0 ELSE 1 END, name ASC LIMIT ?`,
+        [...params, q, limit]
+    );
+});
+
+ipcMain.handle('get-product-stats', async () => {
+    const row = await getAsync(`
+        SELECT
+            COUNT(*) AS total,
+            SUM(CASE WHEN COALESCE(current_stock, 0) <= COALESCE(alert_level, 0) THEN 1 ELSE 0 END) AS low_stock,
+            SUM(CASE WHEN COALESCE(current_stock, 0) = 0 THEN 1 ELSE 0 END) AS out_of_stock,
+            SUM(COALESCE(current_stock, 0) * COALESCE(selling_price, 0)) AS total_value
+        FROM products
+    `);
+    return {
+        total: Number(row?.total || 0),
+        lowStock: Number(row?.low_stock || 0),
+        outOfStock: Number(row?.out_of_stock || 0),
+        totalValue: Number(row?.total_value || 0)
+    };
+});
+
+ipcMain.handle('get-low-stock-summary', async () => {
+    const countRow = await getAsync(`
+        SELECT COUNT(*) AS count
+        FROM products
+        WHERE COALESCE(current_stock, 0) >= 0
+          AND COALESCE(current_stock, 0) <= COALESCE(alert_level, 0)
+    `);
+    const items = await allAsync(`
+        SELECT id, name, current_stock
+        FROM products
+        WHERE COALESCE(current_stock, 0) >= 0
+          AND COALESCE(current_stock, 0) <= COALESCE(alert_level, 0)
+        ORDER BY current_stock ASC, name ASC
+        LIMIT 8
+    `);
+    return { count: Number(countRow?.count || 0), items };
+});
 
 ipcMain.handle('update-product', async (event, p) => {
     await runAsync(
@@ -551,6 +666,30 @@ ipcMain.handle('save-user', async (event, u) => {
 ipcMain.handle('delete-user', async (event, id) => {
     await runAsync('DELETE FROM users WHERE id = ?', [id]);
     return { success: true };
+});
+
+ipcMain.handle('get-user-shift-history', async (event, { cashierName, limit = 50 } = {}) => {
+    const safeLimit = Math.min(Math.max(Number(limit || 50), 1), 200);
+    const rows = await allAsync(
+        `SELECT *
+         FROM shift_reconciliations
+         WHERE cashier_name = ?
+         ORDER BY shift_end DESC, id DESC
+         LIMIT ?`,
+        [cashierName || '', safeLimit]
+    );
+    const summary = await getAsync(
+        `SELECT
+            COUNT(*) AS shift_count,
+            COALESCE(SUM(total_sales), 0) AS total_sales,
+            COALESCE(SUM(items_sold), 0) AS total_items,
+            COALESCE(SUM(salary_earned), 0) AS total_salary,
+            COALESCE(SUM(variance), 0) AS total_variance
+         FROM shift_reconciliations
+         WHERE cashier_name = ?`,
+        [cashierName || '']
+    );
+    return { rows, summary };
 });
 
 ipcMain.handle('get-settings', async () => {
@@ -934,6 +1073,9 @@ ipcMain.handle('export-shift-summary-pdf', async (event, summary) => {
         <tr><td style="padding:8px;border:1px solid #dbe1ea">Expected Drawer</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right">LKR ${Number(summary.expectedDrawer || 0).toFixed(2)}</td></tr>
         <tr><td style="padding:8px;border:1px solid #dbe1ea">Actual Drawer</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right">LKR ${Number(summary.actualDrawer || 0).toFixed(2)}</td></tr>
         <tr><td style="padding:8px;border:1px solid #dbe1ea">Variance</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right; color:${Number(summary.variance || 0) === 0 ? '#111' : '#dc2626'}">LKR ${Number(summary.variance || 0).toFixed(2)}</td></tr>
+        <tr><td style="padding:8px;border:1px solid #dbe1ea">Salary Basis</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right">${String(summary.salaryBasis || '-')}</td></tr>
+        <tr><td style="padding:8px;border:1px solid #dbe1ea">Salary Amount</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right">LKR ${Number(summary.salaryAmount || 0).toFixed(2)}</td></tr>
+        <tr><td style="padding:8px;border:1px solid #dbe1ea">Salary Earned</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right">LKR ${Number(summary.salaryEarned || 0).toFixed(2)}</td></tr>
         <tr><td style="padding:8px;border:1px solid #dbe1ea;font-weight:700">Total Revenue</td><td style="padding:8px;border:1px solid #dbe1ea;text-align:right;font-weight:700">LKR ${Number(summary.revenueTotal || 0).toFixed(2)}</td></tr>
       </table>
     </body></html>`;
@@ -999,8 +1141,9 @@ ipcMain.handle('record-shift-reconciliation', async (event, payload) => withTran
     const result = await runAsync(
         `INSERT INTO shift_reconciliations (
             cashier_name, shift_start, shift_end, opening_float, cash_sales, card_sales, credit_sales,
-            total_sales, expected_drawer, actual_drawer, variance, items_sold, notes
-         ) VALUES (?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            total_sales, expected_drawer, actual_drawer, variance, items_sold,
+            salary_basis, salary_amount, salary_earned, notes
+         ) VALUES (?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
             payload.cashierName || 'Cashier',
             payload.shiftStart || null,
@@ -1013,6 +1156,9 @@ ipcMain.handle('record-shift-reconciliation', async (event, payload) => withTran
             Number(payload.actualDrawer || 0),
             Number(payload.variance || 0),
             Number(payload.itemsSold || 0),
+            payload.salaryBasis || null,
+            Number(payload.salaryAmount || 0),
+            Number(payload.salaryEarned || 0),
             payload.notes || null
         ]
     );
@@ -1038,9 +1184,20 @@ ipcMain.handle('record-credit-payment', async (event, paymentData) => withTransa
     return { success: true, remainingBalance: newBalance };
 }));
 
-ipcMain.handle('get-sales-history', async () => {
-    const sales = await allAsync('SELECT * FROM sales ORDER BY timestamp DESC');
-    const items = await allAsync('SELECT sale_id, product_name, product_id, quantity, unit_price, subtotal, cost_total, profit_total, batch_trace FROM sale_items');
+ipcMain.handle('get-sales-history', async (event, options = {}) => {
+    const limit = Math.min(Math.max(Number(options.limit || 500), 1), 5000);
+    const offset = Math.max(Number(options.offset || 0), 0);
+    const sales = await allAsync('SELECT * FROM sales ORDER BY timestamp DESC, id DESC LIMIT ? OFFSET ?', [limit, offset]);
+    const saleIds = sales.map((sale) => sale.id);
+    if (!saleIds.length) return [];
+
+    const placeholders = saleIds.map(() => '?').join(',');
+    const items = await allAsync(
+        `SELECT sale_id, product_name, product_id, quantity, unit_price, subtotal, cost_total, profit_total, batch_trace
+         FROM sale_items
+         WHERE sale_id IN (${placeholders})`,
+        saleIds
+    );
     const itemsBySaleId = {};
     for (let i = 0; i < items.length; i++) {
         const item = items[i];
@@ -1054,6 +1211,32 @@ ipcMain.handle('get-sales-history', async () => {
     }
     return sales;
 });
+
+ipcMain.handle('get-sales-page', async (event, options = {}) => {
+    const limit = Math.min(Math.max(Number(options.limit || 100), 1), 500);
+    const offset = Math.max(Number(options.offset || 0), 0);
+    const from = String(options.from || '').trim();
+    const to = String(options.to || '').trim();
+    const where = [];
+    const params = [];
+
+    if (from) {
+        where.push('date(timestamp) >= date(?)');
+        params.push(from);
+    }
+    if (to) {
+        where.push('date(timestamp) <= date(?)');
+        params.push(to);
+    }
+
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+    const countRow = await getAsync(`SELECT COUNT(*) AS count FROM sales ${whereSql}`, params);
+    const items = await allAsync(
+        `SELECT * FROM sales ${whereSql} ORDER BY timestamp DESC, id DESC LIMIT ? OFFSET ?`,
+        [...params, limit, offset]
+    );
+    return { items, total: Number(countRow?.count || 0), limit, offset };
+});
 ipcMain.handle('get-sale-details', async (event, saleId) => allAsync('SELECT * FROM sale_items WHERE sale_id = ?', [saleId]));
 
 ipcMain.handle('get-printers', async (event) => {
@@ -1066,6 +1249,8 @@ ipcMain.handle('get-printers', async (event) => {
 app.whenReady().then(async () => {
     await ensureDefaultLoginUsers();
     await ensureGoogleDriveBackupSettings();
+    await ensureShiftSalaryColumns();
+    await ensurePerformanceIndexes();
 
     // Upgrade any remaining plain-text passwords
     const plainUsers = await allAsync("SELECT id, password FROM users WHERE password NOT LIKE 'pbkdf2$%'");

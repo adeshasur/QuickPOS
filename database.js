@@ -140,6 +140,9 @@ db.serialize(() => {
         actual_drawer REAL NOT NULL DEFAULT 0,
         variance REAL NOT NULL DEFAULT 0,
         items_sold REAL NOT NULL DEFAULT 0,
+        salary_basis TEXT,
+        salary_amount REAL NOT NULL DEFAULT 0,
+        salary_earned REAL NOT NULL DEFAULT 0,
         notes TEXT
     )`);
 
@@ -164,6 +167,9 @@ db.serialize(() => {
     db.run("ALTER TABLE sale_items ADD COLUMN profit_total REAL DEFAULT 0", () => {});
     db.run("ALTER TABLE sale_items ADD COLUMN batch_trace TEXT", () => {});
     db.run("ALTER TABLE sales ADD COLUMN gross_profit REAL DEFAULT 0", () => {});
+    db.run("ALTER TABLE shift_reconciliations ADD COLUMN salary_basis TEXT", () => {});
+    db.run("ALTER TABLE shift_reconciliations ADD COLUMN salary_amount REAL DEFAULT 0", () => {});
+    db.run("ALTER TABLE shift_reconciliations ADD COLUMN salary_earned REAL DEFAULT 0", () => {});
 }); // end outer db.serialize
 
 
