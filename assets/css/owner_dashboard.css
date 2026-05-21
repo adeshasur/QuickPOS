@@ -55,6 +55,10 @@
 /* ─── KPI GRID ─── */
 .kpi-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; width:100%; }
 
+#expiryAlertCard {
+  display: none !important;
+}
+
 .kpi-card {
   --kpi-accent: #2563eb;
   --kpi-accent-2: #1d4ed8;
