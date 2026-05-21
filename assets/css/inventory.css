@@ -483,4 +483,137 @@ tr.expired-row:hover td {
     .search-box { width: 100%; }
 }
 
+/* Inventory page refinement pass */
+.inventory-container {
+    background: #f6f8fb;
+}
+
+.page-header,
+.inventory-card,
+.stock-table-card,
+.table-card,
+.form-card {
+    border-radius: 14px;
+    border-color: #dde6f1;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.045);
+}
+
+.card-top,
+.section-header {
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.update-btn,
+.add-btn {
+    border-radius: 10px;
+}
+
+.days-badge,
+.status-badge,
+.stock-badge {
+    letter-spacing: 0;
+}
+
+.empty-state {
+    background: #fbfcfe;
+}
+
+/* Advanced inventory control polish */
+.inventory-container {
+    min-width: 0;
+}
+
+.expiry-filters {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.filter-badge {
+    min-height: 34px;
+}
+
+.filter-badge.active {
+    box-shadow: 0 8px 18px rgba(29, 45, 191, 0.16);
+}
+
+.stock-history-section {
+    min-height: 0;
+}
+
+.section-header {
+    position: sticky;
+    top: 55px;
+    z-index: 4;
+}
+
+.table-container {
+    scrollbar-width: thin;
+}
+
+.stock-table th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+.stock-table td {
+    vertical-align: middle;
+}
+
+.expiry-badge,
+.days-badge {
+    min-width: 82px;
+}
+
+.tbl-btn {
+    min-width: 34px;
+}
+
+.modal-box {
+    max-width: min(620px, 100%);
+}
+
+@media (max-width: 900px) {
+    .page-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .add-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .expiry-filters {
+        position: static;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        scrollbar-width: thin;
+    }
+
+    .filter-badge,
+    .filters-label {
+        flex-shrink: 0;
+    }
+
+    .section-header {
+        position: static;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 640px) {
+    .field-row {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-actions {
+        flex-direction: column-reverse;
+    }
+}
+
 

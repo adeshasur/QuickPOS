@@ -11,6 +11,15 @@
 
   async function openModal(id) { document.getElementById(id).classList.add('open'); }
   async function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[char]));
+  }
 
   async function loadData() {
     const results = await Promise.all([
@@ -168,20 +177,29 @@
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((cat) => {
         const pCount = counts.get(cat.id) || 0;
-        const deleteDisabledAttr = pCount > 0
-          ? 'disabled style="opacity: 0.4; cursor: not-allowed;" title="Cannot delete category with active products"'
-          : '';
         const statusClass = (cat.description === 'Inactive') ? 'inactive' : 'active';
         const statusText = cat.description === 'Inactive' ? 'Inactive' : 'Active';
         const pluralizedText = pCount === 1 ? '1 Product' : `${pCount} Products`;
+        const categoryName = String(cat.name || 'Category').trim();
+        const safeName = escapeHtml(categoryName);
+        const initial = escapeHtml(categoryName.slice(0, 1).toUpperCase() || 'C');
+        const aisleCode = escapeHtml(categoryName.slice(0, 3).toUpperCase() || 'CAT');
         return `<tr>
-          <td class="td-name">${cat.name}</td>
+          <td class="td-name">
+            <div class="category-name-cell">
+              <span class="category-avatar">${initial}</span>
+              <span class="category-copy">
+                <strong>${safeName}</strong>
+                <small>Aisle ${aisleCode}</small>
+              </span>
+            </div>
+          </td>
           <td><span class="status-badge ${statusClass}">${statusText}</span></td>
           <td><span class="count-badge">${pluralizedText}</span></td>
           <td>
             <div class="actions-cell">
               <button class="tbl-btn edit" data-id="${cat.id}">Edit</button>
-              <button class="tbl-btn del" data-id="${cat.id}" ${deleteDisabledAttr}>Delete</button>
+              <button class="tbl-btn del" data-id="${cat.id}" data-products="${pCount}">Delete</button>
             </div>
           </td>
         </tr>`;
@@ -219,10 +237,14 @@
       }
 
       if (delBtn) {
-        if (delBtn.disabled) return;
         deletingId = Number(delBtn.dataset.id);
         const cat = categories.find((c) => c.id === deletingId);
-        document.getElementById('delMsg').textContent = `Are you sure you want to delete the category "${cat ? cat.name : ''}"? This action cannot be undone.`;
+        const productCount = Number(delBtn.dataset.products || 0);
+        const delTitle = document.getElementById('delTitle');
+        if (delTitle) delTitle.textContent = productCount > 0 ? 'Products attached' : 'Delete Category?';
+        document.getElementById('delMsg').textContent = productCount > 0
+          ? `Warning: "${cat ? cat.name : ''}" already has ${productCount} product${productCount === 1 ? '' : 's'}. Delete this category anyway? Those products will stay in the system but become uncategorized.`
+          : `Are you sure you want to delete the category "${cat ? cat.name : ''}"? This action cannot be undone.`;
         openModal('deleteModal');
       }
     });
@@ -241,9 +263,13 @@
     document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
       if (!deletingId) return;
       const cat = categories.find((c) => c.id === deletingId);
+      const linkedCount = products.filter((p) => Number(p.category_id) === Number(deletingId)).length;
       
       // Safety window confirmation dialog box checkpoint
-      if (confirm(`Are you sure you want to delete the category "${cat ? cat.name : ''}"?`)) {
+      const warning = linkedCount > 0
+        ? `This category has ${linkedCount} product${linkedCount === 1 ? '' : 's'}. Delete it anyway? Products will not be deleted, but they will become uncategorized.`
+        : `Are you sure you want to delete the category "${cat ? cat.name : ''}"?`;
+      if (confirm(warning)) {
         const result = await window.api.deleteCategory(deletingId);
         if (!result.success) {
           alert(result.message || 'Cannot delete this category.');

@@ -783,3 +783,210 @@ body.sales-dense .cart-item { padding: 9px 0; }
   color: var(--success);
   line-height: 1;
 }
+
+/* POS terminal refinement pass */
+.content,
+.sales-shell,
+.pos-shell {
+  background: #f6f8fb;
+}
+
+.sale-panel,
+.products-panel,
+.cart-panel,
+.payment-panel,
+.modal-content,
+.payment-modal-content {
+  border-radius: 14px;
+  border-color: #dde6f1;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.045);
+}
+
+.panel-header,
+.cart-header,
+.payment-header {
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.product-card,
+.cart-item,
+.quick-btn,
+.np-btn,
+.remove-btn {
+  border-radius: 10px;
+}
+
+.product-card:hover {
+  transform: translateY(-1px);
+}
+
+.pay-btn,
+.checkout-btn,
+.hold-btn {
+  border-radius: 11px;
+}
+
+.change-due-box {
+  border-radius: 13px;
+}
+
+/* Advanced POS workflow polish */
+.products-toolbar {
+  padding: 18px 20px 10px;
+}
+
+.toolbar-row {
+  min-width: 0;
+}
+
+.search-wrap {
+  min-width: 220px;
+}
+
+.cat-pills {
+  max-height: 86px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.products-grid {
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 10px;
+  padding: 12px 14px 16px;
+}
+
+.product-card {
+  height: 136px;
+  border-color: rgba(214, 224, 236, 0.95);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.045);
+}
+
+.product-card:hover:not(.out-of-stock) {
+  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.08);
+}
+
+.pc-cat {
+  color: #667085;
+}
+
+.pc-price {
+  font-size: 16px;
+}
+
+.cart-section {
+  width: clamp(340px, 30vw, 430px);
+  border-left-color: rgba(214, 224, 236, 0.95);
+  box-shadow: -10px 0 28px rgba(15, 23, 42, 0.045);
+}
+
+.cart-header,
+.customer-zone,
+.cart-footer {
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+.cart-items {
+  padding: 12px 16px;
+}
+
+.cart-item {
+  border-color: rgba(16, 185, 129, 0.18);
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.92), rgba(255, 255, 255, 0.98));
+}
+
+.qty-btn {
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+}
+
+.total-row {
+  background: #fbfdff;
+}
+
+.total-amount {
+  font-size: clamp(22px, 2vw, 28px);
+}
+
+.pay-btns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pay-btn {
+  min-height: 52px;
+}
+
+.search-suggest,
+.cust-dropdown {
+  border-radius: 14px;
+  box-shadow: 0 20px 44px rgba(15, 23, 42, 0.16);
+}
+
+@media (max-width: 1320px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+
+  .cart-section {
+    width: 360px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .cart-section {
+    width: 100%;
+    height: auto;
+    max-height: 46vh;
+  }
+
+  .products-section {
+    width: 100%;
+    min-height: 54vh;
+  }
+
+  .products-toolbar {
+    padding: 14px;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .toolbar-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-wrap {
+    min-width: 0;
+  }
+
+  .cat-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-height: none;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .product-card {
+    height: 126px;
+    padding: 10px;
+  }
+
+  .cart-section {
+    max-height: none;
+  }
+
+  .pay-btns {
+    grid-template-columns: 1fr;
+  }
+}

@@ -246,3 +246,154 @@ tbody tr:last-child td{border-bottom:none}
   .add-btn { width: 100%; justify-content: center; }
   .field-row { grid-template-columns: 1fr; }
 }
+
+/* Products page refinement pass */
+.content {
+  background: #f6f8fb;
+}
+
+.page-header,
+.filter-toolbar,
+.table-wrap {
+  border-radius: 14px;
+}
+
+.filter-toolbar {
+  min-height: 58px;
+}
+
+.search-box {
+  max-width: 420px;
+}
+
+.table-wrap {
+  overflow: hidden;
+}
+
+th,
+td {
+  padding: 14px 16px;
+}
+
+.p-name-main {
+  font-size: 14.5px;
+  line-height: 1.35;
+}
+
+.p-barcode-sub,
+.measure-tag,
+.badge {
+  border-radius: 8px;
+}
+
+.stock-low {
+  border-radius: 9px;
+}
+
+.tbl-btn {
+  border-radius: 9px;
+}
+
+.modal-top {
+  padding: 20px 24px 16px;
+}
+
+.modal-body {
+  padding: 22px 24px;
+}
+
+.modal-actions {
+  padding: 0 24px 24px;
+}
+
+.measure-section,
+.price-preview {
+  border-radius: 13px;
+}
+
+/* Advanced catalog management polish */
+.filter-toolbar {
+  flex-wrap: wrap;
+}
+
+.search-box {
+  min-width: 260px;
+}
+
+.cat-filter-box {
+  min-width: 210px;
+}
+
+.table-wrap {
+  min-height: 0;
+}
+
+.table-scroll {
+  scrollbar-width: thin;
+}
+
+tbody tr {
+  background: #ffffff;
+}
+
+tbody tr:hover td {
+  background: #fbfdff;
+}
+
+.name-box {
+  min-width: 0;
+}
+
+.p-name-main,
+.p-barcode-sub {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.price-wrap {
+  min-width: 112px;
+}
+
+.actions-cell {
+  min-width: 150px;
+}
+
+.tbl-btn {
+  min-width: 40px;
+  justify-content: center;
+}
+
+.price-preview {
+  background: linear-gradient(180deg, #fbfdff, #f4f7fb);
+}
+
+.unit-chip.active {
+  box-shadow: 0 8px 18px rgba(29, 45, 191, 0.14);
+}
+
+@media (max-width: 760px) {
+  .filter-toolbar {
+    align-items: stretch;
+  }
+
+  .search-box,
+  .cat-filter-box,
+  .filter-select {
+    width: 100%;
+    max-width: none;
+  }
+
+  .modal-actions,
+  .del-actions {
+    flex-direction: column-reverse;
+  }
+
+  .price-preview {
+    grid-template-columns: 1fr;
+  }
+
+  .pp-final {
+    grid-column: auto;
+  }
+}

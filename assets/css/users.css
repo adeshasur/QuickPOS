@@ -165,3 +165,55 @@
   .modal{width:95%}
   .history-summary-grid{grid-template-columns:1fr}
 }
+
+/* Users page refinement pass */
+.kpi-grid {
+    gap: 14px;
+}
+
+.kpi-card {
+    min-height: 92px;
+    border-radius: 14px;
+    border-color: #dde6f1;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.045);
+}
+
+.kpi-card:hover {
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.07);
+}
+
+.kpi-icon {
+    border-radius: 11px;
+}
+
+.staff-table-section {
+    border-radius: 14px;
+}
+
+.section-header {
+    min-height: 52px;
+    padding: 13px 16px;
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.section-title {
+    color: #172033;
+}
+
+.staff-table td,
+.staff-table th {
+    padding: 14px 16px;
+}
+
+.action-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: #f6f8fb;
+}
+
+.history-summary-card {
+    background: #fbfcfe;
+    border-color: #dde6f1;
+    border-radius: 13px;
+}

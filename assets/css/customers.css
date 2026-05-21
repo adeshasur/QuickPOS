@@ -163,6 +163,150 @@
   .th:nth-child(3), .td:nth-child(3) { display: none; } /* Hide address on small screens */
 }
 
+/* Customers page refinement pass */
+.page-header,
+.toolbar,
+.table-wrap,
+.cust-table,
+.modal-box {
+  border-radius: 14px;
+}
+
+.toolbar {
+  min-height: 58px;
+  background: #ffffff;
+  border-color: #dde6f1;
+}
+
+.cust-row,
+.table-head {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.cust-row:hover {
+  background: #f8fbff;
+}
+
+.avatar-circle,
+.del-icon {
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.history-item {
+  border-radius: 12px;
+  background: #fbfcfe;
+}
+
+/* UX repair: keep the customer grid readable instead of squeezing columns. */
+.table-card {
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.table-head,
+.cust-row {
+  min-width: 980px;
+}
+
+.table-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.cust-row {
+  min-height: 72px;
+}
+
+.cust-fullname,
+.cust-id,
+.phone-val,
+.addr-val {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row-actions {
+  min-width: 0;
+}
+
+.row-btn {
+  min-width: 44px;
+}
+
+.modal-box {
+  max-width: min(560px, 100%);
+}
+
+@media (max-width: 1024px) {
+  .table-head,
+  .cust-row {
+    min-width: 760px;
+  }
+
+  .table-card {
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 720px) {
+  .toolbar {
+    padding: 0;
+  }
+
+  .table-head {
+    display: none;
+  }
+
+  .table-card {
+    overflow-x: visible;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    gap: 10px;
+  }
+
+  .cust-row {
+    min-width: 0;
+    grid-template-columns: 1fr;
+    padding: 14px;
+    gap: 10px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045);
+    margin-bottom: 10px;
+  }
+
+  .td {
+    padding: 0;
+  }
+
+  .cust-row .td:nth-child(3),
+  .cust-row .td:nth-child(4) {
+    display: block;
+  }
+
+  .addr-val {
+    max-width: none;
+  }
+
+  .row-actions {
+    justify-content: stretch;
+    gap: 8px;
+  }
+
+  .row-btn {
+    flex: 1;
+  }
+
+  .field-row {
+    flex-direction: column;
+  }
+}
+
 
 
 

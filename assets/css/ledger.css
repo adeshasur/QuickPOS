@@ -341,3 +341,32 @@ tr:hover td { background: var(--surface2); }
     .toolbar { flex-direction: column; align-items: stretch; gap: 12px; }
     .search-wrap { width: 100%; max-width: 100%; }
 }
+
+/* Credit ledger refinement pass */
+.ledger-container {
+    background: #f6f8fb;
+}
+
+.page-header,
+.toolbar,
+.ledger-card,
+.customer-card,
+.table-wrap,
+.modal-box {
+    border-radius: 14px;
+    border-color: #dde6f1;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.045);
+}
+
+.kpi-card {
+    border-radius: 14px;
+}
+
+.modal-header,
+.card-header {
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.amount-input {
+    border-radius: 11px;
+}

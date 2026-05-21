@@ -211,3 +211,43 @@
   .report-btn{width:100%;justify-content:center}
 }
 
+/* Reports page refinement pass */
+.reports-dashboard,
+.content {
+  background: #f6f8fb;
+}
+
+.reports-header,
+.summary-card,
+.analysis-card,
+.table-container,
+.table-wrapper {
+  border-radius: 14px;
+  border-color: #dde6f1;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.045);
+}
+
+.summary-card {
+  background: linear-gradient(180deg, #ffffff, #fbfcfe);
+}
+
+.analysis-card {
+  background: #ffffff;
+}
+
+.section-header {
+  min-height: 50px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.report-btn {
+  border-radius: 10px;
+}
+
+.sales-table th,
+.top-items-table th,
+.sales-table td,
+.top-items-table td {
+  padding: 13px 15px;
+}
+

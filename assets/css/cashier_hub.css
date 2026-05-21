@@ -1303,3 +1303,37 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Cashier hub refinement pass */
+.hub-shell {
+  background: #f6f8fb;
+}
+
+.hub-topbar,
+.hub-panel,
+.kpi-card,
+.action-tile,
+.analytics-card {
+  border-radius: 14px;
+  border-color: #dde6f1;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.045);
+}
+
+.hub-panel,
+.analytics-card {
+  background: #ffffff;
+}
+
+.panel-head {
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.action-tile:hover {
+  transform: translateY(-1px);
+}
+
+.shift-btn,
+.primary-action,
+.secondary-action {
+  border-radius: 11px;
+}

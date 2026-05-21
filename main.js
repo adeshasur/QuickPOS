@@ -623,9 +623,16 @@ ipcMain.handle('save-category', async (event, c) => {
 
 ipcMain.handle('delete-category', async (event, id) => {
     const linkedProducts = await getAsync('SELECT COUNT(*) AS count FROM products WHERE category_id = ?', [id]);
-    if ((linkedProducts?.count || 0) > 0) return { success: false, message: 'Cannot delete category with existing products.' };
-    await runAsync('DELETE FROM categories WHERE id = ?', [id]);
-    return { success: true };
+    await runAsync('BEGIN IMMEDIATE TRANSACTION');
+    try {
+        await runAsync('UPDATE products SET category_id = NULL WHERE category_id = ?', [id]);
+        await runAsync('DELETE FROM categories WHERE id = ?', [id]);
+        await runAsync('COMMIT');
+        return { success: true, uncategorizedProducts: linkedProducts?.count || 0 };
+    } catch (err) {
+        await runAsync('ROLLBACK');
+        return { success: false, message: err.message || 'Could not delete category.' };
+    }
 });
 
 ipcMain.handle('get-customers', async () => allAsync('SELECT * FROM customers'));

@@ -3,7 +3,7 @@
 
   const fmt = window.fmtLKR;
   const fmtK = window.fmtLKR;
-  const fmtRu = (n) => `රු. ${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const fmtCurrency = (n) => window.fmtLKR(Number(n || 0));
 
   let sales = [];
   let saleItemsMap = new Map();
@@ -166,12 +166,12 @@
     // Calculate system-wide Credit Receivable outstanding balance
     const totalCredit = customers.reduce((sum, c) => sum + Number(c.balance || 0), 0);
     const creditEl = document.getElementById('kpiCredit');
-    if (creditEl) creditEl.textContent = fmtRu(totalCredit);
+    if (creditEl) creditEl.textContent = fmtCurrency(totalCredit);
 
     // Calculate system-wide Stock Asset Valuation (stock * cost_price)
     const totalStockValue = products.reduce((sum, p) => sum + (Number(p.current_stock || 0) * Number(p.cost_price || 0)), 0);
     const stockValEl = document.getElementById('kpiStockValue');
-    if (stockValEl) stockValEl.textContent = fmtRu(totalStockValue);
+    if (stockValEl) stockValEl.textContent = fmtCurrency(totalStockValue);
 
     // Dynamic Today vs Yesterday Profit comparison rendering
     const todayProfit = t.profit;
@@ -194,7 +194,7 @@
     const profitTrendBadgeEl = document.getElementById('kpiProfitTrendBadge');
     if (profitTrendBadgeEl) {
       profitTrendBadgeEl.innerHTML = `
-        <span class="kpi-trend-badge ${diff >= 0 ? 'up' : 'down'}" title="Today: ${fmtRu(todayProfit)} | Yesterday: ${fmtRu(yesterdayProfit)}">
+        <span class="kpi-trend-badge ${diff >= 0 ? 'up' : 'down'}" title="Today: ${fmtCurrency(todayProfit)} | Yesterday: ${fmtCurrency(yesterdayProfit)}">
           <i class="fa-solid ${diff >= 0 ? 'fa-caret-up' : 'fa-caret-down'}"></i> ${pctChangeText}
         </span>
       `;
@@ -203,7 +203,7 @@
     // Symmetrical sub-text yesterday comparison
     const profitCompareTextEl = document.getElementById('kpiProfitCompareText');
     if (profitCompareTextEl) {
-      profitCompareTextEl.textContent = `Yest: ${fmtRu(yesterdayProfit)}`;
+      profitCompareTextEl.textContent = `Yest: ${fmtCurrency(yesterdayProfit)}`;
     }
 
     document.getElementById('ovToday0').textContent = t.tx;
