@@ -407,6 +407,82 @@ body.sidebar-collapsible.sidebar-hidden #sidebar-container {
     text-decoration: underline;
 }
 
+.nd-section-title {
+    padding: 10px 18px 6px;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.nd-actions-row {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 12px 6px;
+}
+
+.nd-mark-all-btn,
+.nd-read-btn {
+    border: 1px solid #d8e2ef;
+    background: #ffffff;
+    color: #475569;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.nd-mark-all-btn {
+    padding: 7px 11px;
+}
+
+.nd-read-btn {
+    flex-shrink: 0;
+    padding: 6px 9px;
+    margin-left: auto;
+}
+
+.nd-mark-all-btn:hover,
+.nd-read-btn:hover {
+    border-color: rgba(29, 45, 191, 0.28);
+    color: var(--primary);
+    background: #eef3ff;
+}
+
+.nd-low-title {
+    color: #e11d48;
+}
+
+.nd-expiry-title {
+    color: #d97706;
+}
+
+.nd-item.nd-low-stock .nd-item-icon {
+    background: #fff1f2;
+    color: #e11d48;
+}
+
+.nd-item.nd-low-stock .nd-item-tag {
+    color: #e11d48;
+}
+
+.nd-item.nd-expiring-soon .nd-item-icon {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.nd-item.nd-expiring-soon .nd-item-tag {
+    color: #d97706;
+}
+
+.toast.expiry {
+    border-left-color: #d97706;
+}
+
+.toast.expiry i {
+    color: #d97706;
+}
+
 .nd-item-tag {
     font-size: 9px;
     font-weight: 800;

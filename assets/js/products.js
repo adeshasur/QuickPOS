@@ -69,7 +69,7 @@
     const filteredProducts = products;
 
     if (!filteredProducts.length) {
-      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><p>No products found</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>No products found</p></div></td></tr>`;
       return;
     }
 
@@ -86,18 +86,23 @@
         <td class="td-name">
           <div class="name-box">
             <span class="p-name-main">${p.name}</span>
-            <span class="p-barcode-sub">${p.barcode || '-'}</span>
           </div>
         </td>
+        <td><span class="p-barcode-sub">${p.barcode || '-'}</span></td>
         <td class="td-cat">${cat ? cat.name : '-'}</td>
         <td><span class="measure-tag">${displayUnit}</span></td>
         <td>${low ? `<span class="stock-low">${p.current_stock}</span>` : `<span class="stock-ok">${p.current_stock}</span>`}</td>
         <td><div class="price-wrap">${discount > 0 ? `<span class="price-base">${fmt(p.cost_price)}</span>` : ''}<span class="price-final">${fmt(p.selling_price)}</span>${discount > 0 ? `<span class="price-disc">-${fmt(discount)}</span>` : ''}</div></td>
+        <td><span class="discount-cell ${discount > 0 ? 'has-discount' : ''}">${discount > 0 ? fmt(discount) : '-'}</span></td>
         <td><div class="actions-cell"><button class="tbl-btn edit" data-id="${p.id}">Edit</button><button class="tbl-btn del" data-id="${p.id}">Delete</button></div></td>
       </tr>`;
     }).join('');
 
-    renderPager();
+    removePager();
+  }
+
+  function removePager() {
+    document.getElementById('productsPager')?.remove();
   }
 
   function ensurePager() {
@@ -106,7 +111,7 @@
     const wrap = document.querySelector('.table-wrap');
     pager = document.createElement('div');
     pager.id = 'productsPager';
-    pager.style.cssText = 'display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:12px 4px;font-size:13px;font-weight:700;color:var(--text2)';
+    pager.style.cssText = 'display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:12px 14px;font-size:13px;font-weight:700;color:var(--text2);position:static;flex:0 0 auto';
     if (wrap) wrap.appendChild(pager);
     return pager;
   }

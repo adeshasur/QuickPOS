@@ -89,6 +89,13 @@ async function saveSettingValue(key, value) {
     await runAsync('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [key, String(value)]);
 }
 
+async function logAudit(entityType, entityId, action, detail = '', userName = '') {
+    await runAsync(
+        'INSERT INTO audit_log (entity_type, entity_id, action, detail, user_name) VALUES (?, ?, ?, ?, ?)',
+        [entityType, entityId || null, action, typeof detail === 'string' ? detail : JSON.stringify(detail), userName || 'System']
+    );
+}
+
 function getLocalDateKey(date = new Date()) {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -499,11 +506,277 @@ ipcMain.handle('get-low-stock-summary', async () => {
     return { count: Number(countRow?.count || 0), items };
 });
 
-ipcMain.handle('update-product', async (event, p) => {
-    await runAsync(
-        'UPDATE products SET barcode = ?, name = ?, category_id = ?, cost_price = ?, selling_price = ?, alert_level = ?, unit_type = ?, is_weighted = ?, expiry_date = COALESCE(?, expiry_date) WHERE id = ?',
-        [p.barcode, p.name, p.categoryId, p.cost, p.price, p.alertLevel, p.unitType, p.isWeighted ? 1 : 0, p.expiryDate || null, p.id]
+ipcMain.handle('get-notification-summary', async () => {
+    const lowCountRow = await getAsync(`
+        SELECT COUNT(*) AS count
+        FROM products
+        WHERE COALESCE(current_stock, 0) >= 0
+          AND COALESCE(current_stock, 0) <= COALESCE(alert_level, 0)
+    `);
+    const lowItems = await allAsync(`
+        SELECT id, name, current_stock, alert_level
+        FROM products
+        WHERE COALESCE(current_stock, 0) >= 0
+          AND COALESCE(current_stock, 0) <= COALESCE(alert_level, 0)
+        ORDER BY current_stock ASC, name ASC
+        LIMIT 8
+    `);
+
+    const stockProducts = await allAsync('SELECT id FROM products WHERE COALESCE(current_stock, 0) > 0');
+    for (const product of stockProducts) {
+        await ensureLegacyBatchCoverage(product.id);
+    }
+
+    const expiryCountRow = await getAsync(`
+        SELECT COUNT(*) AS count
+        FROM inventory_batches
+        WHERE COALESCE(remaining_qty, 0) > 0
+          AND expiry_date IS NOT NULL
+          AND expiry_date != ''
+          AND date(expiry_date) >= date('now')
+          AND date(expiry_date) <= date('now', '+30 days')
+    `);
+    const expiryItems = await allAsync(`
+        SELECT
+            b.id,
+            p.name,
+            b.remaining_qty,
+            b.expiry_date,
+            CAST(julianday(date(b.expiry_date)) - julianday(date('now')) AS INTEGER) AS days_left
+        FROM inventory_batches b
+        JOIN products p ON p.id = b.product_id
+        WHERE COALESCE(b.remaining_qty, 0) > 0
+          AND b.expiry_date IS NOT NULL
+          AND b.expiry_date != ''
+          AND date(b.expiry_date) >= date('now')
+          AND date(b.expiry_date) <= date('now', '+30 days')
+        ORDER BY date(b.expiry_date) ASC, p.name ASC
+        LIMIT 8
+    `);
+
+    const lowCount = Number(lowCountRow?.count || 0);
+    const expiryCount = Number(expiryCountRow?.count || 0);
+    return {
+        total: lowCount + expiryCount,
+        lowStock: { count: lowCount, items: lowItems },
+        expiringSoon: { count: expiryCount, items: expiryItems }
+    };
+});
+
+ipcMain.handle('get-inventory-batches', async () => {
+    const stockProducts = await allAsync('SELECT id FROM products WHERE COALESCE(current_stock, 0) > 0');
+    for (const product of stockProducts) {
+        await ensureLegacyBatchCoverage(product.id);
+    }
+
+    return allAsync(`
+        SELECT
+            b.id AS batch_id,
+            b.product_id,
+            b.batch_code,
+            b.received_qty,
+            b.remaining_qty,
+            b.cost_price,
+            b.selling_price,
+            b.expiry_date,
+            b.created_at,
+            p.name,
+            p.category_id,
+            p.unit_type,
+            p.current_stock,
+            c.name AS category_name
+        FROM inventory_batches b
+        JOIN products p ON p.id = b.product_id
+        LEFT JOIN categories c ON c.id = p.category_id
+        WHERE COALESCE(b.remaining_qty, 0) > 0
+        ORDER BY CASE WHEN b.expiry_date IS NULL OR b.expiry_date = '' THEN 1 ELSE 0 END ASC,
+                 date(b.expiry_date) ASC,
+                 p.name ASC,
+                 b.id ASC
+    `);
+});
+
+ipcMain.handle('get-suppliers', async () => allAsync('SELECT * FROM suppliers ORDER BY name ASC'));
+
+ipcMain.handle('save-supplier', async (event, supplier) => {
+    const id = Number(supplier.id || 0);
+    if (!String(supplier.name || '').trim()) throw new Error('Supplier name is required.');
+    if (id) {
+        await runAsync(
+            `UPDATE suppliers SET name = ?, phone = ?, email = ?, address = ?, contact_person = ? WHERE id = ?`,
+            [supplier.name, supplier.phone || '', supplier.email || '', supplier.address || '', supplier.contactPerson || '', id]
+        );
+        await logAudit('supplier', id, 'update', supplier, supplier.userName);
+        return { success: true, id };
+    }
+    const result = await runAsync(
+        `INSERT INTO suppliers (name, phone, email, address, contact_person) VALUES (?, ?, ?, ?, ?)`,
+        [supplier.name, supplier.phone || '', supplier.email || '', supplier.address || '', supplier.contactPerson || '']
     );
+    await logAudit('supplier', result.lastID, 'create', supplier, supplier.userName);
+    return { success: true, id: result.lastID };
+});
+
+ipcMain.handle('get-product-discounts', async () => allAsync(`
+    SELECT d.*, p.name AS product_name
+    FROM product_discounts d
+    JOIN products p ON p.id = d.product_id
+    ORDER BY d.active DESC, d.created_at DESC
+`));
+
+ipcMain.handle('save-product-discount', async (event, discount) => {
+    const productId = Number(discount.productId || discount.product_id || 0);
+    const value = Number(discount.discountValue ?? discount.discount_value ?? 0);
+    if (!productId) throw new Error('Product is required.');
+    if (value < 0) throw new Error('Discount cannot be negative.');
+    const result = await runAsync(
+        `INSERT INTO product_discounts (product_id, discount_type, discount_value, starts_at, ends_at, active, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [productId, discount.discountType || 'amount', value, discount.startsAt || null, discount.endsAt || null, discount.active === false ? 0 : 1, discount.userName || 'System']
+    );
+    await logAudit('discount', result.lastID, 'create', discount, discount.userName);
+    return { success: true, id: result.lastID };
+});
+
+ipcMain.handle('record-stock-adjustment', async (event, payload) => {
+    return withTransaction(async () => {
+        const productId = Number(payload.productId || 0);
+        const batchId = payload.batchId ? Number(payload.batchId) : null;
+        const qty = Number(payload.quantity || 0);
+        const type = String(payload.adjustmentType || 'wastage');
+        if (!productId || qty <= 0) throw new Error('Valid product and quantity are required.');
+
+        if (['wastage', 'damage', 'expired', 'decrease'].includes(type)) {
+            await ensureLegacyBatchCoverage(productId);
+            let needed = qty;
+            const batches = await allAsync(
+                `SELECT id, remaining_qty FROM inventory_batches
+                 WHERE product_id = ? AND remaining_qty > 0 ${batchId ? 'AND id = ?' : ''}
+                 ORDER BY CASE WHEN expiry_date IS NULL OR expiry_date = '' THEN 1 ELSE 0 END ASC, expiry_date ASC, created_at ASC, id ASC`,
+                batchId ? [productId, batchId] : [productId]
+            );
+            for (const batch of batches) {
+                if (needed <= 0) break;
+                const takeQty = Math.min(needed, Number(batch.remaining_qty || 0));
+                if (takeQty <= 0) continue;
+                await runAsync('UPDATE inventory_batches SET remaining_qty = remaining_qty - ? WHERE id = ?', [takeQty, batch.id]);
+                needed -= takeQty;
+            }
+            const actual = qty - Math.max(0, needed);
+            await runAsync('UPDATE products SET current_stock = MAX(0, current_stock - ?) WHERE id = ?', [actual, productId]);
+        } else {
+            await runAsync('UPDATE products SET current_stock = current_stock + ? WHERE id = ?', [qty, productId]);
+        }
+
+        const result = await runAsync(
+            `INSERT INTO stock_adjustments (product_id, batch_id, adjustment_type, quantity, reason, note, user_name)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [productId, batchId, type, qty, payload.reason || '', payload.note || '', payload.userName || 'System']
+        );
+        await logAudit('stock_adjustment', result.lastID, type, payload, payload.userName);
+        return { success: true, id: result.lastID };
+    });
+});
+
+ipcMain.handle('record-return', async (event, payload) => {
+    return withTransaction(async () => {
+        const items = Array.isArray(payload.items) ? payload.items : [];
+        if (!items.length) throw new Error('Return items are required.');
+        const refundAmount = items.reduce((sum, item) => sum + (Number(item.quantity || 0) * Number(item.unitPrice || 0)), 0);
+        const result = await runAsync(
+            `INSERT INTO returns (sale_id, bill_id, customer_id, refund_amount, reason, user_name)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [payload.saleId || null, payload.billId || '', payload.customerId || null, refundAmount, payload.reason || '', payload.userName || 'System']
+        );
+        for (const item of items) {
+            const qty = Number(item.quantity || 0);
+            const unitPrice = Number(item.unitPrice || 0);
+            await runAsync(
+                `INSERT INTO return_items (return_id, sale_item_id, product_id, quantity, unit_price, subtotal, restock)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [result.lastID, item.saleItemId || null, item.productId, qty, unitPrice, qty * unitPrice, item.restock === false ? 0 : 1]
+            );
+            if (item.restock !== false) {
+                await runAsync('UPDATE products SET current_stock = current_stock + ? WHERE id = ?', [qty, item.productId]);
+                const product = await getAsync('SELECT cost_price, selling_price, expiry_date FROM products WHERE id = ?', [item.productId]);
+                await runAsync(
+                    `INSERT INTO inventory_batches (product_id, batch_code, received_qty, remaining_qty, cost_price, selling_price, expiry_date)
+                     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    [item.productId, `RETURN-${result.lastID}-${Date.now()}`, qty, qty, Number(product?.cost_price || 0), Number(product?.selling_price || unitPrice), product?.expiry_date || null]
+                );
+            }
+        }
+        await logAudit('return', result.lastID, 'create', payload, payload.userName);
+        return { success: true, id: result.lastID, refundAmount };
+    });
+});
+
+ipcMain.handle('get-stock-adjustments', async () => allAsync(`
+    SELECT a.*, p.name AS product_name
+    FROM stock_adjustments a
+    JOIN products p ON p.id = a.product_id
+    ORDER BY a.created_at DESC
+    LIMIT 500
+`));
+
+ipcMain.handle('get-returns', async () => allAsync('SELECT * FROM returns ORDER BY created_at DESC LIMIT 500'));
+
+ipcMain.handle('save-unit-conversion', async (event, payload) => {
+    const factor = Number(payload.factor || 0);
+    if (!payload.fromUnit || !payload.toUnit || factor <= 0) throw new Error('Valid unit conversion is required.');
+    const result = await runAsync(
+        `INSERT INTO unit_conversions (product_id, from_unit, to_unit, factor) VALUES (?, ?, ?, ?)`,
+        [payload.productId || null, payload.fromUnit, payload.toUnit, factor]
+    );
+    await logAudit('unit_conversion', result.lastID, 'create', payload, payload.userName);
+    return { success: true, id: result.lastID };
+});
+
+ipcMain.handle('get-unit-conversions', async () => allAsync(`
+    SELECT u.*, p.name AS product_name
+    FROM unit_conversions u
+    LEFT JOIN products p ON p.id = u.product_id
+    ORDER BY u.created_at DESC
+`));
+
+ipcMain.handle('get-price-history', async (event, productId = null) => allAsync(`
+    SELECT h.*, p.name AS product_name
+    FROM price_history h
+    JOIN products p ON p.id = h.product_id
+    ${productId ? 'WHERE h.product_id = ?' : ''}
+    ORDER BY h.created_at DESC
+    LIMIT 500
+`, productId ? [productId] : []));
+
+ipcMain.handle('get-reorder-list', async () => allAsync(`
+    SELECT p.*, c.name AS category_name
+    FROM products p
+    LEFT JOIN categories c ON c.id = p.category_id
+    WHERE COALESCE(p.current_stock, 0) <= COALESCE(p.alert_level, 0)
+    ORDER BY p.current_stock ASC, p.name ASC
+`));
+
+ipcMain.handle('get-audit-log', async () => allAsync('SELECT * FROM audit_log ORDER BY created_at DESC LIMIT 500'));
+
+ipcMain.handle('update-product', async (event, p) => {
+    const oldProduct = await getAsync('SELECT cost_price, selling_price FROM products WHERE id = ?', [p.id]);
+    await runAsync(
+        'UPDATE products SET barcode = ?, name = ?, category_id = ?, cost_price = ?, selling_price = ?, alert_level = ?, unit_type = ?, is_weighted = ?, expiry_date = COALESCE(?, expiry_date), reorder_qty = COALESCE(?, reorder_qty) WHERE id = ?',
+        [p.barcode, p.name, p.categoryId, p.cost, p.price, p.alertLevel, p.unitType, p.isWeighted ? 1 : 0, p.expiryDate || null, p.reorderQty ?? null, p.id]
+    );
+    if (oldProduct && (Number(oldProduct.cost_price || 0) !== Number(p.cost || 0) || Number(oldProduct.selling_price || 0) !== Number(p.price || 0))) {
+        await runAsync(
+            `INSERT INTO price_history (product_id, old_cost_price, new_cost_price, old_selling_price, new_selling_price, changed_by)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [p.id, oldProduct.cost_price, p.cost, oldProduct.selling_price, p.price, p.userName || 'System']
+        );
+        await logAudit('product', p.id, 'price_change', {
+            oldCost: oldProduct.cost_price,
+            newCost: p.cost,
+            oldPrice: oldProduct.selling_price,
+            newPrice: p.price
+        }, p.userName);
+    }
     return { success: true };
 });
 
@@ -512,22 +785,25 @@ ipcMain.handle('delete-product', async (event, id) => {
     return { success: true };
 });
 
-ipcMain.handle('add-stock', async (event, { productId, quantity, costPrice, sellingPrice, expiryDate }) => {
+ipcMain.handle('add-stock', async (event, { productId, quantity, costPrice, sellingPrice, expiryDate, supplierId, grnNo, purchaseInvoiceNo, userName }) => {
     return withTransaction(async () => {
         const qty = Number(quantity || 0);
         if (qty <= 0) throw new Error('Stock quantity must be greater than zero.');
 
-        await runAsync(
-            `INSERT INTO inventory_batches (product_id, batch_code, received_qty, remaining_qty, cost_price, selling_price, expiry_date)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        const batchResult = await runAsync(
+            `INSERT INTO inventory_batches (product_id, batch_code, received_qty, remaining_qty, cost_price, selling_price, expiry_date, supplier_id, grn_no, purchase_invoice_no)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 productId,
-                `GRN-${productId}-${Date.now()}`,
+                grnNo || `GRN-${productId}-${Date.now()}`,
                 qty,
                 qty,
                 Number(costPrice || 0),
                 Number(sellingPrice || 0),
-                expiryDate || null
+                expiryDate || null,
+                supplierId || null,
+                grnNo || '',
+                purchaseInvoiceNo || ''
             ]
         );
 
@@ -535,7 +811,8 @@ ipcMain.handle('add-stock', async (event, { productId, quantity, costPrice, sell
             'UPDATE products SET current_stock = current_stock + ?, cost_price = ?, selling_price = ?, expiry_date = ? WHERE id = ?',
             [qty, Number(costPrice || 0), Number(sellingPrice || 0), expiryDate || null, productId]
         );
-        return { success: true };
+        await logAudit('inventory_batch', batchResult.lastID, 'receive_stock', { productId, quantity: qty, supplierId, grnNo, purchaseInvoiceNo, expiryDate }, userName);
+        return { success: true, batchId: batchResult.lastID };
     });
 });
 

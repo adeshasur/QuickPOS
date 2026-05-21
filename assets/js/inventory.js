@@ -3,6 +3,7 @@
 
     let categories = [];
     let products = [];
+    let stockBatches = [];
     let currentFilter = "all";
     let searchTerm = "";
 
@@ -53,14 +54,49 @@
 
     async function loadData() {
         try {
-            categories = await window.api.getCategories();
-            products = await window.api.getProducts();
+            [categories, products] = await Promise.all([
+                window.api.getCategories(),
+                window.api.getProducts()
+            ]);
+            stockBatches = await loadInventoryBatches();
             populateProductDropdown();
             populateCategoryDropdown();
             renderStockTable();
         } catch (err) {
             console.error('Error loading inventory data:', err);
+            renderStockTable();
         }
+    }
+
+    async function loadInventoryBatches() {
+        if (window.api.getInventoryBatches) {
+            try {
+                const batches = await window.api.getInventoryBatches();
+                if (Array.isArray(batches) && batches.length) return batches;
+            } catch (err) {
+                console.warn('Batch inventory API unavailable, using product stock fallback:', err);
+            }
+        }
+
+        return products
+            .filter((product) => Number(product.current_stock || 0) > 0)
+            .map((product) => {
+                const category = categories.find((cat) => cat.id === product.category_id);
+                return {
+                    batch_id: null,
+                    product_id: product.id,
+                    batch_code: product.expiry_date ? `Product stock - ${product.expiry_date}` : 'Product stock',
+                    remaining_qty: product.current_stock,
+                    cost_price: product.cost_price,
+                    selling_price: product.selling_price,
+                    expiry_date: product.expiry_date,
+                    name: product.name,
+                    category_id: product.category_id,
+                    category_name: category?.name,
+                    unit_type: product.unit_type,
+                    current_stock: product.current_stock
+                };
+            });
     }
 
     function populateCategoryDropdown() {
@@ -93,7 +129,7 @@
         const canEditProducts = currentUser && currentUser.role === 'owner';
         const canDiscardStock = currentUser && currentUser.role === 'owner';
         const showActionColumn = currentUser && currentUser.role === 'owner';
-        let filteredItems = [...products];
+        let filteredItems = [...stockBatches];
         
         // Apply expiry filter
         if (currentFilter !== 'all') {
@@ -110,6 +146,7 @@
         if (searchTerm) {
             filteredItems = filteredItems.filter(item => 
                 item.name.toLowerCase().includes(searchTerm.toLowerCase())
+                || String(item.batch_code || '').toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
         
@@ -125,13 +162,16 @@
             const daysLeft = getDaysUntilExpiry(item.expiry_date);
             const expiryInfo = getExpiryStatus(daysLeft);
             const isExpired = daysLeft < 0;
-            const category = categories.find(c => c.id === item.category_id);
+            const categoryName = item.category_name || displayCategoryName(categories.find(c => c.id === item.category_id));
+            const qty = Number(item.remaining_qty ?? item.current_stock ?? 0);
+            const productId = Number(item.product_id || item.id);
+            const batchCode = item.batch_code || `Batch #${item.batch_id || '-'}`;
             
             return `
                 <tr class="${isExpired ? 'expired-row' : ''}">
-                    <td><strong>${item.name}</strong></td>
-                    <td>${displayCategoryName(category)}</td>
-                    <td>${item.current_stock} ${displayUnit(item.unit_type)}</td>
+                    <td><strong>${item.name}</strong><div class="batch-code">${batchCode}</div></td>
+                    <td>${categoryName}</td>
+                    <td>${qty} ${displayUnit(item.unit_type)}</td>
                     <td>${formatCurrency(item.cost_price || 0)}</td>
                     <td>${formatCurrency(item.selling_price || 0)}</td>
                     <td>${formatDate(item.expiry_date)}</td>
@@ -145,11 +185,11 @@
                         ${canEditInventory
                           ? `<div style="display:flex;gap:6px;align-items:center;">
                                ${canEditProducts ? `<button class="tbl-btn edit" onclick="location.href='products.html'" title="Edit Product">
-                                   <span class="material-symbols-rounded" style="font-size:16px;">edit</span>
+                                   <i class="fa-solid fa-pen"></i>
                                </button>` : ''}
                                ${canDiscardStock ? `
-                               <button class="tbl-btn discard-btn" onclick="window.discardStockBatch(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.current_stock})" title="Discard / Write-off Stock">
-                                   <span class="material-symbols-rounded" style="font-size:16px;">delete_sweep</span>
+                               <button class="tbl-btn discard-btn" onclick="window.discardStockBatch(${productId}, '${item.name.replace(/'/g, "\\'")}', ${qty})" title="Discard / Write-off Stock">
+                                   <i class="fa-solid fa-trash-can"></i>
                                </button>` : ''}
                              </div>`
                           : '<span style="color: var(--text3); font-size:12px; font-weight:600;">View Only</span>'}

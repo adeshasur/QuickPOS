@@ -126,6 +126,102 @@ db.serialize(() => {
         FOREIGN KEY (product_id) REFERENCES products (id)
     )`);
 
+    db.run(`CREATE TABLE IF NOT EXISTS suppliers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        phone TEXT,
+        email TEXT,
+        address TEXT,
+        contact_person TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS product_discounts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_id INTEGER NOT NULL,
+        discount_type TEXT NOT NULL DEFAULT 'amount',
+        discount_value REAL NOT NULL DEFAULT 0,
+        starts_at DATE,
+        ends_at DATE,
+        active INTEGER DEFAULT 1,
+        created_by TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS stock_adjustments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_id INTEGER NOT NULL,
+        batch_id INTEGER,
+        adjustment_type TEXT NOT NULL,
+        quantity REAL NOT NULL,
+        reason TEXT,
+        note TEXT,
+        user_name TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (product_id) REFERENCES products (id),
+        FOREIGN KEY (batch_id) REFERENCES inventory_batches (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS returns (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sale_id INTEGER,
+        bill_id TEXT,
+        customer_id INTEGER,
+        refund_amount REAL NOT NULL DEFAULT 0,
+        reason TEXT,
+        user_name TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (sale_id) REFERENCES sales (id) ON DELETE SET NULL,
+        FOREIGN KEY (customer_id) REFERENCES customers (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS return_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        return_id INTEGER NOT NULL,
+        sale_item_id INTEGER,
+        product_id INTEGER NOT NULL,
+        quantity REAL NOT NULL,
+        unit_price REAL NOT NULL DEFAULT 0,
+        subtotal REAL NOT NULL DEFAULT 0,
+        restock INTEGER DEFAULT 1,
+        FOREIGN KEY (return_id) REFERENCES returns (id) ON DELETE CASCADE,
+        FOREIGN KEY (sale_item_id) REFERENCES sale_items (id),
+        FOREIGN KEY (product_id) REFERENCES products (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS unit_conversions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_id INTEGER,
+        from_unit TEXT NOT NULL,
+        to_unit TEXT NOT NULL,
+        factor REAL NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS price_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_id INTEGER NOT NULL,
+        old_cost_price REAL,
+        new_cost_price REAL,
+        old_selling_price REAL,
+        new_selling_price REAL,
+        changed_by TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS audit_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        entity_type TEXT NOT NULL,
+        entity_id INTEGER,
+        action TEXT NOT NULL,
+        detail TEXT,
+        user_name TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
     db.run(`CREATE TABLE IF NOT EXISTS shift_reconciliations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         cashier_name TEXT NOT NULL,
@@ -170,6 +266,12 @@ db.serialize(() => {
     db.run("ALTER TABLE shift_reconciliations ADD COLUMN salary_basis TEXT", () => {});
     db.run("ALTER TABLE shift_reconciliations ADD COLUMN salary_amount REAL DEFAULT 0", () => {});
     db.run("ALTER TABLE shift_reconciliations ADD COLUMN salary_earned REAL DEFAULT 0", () => {});
+    db.run("ALTER TABLE inventory_batches ADD COLUMN supplier_id INTEGER", () => {});
+    db.run("ALTER TABLE inventory_batches ADD COLUMN grn_no TEXT", () => {});
+    db.run("ALTER TABLE inventory_batches ADD COLUMN purchase_invoice_no TEXT", () => {});
+    db.run("ALTER TABLE customers ADD COLUMN credit_limit REAL DEFAULT 0", () => {});
+    db.run("ALTER TABLE customers ADD COLUMN credit_due_days INTEGER DEFAULT 30", () => {});
+    db.run("ALTER TABLE products ADD COLUMN reorder_qty REAL DEFAULT 0", () => {});
 }); // end outer db.serialize
 
 

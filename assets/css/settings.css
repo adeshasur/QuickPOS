@@ -166,6 +166,37 @@
 .sys-info-label{font-size:13px;color:var(--text2)}
 .sys-info-val{font-size:13px;font-weight:700;color:var(--text);font-family:var(--mono)}
 
+.supermarket-mini-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mini-metric {
+  min-height: 58px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.mini-metric span {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text3);
+  text-transform: uppercase;
+}
+
+.mini-metric strong {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text);
+}
+
 .cashier-hourly-wrap{
   margin-top:12px;
   border:1px solid var(--border);

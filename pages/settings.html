@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="../assets/css/common.css">
 <link rel="stylesheet" href="../assets/css/sidebar.css">
 <link rel="stylesheet" href="../assets/css/settings.css">
+    <link rel="stylesheet" href="../assets/css/management_theme.css">
 </head>
 <body class="dashboard-body">
 
@@ -34,6 +35,7 @@
       <button class="settings-tab-btn" data-tab="version"><span class="material-symbols-rounded">deployed_code</span>System Version</button>
       <button class="settings-tab-btn" data-tab="security"><span class="material-symbols-rounded">shield_lock</span>Security</button>
       <button class="settings-tab-btn" data-tab="local"><span class="material-symbols-rounded">public</span>Localization</button>
+      <button class="settings-tab-btn" data-tab="supermarket"><i class="fa-solid fa-store"></i>Supermarket</button>
       <button class="settings-tab-btn" data-tab="system"><span class="material-symbols-rounded">memory</span>System Info</button>
       <button class="settings-tab-btn tab-danger" data-tab="danger"><span class="material-symbols-rounded">warning</span>Danger Zone</button>
     </nav>
@@ -249,6 +251,24 @@
             <div class="danger-card"><div><div class="danger-card-title">Restore Database Backup</div><div class="danger-card-desc">Load a previous backup and restart the app safely.</div></div><button class="danger-action-btn" id="restoreBtn">Restore Backup</button></div>
             <div class="danger-card"><div><div class="danger-card-title">Reset All Settings</div><div class="danger-card-desc">Restore all settings to defaults without deleting sales data.</div></div><button class="danger-action-btn" id="resetSettingsBtn">Reset Settings</button></div>
             <div class="danger-card hard"><div><div class="danger-card-title">Full System Reset</div><div class="danger-card-desc">Delete all data permanently. This action is disabled by default for safety.</div></div><button class="danger-action-btn" id="fullResetBtn">Reset System</button></div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-supermarket">
+          <div class="panel-title"><i class="fa-solid fa-store"></i>Supermarket Controls</div>
+          <div class="settings-grid settings-grid-2">
+            <div class="scard">
+              <div class="scard-title">Stock & Purchasing</div>
+              <div id="supermarketStockStats" class="supermarket-mini-list">Loading supermarket stock controls...</div>
+            </div>
+            <div class="scard">
+              <div class="scard-title">Pricing & Discounts</div>
+              <div id="supermarketPricingStats" class="supermarket-mini-list">Loading pricing controls...</div>
+            </div>
+            <div class="scard span-2">
+              <div class="scard-title">Audit & Exceptions</div>
+              <div id="supermarketAuditStats" class="supermarket-mini-list">Loading audit controls...</div>
+            </div>
           </div>
         </div>
       </section>

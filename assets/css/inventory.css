@@ -391,6 +391,22 @@ body, html, .inventory-container, input, select, button {
     font-family: 'Noto Sans Sinhala', 'Iskoola Pota', var(--font);
 }
 
+.batch-code {
+    margin-top: 3px;
+    width: fit-content;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 2px 7px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: #f8fafc;
+    color: var(--text3);
+    font-size: 10px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
 .stock-table tr:hover { background-color: var(--surface2); }
 
 /* Elegant Glassmorphic Expiry Badges */

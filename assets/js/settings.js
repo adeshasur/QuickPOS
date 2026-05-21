@@ -95,7 +95,56 @@
     document.getElementById('sysCustomers').textContent = customers.length;
     document.getElementById('sysCache').textContent = 'SQLite';
     renderCashierHourlyInsight(sales);
+    await refreshSupermarketControls();
     await refreshGoogleDriveBackupStatus();
+  }
+
+  async function refreshSupermarketControls() {
+    const stockEl = document.getElementById('supermarketStockStats');
+    const pricingEl = document.getElementById('supermarketPricingStats');
+    const auditEl = document.getElementById('supermarketAuditStats');
+    if (!stockEl || !pricingEl || !auditEl) return;
+
+    const [suppliers, reorder, batches, discounts, adjustments, returnsRows, conversions, priceHistory, auditLog] = await Promise.all([
+      window.api.getSuppliers ? window.api.getSuppliers() : [],
+      window.api.getReorderList ? window.api.getReorderList() : [],
+      window.api.getInventoryBatches ? window.api.getInventoryBatches() : [],
+      window.api.getProductDiscounts ? window.api.getProductDiscounts() : [],
+      window.api.getStockAdjustments ? window.api.getStockAdjustments() : [],
+      window.api.getReturns ? window.api.getReturns() : [],
+      window.api.getUnitConversions ? window.api.getUnitConversions() : [],
+      window.api.getPriceHistory ? window.api.getPriceHistory() : [],
+      window.api.getAuditLog ? window.api.getAuditLog() : []
+    ]);
+
+    const expiringBatches = (batches || []).filter((batch) => {
+      if (!batch.expiry_date) return false;
+      const days = Math.ceil((new Date(batch.expiry_date).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 86400000);
+      return days >= 0 && days <= 30;
+    });
+
+    stockEl.innerHTML = `
+      ${miniMetric('Suppliers', suppliers.length)}
+      ${miniMetric('Active Batches', batches.length)}
+      ${miniMetric('Expiring Batches', expiringBatches.length)}
+      ${miniMetric('Reorder Items', reorder.length)}
+    `;
+    pricingEl.innerHTML = `
+      ${miniMetric('Discount Rules', discounts.length)}
+      ${miniMetric('Unit Conversions', conversions.length)}
+      ${miniMetric('Price Changes', priceHistory.length)}
+      ${miniMetric('Tax Rate', `${settings.taxPercentage || 0}%`)}
+    `;
+    auditEl.innerHTML = `
+      ${miniMetric('Stock Adjustments', adjustments.length)}
+      ${miniMetric('Returns', returnsRows.length)}
+      ${miniMetric('Audit Events', auditLog.length)}
+      ${miniMetric('Refund Admin PIN', settings.requireAdminForRefund !== 'false' ? 'ON' : 'OFF')}
+    `;
+  }
+
+  function miniMetric(label, value) {
+    return `<div class="mini-metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
   }
 
   async function refreshGoogleDriveBackupStatus() {
