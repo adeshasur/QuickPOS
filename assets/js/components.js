@@ -3,6 +3,8 @@
 
   let isNavigating = false;
   const CASHIER_SIDEBAR_PREF_KEY = 'quickpos-cashier-sidebar-hidden';
+  const SESSION_MAX_MS = 12 * 60 * 60 * 1000;
+  const SESSION_IDLE_MS = 2 * 60 * 60 * 1000;
 
   function isMobileSidebarViewport() {
     return window.matchMedia('(max-width: 1024px)').matches;
@@ -32,6 +34,51 @@
     setTimeout(() => {
       window.location.href = url;
     }, 45);
+  }
+
+  function clearSessionAndRedirect() {
+    localStorage.removeItem('quickpos-user');
+    localStorage.removeItem('quickposUser');
+    if (!window.location.pathname.endsWith('/login.html') && !window.location.pathname.endsWith('login.html')) {
+      window.location.href = 'login.html';
+    }
+  }
+
+  function ensureSession() {
+    const user = getCurrentUser();
+    if (!user.username && !user.role) {
+      clearSessionAndRedirect();
+      return {};
+    }
+    const now = Date.now();
+    const loginAt = user.loginTime ? new Date(user.loginTime).getTime() : now;
+    const expiresAt = Number(user.expiresAt || (loginAt + SESSION_MAX_MS));
+    const lastActivityAt = Number(user.lastActivityAt || loginAt);
+    if (now > expiresAt || now - lastActivityAt > SESSION_IDLE_MS) {
+      clearSessionAndRedirect();
+      return {};
+    }
+    user.lastActivityAt = now;
+    user.expiresAt = expiresAt;
+    localStorage.setItem('quickpos-user', JSON.stringify(user));
+    return user;
+  }
+
+  function startSessionWatch() {
+    ['click', 'keydown', 'mousemove', 'touchstart'].forEach((eventName) => {
+      document.addEventListener(eventName, () => {
+        const user = getCurrentUser();
+        if (!user.username && !user.role) return;
+        user.lastActivityAt = Date.now();
+        if (!user.expiresAt) user.expiresAt = Date.now() + SESSION_MAX_MS;
+        localStorage.setItem('quickpos-user', JSON.stringify(user));
+      }, { passive: true });
+    });
+    setInterval(ensureSession, 60 * 1000);
+  }
+
+  function notifyDataChanged() {
+    localStorage.setItem('quickpos-data-version', String(Date.now()));
   }
 
   function ensureConfirmModal() {
@@ -119,7 +166,7 @@
       const title = options.title || '';
       const actions = options.actions || '';
       const topbarContainer = document.getElementById('topbar-container');
-      const user = getCurrentUser();
+      const user = ensureSession();
       const isCashier = user.role === 'cashier';
       const avatarSeed = String(user.name || user.username || 'U').trim();
       const avatarText = avatarSeed.slice(0, 2).toUpperCase();
@@ -283,11 +330,17 @@
   };
 
   window.appConfirm = appConfirm;
+  window.quickposDataChanged = notifyDataChanged;
   window.Components = Components;
 
   document.addEventListener('DOMContentLoaded', () => {
     runPageEnterTransition();
     bindSmoothNavigation();
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'quickpos-data-version' && window.Notifications?.refreshApp) {
+        window.Notifications.refreshApp();
+      }
+    });
 
     const sidebarContainer = document.getElementById('sidebar-container');
     const currentPage = window.location.pathname.split("/").pop().replace('.html', '');
@@ -305,6 +358,7 @@
         ledger: 'Credit Ledger',
         sales_reports: 'Invoice History',
         reports: 'Reports & Analytics',
+        supermarket: 'Supermarket Ops',
         users: 'Users',
         settings: 'Settings'
       };
@@ -316,7 +370,7 @@
 
     if (!sidebarContainer) return;
 
-    const user = getCurrentUser();
+    const user = ensureSession();
     document.body.classList.add('dashboard-body');
 
     sidebarContainer.innerHTML = `
@@ -337,6 +391,7 @@
           <a href="ledger.html" class="menu-item" data-page="ledger"><i class="fa-solid fa-book"></i> Credit Ledger</a>
           <a href="sales_reports.html" class="menu-item" data-page="sales_reports"><i class="fa-solid fa-history"></i> Invoice History</a>
           <a href="reports.html" class="menu-item reports-allowed" data-page="reports"><i class="fa-solid fa-chart-pie"></i> Reports & Analytics</a>
+          <a href="supermarket.html" class="menu-item owner-only" data-page="supermarket"><i class="fa-solid fa-store"></i> Supermarket Ops</a>
           <a href="users.html" class="menu-item owner-only" data-page="users"><i class="fa-solid fa-user-gear"></i> Users</a>
           <a href="settings.html" class="menu-item owner-only" data-page="settings"><i class="fa-solid fa-cog"></i> Settings</a>
         </div>
@@ -381,6 +436,7 @@
         });
         if (confirmed) {
           localStorage.removeItem('quickpos-user');
+          localStorage.removeItem('quickposUser');
           smoothNavigate('login.html');
         }
       });
@@ -388,5 +444,6 @@
 
     // Notifications logic is now handled in notifications.js
     if (window.Notifications) window.Notifications.refresh();
+    startSessionWatch();
   });
 })();

@@ -431,6 +431,10 @@ db.serialize(() => {
     db.run("ALTER TABLE sale_items ADD COLUMN profit_total REAL DEFAULT 0", () => {});
     db.run("ALTER TABLE sale_items ADD COLUMN batch_trace TEXT", () => {});
     db.run("ALTER TABLE sales ADD COLUMN gross_profit REAL DEFAULT 0", () => {});
+    db.run("ALTER TABLE sales ADD COLUMN discount_total REAL DEFAULT 0", () => {});
+    db.run("ALTER TABLE sales ADD COLUMN tax_total REAL DEFAULT 0", () => {});
+    db.run("ALTER TABLE sales ADD COLUMN loyalty_points_earned INTEGER DEFAULT 0", () => {});
+    db.run("ALTER TABLE sales ADD COLUMN voided INTEGER DEFAULT 0", () => {});
     db.run("ALTER TABLE shift_reconciliations ADD COLUMN salary_basis TEXT", () => {});
     db.run("ALTER TABLE shift_reconciliations ADD COLUMN salary_amount REAL DEFAULT 0", () => {});
     db.run("ALTER TABLE shift_reconciliations ADD COLUMN salary_earned REAL DEFAULT 0", () => {});
@@ -443,6 +447,8 @@ db.serialize(() => {
     db.run("ALTER TABLE products ADD COLUMN tax_category_id INTEGER", () => {});
     db.run("ALTER TABLE products ADD COLUMN age_restricted INTEGER DEFAULT 0", () => {});
     db.run("ALTER TABLE products ADD COLUMN age_limit INTEGER DEFAULT 0", () => {});
+    db.run("ALTER TABLE stock_counts ADD COLUMN completed_at DATETIME", () => {});
+    db.run("ALTER TABLE stock_transfers ADD COLUMN completed_at DATETIME", () => {});
 }); // end outer db.serialize
 
 

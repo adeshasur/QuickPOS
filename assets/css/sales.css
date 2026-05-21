@@ -335,6 +335,16 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
 }
+.pay-btn.split {
+  background: #8b5cf6;
+  color: white;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+}
+.pay-btn.split:hover:not(:disabled) {
+  background: #7c3aed;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.35);
+}
 .pay-btn.print-draft {
   background: #64748b;
   color: white;
@@ -689,6 +699,33 @@ body.sales-dense .cart-item { padding: 9px 0; }
 }
 .ledger-name { color: var(--text); }
 .ledger-points { font-family: var(--mono); }
+.pc-discount,
+.ci-discount {
+  color: #dc2626;
+  font-size: 11px;
+  font-weight: 800;
+}
+.pc-discount {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.pc-discount small {
+  color: var(--text3);
+  text-decoration: line-through;
+}
+.split-balance-row {
+  border: 1px dashed var(--border2);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: var(--surface2);
+}
+.field-input.split-ref {
+  text-align: left;
+  font-family: var(--font);
+  font-size: 15px;
+}
 
 .pay-btn.hold-sale {
   background: var(--surface2);

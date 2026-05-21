@@ -108,6 +108,10 @@
             <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
             CARD
           </button>
+          <button class="pay-btn split" id="splitBtn">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M4 17h16"/><path d="M8 3v8"/><path d="M16 13v8"/></svg>
+            SPLIT
+          </button>
           <button class="pay-btn print-draft" id="printDraftBtn">
             <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             PRINT
@@ -226,6 +230,42 @@
     <div class="modal-actions">
       <button class="mact-btn cancel" id="cancelCardModal">Cancel</button>
       <button class="mact-btn confirm" id="finalizeCard">Complete Sale</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="splitModal">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-top">
+      <div class="modal-title">Split Payment</div>
+      <button class="modal-close" id="closeSplitModal"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="pay-row">
+        <span class="pay-row-label">Total amount</span>
+        <span class="pay-row-val total" id="splitModalTotal">LKR 0.00</span>
+      </div>
+      <div class="divider"></div>
+      <div class="field-group" style="margin-top:12px">
+        <label class="field-label">Cash amount (LKR)</label>
+        <input class="field-input" type="number" id="splitCashAmount" step="0.01" min="0" placeholder="0.00">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Card amount (LKR)</label>
+        <input class="field-input" type="number" id="splitCardAmount" step="0.01" min="0" placeholder="0.00">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Card reference (optional)</label>
+        <input class="field-input split-ref" type="text" id="splitCardRef" placeholder="Transaction ID">
+      </div>
+      <div class="pay-row split-balance-row">
+        <span class="pay-row-label">Remaining</span>
+        <span class="pay-row-val change" id="splitBalance">LKR 0.00</span>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="mact-btn cancel" id="cancelSplitModal">Cancel</button>
+      <button class="mact-btn confirm" id="finalizeSplit">Complete Sale</button>
     </div>
   </div>
 </div>

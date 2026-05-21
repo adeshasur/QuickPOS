@@ -802,6 +802,7 @@ ipcMain.handle('void-bill', async (event, payload) => {
         ? await getAsync('SELECT * FROM sales WHERE id = ?', [payload.saleId])
         : await getAsync('SELECT * FROM sales WHERE bill_id = ?', [payload.billId]);
     if (!sale) throw new Error('Sale not found.');
+    await runAsync('UPDATE sales SET voided = 1 WHERE id = ?', [sale.id]);
     const result = await runAsync(
         'INSERT INTO void_bills (sale_id, bill_id, reason, approved_by, user_name) VALUES (?, ?, ?, ?, ?)',
         [sale.id, sale.bill_id, payload.reason || '', payload.approvedBy || '', payload.userName || 'System']
@@ -819,7 +820,13 @@ ipcMain.handle('hold-bill', async (event, payload) => {
     );
     return { success: true, id: result.lastID, holdCode: code };
 });
-ipcMain.handle('get-held-bills', async () => allAsync('SELECT * FROM held_bills ORDER BY created_at DESC LIMIT 200'));
+ipcMain.handle('get-held-bills', async () => allAsync(`
+    SELECT h.*, c.name AS customer_name, c.phone AS customer_phone, c.balance AS customer_balance, c.loyalty_points AS customer_loyalty_points
+    FROM held_bills h
+    LEFT JOIN customers c ON c.id = h.customer_id
+    ORDER BY h.created_at DESC
+    LIMIT 200
+`));
 ipcMain.handle('delete-held-bill', async (event, id) => {
     await runAsync('DELETE FROM held_bills WHERE id = ?', [id]);
     return { success: true };
@@ -846,29 +853,87 @@ ipcMain.handle('save-branch', async (event, payload) => {
 ipcMain.handle('get-branches', async () => allAsync('SELECT * FROM branches ORDER BY active DESC, name ASC'));
 
 ipcMain.handle('record-stock-transfer', async (event, payload) => {
-    const result = await runAsync(
-        `INSERT INTO stock_transfers (from_branch_id, to_branch_id, product_id, quantity, status, note, user_name)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [payload.fromBranchId || null, payload.toBranchId || null, payload.productId, Number(payload.quantity || 0), payload.status || 'pending', payload.note || '', payload.userName || 'System']
-    );
-    await logAudit('stock_transfer', result.lastID, 'create', payload, payload.userName);
-    return { success: true, id: result.lastID };
+    return withTransaction(async () => {
+        const productId = Number(payload.productId || 0);
+        const qty = Number(payload.quantity || 0);
+        const status = payload.status || 'pending';
+        if (!productId || qty <= 0) throw new Error('Valid product and quantity are required.');
+
+        if (status === 'completed') {
+            const product = await getAsync('SELECT current_stock FROM products WHERE id = ?', [productId]);
+            if (!product) throw new Error('Product not found.');
+            if (Number(product.current_stock || 0) < qty) throw new Error('Insufficient stock for transfer.');
+            await ensureLegacyBatchCoverage(productId);
+            let remaining = qty;
+            const batches = await allAsync(
+                `SELECT id, remaining_qty
+                 FROM inventory_batches
+                 WHERE product_id = ? AND remaining_qty > 0
+                 ORDER BY CASE WHEN expiry_date IS NULL OR expiry_date = '' THEN 1 ELSE 0 END ASC,
+                          expiry_date ASC,
+                          created_at ASC,
+                          id ASC`,
+                [productId]
+            );
+            for (const batch of batches) {
+                if (remaining <= 0) break;
+                const used = Math.min(remaining, Number(batch.remaining_qty || 0));
+                if (used > 0) {
+                    await runAsync('UPDATE inventory_batches SET remaining_qty = remaining_qty - ? WHERE id = ?', [used, batch.id]);
+                    remaining -= used;
+                }
+            }
+            await runAsync('UPDATE products SET current_stock = current_stock - ? WHERE id = ?', [qty, productId]);
+        }
+
+        const result = await runAsync(
+            `INSERT INTO stock_transfers (from_branch_id, to_branch_id, product_id, quantity, status, note, user_name, completed_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [payload.fromBranchId || null, payload.toBranchId || null, productId, qty, status, payload.note || '', payload.userName || 'System', status === 'completed' ? new Date().toISOString() : null]
+        );
+        await logAudit('stock_transfer', result.lastID, status === 'completed' ? 'complete' : 'create', payload, payload.userName);
+        return { success: true, id: result.lastID };
+    });
 });
-ipcMain.handle('get-stock-transfers', async () => allAsync('SELECT * FROM stock_transfers ORDER BY created_at DESC LIMIT 500'));
+ipcMain.handle('get-stock-transfers', async () => allAsync(`
+    SELECT t.*, p.name AS product_name, fb.name AS from_branch_name, tb.name AS to_branch_name
+    FROM stock_transfers t
+    JOIN products p ON p.id = t.product_id
+    LEFT JOIN branches fb ON fb.id = t.from_branch_id
+    LEFT JOIN branches tb ON tb.id = t.to_branch_id
+    ORDER BY t.created_at DESC
+    LIMIT 500
+`));
 
 ipcMain.handle('save-stock-count', async (event, payload) => {
-    const code = payload.countCode || `COUNT-${Date.now()}`;
-    const result = await runAsync('INSERT INTO stock_counts (count_code, status, user_name) VALUES (?, ?, ?)', [code, payload.status || 'draft', payload.userName || 'System']);
-    for (const item of payload.items || []) {
-        const variance = Number(item.countedQty || 0) - Number(item.systemQty || 0);
-        await runAsync(
-            `INSERT INTO stock_count_items (stock_count_id, product_id, system_qty, counted_qty, variance_qty, note)
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            [result.lastID, item.productId, Number(item.systemQty || 0), Number(item.countedQty || 0), variance, item.note || '']
+    return withTransaction(async () => {
+        const code = payload.countCode || `COUNT-${Date.now()}`;
+        const status = payload.status || 'draft';
+        const result = await runAsync(
+            'INSERT INTO stock_counts (count_code, status, user_name, completed_at) VALUES (?, ?, ?, ?)',
+            [code, status, payload.userName || 'System', status === 'completed' ? new Date().toISOString() : null]
         );
-    }
-    await logAudit('stock_count', result.lastID, 'create', payload, payload.userName);
-    return { success: true, id: result.lastID, countCode: code };
+        for (const item of payload.items || []) {
+            const systemQty = Number(item.systemQty || 0);
+            const countedQty = Number(item.countedQty ?? systemQty);
+            const variance = countedQty - systemQty;
+            await runAsync(
+                `INSERT INTO stock_count_items (stock_count_id, product_id, system_qty, counted_qty, variance_qty, note)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                [result.lastID, item.productId, systemQty, countedQty, variance, item.note || '']
+            );
+            if (status === 'completed' && Math.abs(variance) > 0) {
+                await runAsync('UPDATE products SET current_stock = ? WHERE id = ?', [Math.max(0, countedQty), item.productId]);
+                await runAsync(
+                    `INSERT INTO stock_adjustments (product_id, adjustment_type, quantity, reason, note, user_name)
+                     VALUES (?, ?, ?, ?, ?, ?)`,
+                    [item.productId, variance >= 0 ? 'increase' : 'decrease', Math.abs(variance), 'Stock count variance', code, payload.userName || 'System']
+                );
+            }
+        }
+        await logAudit('stock_count', result.lastID, status === 'completed' ? 'finalize' : 'create', payload, payload.userName);
+        return { success: true, id: result.lastID, countCode: code };
+    });
 });
 ipcMain.handle('get-stock-counts', async () => allAsync('SELECT * FROM stock_counts ORDER BY created_at DESC LIMIT 200'));
 
@@ -1164,10 +1229,12 @@ ipcMain.handle('save-sale', async (event, saleData) => withTransaction(async () 
 
     const finalBillId = saleData.billId || await getNextBillId();
 
+    const discountTotal = Number(saleData.discountTotal || 0);
+    const taxTotal = Number(saleData.taxTotal || 0);
     const saleInsert = await runAsync(
-        `INSERT INTO sales (bill_id, customer_id, total_amount, payment_method, received_amount, balance_amount, ref_no, cashier_name, gross_profit)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)`,
-        [finalBillId, saleData.customerId, saleData.total, saleData.method, saleData.received, saleData.balanceDue, saleData.refNo, saleData.cashier]
+        `INSERT INTO sales (bill_id, customer_id, total_amount, payment_method, received_amount, balance_amount, ref_no, cashier_name, gross_profit, discount_total, tax_total, loyalty_points_earned, voided)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, 0, 0)`,
+        [finalBillId, saleData.customerId, saleData.total, saleData.method, saleData.received, saleData.balanceDue, saleData.refNo, saleData.cashier, discountTotal, taxTotal]
     );
 
     let grossProfitTotal = 0;
@@ -1228,13 +1295,36 @@ ipcMain.handle('save-sale', async (event, saleData) => withTransaction(async () 
         await runAsync('UPDATE customers SET balance = COALESCE(balance, 0) + ? WHERE id = ?', [saleData.balanceDue, saleData.customerId]);
     }
 
-    await runAsync('UPDATE sales SET gross_profit = ? WHERE id = ?', [grossProfitTotal, saleInsert.lastID]);
+    const payments = Array.isArray(saleData.payments) && saleData.payments.length
+        ? saleData.payments
+        : [{ method: saleData.method, amount: saleData.method === 'Credit' ? 0 : Number(saleData.received || saleData.total || 0), refNo: saleData.refNo || '' }];
+    for (const payment of payments) {
+        await runAsync(
+            'INSERT INTO sale_payments (sale_id, payment_method, amount, ref_no) VALUES (?, ?, ?, ?)',
+            [saleInsert.lastID, payment.method || saleData.method, Number(payment.amount || 0), payment.refNo || '']
+        );
+    }
+
+    let loyaltyPointsEarned = 0;
+    if (saleData.customerId && saleData.method !== 'Credit') {
+        loyaltyPointsEarned = Math.floor(Number(saleData.total || 0) / 100);
+        if (loyaltyPointsEarned > 0) {
+            await runAsync('UPDATE customers SET loyalty_points = COALESCE(loyalty_points, 0) + ? WHERE id = ?', [loyaltyPointsEarned, saleData.customerId]);
+            await runAsync(
+                'INSERT INTO loyalty_transactions (customer_id, sale_id, points, transaction_type, note) VALUES (?, ?, ?, ?, ?)',
+                [saleData.customerId, saleInsert.lastID, loyaltyPointsEarned, 'earn', finalBillId]
+            );
+        }
+    }
+
+    await runAsync('UPDATE sales SET gross_profit = ?, loyalty_points_earned = ? WHERE id = ?', [grossProfitTotal, loyaltyPointsEarned, saleInsert.lastID]);
 
     return {
         success: true,
         id: saleInsert.lastID,
         billId: finalBillId,
         grossProfit: grossProfitTotal,
+        loyaltyPointsEarned,
         stockOverrideUsed: overrideCount > 0
     };
 }));
@@ -1637,7 +1727,7 @@ ipcMain.handle('get-sales-history', async (event, options = {}) => {
 
     const placeholders = saleIds.map(() => '?').join(',');
     const items = await allAsync(
-        `SELECT sale_id, product_name, product_id, quantity, unit_price, subtotal, cost_total, profit_total, batch_trace
+        `SELECT id, sale_id, product_name, product_id, quantity, unit_price, subtotal, cost_total, profit_total, batch_trace
          FROM sale_items
          WHERE sale_id IN (${placeholders})`,
         saleIds

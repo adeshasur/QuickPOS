@@ -82,7 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 role: response.user.role,
                 name: response.user.name,
                 canViewReports: response.user.canViewReports,
-                loginTime: new Date().toISOString()
+                loginTime: new Date().toISOString(),
+                lastActivityAt: Date.now(),
+                expiresAt: Date.now() + (12 * 60 * 60 * 1000)
             };
 
             localStorage.setItem("quickpos-user", JSON.stringify(userData));

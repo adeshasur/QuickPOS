@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickPOS Pro - Supermarket Ops</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link rel="stylesheet" href="../assets/css/common.css">
+  <link rel="stylesheet" href="../assets/css/sidebar.css">
+  <link rel="stylesheet" href="../assets/css/management_theme.css">
+  <link rel="stylesheet" href="../assets/css/supermarket.css">
+</head>
+<body class="dashboard-body">
+  <div id="sidebar-container"></div>
+  <div class="main-content">
+    <div id="topbar-container"></div>
+    <div class="content">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-heading">Supermarket Operations</div>
+          <div class="page-sub">Manage supplier, promotion, stock exception, return, tax, branch, and audit workflows</div>
+        </div>
+      </div>
+
+      <div class="ops-grid">
+        <section class="ops-card">
+          <div class="ops-title"><i class="fa-solid fa-truck-field"></i> Supplier / GRN</div>
+          <div class="ops-fields">
+            <input id="supplierName" class="field-input" placeholder="Supplier name">
+            <input id="supplierPhone" class="field-input" placeholder="Phone">
+            <button id="saveSupplierBtn" class="ops-btn">Save Supplier</button>
+          </div>
+        </section>
+
+        <section class="ops-card">
+          <div class="ops-title"><i class="fa-solid fa-percent"></i> Promotion / Discount Rule</div>
+          <div class="ops-fields">
+            <input id="promoName" class="field-input" placeholder="Promotion name">
+            <select id="promoProduct" class="field-input"></select>
+            <div class="ops-row">
+              <select id="promoType" class="field-input"><option value="discount">Discount</option><option value="bogo">Buy X Get Y</option></select>
+              <input id="promoValue" class="field-input" type="number" min="0" step="0.01" placeholder="Value">
+            </div>
+            <button id="savePromotionBtn" class="ops-btn">Save Promotion</button>
+          </div>
+        </section>
+
+        <section class="ops-card">
+          <div class="ops-title"><i class="fa-solid fa-boxes-packing"></i> Stock Adjustment / Wastage</div>
+          <div class="ops-fields">
+            <select id="adjustProduct" class="field-input"></select>
+            <div class="ops-row">
+              <select id="adjustType" class="field-input"><option value="wastage">Wastage</option><option value="damage">Damaged</option><option value="expired">Expired</option><option value="decrease">Manual Decrease</option></select>
+              <input id="adjustQty" class="field-input" type="number" min="0" step="0.01" placeholder="Qty">
+            </div>
+            <input id="adjustReason" class="field-input" placeholder="Reason">
+            <button id="recordAdjustmentBtn" class="ops-btn danger">Record Adjustment</button>
+          </div>
+        </section>
+
+        <section class="ops-card">
+          <div class="ops-title"><i class="fa-solid fa-rotate-left"></i> Return / Void</div>
+          <div class="ops-fields">
+            <input id="voidBillId" class="field-input" placeholder="Bill ID to void">
+            <input id="voidReason" class="field-input" placeholder="Reason">
+            <button id="voidBillBtn" class="ops-btn danger">Void Bill</button>
+            <div class="ops-divider"></div>
+            <input id="returnBillId" class="field-input" placeholder="Bill ID to return/restock">
+            <input id="returnReason" class="field-input" placeholder="Return reason">
+            <button id="loadReturnBillBtn" class="ops-btn">Load Bill Items</button>
+            <div id="returnItemsList" class="ops-list compact">No bill loaded</div>
+            <button id="returnBillBtn" class="ops-btn">Record Selected Return</button>
+          </div>
+        </section>
+
+        <section class="ops-card">
+          <div class="ops-title"><i class="fa-solid fa-cash-register"></i> Till Cash In / Out</div>
+          <div class="ops-fields">
+            <div class="ops-row">
+              <select id="tillType" class="field-input"><option value="cash_in">Cash In</option><option value="cash_out">Cash Out</option><option value="petty_cash">Petty Cash</option></select>
+              <input id="tillAmount" class="field-input" type="number" min="0" step="0.01" placeholder="Amount">
+            </div>
+            <input id="tillReason" class="field-input" placeholder="Reason">
+            <button id="recordTillBtn" class="ops-btn">Record Till Movement</button>
+          </div>
+        </section>
+
+        <section class="ops-card">
+          <div class="ops-title"><i class="fa-solid fa-receipt"></i> Held Bills</div>
+          <div id="heldBillsList" class="ops-list">Loading...</div>
+        </section>
+
+        <section class="ops-card">
+          <div class="ops-title"><i class="fa-solid fa-scale-balanced"></i> Tax / Branch</div>
+          <div class="ops-fields">
+            <div class="ops-row">
+              <input id="taxName" class="field-input" placeholder="Tax name">
+              <input id="taxRate" class="field-input" type="number" min="0" step="0.01" placeholder="Rate %">
+            </div>
+            <button id="saveTaxBtn" class="ops-btn">Save Tax Category</button>
+            <div class="ops-row">
+              <input id="branchName" class="field-input" placeholder="Branch name">
+              <input id="branchPhone" class="field-input" placeholder="Phone">
+            </div>
+            <button id="saveBranchBtn" class="ops-btn">Save Branch</button>
+          </div>
+        </section>
+
+        <section class="ops-card">
+          <div class="ops-title"><i class="fa-solid fa-right-left"></i> Branch Transfer</div>
+          <div class="ops-fields">
+            <select id="transferProduct" class="field-input"></select>
+            <div class="ops-row">
+              <select id="transferFromBranch" class="field-input"></select>
+              <select id="transferToBranch" class="field-input"></select>
+            </div>
+            <div class="ops-row">
+              <input id="transferQty" class="field-input" type="number" min="0" step="0.01" placeholder="Qty">
+              <select id="transferStatus" class="field-input"><option value="pending">Pending</option><option value="completed">Completed</option></select>
+            </div>
+            <input id="transferNote" class="field-input" placeholder="Transfer note">
+            <button id="recordTransferBtn" class="ops-btn">Record Transfer</button>
+          </div>
+        </section>
+
+        <section class="ops-card">
+          <div class="ops-title"><i class="fa-solid fa-clipboard-check"></i> Stock Count</div>
+          <div class="ops-fields">
+            <input id="stockCountCode" class="field-input" placeholder="Count code">
+            <div class="ops-row">
+              <select id="stockCountProduct" class="field-input"></select>
+              <input id="stockCountQty" class="field-input" type="number" min="0" step="0.01" placeholder="Counted qty">
+            </div>
+            <button id="addCountLineBtn" class="ops-btn">Add Count Line</button>
+            <div id="stockCountLines" class="ops-list compact">No count lines</div>
+            <button id="createStockCountBtn" class="ops-btn">Create Snapshot Count</button>
+            <button id="finalizeStockCountBtn" class="ops-btn danger">Finalize Count</button>
+          </div>
+        </section>
+      </div>
+
+      <section class="ops-card wide">
+        <div class="ops-title"><i class="fa-solid fa-chart-simple"></i> Supermarket Summary</div>
+        <div id="opsSummary" class="ops-summary">Loading...</div>
+      </section>
+    </div>
+  </div>
+
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/components.js"></script>
+  <script src="../assets/js/supermarket.js"></script>
+</body>
+</html>

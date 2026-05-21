@@ -13,6 +13,9 @@
     suggestList: [],
     suggestActive: -1,
     heldBills: [],
+    discounts: [],
+    promotions: [],
+    taxCategories: [],
     productToCustomize: null,
     priceEdited: false,
     lastSale: null,
@@ -63,6 +66,14 @@
     return state.cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
   }
 
+  function cartDiscountTotal() {
+    return state.cart.reduce((sum, item) => sum + (Number(item.discount || 0) * Number(item.quantity)), 0);
+  }
+
+  function cartTaxTotal() {
+    return state.cart.reduce((sum, item) => sum + (Number(item.taxAmount || 0) * Number(item.quantity)), 0);
+  }
+
   function persistCart() {
     localStorage.setItem('quickpos-current-cart', JSON.stringify(state.cart));
   }
@@ -75,6 +86,10 @@
         name: it.name,
         quantity: Number(it.quantity || it.qty || 0),
         price: Number(it.price || 0),
+        originalPrice: Number(it.originalPrice || it.price || 0),
+        discount: Number(it.discount || 0),
+        taxRate: Number(it.taxRate || 0),
+        taxAmount: Number(it.taxAmount || 0),
         unit: it.unit || 'pc'
       })) : [];
     } catch (_err) {
@@ -93,6 +108,37 @@
     } catch (_err) {
       state.heldBills = [];
     }
+  }
+
+  async function loadHeldBills() {
+    if (!window.api.getHeldBills) {
+      hydrateHeldBills();
+      return;
+    }
+    const rows = await window.api.getHeldBills();
+    state.heldBills = (rows || []).map((bill) => {
+      let cart = [];
+      try {
+        cart = JSON.parse(bill.cart_json || '[]');
+      } catch (_err) {
+        cart = [];
+      }
+      const customer = bill.customer_id ? {
+        id: bill.customer_id,
+        name: bill.customer_name || 'Customer',
+        phone: bill.customer_phone || '',
+        balance: Number(bill.customer_balance || 0),
+        loyalty_points: Number(bill.customer_loyalty_points || 0)
+      } : null;
+      return {
+        id: String(bill.id),
+        holdCode: bill.hold_code,
+        cart,
+        customer,
+        at: bill.created_at ? new Date(bill.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
+      };
+    });
+    persistHeldBills();
   }
 
   function updateSearchMeta() {
@@ -132,11 +178,65 @@
   function decorateProduct(product) {
     const category = state.categories.find((c) => c.id === product.category_id);
     const categoryName = category?.name || product.category_name || 'General';
+    const priceInfo = effectiveProductPrice(product);
+    const tax = state.taxCategories.find((t) => Number(t.id) === Number(product.tax_category_id) && Number(t.active ?? 1) !== 0);
     return {
       ...product,
+      original_selling_price: Number(product.selling_price || 0),
+      selling_price: priceInfo.price,
+      discount_amount: priceInfo.discount,
+      discount_label: priceInfo.label,
+      tax_rate: Number(tax?.rate || 0),
       category_name: categoryName,
       categoryKey: categoryKey(categoryName)
     };
+  }
+
+  function taxIncludedPerUnit(price, rate) {
+    const value = Number(price || 0);
+    const pct = Number(rate || 0);
+    if (value <= 0 || pct <= 0) return 0;
+    return value * (pct / (100 + pct));
+  }
+
+  function effectiveProductPrice(product) {
+    const basePrice = Number(product.selling_price || 0);
+    const today = new Date().toISOString().slice(0, 10);
+    const activeDiscounts = (state.discounts || []).filter((discount) => {
+      if (Number(discount.product_id) !== Number(product.id)) return false;
+      if (Number(discount.active ?? 1) === 0) return false;
+      if (discount.starts_at && discount.starts_at > today) return false;
+      if (discount.ends_at && discount.ends_at < today) return false;
+      return true;
+    });
+    const activePromotions = (state.promotions || []).filter((promo) => {
+      if (Number(promo.active ?? 1) === 0) return false;
+      if (promo.starts_at && promo.starts_at > today) return false;
+      if (promo.ends_at && promo.ends_at < today) return false;
+      if (promo.promo_type === 'bogo') return false;
+      if (promo.target_type === 'product' && Number(promo.target_id || 0) !== Number(product.id)) return false;
+      if (promo.target_type === 'category' && Number(promo.target_id || 0) !== Number(product.category_id || 0)) return false;
+      return true;
+    }).map((promo) => ({
+      discount_type: promo.discount_type || 'amount',
+      discount_value: promo.discount_value || 0,
+      promo_name: promo.name
+    }));
+    const active = [...activeDiscounts, ...activePromotions];
+    if (!active.length) return { price: basePrice, discount: 0, label: '' };
+
+    const best = active.reduce((winner, discount) => {
+      const value = discount.discount_type === 'percent'
+        ? basePrice * (Number(discount.discount_value || 0) / 100)
+        : Number(discount.discount_value || 0);
+      return value > winner.value ? { discount, value } : winner;
+    }, { discount: null, value: 0 });
+
+    const discountAmount = Math.min(basePrice, Math.max(0, best.value));
+    const label = best.discount?.discount_type === 'percent'
+      ? `${Number(best.discount.discount_value || 0)}% off`
+      : (best.discount?.promo_name || `${fmt(discountAmount)} off`);
+    return { price: Math.max(0, basePrice - discountAmount), discount: discountAmount, label };
   }
 
   function upsertProduct(product) {
@@ -174,6 +274,7 @@
           <div class="pc-cat">${escapeHtml((p.category_name || 'General').toLowerCase())}</div>
           <div class="pc-name">${escapeHtml(displayName(p))}${p.unit_type ? ` / ${escapeHtml(p.unit_type)}` : ''}</div>
           <div class="pc-price">${fmt(p.selling_price || 0)}</div>
+          ${Number(p.discount_amount || 0) > 0 ? `<div class="pc-discount"><span>${escapeHtml(p.discount_label || 'Discount')}</span><small>${fmt(p.original_selling_price || 0)}</small></div>` : ''}
           <div class="pc-footer"><span></span><span class="stock-badge ${stockClass(Number(p.current_stock || 0))}">${stockText(Number(p.current_stock || 0))}</span></div>
         </div>
       `;
@@ -220,6 +321,10 @@
         name: displayName(product),
         quantity: Number(qty),
         price: Number(price),
+        originalPrice: Number(product.original_selling_price || product.selling_price || price),
+        discount: Math.max(0, Number(product.original_selling_price || product.selling_price || price) - Number(price)),
+        taxRate: Number(product.tax_rate || 0),
+        taxAmount: taxIncludedPerUnit(price, product.tax_rate || 0),
         unit: product.unit_type || 'pc'
       });
     }
@@ -293,7 +398,7 @@
         <div class="cart-item" data-index="${i}">
           <div class="ci-info">
             <div class="ci-name">${escapeHtml(item.name)}</div>
-            <div class="ci-unit">${formatQty(item.quantity)} ${escapeHtml(item.unit)} x ${fmt(item.price)}</div>
+            <div class="ci-unit">${formatQty(item.quantity)} ${escapeHtml(item.unit)} x ${fmt(item.price)}${Number(item.discount || 0) > 0 ? ` <span class="ci-discount">saved ${fmt(Number(item.discount) * Number(item.quantity))}</span>` : ''}</div>
           </div>
           <div class="ci-controls">
             <button class="qty-btn" data-action="dec" data-index="${i}">-</button>
@@ -393,35 +498,46 @@
       chip.addEventListener('click', async () => {
         const billId = chip.dataset.holdId;
         if (state.cart.length && !(await confirmAction('Replace current cart with held bill?'))) return;
-        resumeHeldBill(billId);
+        await resumeHeldBill(billId);
       });
     });
   }
 
-  function holdCurrentBill() {
+  async function holdCurrentBill() {
     if (!state.cart.length) {
       notify('Cart is empty. Nothing to hold.', 'warning');
       return;
     }
-
-    state.heldBills.push({
+    const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
+    const heldBill = {
       id: `H${Date.now()}`,
       cart: state.cart.map((i) => ({ ...i })),
       customer: state.selectedCustomer ? { ...state.selectedCustomer } : null,
       at: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    });
+    };
+    if (window.api.holdBill) {
+      await window.api.holdBill({
+        customerId: state.selectedCustomer ? state.selectedCustomer.id : null,
+        cart: heldBill.cart,
+        cashierName: user.name || 'Cashier'
+      });
+      await loadHeldBills();
+    } else {
+      state.heldBills.push(heldBill);
+      persistHeldBills();
+    }
+    if (window.quickposDataChanged) window.quickposDataChanged();
 
     state.cart = [];
     state.selectedCustomer = null;
     persistCart();
-    persistHeldBills();
     renderCart();
     renderCustomer();
     renderHoldTray();
     notify('Bill held successfully', 'info');
   }
 
-  function resumeHeldBill(holdId) {
+  async function resumeHeldBill(holdId) {
     const index = state.heldBills.findIndex((b) => b.id === holdId);
     if (index < 0) return;
     const bill = state.heldBills.splice(index, 1)[0];
@@ -430,9 +546,20 @@
       name: item.name,
       quantity: Number(item.quantity || item.qty || 0),
       price: Number(item.price || 0),
+      originalPrice: Number(item.originalPrice || item.price || 0),
+      discount: Number(item.discount || 0),
+      taxRate: Number(item.taxRate || 0),
+      taxAmount: Number(item.taxAmount || 0),
       unit: item.unit || 'pc'
     }));
-    state.selectedCustomer = bill.customer ? { ...bill.customer } : null;
+    state.selectedCustomer = bill.customer
+      ? (state.customers.find((customer) => Number(customer.id) === Number(bill.customer.id)) || { ...bill.customer })
+      : null;
+
+    if (window.api.deleteHeldBill && !String(holdId).startsWith('H')) {
+      await window.api.deleteHeldBill(Number(holdId));
+      if (window.quickposDataChanged) window.quickposDataChanged();
+    }
 
     persistCart();
     persistHeldBills();
@@ -442,11 +569,11 @@
     notify('Held bill resumed', 'info');
   }
 
-  function tryResumeHeldBill() {
+  async function tryResumeHeldBill() {
     const resumeId = localStorage.getItem('quickpos-resume-hold-id');
     if (!resumeId) return;
     localStorage.removeItem('quickpos-resume-hold-id');
-    resumeHeldBill(resumeId);
+    await resumeHeldBill(resumeId);
   }
 
   function openCustomize(productId) {
@@ -563,6 +690,15 @@
     document.getElementById('changeAmt').textContent = fmt(Math.max(0, received - total));
   }
 
+  function updateSplitBalance() {
+    const total = cartTotal();
+    const cash = Number(parseFloat(document.getElementById('splitCashAmount')?.value) || 0);
+    const card = Number(parseFloat(document.getElementById('splitCardAmount')?.value) || 0);
+    const balance = Math.max(0, total - cash - card);
+    const el = document.getElementById('splitBalance');
+    if (el) el.textContent = fmt(balance);
+  }
+
   function setReceivedAmount(amount) {
     document.getElementById('amtReceived').value = Number(amount || 0).toFixed(2);
     updateChangeDue();
@@ -629,7 +765,7 @@
     }
   }
 
-  async function completeSale(method, receivedAmount, refNo) {
+  async function completeSale(method, receivedAmount, refNo, payments = null) {
     const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
     const total = cartTotal();
     const balanceDue = method === 'Credit' ? total : 0;
@@ -642,13 +778,17 @@
       received: Number(receivedAmount || 0),
       balanceDue,
       refNo: refNo || null,
+      discountTotal: cartDiscountTotal(),
+      taxTotal: cartTaxTotal(),
+      payments,
       cashier: user.name || 'Unknown',
       allowStockOverride: false,
       items: state.cart.map((item) => ({
         id: item.id,
         name: item.name,
         qty: Number(item.quantity),
-        price: Number(item.price)
+        price: Number(item.price),
+        discount: Number(item.discount || 0)
       }))
     };
 
@@ -660,6 +800,7 @@
     if (saved.stockOverrideUsed) {
       notify('Stock override applied and audit logged for this sale', 'warning');
     }
+    if (window.quickposDataChanged) window.quickposDataChanged();
 
     state.cart = [];
     state.selectedCustomer = null;
@@ -669,6 +810,7 @@
 
     closeModal('cashModal');
     closeModal('cardModal');
+    closeModal('splitModal');
 
     await triggerPrint(state.lastSale);
 
@@ -723,6 +865,8 @@
         <table class="receipt-table"><tbody>${itemsHtml}</tbody></table>
         <div class="receipt-divider double"></div>
         <div class="receipt-totals">
+          ${Number(saleData.discountTotal || 0) > 0 ? `<div class="total-row"><span>Discount</span><span>-LKR ${Number(saleData.discountTotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></div>` : ''}
+          ${Number(saleData.taxTotal || 0) > 0 ? `<div class="total-row"><span>Tax included</span><span>LKR ${Number(saleData.taxTotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></div>` : ''}
           <div class="total-row grand-total"><span>NET TOTAL</span><span>LKR ${Number(saleData.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></div>
         </div>
         ${!saleData.isDraft ? `<div class="payment-info"><div class="total-row"><span>Paid via ${escapeHtml(saleData.method || '-')}</span><span>${Number(saleData.received || saleData.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></div>${saleData.method === 'Cash' ? `<div class="total-row"><span>Change</span><span>${change.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></div>` : ''}</div>` : ''}
@@ -745,15 +889,21 @@
   }
 
   async function loadData() {
-    const [categoryRows, productRows, customerRows] = await Promise.all([
+    const [categoryRows, productRows, customerRows, discountRows, promotionRows, taxRows] = await Promise.all([
       window.api.getCategories(),
       window.api.getProducts(),
-      window.api.getCustomers()
+      window.api.getCustomers(),
+      window.api.getProductDiscounts ? window.api.getProductDiscounts() : Promise.resolve([]),
+      window.api.getPromotions ? window.api.getPromotions() : Promise.resolve([]),
+      window.api.getTaxCategories ? window.api.getTaxCategories() : Promise.resolve([])
     ]);
 
     const categoryMap = new Map((categoryRows || []).map((c) => [c.id, c]));
 
     state.categories = categoryRows || [];
+    state.discounts = discountRows || [];
+    state.promotions = promotionRows || [];
+    state.taxCategories = taxRows || [];
     state.products = (productRows || []).map(decorateProduct);
     state.customers = customerRows || [];
   }
@@ -948,14 +1098,32 @@
       setTimeout(() => document.getElementById('cardRefNo').focus(), 150);
     });
 
+    document.getElementById('splitBtn').addEventListener('click', () => {
+      if (!state.cart.length) {
+        notify('Cart is empty. Add products first.', 'warning');
+        return;
+      }
+      const total = cartTotal();
+      document.getElementById('splitModalTotal').textContent = fmt(total);
+      document.getElementById('splitCashAmount').value = '';
+      document.getElementById('splitCardAmount').value = Number(total || 0).toFixed(2);
+      document.getElementById('splitCardRef').value = '';
+      updateSplitBalance();
+      openModal('splitModal');
+    });
+
     document.getElementById('holdSaleBtn').addEventListener('click', holdCurrentBill);
 
     document.getElementById('closeCashModal').addEventListener('click', () => closeModal('cashModal'));
     document.getElementById('cancelCashModal').addEventListener('click', () => closeModal('cashModal'));
     document.getElementById('closeCardModal').addEventListener('click', () => closeModal('cardModal'));
     document.getElementById('cancelCardModal').addEventListener('click', () => closeModal('cardModal'));
+    document.getElementById('closeSplitModal').addEventListener('click', () => closeModal('splitModal'));
+    document.getElementById('cancelSplitModal').addEventListener('click', () => closeModal('splitModal'));
 
     document.getElementById('amtReceived').addEventListener('input', updateChangeDue);
+    document.getElementById('splitCashAmount').addEventListener('input', updateSplitBalance);
+    document.getElementById('splitCardAmount').addEventListener('input', updateSplitBalance);
 
     document.querySelectorAll('.quick-btn[data-set]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -992,6 +1160,25 @@
         await completeSale('Card', cartTotal(), ref);
       } catch (err) {
         notify(`Failed to save card sale: ${err.message}`, 'warning');
+      }
+    });
+
+    document.getElementById('finalizeSplit').addEventListener('click', async () => {
+      const total = cartTotal();
+      const cash = Number(parseFloat(document.getElementById('splitCashAmount').value) || 0);
+      const card = Number(parseFloat(document.getElementById('splitCardAmount').value) || 0);
+      const ref = document.getElementById('splitCardRef').value.trim();
+      if (cash < 0 || card < 0 || Math.abs((cash + card) - total) > 0.01) {
+        notify('Split amounts must match the bill total', 'warning');
+        return;
+      }
+      const payments = [];
+      if (cash > 0) payments.push({ method: 'Cash', amount: cash, refNo: '' });
+      if (card > 0) payments.push({ method: 'Card', amount: card, refNo: ref });
+      try {
+        await completeSale('Split', total, ref, payments);
+      } catch (err) {
+        notify(`Failed to save split sale: ${err.message}`, 'warning');
       }
     });
 
@@ -1117,6 +1304,7 @@
 
     document.addEventListener('quickpos:refresh', async () => {
       await loadData();
+      await loadHeldBills();
       renderCategories();
       renderProducts();
       renderCustomer();
@@ -1125,7 +1313,8 @@
 
     try {
       await loadData();
-      tryResumeHeldBill();
+      await loadHeldBills();
+      await tryResumeHeldBill();
       renderCategories();
       renderProducts();
       renderCustomer();
