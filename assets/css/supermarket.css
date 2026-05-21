@@ -1,33 +1,66 @@
 /* === Supermarket Operations Custom Stylesheet === */
 
 .ops-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
+  display: block; /* Turn off grid for masonry columns */
+  column-count: 3;
+  column-gap: 18px;
   margin-bottom: 16px;
 }
 
 .ops-card {
   border: 1px solid rgba(218, 227, 239, 0.9);
+  border-top: 4px solid var(--primary); /* Default top accent */
   border-radius: 16px;
   background: #ffffff;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.045);
   padding: 20px;
-  display: flex;
+  display: inline-flex; /* Prevents splitting columns */
   flex-direction: column;
+  width: 100%;
+  margin-bottom: 18px; /* space below card in columns */
+  break-inside: avoid; /* Prevents splitting columns */
   gap: 16px;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
 }
 
 .ops-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   border-color: rgba(29, 45, 191, 0.18);
   box-shadow: 0 20px 38px rgba(15, 23, 42, 0.09);
 }
 
+/* Card Accent Colors */
+.ops-card.accent-blue { border-top-color: #1d2dbf; }
+.ops-card.accent-purple { border-top-color: #8b5cf6; }
+.ops-card.accent-amber { border-top-color: #f59e0b; }
+.ops-card.accent-danger { border-top-color: #ef4444; }
+.ops-card.accent-success { border-top-color: #10b981; }
+.ops-card.accent-slate { border-top-color: #64748b; }
+.ops-card.accent-indigo { border-top-color: #4f46e5; }
+.ops-card.accent-teal { border-top-color: #0d9488; }
+.ops-card.accent-orange { border-top-color: #ff9800; }
+
+.ops-card.accent-blue .ops-title i { color: #1d2dbf; }
+.ops-card.accent-purple .ops-title i { color: #8b5cf6; }
+.ops-card.accent-amber .ops-title i { color: #f59e0b; }
+.ops-card.accent-danger .ops-title i { color: #ef4444; }
+.ops-card.accent-success .ops-title i { color: #10b981; }
+.ops-card.accent-slate .ops-title i { color: #64748b; }
+.ops-card.accent-indigo .ops-title i { color: #4f46e5; }
+.ops-card.accent-teal .ops-title i { color: #0d9488; }
+.ops-card.accent-orange .ops-title i { color: #ff9800; }
+
 .ops-card.wide {
+  display: flex; /* Spans full block width */
   margin-top: 16px;
+  margin-bottom: 0;
+  width: 100%;
+  border-top: 1px solid rgba(218, 227, 239, 0.9); /* Neutral top */
+}
+
+.ops-card.wide:hover {
+  transform: translateY(-2px);
 }
 
 .ops-title {
@@ -40,11 +73,6 @@
   border-bottom: 1px dashed rgba(226, 232, 240, 0.9);
   padding-bottom: 12px;
   margin-bottom: 2px;
-}
-
-.ops-title i {
-  color: var(--primary);
-  font-size: 16px;
 }
 
 .ops-fields {
@@ -287,7 +315,7 @@ select.field-input,
 /* Responsive Media Queries */
 @media (max-width: 1400px) {
   .ops-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-count: 3;
   }
   .ops-summary {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -296,7 +324,7 @@ select.field-input,
 
 @media (max-width: 1100px) {
   .ops-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-count: 2;
   }
   .ops-summary {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -305,7 +333,7 @@ select.field-input,
 
 @media (max-width: 768px) {
   .ops-grid {
-    grid-template-columns: 1fr;
+    column-count: 1;
   }
   .ops-row {
     grid-template-columns: 1fr;
