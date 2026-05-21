@@ -1,114 +1,323 @@
+/* === Supermarket Operations Custom Stylesheet === */
+
 .ops-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .ops-card {
-  border: 1px solid rgba(218, 227, 239, 0.96);
+  border: 1px solid rgba(218, 227, 239, 0.9);
   border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.055);
-  padding: 16px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.045);
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.ops-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(29, 45, 191, 0.18);
+  box-shadow: 0 20px 38px rgba(15, 23, 42, 0.09);
 }
 
 .ops-card.wide {
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 .ops-title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 900;
-  color: #111827;
+  gap: 10px;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--text);
+  border-bottom: 1px dashed rgba(226, 232, 240, 0.9);
+  padding-bottom: 12px;
+  margin-bottom: 2px;
 }
 
 .ops-title i {
   color: var(--primary);
+  font-size: 16px;
 }
 
 .ops-fields {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .ops-divider {
   height: 1px;
-  background: rgba(203, 213, 225, 0.8);
-  margin: 2px 0;
+  background: linear-gradient(90deg, transparent, rgba(226, 232, 240, 0.9) 20%, rgba(226, 232, 240, 0.9) 80%, transparent);
+  margin: 6px 0;
 }
 
-.ops-list.compact {
-  max-height: 180px;
-  overflow: auto;
+/* Form inputs & select styling */
+.field-input, 
+select.field-input,
+.ops-fields input,
+.ops-fields select {
+  font-family: var(--font);
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  padding: 10px 14px !important;
+  border-radius: 12px !important;
+  border: 1.5px solid #d5dfec !important;
+  color: var(--text) !important;
+  outline: none !important;
+  background: #ffffff !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: none !important;
+  box-sizing: border-box;
+  width: 100%;
 }
 
-.return-item-row {
-  display: grid;
-  grid-template-columns: 18px 1fr 76px;
-  align-items: center;
-  gap: 8px;
+.field-input::placeholder {
+  color: var(--text3) !important;
+  font-weight: 500 !important;
 }
 
-.return-item-row input[type="number"] {
-  min-width: 0;
-  padding: 8px;
-  text-align: right;
+.field-input:focus,
+select.field-input:focus,
+.ops-fields input:focus,
+.ops-fields select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3.5px var(--primary-glow) !important;
+  background: #ffffff !important;
+}
+
+/* Custom select dropdown arrows */
+select.field-input,
+.ops-fields select {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 14px center !important;
+  background-size: 12px !important;
+  padding-right: 36px !important;
 }
 
 .ops-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 12px;
 }
 
+/* Premium Buttons styling */
 .ops-btn {
-  min-height: 40px;
-  border: 1px solid rgba(29, 45, 191, 0.14);
+  min-height: 42px;
+  border: 1px solid transparent;
   border-radius: 11px;
   background: var(--primary);
-  color: #fff;
-  font-weight: 850;
+  color: #ffffff;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 13.5px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.ops-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 16px rgba(29, 45, 191, 0.22);
+}
+
+.ops-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(29, 45, 191, 0.15);
 }
 
 .ops-btn.danger {
-  background: #ef4444;
-  border-color: rgba(239, 68, 68, 0.2);
+  background: var(--danger);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
 }
 
-.ops-list,
-.ops-summary {
-  display: grid;
+.ops-btn.danger:hover {
+  background: #dc2626;
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.25);
+}
+
+/* Lists styling */
+.ops-list {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
-.ops-list-row,
-.ops-summary-row {
-  min-height: 42px;
+.ops-list.compact {
+  max-height: 160px;
+}
+
+.ops-list-row {
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  border: 1px solid #e2e8f0;
-  border-radius: 11px;
-  padding: 8px 10px;
+  gap: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 10px;
+  padding: 10px 14px;
   background: #f8fafc;
-  font-size: 12px;
-  font-weight: 750;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text2);
+  transition: all 0.2s ease;
 }
 
-@media (max-width: 1280px) {
-  .ops-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ops-list-row:hover {
+  background: #f1f5f9;
+  border-color: var(--border2);
+  color: var(--text);
 }
 
-@media (max-width: 760px) {
-  .ops-grid,
-  .ops-row { grid-template-columns: 1fr; }
+.ops-list-row span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80%;
+}
+
+.ops-list-row button.ops-btn {
+  min-height: 28px;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 11px;
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+.ops-list-row button.ops-btn:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Return item specific grid */
+.return-item-row {
+  display: grid;
+  grid-template-columns: 20px 1fr 80px;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.return-item-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+  margin: 0;
+}
+
+.return-item-row input[type="number"] {
+  min-height: 28px !important;
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--border2) !important;
+  text-align: right;
+  margin: 0;
+  width: 100%;
+}
+
+/* Summary Grid Section */
+.ops-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
+}
+
+.ops-summary-row {
+  min-height: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid rgba(218, 227, 239, 0.9);
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.ops-summary-row:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  background: var(--primary-glow);
+  box-shadow: 0 8px 18px rgba(29, 45, 191, 0.05);
+}
+
+.ops-summary-row span {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ops-summary-row strong {
+  font-size: 20px;
+  font-weight: 850;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 1400px) {
+  .ops-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .ops-summary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1100px) {
+  .ops-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ops-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .ops-grid {
+    grid-template-columns: 1fr;
+  }
+  .ops-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .ops-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .ops-summary {
+    grid-template-columns: 1fr;
+  }
 }
