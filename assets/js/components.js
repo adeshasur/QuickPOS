@@ -304,7 +304,7 @@
         customers: 'Customers',
         ledger: 'Credit Ledger',
         sales_reports: 'Invoice History',
-        reports: 'Shift Reports',
+        reports: 'Reports & Analytics',
         users: 'Users',
         settings: 'Settings'
       };
@@ -336,7 +336,7 @@
           <a href="customers.html" class="menu-item" data-page="customers"><i class="fa-solid fa-users"></i> Customers</a>
           <a href="ledger.html" class="menu-item" data-page="ledger"><i class="fa-solid fa-book"></i> Credit Ledger</a>
           <a href="sales_reports.html" class="menu-item" data-page="sales_reports"><i class="fa-solid fa-history"></i> Invoice History</a>
-          <a href="reports.html" class="menu-item reports-allowed" data-page="reports"><i class="fa-solid fa-chart-pie"></i> Shift Reports</a>
+          <a href="reports.html" class="menu-item reports-allowed" data-page="reports"><i class="fa-solid fa-chart-pie"></i> Reports & Analytics</a>
           <a href="users.html" class="menu-item owner-only" data-page="users"><i class="fa-solid fa-user-gear"></i> Users</a>
           <a href="settings.html" class="menu-item owner-only" data-page="settings"><i class="fa-solid fa-cog"></i> Settings</a>
         </div>

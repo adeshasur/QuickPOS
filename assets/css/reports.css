@@ -16,6 +16,10 @@
 .report-btn{padding:8px 16px;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;gap:6px}
 .generate-btn{background-color:var(--primary);color:#fff}
 .generate-btn:hover{background-color:var(--primary-dark);transform:translateY(-1px)}
+.view-pdf-btn{background-color:#334155;color:#fff}
+.view-pdf-btn:hover{background-color:#1f2937;transform:translateY(-1px)}
+.download-pdf-btn{background-color:#7c3aed;color:#fff}
+.download-pdf-btn:hover{background-color:#6d28d9;transform:translateY(-1px)}
 .print-btn{background-color:var(--success);color:#fff}
 .print-btn:hover{background-color:#0f8a63;transform:translateY(-1px)}
 

@@ -61,19 +61,108 @@
               </div>
             </div>
             <div class="scard">
+              <div class="scard-title">Receipt Options</div>
+              <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Print receipt after sale</span><span class="toggle-desc">Automatically prompt receipt print</span></div><label class="ts"><input type="checkbox" id="autoPrint" checked><span class="ts-slider"></span></label></div>
+              <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Show store logo on receipt</span><span class="toggle-desc">If a logo has been uploaded</span></div><label class="ts"><input type="checkbox" id="showLogo"><span class="ts-slider"></span></label></div>
+              <div class="field">
+                <label class="field-label">Receipt Footer Message</label>
+                <input class="field-input" type="text" id="receiptFooter" maxlength="80" placeholder="Thank you for shopping with us!">
+              </div>
+            </div>
+            <div class="scard">
+              <div class="scard-title">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Printer Configuration
+              </div>
+              <div class="field">
+                <label class="field-label">Thermal Printer Name</label>
+                <select class="field-input" id="thermalPrinterName">
+                  <option value="">-- System Default Printer --</option>
+                </select>
+                <span class="field-hint">Select your receipt printer. Leave on default if unsure.</span>
+              </div>
+              <button class="footer-btn save-btn" id="detectPrintersBtn" style="height:44px;padding:0 18px;white-space:nowrap">
+                <i class="fa-solid fa-arrows-rotate" style="margin-right:6px"></i>Detect Printers
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-version">
+          <div class="panel-title"><span class="material-symbols-rounded">deployed_code</span>System Version</div>
+          <div class="settings-grid settings-grid-2">
+            <div class="scard span-2">
+              <div class="scard-title">Choose POS Edition</div>
+              <div class="ver-grid">
+                <div class="ver-card" data-version="lite"><div class="ver-name">QuickPOS Lite</div><div class="ver-desc">Basic sales + receipt workflow</div></div>
+                <div class="ver-card selected" data-version="pro"><div class="ver-name">QuickPOS Pro</div><div class="ver-desc">Inventory, reports, and multi-user tools</div></div>
+              </div>
+              <div class="field-hint warn" id="versionHint">Currently on Pro with all advanced modules enabled.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-security">
+          <div class="panel-title"><span class="material-symbols-rounded">shield_lock</span>Security Settings</div>
+          <div class="settings-grid settings-grid-2">
+            <div class="scard">
+              <div class="scard-title">Owner Password</div>
+              <div class="field"><label class="field-label">New Password</label><div class="pw-wrap"><input class="field-input" type="password" id="adminPassword" minlength="6"><button class="pw-eye" data-target="adminPassword">Show</button></div></div>
+              <div class="field"><label class="field-label">Confirm Password</label><div class="pw-wrap"><input class="field-input" type="password" id="adminPasswordConfirm"><button class="pw-eye" data-target="adminPasswordConfirm">Show</button></div></div>
+            </div>
+            <div class="scard">
+              <div class="scard-title">Cashier Password</div>
+              <div class="field"><label class="field-label">New Password</label><div class="pw-wrap"><input class="field-input" type="password" id="cashierPassword" minlength="4"><button class="pw-eye" data-target="cashierPassword">Show</button></div></div>
+              <div class="field"><label class="field-label">Confirm Password</label><div class="pw-wrap"><input class="field-input" type="password" id="cashierPasswordConfirm"><button class="pw-eye" data-target="cashierPasswordConfirm">Show</button></div></div>
+            </div>
+            <div class="scard span-2">
+              <div class="scard-title">Access Controls</div>
+              <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Require Admin PIN for refunds</span><span class="toggle-desc">Extra safety at cashier refund flow</span></div><label class="ts"><input type="checkbox" id="requireAdminForRefund" checked><span class="ts-slider"></span></label></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-local">
+          <div class="panel-title"><span class="material-symbols-rounded">public</span>Localization</div>
+          <div class="settings-grid settings-grid-2">
+            <div class="scard">
+              <div class="scard-title">Currency</div>
+              <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Use LKR</span><span class="toggle-desc">All prices displayed in Sri Lankan Rupees</span></div><label class="ts"><input type="checkbox" id="currencyToggle" checked><span class="ts-slider"></span></label></div>
+              <div class="field"><label class="field-label">Tax Percentage (%)</label><input class="field-input" type="number" id="taxPercentage" min="0" max="50" step="0.01" value="0"></div>
+            </div>
+            <div class="scard">
+              <div class="scard-title">Date & Time</div>
+              <div class="field"><label class="field-label">Date Format</label><select class="field-input" id="dateFormat"><option value="DD/MM/YYYY">DD/MM/YYYY</option><option value="MM/DD/YYYY">MM/DD/YYYY</option><option value="YYYY-MM-DD">YYYY-MM-DD</option></select></div>
+              <div class="field"><label class="field-label">Time Format</label><select class="field-input" id="timeFormat"><option value="12h">12-hour (AM/PM)</option><option value="24h">24-hour</option></select></div>
+            </div>
+            <div class="scard span-2">
               <div class="scard-title">Shift Settings</div>
               <div class="field">
                 <label class="field-label">Default Shift Hours</label>
                 <input class="field-input" type="text" id="shiftHours" placeholder="08:00 - 16:00" maxlength="20">
               </div>
             </div>
-            <div class="scard">
-              <div class="scard-title">Receipt Options</div>
-              <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Print receipt after sale</span><span class="toggle-desc">Automatically prompt receipt print</span></div><label class="ts"><input type="checkbox" id="autoPrint" checked><span class="ts-slider"></span></label></div>
-              <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Show store logo on receipt</span><span class="toggle-desc">If a logo has been uploaded</span></div><label class="ts"><input type="checkbox" id="showLogo"><span class="ts-slider"></span></label></div>
-            </div>
           </div>
+        </div>
+
+        <div class="panel" id="panel-system">
+          <div class="panel-title"><span class="material-symbols-rounded">memory</span>System Information</div>
           <div class="settings-grid settings-grid-2">
+            <div class="scard">
+              <div class="scard-title">Application</div>
+              <div class="sys-info-row"><span class="sys-info-label">Application</span><span class="sys-info-val">QuickPOS Pro</span></div>
+              <div class="sys-info-row"><span class="sys-info-label">Version</span><span class="sys-info-val">1.0.0</span></div>
+              <div class="sys-info-row"><span class="sys-info-label">Edition</span><span class="sys-info-val">Pro</span></div>
+              <div class="sys-info-row"><span class="sys-info-label">Build</span><span class="sys-info-val">2026.05</span></div>
+            </div>
+            <div class="scard">
+              <div class="scard-title">Storage</div>
+              <div class="sys-info-row"><span class="sys-info-label">Storage Type</span><span class="sys-info-val">SQLite</span></div>
+              <div class="sys-info-row"><span class="sys-info-label">Products</span><span class="sys-info-val" id="sysProducts">-</span></div>
+              <div class="sys-info-row"><span class="sys-info-label">Sales Records</span><span class="sys-info-val" id="sysSales">-</span></div>
+              <div class="sys-info-row"><span class="sys-info-label">Customers</span><span class="sys-info-val" id="sysCustomers">-</span></div>
+              <div class="sys-info-row"><span class="sys-info-label">Cache Size</span><span class="sys-info-val" id="sysCache">-</span></div>
+            </div>
             <div class="scard">
               <div class="scard-title">POS Behavior</div>
               <div class="field">
@@ -109,101 +198,11 @@
               <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Play scan sound</span><span class="toggle-desc">Audio cue on successful barcode scan</span></div><label class="ts"><input type="checkbox" id="barcodeScanSound"><span class="ts-slider"></span></label></div>
             </div>
             <div class="scard">
-              <div class="scard-title">Alerts & Controls</div>
+              <div class="scard-title">Alerts</div>
               <div class="field">
                 <label class="field-label">Low Stock Alert Level</label>
                 <input class="field-input" type="number" id="lowStockAlertLevel" min="0" max="10000" step="1" value="10">
               </div>
-              <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Require Admin PIN for refunds</span><span class="toggle-desc">Extra safety at cashier refund flow</span></div><label class="ts"><input type="checkbox" id="requireAdminForRefund" checked><span class="ts-slider"></span></label></div>
-              <div class="field">
-                <label class="field-label">Receipt Footer Message</label>
-                <input class="field-input" type="text" id="receiptFooter" maxlength="80" placeholder="Thank you for shopping with us!">
-              </div>
-            </div>          <div class="scard" style="grid-column:1/-1">
-            <div class="scard-title">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-              Printer Configuration
-            </div>
-            <div class="field-row">
-              <div class="field" style="flex:1">
-                <label class="field-label">Thermal Printer Name</label>
-                <select class="field-input" id="thermalPrinterName">
-                  <option value="">-- System Default Printer --</option>
-                </select>
-                <span class="field-hint">Select your receipt printer. Leave on default if unsure.</span>
-              </div>
-              <div class="field" style="flex:0;align-self:flex-end">
-                <button class="footer-btn save-btn" id="detectPrintersBtn" style="height:44px;padding:0 18px;white-space:nowrap">
-                  <i class="fa-solid fa-arrows-rotate" style="margin-right:6px"></i>Detect Printers
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel" id="panel-version">
-          <div class="panel-title"><span class="material-symbols-rounded">deployed_code</span>System Version</div>
-          <div class="settings-grid settings-grid-2">
-            <div class="scard span-2">
-              <div class="scard-title">Choose POS Edition</div>
-              <div class="ver-grid">
-                <div class="ver-card" data-version="lite"><div class="ver-name">QuickPOS Lite</div><div class="ver-desc">Basic sales + receipt workflow</div></div>
-                <div class="ver-card selected" data-version="pro"><div class="ver-name">QuickPOS Pro</div><div class="ver-desc">Inventory, reports, and multi-user tools</div></div>
-              </div>
-              <div class="field-hint warn" id="versionHint">Currently on Pro with all advanced modules enabled.</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel" id="panel-security">
-          <div class="panel-title"><span class="material-symbols-rounded">shield_lock</span>Security Settings</div>
-          <div class="settings-grid settings-grid-2">
-            <div class="scard">
-              <div class="scard-title">Owner Password</div>
-              <div class="field"><label class="field-label">New Password</label><div class="pw-wrap"><input class="field-input" type="password" id="adminPassword" minlength="6"><button class="pw-eye" data-target="adminPassword">Show</button></div></div>
-              <div class="field"><label class="field-label">Confirm Password</label><div class="pw-wrap"><input class="field-input" type="password" id="adminPasswordConfirm"><button class="pw-eye" data-target="adminPasswordConfirm">Show</button></div></div>
-            </div>
-            <div class="scard">
-              <div class="scard-title">Cashier Password</div>
-              <div class="field"><label class="field-label">New Password</label><div class="pw-wrap"><input class="field-input" type="password" id="cashierPassword" minlength="4"><button class="pw-eye" data-target="cashierPassword">Show</button></div></div>
-              <div class="field"><label class="field-label">Confirm Password</label><div class="pw-wrap"><input class="field-input" type="password" id="cashierPasswordConfirm"><button class="pw-eye" data-target="cashierPasswordConfirm">Show</button></div></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel" id="panel-local">
-          <div class="panel-title"><span class="material-symbols-rounded">public</span>Localization</div>
-          <div class="settings-grid settings-grid-2">
-            <div class="scard">
-              <div class="scard-title">Currency</div>
-              <div class="toggle-row"><div class="toggle-info"><span class="toggle-name">Use LKR</span><span class="toggle-desc">All prices displayed in Sri Lankan Rupees</span></div><label class="ts"><input type="checkbox" id="currencyToggle" checked><span class="ts-slider"></span></label></div>
-              <div class="field"><label class="field-label">Tax Percentage (%)</label><input class="field-input" type="number" id="taxPercentage" min="0" max="50" step="0.01" value="0"></div>
-            </div>
-            <div class="scard">
-              <div class="scard-title">Date & Time</div>
-              <div class="field"><label class="field-label">Date Format</label><select class="field-input" id="dateFormat"><option value="DD/MM/YYYY">DD/MM/YYYY</option><option value="MM/DD/YYYY">MM/DD/YYYY</option><option value="YYYY-MM-DD">YYYY-MM-DD</option></select></div>
-              <div class="field"><label class="field-label">Time Format</label><select class="field-input" id="timeFormat"><option value="12h">12-hour (AM/PM)</option><option value="24h">24-hour</option></select></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel" id="panel-system">
-          <div class="panel-title"><span class="material-symbols-rounded">memory</span>System Information</div>
-          <div class="settings-grid settings-grid-2">
-            <div class="scard">
-              <div class="scard-title">Application</div>
-              <div class="sys-info-row"><span class="sys-info-label">Application</span><span class="sys-info-val">QuickPOS Pro</span></div>
-              <div class="sys-info-row"><span class="sys-info-label">Version</span><span class="sys-info-val">1.0.0</span></div>
-              <div class="sys-info-row"><span class="sys-info-label">Edition</span><span class="sys-info-val">Pro</span></div>
-              <div class="sys-info-row"><span class="sys-info-label">Build</span><span class="sys-info-val">2026.05</span></div>
-            </div>
-            <div class="scard">
-              <div class="scard-title">Storage</div>
-              <div class="sys-info-row"><span class="sys-info-label">Storage Type</span><span class="sys-info-val">SQLite</span></div>
-              <div class="sys-info-row"><span class="sys-info-label">Products</span><span class="sys-info-val" id="sysProducts">-</span></div>
-              <div class="sys-info-row"><span class="sys-info-label">Sales Records</span><span class="sys-info-val" id="sysSales">-</span></div>
-              <div class="sys-info-row"><span class="sys-info-label">Customers</span><span class="sys-info-val" id="sysCustomers">-</span></div>
-              <div class="sys-info-row"><span class="sys-info-label">Cache Size</span><span class="sys-info-val" id="sysCache">-</span></div>
             </div>
             <div class="scard span-2">
               <div class="scard-title">Cashier Hourly Payment Monitor</div>
@@ -217,6 +216,18 @@
         <div class="panel" id="panel-danger">
           <div class="panel-title danger-title"><span class="material-symbols-rounded">warning</span>Danger Zone</div>
           <div class="settings-grid settings-grid-1">
+            <div class="danger-card backup-card">
+              <div class="backup-copy">
+                <div class="danger-card-title">Google Drive Auto Backup</div>
+                <div class="danger-card-desc">Add a Gmail address to create one automatic database backup per day in your Google Drive sync folder.</div>
+                <div class="field backup-email-field">
+                  <label class="field-label">Backup Gmail</label>
+                  <input class="field-input" type="email" id="googleDriveBackupEmail" placeholder="owner@gmail.com" maxlength="80">
+                  <span class="field-hint" id="googleDriveBackupStatus">Daily backup is disabled until Gmail is saved.</span>
+                </div>
+              </div>
+              <button class="danger-action-btn amber" id="googleDriveBackupNowBtn">Backup Now</button>
+            </div>
             <div class="danger-card"><div><div class="danger-card-title">Create Database Backup</div><div class="danger-card-desc">Export a full SQLite backup file you can store safely.</div></div><button class="danger-action-btn amber" id="backupBtn">Backup Now</button></div>
             <div class="danger-card"><div><div class="danger-card-title">Restore Database Backup</div><div class="danger-card-desc">Load a previous backup and restart the app safely.</div></div><button class="danger-action-btn" id="restoreBtn">Restore Backup</button></div>
             <div class="danger-card"><div><div class="danger-card-title">Reset All Settings</div><div class="danger-card-desc">Restore all settings to defaults without deleting sales data.</div></div><button class="danger-action-btn" id="resetSettingsBtn">Reset Settings</button></div>

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -8,6 +8,7 @@ process.env.QUICKPOS_DB_DIR = app.getPath('userData');
 const db = require('./database.js');
 
 const DB_FILE_PATH = path.join(process.env.QUICKPOS_DB_DIR, 'quickpos.db');
+let autoBackupTimer = null;
 
 function createWindow() {
     const mainWindow = new BrowserWindow({
@@ -79,6 +80,109 @@ const closeDbAsync = () => new Promise((resolve, reject) => {
     });
 });
 
+async function getSettingValue(key, fallback = '') {
+    const row = await getAsync('SELECT value FROM settings WHERE key = ?', [key]);
+    return row?.value ?? fallback;
+}
+
+async function saveSettingValue(key, value) {
+    await runAsync('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [key, String(value)]);
+}
+
+function getLocalDateKey(date = new Date()) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function sanitizeFilePart(value) {
+    return String(value || '')
+        .trim()
+        .replace(/[\\/:*?"<>|]/g, '-')
+        .replace(/\s+/g, '-')
+        .slice(0, 80) || 'quickpos';
+}
+
+function findGoogleDriveBackupDir() {
+    const home = os.homedir();
+    const candidates = [
+        path.join(home, 'Google Drive', 'My Drive'),
+        path.join(home, 'Google Drive'),
+        path.join(home, 'My Drive')
+    ];
+
+    for (let code = 67; code <= 90; code += 1) {
+        const letter = String.fromCharCode(code);
+        candidates.push(`${letter}:\\My Drive`);
+        candidates.push(`${letter}:\\Google Drive`);
+    }
+
+    const root = candidates.find((candidate) => fs.existsSync(candidate));
+    if (root) {
+        return { dir: path.join(root, 'QuickPOS Backups'), storage: 'Google Drive' };
+    }
+
+    return {
+        dir: path.join(app.getPath('userData'), 'AutoBackups'),
+        storage: 'Local fallback'
+    };
+}
+
+async function createDatabaseBackupFile(targetDir, email) {
+    await runAsync('PRAGMA wal_checkpoint(FULL)');
+    fs.mkdirSync(targetDir, { recursive: true });
+
+    const now = new Date();
+    const stamp = now.toISOString().replace(/[:.]/g, '-');
+    const emailPart = sanitizeFilePart(email).replace('@', '-at-');
+    const filePath = path.join(targetDir, `quickpos-${emailPart}-${stamp}.db`);
+    fs.copyFileSync(DB_FILE_PATH, filePath);
+    return filePath;
+}
+
+async function runGoogleDriveAutoBackup({ force = false } = {}) {
+    const email = String(await getSettingValue('googleDriveBackupEmail', '')).trim();
+    if (!email) {
+        return { success: false, skipped: true, message: 'Add a Gmail address to enable daily auto backup.' };
+    }
+
+    const todayKey = getLocalDateKey();
+    const lastDate = await getSettingValue('googleDriveBackupLastDate', '');
+    if (!force && lastDate === todayKey) {
+        const lastPath = await getSettingValue('googleDriveBackupLastPath', '');
+        return { success: true, skipped: true, path: lastPath, message: 'Today backup already completed.' };
+    }
+
+    const backupTarget = findGoogleDriveBackupDir();
+    try {
+        const backupPath = await createDatabaseBackupFile(backupTarget.dir, email);
+        const nowIso = new Date().toISOString();
+        await saveSettingValue('googleDriveBackupLastDate', todayKey);
+        await saveSettingValue('googleDriveBackupLastAt', nowIso);
+        await saveSettingValue('googleDriveBackupLastPath', backupPath);
+        await saveSettingValue('googleDriveBackupStorage', backupTarget.storage);
+        await saveSettingValue('googleDriveBackupLastResult', 'success');
+        return { success: true, path: backupPath, storage: backupTarget.storage, lastAt: nowIso };
+    } catch (err) {
+        await saveSettingValue('googleDriveBackupLastResult', `failed: ${err.message}`);
+        throw err;
+    }
+}
+
+function scheduleGoogleDriveAutoBackup() {
+    if (autoBackupTimer) clearInterval(autoBackupTimer);
+
+    const run = () => {
+        runGoogleDriveAutoBackup().catch((err) => {
+            console.error('[AUTO BACKUP] Failed:', err);
+        });
+    };
+
+    setTimeout(run, 5000);
+    autoBackupTimer = setInterval(run, 60 * 60 * 1000);
+}
+
 function hashPassword(password) {
     const salt = crypto.randomBytes(16).toString('hex');
     const hash = crypto.pbkdf2Sync(password, salt, 120000, 64, 'sha512').toString('hex');
@@ -101,6 +205,39 @@ function verifyPassword(stored, plain) {
         return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(computed, 'hex'));
     } catch (_) {
         return false;
+    }
+}
+
+async function ensureDefaultLoginUsers() {
+    const defaults = [
+        ['Nadeesha Perera', 'owner', 'owner@123', 'owner', 1],
+        ['Kasun Fernando', 'cashier1', 'cashier@123', 'cashier', 0]
+    ];
+
+    for (const [name, username, password, role, canViewReports] of defaults) {
+        const existing = await getAsync('SELECT id FROM users WHERE username = ?', [username]);
+        if (existing) continue;
+
+        await runAsync(
+            'INSERT INTO users (name, username, password, role, can_view_reports) VALUES (?, ?, ?, ?, ?)',
+            [name, username, hashPassword(password), role, canViewReports]
+        );
+    }
+}
+
+async function ensureGoogleDriveBackupSettings() {
+    const defaults = {
+        googleDriveBackupEmail: '',
+        googleDriveBackupLastDate: '',
+        googleDriveBackupLastAt: '',
+        googleDriveBackupLastPath: '',
+        googleDriveBackupStorage: '',
+        googleDriveBackupLastResult: ''
+    };
+
+    for (const [key, value] of Object.entries(defaults)) {
+        const row = await getAsync('SELECT key FROM settings WHERE key = ?', [key]);
+        if (!row) await saveSettingValue(key, value);
     }
 }
 
@@ -172,6 +309,16 @@ ipcMain.handle('backup-database', async () => {
     fs.copyFileSync(DB_FILE_PATH, saveResult.filePath);
     return { success: true, path: saveResult.filePath };
 });
+
+ipcMain.handle('run-google-drive-backup-now', async () => runGoogleDriveAutoBackup({ force: true }));
+
+ipcMain.handle('get-google-drive-backup-status', async () => ({
+    email: await getSettingValue('googleDriveBackupEmail', ''),
+    lastAt: await getSettingValue('googleDriveBackupLastAt', ''),
+    lastPath: await getSettingValue('googleDriveBackupLastPath', ''),
+    storage: await getSettingValue('googleDriveBackupStorage', ''),
+    lastResult: await getSettingValue('googleDriveBackupLastResult', '')
+}));
 
 ipcMain.handle('restore-database', async () => {
     const openResult = await dialog.showOpenDialog({
@@ -415,6 +562,7 @@ ipcMain.handle('get-settings', async () => {
 
 ipcMain.handle('save-setting', async (event, key, value) => {
     await runAsync('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [key, value]);
+    if (key === 'googleDriveBackupEmail') scheduleGoogleDriveAutoBackup();
     return { success: true };
 });
 
@@ -804,6 +952,49 @@ ipcMain.handle('export-shift-summary-pdf', async (event, summary) => {
     return { success: true, path: save.filePath };
 });
 
+ipcMain.handle('export-report-pdf', async (event, payload = {}) => {
+    const html = String(payload.html || '').trim();
+    if (!html) throw new Error('Report content is empty.');
+
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const safeName = String(payload.fileName || `quickpos-report-${stamp}.pdf`)
+        .replace(/[\\/:*?"<>|]/g, '-')
+        .replace(/\.pdf$/i, '');
+
+    let targetPath;
+    if (payload.mode === 'view') {
+        const previewDir = path.join(app.getPath('userData'), 'ReportPreviews');
+        fs.mkdirSync(previewDir, { recursive: true });
+        targetPath = path.join(previewDir, `${safeName}.pdf`);
+    } else {
+        const save = await dialog.showSaveDialog({
+            title: 'Save Report PDF',
+            defaultPath: path.join(os.homedir(), 'Documents', `${safeName}.pdf`),
+            filters: [{ name: 'PDF', extensions: ['pdf'] }]
+        });
+        if (save.canceled || !save.filePath) return { success: false, cancelled: true };
+        targetPath = save.filePath;
+    }
+
+    const win = new BrowserWindow({
+        show: false,
+        webPreferences: { nodeIntegration: false, contextIsolation: true }
+    });
+
+    await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    const pdfData = await win.webContents.printToPDF({
+        printBackground: true,
+        pageSize: 'A4',
+        margins: { top: 24, bottom: 24, left: 20, right: 20 }
+    });
+    win.close();
+
+    fs.writeFileSync(targetPath, pdfData);
+    if (payload.mode === 'view') await shell.openPath(targetPath);
+
+    return { success: true, path: targetPath };
+});
+
 ipcMain.handle('record-shift-reconciliation', async (event, payload) => withTransaction(async () => {
     const result = await runAsync(
         `INSERT INTO shift_reconciliations (
@@ -873,6 +1064,9 @@ ipcMain.handle('get-printers', async (event) => {
 
 
 app.whenReady().then(async () => {
+    await ensureDefaultLoginUsers();
+    await ensureGoogleDriveBackupSettings();
+
     // Upgrade any remaining plain-text passwords
     const plainUsers = await allAsync("SELECT id, password FROM users WHERE password NOT LIKE 'pbkdf2$%'");
     for (const u of plainUsers) {
@@ -886,13 +1080,14 @@ app.whenReady().then(async () => {
         const iterations = Number(parts[1]);
         if (parts.length < 4 || isNaN(iterations) || iterations < 1) {
             // Hash is corrupt — reset to a safe default so user can login & change via Settings
-            const defaultPass = u.role === 'owner' ? '123' : '456';
+            const defaultPass = u.role === 'owner' ? 'owner@123' : 'cashier@123';
             console.warn(`[STARTUP] Repaired malformed hash for user: ${u.username} (role: ${u.role}) → reset to default`);
             await runAsync('UPDATE users SET password = ? WHERE id = ?', [hashPassword(defaultPass), u.id]);
         }
     }
 
     createWindow();
+    scheduleGoogleDriveAutoBackup();
 });
 
 app.on('window-all-closed', () => {

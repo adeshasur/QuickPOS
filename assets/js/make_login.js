@@ -24,15 +24,15 @@ document.addEventListener('DOMContentLoaded', () => {
     ownerBtn.addEventListener("click", () => {
         ownerBtn.classList.add("active");
         cashierBtn.classList.remove("active");
-        username.value = "admin";
-        password.value = "123";
+        username.value = "owner";
+        password.value = "owner@123";
     });
 
     cashierBtn.addEventListener("click", () => {
         cashierBtn.classList.add("active");
         ownerBtn.classList.remove("active");
-        username.value = "staff";
-        password.value = "456";
+        username.value = "cashier1";
+        password.value = "cashier@123";
     });
 
     /* =========================

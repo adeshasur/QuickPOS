@@ -24,7 +24,8 @@
     barcodeScanSound: 'false',
     lowStockAlertLevel: '10',
     requireAdminForRefund: 'true',
-    receiptFooter: 'Thank you for shopping with us!'
+    receiptFooter: 'Thank you for shopping with us!',
+    googleDriveBackupEmail: ''
   };
 
   let settings = { ...defaultSettings };
@@ -63,6 +64,7 @@
     document.getElementById('lowStockAlertLevel').value = settings.lowStockAlertLevel || '10';
     document.getElementById('requireAdminForRefund').checked = settings.requireAdminForRefund !== 'false';
     document.getElementById('receiptFooter').value = settings.receiptFooter || 'Thank you for shopping with us!';
+    document.getElementById('googleDriveBackupEmail').value = settings.googleDriveBackupEmail || '';
     document.querySelectorAll('.ver-card').forEach((c) => c.classList.toggle('selected', c.dataset.version === settings.systemVersion));
     // Restore saved printer selection
     const sel = document.getElementById('thermalPrinterName');
@@ -89,6 +91,35 @@
     document.getElementById('sysCustomers').textContent = customers.length;
     document.getElementById('sysCache').textContent = 'SQLite';
     renderCashierHourlyInsight(sales);
+    await refreshGoogleDriveBackupStatus();
+  }
+
+  async function refreshGoogleDriveBackupStatus() {
+    const statusEl = document.getElementById('googleDriveBackupStatus');
+    if (!statusEl || !window.api.getGoogleDriveBackupStatus) return;
+
+    try {
+      const status = await window.api.getGoogleDriveBackupStatus();
+      if (!status.email) {
+        statusEl.textContent = 'Daily backup is disabled until Gmail is saved.';
+        return;
+      }
+
+      if (status.lastAt) {
+        const when = new Date(status.lastAt).toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        statusEl.textContent = `Last backup: ${when} (${status.storage || 'backup folder'})`;
+        return;
+      }
+
+      statusEl.textContent = 'Daily backup is enabled. The next backup will run automatically.';
+    } catch (err) {
+      statusEl.textContent = `Backup status unavailable: ${err.message}`;
+    }
   }
 
   function localDateKey(value) {
@@ -226,10 +257,14 @@
       barcodeScanSound: String(document.getElementById('barcodeScanSound').checked),
       lowStockAlertLevel: String(Math.max(0, parseInt(document.getElementById('lowStockAlertLevel').value || '10', 10) || 10)),
       requireAdminForRefund: String(document.getElementById('requireAdminForRefund').checked),
-      receiptFooter: document.getElementById('receiptFooter').value.trim() || 'Thank you for shopping with us!'
+      receiptFooter: document.getElementById('receiptFooter').value.trim() || 'Thank you for shopping with us!',
+      googleDriveBackupEmail: document.getElementById('googleDriveBackupEmail').value.trim()
     };
 
     if (!next.storeName) return showToast('Store Name is required', 'error');
+    if (next.googleDriveBackupEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(next.googleDriveBackupEmail)) {
+      return showToast('Enter a valid Gmail address for auto backup', 'error');
+    }
 
     settings = next;
     for (const [k, v] of Object.entries(next)) {
@@ -348,6 +383,22 @@
         showToast('Backup created successfully');
       } catch (err) {
         showToast(`Backup failed: ${err.message}`, 'error');
+      }
+    });
+
+    document.getElementById('googleDriveBackupNowBtn').addEventListener('click', async () => {
+      const email = document.getElementById('googleDriveBackupEmail').value.trim();
+      if (!email) return showToast('Add and save a Gmail address first', 'error');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter a valid Gmail address', 'error');
+
+      try {
+        await saveKV('googleDriveBackupEmail', email);
+        settings.googleDriveBackupEmail = email;
+        const result = await window.api.runGoogleDriveBackupNow();
+        await refreshGoogleDriveBackupStatus();
+        showToast(result.storage === 'Google Drive' ? 'Google Drive backup created' : 'Backup created in local fallback folder');
+      } catch (err) {
+        showToast(`Google Drive backup failed: ${err.message}`, 'error');
       }
     });
 

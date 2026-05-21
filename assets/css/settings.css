@@ -218,6 +218,10 @@
 .danger-action-btn:hover{background:var(--border)}
 .danger-action-btn.amber{background:#fff7ed;border-color:#fdba74;color:#9a3412}
 .danger-action-btn.amber:hover{background:#fb923c;color:#fff;border-color:#fb923c}
+.backup-card{align-items:flex-end}
+.backup-copy{display:flex;flex-direction:column;gap:10px;flex:1;min-width:0}
+.backup-email-field{max-width:420px}
+.backup-email-field .field-hint{line-height:1.45}
 
 .toast{position:fixed;bottom:30px;right:30px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:14px 18px;font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.1);z-index:999;transform:translateY(90px);opacity:0;transition:.3s}
 .toast.show{transform:translateY(0);opacity:1}
