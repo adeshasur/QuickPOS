@@ -26,6 +26,7 @@
       </div>
 
       <div class="ops-grid">
+        <!-- Row 1: Short Cards -->
         <section class="ops-card accent-blue">
           <div class="ops-title"><i class="fa-solid fa-truck-field"></i> Supplier / GRN</div>
           <div class="ops-fields">
@@ -35,6 +36,24 @@
           </div>
         </section>
 
+        <section class="ops-card accent-success">
+          <div class="ops-title"><i class="fa-solid fa-cash-register"></i> Till Cash In / Out</div>
+          <div class="ops-fields">
+            <div class="ops-row">
+              <select id="tillType" class="field-input"><option value="cash_in">Cash In</option><option value="cash_out">Cash Out</option><option value="petty_cash">Petty Cash</option></select>
+              <input id="tillAmount" class="field-input" type="number" min="0" step="0.01" placeholder="Amount">
+            </div>
+            <input id="tillReason" class="field-input" placeholder="Reason">
+            <button id="recordTillBtn" class="ops-btn">Record Till Movement</button>
+          </div>
+        </section>
+
+        <section class="ops-card accent-slate">
+          <div class="ops-title"><i class="fa-solid fa-receipt"></i> Held Bills</div>
+          <div id="heldBillsList" class="ops-list">Loading...</div>
+        </section>
+
+        <!-- Row 2: Medium Cards -->
         <section class="ops-card accent-purple">
           <div class="ops-title"><i class="fa-solid fa-percent"></i> Promotion / Discount Rule</div>
           <div class="ops-fields">
@@ -61,38 +80,24 @@
           </div>
         </section>
 
-        <section class="ops-card accent-danger">
-          <div class="ops-title"><i class="fa-solid fa-rotate-left"></i> Return / Void</div>
+        <section class="ops-card accent-teal">
+          <div class="ops-title"><i class="fa-solid fa-right-left"></i> Branch Transfer</div>
           <div class="ops-fields">
-            <input id="voidBillId" class="field-input" placeholder="Bill ID to void">
-            <input id="voidReason" class="field-input" placeholder="Reason">
-            <button id="voidBillBtn" class="ops-btn danger">Void Bill</button>
-            <div class="ops-divider"></div>
-            <input id="returnBillId" class="field-input" placeholder="Bill ID to return/restock">
-            <input id="returnReason" class="field-input" placeholder="Return reason">
-            <button id="loadReturnBillBtn" class="ops-btn">Load Bill Items</button>
-            <div id="returnItemsList" class="ops-list compact">No bill loaded</div>
-            <button id="returnBillBtn" class="ops-btn">Record Selected Return</button>
-          </div>
-        </section>
-
-        <section class="ops-card accent-success">
-          <div class="ops-title"><i class="fa-solid fa-cash-register"></i> Till Cash In / Out</div>
-          <div class="ops-fields">
+            <select id="transferProduct" class="field-input"></select>
             <div class="ops-row">
-              <select id="tillType" class="field-input"><option value="cash_in">Cash In</option><option value="cash_out">Cash Out</option><option value="petty_cash">Petty Cash</option></select>
-              <input id="tillAmount" class="field-input" type="number" min="0" step="0.01" placeholder="Amount">
+              <select id="transferFromBranch" class="field-input"></select>
+              <select id="transferToBranch" class="field-input"></select>
             </div>
-            <input id="tillReason" class="field-input" placeholder="Reason">
-            <button id="recordTillBtn" class="ops-btn">Record Till Movement</button>
+            <div class="ops-row">
+              <input id="transferQty" class="field-input" type="number" min="0" step="0.01" placeholder="Qty">
+              <select id="transferStatus" class="field-input"><option value="pending">Pending</option><option value="completed">Completed</option></select>
+            </div>
+            <input id="transferNote" class="field-input" placeholder="Transfer note">
+            <button id="recordTransferBtn" class="ops-btn">Record Transfer</button>
           </div>
         </section>
 
-        <section class="ops-card accent-slate">
-          <div class="ops-title"><i class="fa-solid fa-receipt"></i> Held Bills</div>
-          <div id="heldBillsList" class="ops-list">Loading...</div>
-        </section>
-
+        <!-- Row 3: Tall Cards -->
         <section class="ops-card accent-indigo">
           <div class="ops-title"><i class="fa-solid fa-scale-balanced"></i> Tax / Branch</div>
           <div class="ops-fields">
@@ -110,20 +115,18 @@
           </div>
         </section>
 
-        <section class="ops-card accent-teal">
-          <div class="ops-title"><i class="fa-solid fa-right-left"></i> Branch Transfer</div>
+        <section class="ops-card accent-danger">
+          <div class="ops-title"><i class="fa-solid fa-rotate-left"></i> Return / Void</div>
           <div class="ops-fields">
-            <select id="transferProduct" class="field-input"></select>
-            <div class="ops-row">
-              <select id="transferFromBranch" class="field-input"></select>
-              <select id="transferToBranch" class="field-input"></select>
-            </div>
-            <div class="ops-row">
-              <input id="transferQty" class="field-input" type="number" min="0" step="0.01" placeholder="Qty">
-              <select id="transferStatus" class="field-input"><option value="pending">Pending</option><option value="completed">Completed</option></select>
-            </div>
-            <input id="transferNote" class="field-input" placeholder="Transfer note">
-            <button id="recordTransferBtn" class="ops-btn">Record Transfer</button>
+            <input id="voidBillId" class="field-input" placeholder="Bill ID to void">
+            <input id="voidReason" class="field-input" placeholder="Reason">
+            <button id="voidBillBtn" class="ops-btn danger">Void Bill</button>
+            <div class="ops-divider"></div>
+            <input id="returnBillId" class="field-input" placeholder="Bill ID to return/restock">
+            <input id="returnReason" class="field-input" placeholder="Return reason">
+            <button id="loadReturnBillBtn" class="ops-btn">Load Bill Items</button>
+            <div id="returnItemsList" class="ops-list compact">No bill loaded</div>
+            <button id="returnBillBtn" class="ops-btn">Record Selected Return</button>
           </div>
         </section>
 
