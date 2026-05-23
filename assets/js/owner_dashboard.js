@@ -1,6 +1,16 @@
 (function () {
   'use strict';
 
+  function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   const fmt = window.fmtLKR;
   const fmtK = window.fmtLKR;
   const fmtCurrency = (n) => window.fmtLKR(Number(n || 0));
@@ -53,7 +63,7 @@
   }
 
   function getMetrics(list) {
-    const m = { revenue: 0, profit: 0, items: 0, tx: list.length, cash: 0, card: 0, credit: 0, hourSales: new Array(24).fill(0), catSales: {} };
+    const m = { revenue: 0, profit: 0, items: 0, tx: list.length, cash: 0, card: 0, credit: 0, hourSales: new Array(24).fill(0), catSales: new Map() };
     list.forEach((s) => {
       m.revenue += Number(s.total_amount || 0);
       const method = (s.payment_method || '').toLowerCase();
@@ -75,7 +85,7 @@
         }
 
         const catName = p ? categoryMap.get(p.category_id) : 'General';
-        m.catSales[catName] = (m.catSales[catName] || 0) + Number(i.subtotal || 0);
+        m.catSales.set(catName, (m.catSales.get(catName) || 0) + Number(i.subtotal || 0));
       });
     });
     m.avg = m.tx > 0 ? m.revenue / m.tx : 0;
@@ -89,8 +99,8 @@
     if (!el || !labelsEl) return;
 
     const businessHours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    const todayHourSales = businessHours.map(h => t.hourSales[h] || 0);
-    const yesterdayHourSales = businessHours.map(h => y.hourSales[h] || 0);
+    const todayHourSales = businessHours.map(h => t.hourSales.at(h) || 0);
+    const yesterdayHourSales = businessHours.map(h => y.hourSales.at(h) || 0);
     const max = Math.max(...todayHourSales, ...yesterdayHourSales, 1);
     const hoursToRender = [8, 11, 14, 17, 20];
     
@@ -102,8 +112,8 @@
       </div>
       <div class="chart-bars">
         ${businessHours.map((h, idx) => {
-          const tVal = t.hourSales[h] || 0;
-          const yVal = y.hourSales[h] || 0;
+          const tVal = t.hourSales.at(h) || 0;
+          const yVal = y.hourSales.at(h) || 0;
           const tPct = (tVal / max) * 100;
           const yPct = (yVal / max) * 100;
           
@@ -113,26 +123,26 @@
           
           return `
             <div class="hbar-group">
-              <div class="hbar yesterday" style="height:${yVisualPct}%"></div>
-              <div class="hbar today" style="height:${tVisualPct}%"></div>
+              <div class="hbar yesterday" style="height:${escapeHTML(String(yVisualPct))}%"></div>
+              <div class="hbar today" style="height:${escapeHTML(String(tVisualPct))}%"></div>
               <div class="hbar-tip">
-                <strong style="display:block;margin-bottom:4px;border-bottom:1px solid var(--border);padding-bottom:4px;font-size:12px;">${h}:00 Interval</strong>
-                <span style="display:flex;align-items:center;gap:6px;font-weight:600;margin-bottom:2px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--primary);display:inline-block;"></span>Today: ${fmt(tVal)}</span>
-                <span style="display:flex;align-items:center;gap:6px;font-weight:600;color:var(--text-light);"><span style="width:8px;height:8px;border-radius:50%;background:#cbd5e1;display:inline-block;"></span>Yest: ${fmt(yVal)}</span>
+                <strong style="display:block;margin-bottom:4px;border-bottom:1px solid var(--border);padding-bottom:4px;font-size:12px;">${escapeHTML(String(h))}:00 Interval</strong>
+                <span style="display:flex;align-items:center;gap:6px;font-weight:600;margin-bottom:2px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--primary);display:inline-block;"></span>Today: ${escapeHTML(fmt(tVal))}</span>
+                <span style="display:flex;align-items:center;gap:6px;font-weight:600;color:var(--text-light);"><span style="width:8px;height:8px;border-radius:50%;background:#cbd5e1;display:inline-block;"></span>Yest: ${escapeHTML(fmt(yVal))}</span>
               </div>
             </div>`;
         }).join('')}
       </div>
     `;
 
-    labelsEl.innerHTML = hoursToRender.map(h => `<div class="hl">${h}h</div>`).join('<div style="flex:1"></div>');
+    labelsEl.innerHTML = hoursToRender.map(h => `<div class="hl">${escapeHTML(String(h))}h</div>`).join('<div style="flex:1"></div>');
   }
 
   function renderCatChart(m) {
     const el = document.getElementById('catChart');
     if (!el) return;
 
-    const cats = Object.entries(m.catSales).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const cats = Array.from(m.catSales.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
     const max = Math.max(...cats.map(c => c[1]), 1);
 
     if (cats.length === 0) {
@@ -145,9 +155,9 @@
       const colors = ['#1D2DBF', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
       return `
         <div class="cat-row">
-          <div class="cat-name">${name}</div>
-          <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${pct}%;background:${colors[i % colors.length]}"></div></div>
-          <div class="cat-val">${fmt(val)}</div>
+          <div class="cat-name">${escapeHTML(name)}</div>
+          <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${escapeHTML(String(pct))}%;background:${escapeHTML(colors.at(i % colors.length))}"></div></div>
+          <div class="cat-val">${escapeHTML(fmt(val))}</div>
         </div>
       `;
     }).join('');
@@ -207,8 +217,8 @@
     const profitTrendBadgeEl = document.getElementById('kpiProfitTrendBadge');
     if (profitTrendBadgeEl) {
       profitTrendBadgeEl.innerHTML = `
-        <span class="kpi-trend-badge ${diff >= 0 ? 'up' : 'down'}" title="Today: ${fmtCurrency(todayProfit)} | Yesterday: ${fmtCurrency(yesterdayProfit)}">
-          <i class="fa-solid ${diff >= 0 ? 'fa-caret-up' : 'fa-caret-down'}"></i> ${pctChangeText}
+        <span class="kpi-trend-badge ${escapeHTML(diff >= 0 ? 'up' : 'down')}" title="Today: ${escapeHTML(fmtCurrency(todayProfit))} | Yesterday: ${escapeHTML(fmtCurrency(yesterdayProfit))}">
+          <i class="fa-solid ${escapeHTML(diff >= 0 ? 'fa-caret-up' : 'fa-caret-down')}"></i> ${escapeHTML(pctChangeText)}
         </span>
       `;
     }
@@ -252,7 +262,7 @@
     const lowItems = products.filter((p) => Number(p.current_stock || 0) <= Number(p.alert_level || 0));
     document.getElementById('reorderBadge').textContent = `${lowItems.length} items`;
     document.getElementById('reorderList').innerHTML = lowItems.length
-      ? lowItems.map((p) => `<div class="alert-item"><div class="alert-info"><div class="alert-name">${p.name}</div><div class="alert-meta">Stock low</div></div><span class="alert-qty warn">${p.current_stock} left</span></div>`).join('')
+      ? lowItems.map((p) => `<div class="alert-item"><div class="alert-info"><div class="alert-name">${escapeHTML(p.name)}</div><div class="alert-meta">Stock low</div></div><span class="alert-qty warn">${escapeHTML(String(p.current_stock))} left</span></div>`).join('')
       : '<div style="text-align:center;padding:30px 0;color:var(--green)">All stock levels are healthy</div>';
 
     // Expired / Expiring Items Alerts populating
@@ -278,12 +288,12 @@
           let statusClass = daysLeft <= 0 ? 'critical' : 'warn';
           let metaText = daysLeft <= 0 ? 'Expired' : `${daysLeft} days left`;
           return `
-            <div class="alert-item ${statusClass}">
+            <div class="alert-item ${escapeHTML(statusClass)}">
               <div class="alert-info">
-                <div class="alert-name">${p.name}</div>
-                <div class="alert-meta">Expiry: ${p.expiry_date || 'N/A'} (${metaText})</div>
+                <div class="alert-name">${escapeHTML(p.name)}</div>
+                <div class="alert-meta">Expiry: ${escapeHTML(p.expiry_date || 'N/A')} (${escapeHTML(metaText)})</div>
               </div>
-              <span class="alert-qty ${statusClass}">${p.current_stock} left</span>
+              <span class="alert-qty ${escapeHTML(statusClass)}">${escapeHTML(String(p.current_stock))} left</span>
             </div>
           `;
         }).join('');
@@ -305,11 +315,11 @@
     document.getElementById('topItemsList').innerHTML = top.length
       ? top.map(([name, qty], i) => `
           <div class="top-item">
-            <span class="rank r${i < 3 ? i + 1 : ''}">${i + 1}</span>
+            <span class="rank r${escapeHTML(i < 3 ? String(i + 1) : '')}">${escapeHTML(String(i + 1))}</span>
             <div class="item-info">
-              <div class="item-name">${name}</div>
+              <div class="item-name">${escapeHTML(name)}</div>
             </div>
-            <div class="item-qty">${qty} <span style="font-size:10px;color:var(--text3)">sold</span></div>
+            <div class="item-qty">${escapeHTML(String(qty))} <span style="font-size:10px;color:var(--text3)">sold</span></div>
           </div>
         `).join('')
       : '<div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">No sales found for this period</div>';
@@ -318,18 +328,19 @@
     const cashierContainer = document.getElementById('cashierPerformanceList');
     if (cashierContainer) {
       const todaySales = sales.filter((s) => inRange(s.timestamp, 'today'));
-      const cashierData = {};
+      const cashierMap = new Map();
       
       todaySales.forEach((s) => {
         const cashier = s.cashier_name || 'System';
-        if (!cashierData[cashier]) {
-          cashierData[cashier] = { count: 0, revenue: 0 };
+        if (!cashierMap.has(cashier)) {
+          cashierMap.set(cashier, { count: 0, revenue: 0 });
         }
-        cashierData[cashier].count += 1;
-        cashierData[cashier].revenue += Number(s.total_amount || 0);
+        const data = cashierMap.get(cashier);
+        data.count += 1;
+        data.revenue += Number(s.total_amount || 0);
       });
       
-      const cashierList = Object.entries(cashierData).map(([name, data]) => {
+      const cashierList = Array.from(cashierMap.entries()).map(([name, data]) => {
         return {
           name,
           count: data.count,
@@ -351,18 +362,18 @@
             </thead>
             <tbody>
               ${cashierList.map((c) => {
-                const initials = c.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                const initials = c.name.split(' ').map(n => n.at(0)).join('').toUpperCase().slice(0, 2);
                 return `
                   <tr>
                     <td>
                       <div class="cashier-avatar-badge">
-                        <div class="cashier-avatar-circle">${initials}</div>
-                        <span>${c.name}</span>
+                        <div class="cashier-avatar-circle">${escapeHTML(initials)}</div>
+                        <span>${escapeHTML(c.name)}</span>
                       </div>
                     </td>
-                    <td style="text-align:right" class="cashier-metrics-val">${c.count}</td>
-                    <td style="text-align:right" class="cashier-metrics-val">${fmt(c.revenue)}</td>
-                    <td style="text-align:right" class="cashier-metrics-val">${fmt(c.avg)}</td>
+                    <td style="text-align:right" class="cashier-metrics-val">${escapeHTML(String(c.count))}</td>
+                    <td style="text-align:right" class="cashier-metrics-val">${escapeHTML(fmt(c.revenue))}</td>
+                    <td style="text-align:right" class="cashier-metrics-val">${escapeHTML(fmt(c.avg))}</td>
                   </tr>
                 `;
               }).join('')}
@@ -458,9 +469,9 @@
     };
 
     const bestHourIndex = (todayMetrics.hourSales || []).reduce((best, value, index, rows) => (
-      Number(value || 0) > Number(rows[best] || 0) ? index : best
+      Number(value || 0) > Number(rows.at(best) || 0) ? index : best
     ), 0);
-    const bestHourValue = Number((todayMetrics.hourSales || [])[bestHourIndex] || 0);
+    const bestHourValue = Number((todayMetrics.hourSales || []).at(bestHourIndex) || 0);
     setText('execPeakHour', bestHourValue > 0 ? `${String(bestHourIndex).padStart(2, '0')}:00` : '--');
     setText('execPeakHourMeta', bestHourValue > 0 ? fmtCurrency(bestHourValue) : 'Waiting for sales');
 
@@ -521,9 +532,9 @@
 
     queue.innerHTML = items.length
       ? items.slice(0, 6).map((item) => `
-          <div class="action-item ${item.level}">
-            <span>${item.label}</span>
-            <small>${item.hint}</small>
+          <div class="action-item ${escapeHTML(item.level)}">
+            <span>${escapeHTML(item.label)}</span>
+            <small>${escapeHTML(item.hint)}</small>
           </div>
         `).join('')
       : '<div class="action-item good"><span>Everything looks controlled</span><small>No urgent owner action right now</small></div>';
@@ -550,8 +561,8 @@
       ? slow.map(p => `
           <div class="slow-item">
             <span class="slow-badge">3+ Days</span>
-            <div class="slow-name">${p.name}</div>
-            <div style="font-size:12px;color:var(--text3)">Stock: ${p.current_stock}</div>
+            <div class="slow-name">${escapeHTML(p.name)}</div>
+            <div style="font-size:12px;color:var(--text3)">Stock: ${escapeHTML(String(p.current_stock))}</div>
           </div>
         `).join('')
       : '<div style="text-align:center;width:100%;padding:20px;color:var(--text3)">All items are moving well</div>';
@@ -612,13 +623,12 @@
     };
     categoryMap = new Map(categories.map(c => [c.id, c.name]));
     const details = await Promise.all(sales.map((s) => window.api.getSaleDetails(s.id)));
-    saleItemsMap = new Map(sales.map((s, idx) => [s.id, details[idx] || []]));
+    saleItemsMap = new Map(sales.map((s, idx) => [s.id, details.at(idx) || []]));
   }
-
 
   document.addEventListener('DOMContentLoaded', async () => {
     const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
-    if (!user) {
+    if (!user || !user.role) {
       window.location.href = 'login.html';
       return;
     }
