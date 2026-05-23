@@ -956,12 +956,22 @@
         const product = await window.api.searchProductByBarcode(code);
         if (product) {
           const cached = upsertProduct(product);
-          addToCart(cached.id, 1, Number(cached.selling_price || 0), 'scan');
+          if (product.isScale) {
+            addToCart(cached.id, product.parsedQuantity, Number(cached.selling_price || 0), 'scan');
+          } else if (Number(cached.is_weighted || 0) === 1) {
+            openCustomize(cached.id);
+          } else {
+            addToCart(cached.id, 1, Number(cached.selling_price || 0), 'scan');
+          }
         } else {
           const matches = await window.api.searchProducts({ query: code, limit: 1 });
           const fallback = matches?.length ? upsertProduct(matches[0]) : null;
           if (fallback) {
-            addToCart(fallback.id, 1, Number(fallback.selling_price || 0), 'scan');
+            if (Number(fallback.is_weighted || 0) === 1) {
+              openCustomize(fallback.id);
+            } else {
+              addToCart(fallback.id, 1, Number(fallback.selling_price || 0), 'scan');
+            }
           } else {
             notify(`Barcode "${code}" not found`, 'warning');
           }

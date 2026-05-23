@@ -4,8 +4,13 @@
   const fmt = window.fmtLKR || ((n) => `LKR ${Number(n || 0).toFixed(2)}`);
   let products = [];
   let branches = [];
+  let suppliers = [];
+  let purchaseInvoices = [];
   let returnSale = null;
   let stockCountLines = [];
+  let grnLines = [];
+  let shiftPreviewData = null;
+  let reorderRows = [];
 
   function userName() {
     try {
@@ -25,6 +30,19 @@
     if (window.quickposDataChanged) window.quickposDataChanged();
   }
 
+  function bindTabs() {
+    document.querySelectorAll('.ops-tab-btn').forEach((button) => {
+      button.addEventListener('click', () => {
+        const target = button.dataset.tab;
+        if (!target) return;
+        document.querySelectorAll('.ops-tab-btn').forEach((btn) => btn.classList.toggle('active', btn === button));
+        document.querySelectorAll('.ops-tab-content').forEach((panel) => {
+          panel.classList.toggle('active', panel.id === `tab-${target}`);
+        });
+      });
+    });
+  }
+
   function fillProductSelect(id) {
     const select = document.getElementById(id);
     if (!select) return;
@@ -35,6 +53,118 @@
     const select = document.getElementById(id);
     if (!select) return;
     select.innerHTML = `<option value="">${label}</option>` + branches.map((b) => `<option value="${b.id}">${b.name}</option>`).join('');
+  }
+
+  function fillSupplierSelect(id, label = 'Select supplier') {
+    const select = document.getElementById(id);
+    if (!select) return;
+    select.innerHTML = `<option value="">${label}</option>` + suppliers.map((s) => `<option value="${s.id}">${s.name}${Number(s.balance || 0) > 0 ? ` · due ${fmt(s.balance)}` : ''}</option>`).join('');
+  }
+
+  function fillInvoiceSelect() {
+    const select = document.getElementById('payInvoice');
+    if (!select) return;
+    const supplierId = Number(document.getElementById('paySupplier')?.value || 0);
+    const rows = purchaseInvoices.filter((invoice) => Number(invoice.due_amount || 0) > 0 && (!supplierId || Number(invoice.supplier_id || 0) === supplierId));
+    select.innerHTML = '<option value="">General supplier payment</option>' + rows.map((invoice) => `<option value="${invoice.id}">${invoice.grn_no || invoice.invoice_no || invoice.id} · due ${fmt(invoice.due_amount || 0)}</option>`).join('');
+  }
+
+  function renderGrnLines() {
+    const list = document.getElementById('grnLines');
+    if (!list) return;
+    if (!grnLines.length) {
+      list.innerHTML = '<div class="ops-list-row"><span>No GRN lines</span></div>';
+      return;
+    }
+    list.innerHTML = grnLines.map((line, index) => `
+      <div class="ops-list-row">
+        <span>${line.name} · ${line.quantity} x ${fmt(line.costPrice)} · sell ${fmt(line.sellingPrice)}</span>
+        <button class="ops-btn" data-remove-grn="${index}">Remove</button>
+      </div>
+    `).join('');
+    list.querySelectorAll('[data-remove-grn]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        grnLines.splice(Number(btn.dataset.removeGrn), 1);
+        renderGrnLines();
+      });
+    });
+  }
+
+  function renderShiftPreview(data) {
+    const list = document.getElementById('shiftPreview');
+    if (!list) return;
+    if (!data) {
+      list.innerHTML = '<div class="ops-list-row"><span>No shift preview</span></div>';
+      return;
+    }
+    const opening = Number(document.getElementById('openingFloat')?.value || 0);
+    const expected = opening + Number(data.cashTotal || 0) + Number(data.cashIn || 0) - Number(data.cashOut || 0);
+    const actual = Number(document.getElementById('actualDrawer')?.value || expected);
+    const variance = actual - expected;
+    list.innerHTML = [
+      ['Bills', data.billCount],
+      ['Sales', fmt(data.revenueTotal)],
+      ['Cash', fmt(data.cashTotal)],
+      ['Card', fmt(data.cardTotal)],
+      ['Credit', fmt(data.creditTotal)],
+      ['Till Cash In/Out', `${fmt(data.cashIn)} / ${fmt(data.cashOut)}`],
+      ['Expected Drawer', fmt(expected)],
+      ['Variance', fmt(variance)]
+    ].map(([label, value]) => `<div class="ops-list-row"><span>${label}</span><strong>${value}</strong></div>`).join('');
+  }
+
+  function renderReorderRows(rows) {
+    reorderRows = rows || [];
+    const body = document.getElementById('reorderTableBody');
+    const badge = document.getElementById('reorderCountBadge');
+    if (badge) badge.textContent = `${reorderRows.length} items`;
+    if (!body) return;
+    if (!reorderRows.length) {
+      body.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">No reorder alerts</td></tr>';
+      return;
+    }
+    body.innerHTML = reorderRows.slice(0, 80).map((p) => `
+      <tr>
+        <td style="padding:7px 4px;">${p.name}</td>
+        <td style="padding:7px 4px;text-align:center;">${Number(p.current_stock || 0)}</td>
+        <td style="padding:7px 4px;text-align:center;">${Number(p.alert_level || 0)}</td>
+        <td style="padding:7px 4px;text-align:center;">${Number(p.reorder_qty || 0)}</td>
+        <td style="padding:7px 4px;">${p.last_supplier_name || '-'}</td>
+      </tr>
+    `).join('');
+  }
+
+  async function loadReorderRows() {
+    renderReorderRows(window.api.getReorderList ? await window.api.getReorderList() : []);
+  }
+
+  async function loadScaleRules() {
+    const list = document.getElementById('scaleRulesList');
+    if (!list || !window.api.getScaleBarcodeRules) return;
+    const rows = await window.api.getScaleBarcodeRules();
+    list.innerHTML = rows.length ? rows.map((rule) => `
+      <div class="ops-list-row">
+        <span>${rule.prefix} · ${rule.product_digits}/${rule.value_digits} · ${rule.value_type}</span>
+        <button class="ops-btn" data-delete-scale="${rule.id}">Delete</button>
+      </div>
+    `).join('') : '<div class="ops-list-row"><span>No scale rules</span></div>';
+    list.querySelectorAll('[data-delete-scale]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        await window.api.deleteScaleBarcodeRule(Number(btn.dataset.deleteScale));
+        toast('Scale barcode rule deleted');
+        await loadScaleRules();
+      });
+    });
+  }
+
+  function orderSheetText() {
+    return reorderRows.map((p) => [
+      p.name,
+      `stock ${Number(p.current_stock || 0)}`,
+      `safety ${Number(p.alert_level || 0)}`,
+      `order ${Number(p.reorder_qty || 0) || Math.max(0, Number(p.alert_level || 0) - Number(p.current_stock || 0))}`,
+      p.last_supplier_name || ''
+    ].join('\t')).join('\n');
   }
 
   function renderReturnItems(sale) {
@@ -75,7 +205,7 @@
   }
 
   async function loadSummary() {
-    const [suppliers, promotions, adjustments, heldBills, voids, taxes, branches, counts, deadStock, till] = await Promise.all([
+    const [supplierRows, promotions, adjustments, heldBills, voids, taxes, branchRows, counts, deadStock, till, purchases, payments, backup] = await Promise.all([
       window.api.getSuppliers(),
       window.api.getPromotions(),
       window.api.getStockAdjustments(),
@@ -85,8 +215,26 @@
       window.api.getBranches(),
       window.api.getStockCounts(),
       window.api.getDeadStockReport(),
-      window.api.getTillMovements()
+      window.api.getTillMovements(),
+      window.api.getPurchaseInvoices ? window.api.getPurchaseInvoices() : Promise.resolve([]),
+      window.api.getSupplierPayments ? window.api.getSupplierPayments() : Promise.resolve([]),
+      window.api.getGoogleDriveBackupStatus ? window.api.getGoogleDriveBackupStatus() : Promise.resolve({})
     ]);
+
+    suppliers = supplierRows || [];
+    branches = branchRows || [];
+    purchaseInvoices = purchases || [];
+    fillSupplierSelect('grnSupplier');
+    fillSupplierSelect('paySupplier');
+    fillInvoiceSelect();
+
+    const backupStatus = document.getElementById('backupStatus');
+    if (backupStatus) {
+      backupStatus.innerHTML = `
+        <div class="ops-list-row"><span>Storage</span><strong>${backup.storage || 'Not configured'}</strong></div>
+        <div class="ops-list-row"><span>Last result</span><strong>${backup.lastResult || 'No backup yet'}</strong></div>
+      `;
+    }
 
     document.getElementById('heldBillsList').innerHTML = heldBills.length
       ? heldBills.slice(0, 6).map((h) => `<div class="ops-list-row"><span>${h.hold_code}</span><button class="ops-btn" data-delete-hold="${h.id}">Clear</button></div>`).join('')
@@ -94,6 +242,9 @@
 
     document.getElementById('opsSummary').innerHTML = [
       ['Suppliers', suppliers.length],
+      ['Supplier Due', fmt(suppliers.reduce((sum, s) => sum + Number(s.balance || 0), 0))],
+      ['GRNs', purchases.length],
+      ['Supplier Payments', payments.length],
       ['Promotions', promotions.length],
       ['Stock Adjustments', adjustments.length],
       ['Held Bills', heldBills.length],
@@ -128,11 +279,21 @@
     }
 
     Components.init({ title: 'Supermarket Operations' });
+    bindTabs();
     products = await window.api.getProducts();
+    suppliers = await window.api.getSuppliers();
     branches = await window.api.getBranches();
-    ['promoProduct', 'adjustProduct', 'transferProduct', 'stockCountProduct'].forEach(fillProductSelect);
+    purchaseInvoices = window.api.getPurchaseInvoices ? await window.api.getPurchaseInvoices() : [];
+    ['promoProduct', 'adjustProduct', 'transferProduct', 'stockCountProduct', 'grnProduct'].forEach(fillProductSelect);
     fillBranchSelect('transferFromBranch', 'From branch');
     fillBranchSelect('transferToBranch', 'To branch');
+    fillSupplierSelect('grnSupplier');
+    fillSupplierSelect('paySupplier');
+    fillInvoiceSelect();
+    renderGrnLines();
+    renderShiftPreview(null);
+    await loadReorderRows();
+    await loadScaleRules();
 
     document.getElementById('saveSupplierBtn').addEventListener('click', async () => {
       await window.api.saveSupplier({ name: supplierName.value.trim(), phone: supplierPhone.value.trim(), userName: userName() });
@@ -140,6 +301,86 @@
       supplierPhone.value = '';
       toast('Supplier saved');
       dataChanged();
+      suppliers = await window.api.getSuppliers();
+      fillSupplierSelect('grnSupplier');
+      fillSupplierSelect('paySupplier');
+      await loadSummary();
+    });
+
+    document.getElementById('copyOrderSheetBtn').addEventListener('click', async () => {
+      const text = orderSheetText();
+      if (!text) {
+        toast('No reorder rows to copy', 'warning');
+        return;
+      }
+      await navigator.clipboard.writeText(text);
+      toast('Reorder sheet copied');
+    });
+
+    document.getElementById('printOrderSheetBtn').addEventListener('click', async () => {
+      const html = `
+        <h1>Reorder Sheet</h1>
+        <table>
+          <thead><tr><th>Product</th><th>Stock</th><th>Safety</th><th>Order</th><th>Supplier</th></tr></thead>
+          <tbody>${reorderRows.map((p) => `<tr><td>${p.name}</td><td>${Number(p.current_stock || 0)}</td><td>${Number(p.alert_level || 0)}</td><td>${Number(p.reorder_qty || 0)}</td><td>${p.last_supplier_name || ''}</td></tr>`).join('')}</tbody>
+        </table>
+      `;
+      await window.api.exportReportPdf({ title: 'Reorder Sheet', html, mode: 'save' });
+      toast('Reorder sheet PDF exported');
+    });
+
+    document.getElementById('addGrnLineBtn').addEventListener('click', () => {
+      const product = products.find((p) => Number(p.id) === Number(grnProduct.value));
+      if (!product) {
+        toast('Select a product for the GRN line', 'warning');
+        return;
+      }
+      const quantity = Number(grnQty.value || 0);
+      const costPrice = Number(grnCost.value || 0);
+      const sellingPrice = Number(grnSell.value || product.selling_price || 0);
+      if (quantity <= 0) {
+        toast('Received quantity must be greater than zero', 'warning');
+        return;
+      }
+      grnLines.push({
+        productId: product.id,
+        name: product.name,
+        quantity,
+        costPrice,
+        sellingPrice,
+        expiryDate: grnExpiry.value || null
+      });
+      grnQty.value = '';
+      grnCost.value = '';
+      grnSell.value = '';
+      grnExpiry.value = '';
+      renderGrnLines();
+    });
+
+    document.getElementById('saveGrnBtn').addEventListener('click', async () => {
+      if (!grnLines.length) {
+        toast('Add at least one GRN line', 'warning');
+        return;
+      }
+      const result = await window.api.savePurchaseInvoice({
+        supplierId: Number(grnSupplier.value || 0) || null,
+        grnNo: grnNo.value.trim(),
+        invoiceNo: invoiceNo.value.trim(),
+        invoiceDate: invoiceDate.value || null,
+        paidAmount: Number(grnPaid.value || 0),
+        items: grnLines,
+        userName: userName()
+      });
+      toast(`GRN saved: ${result.grnNo} · due ${fmt(result.dueAmount || 0)}`);
+      dataChanged();
+      grnLines = [];
+      renderGrnLines();
+      grnNo.value = '';
+      invoiceNo.value = '';
+      grnPaid.value = '';
+      products = await window.api.getProducts();
+      purchaseInvoices = await window.api.getPurchaseInvoices();
+      await loadReorderRows();
       await loadSummary();
     });
 
@@ -167,7 +408,21 @@
       });
       toast('Stock adjustment recorded', 'warning');
       dataChanged();
+      await loadReorderRows();
       await loadSummary();
+    });
+
+    document.getElementById('saveScaleRuleBtn').addEventListener('click', async () => {
+      await window.api.saveScaleBarcodeRule({
+        prefix: scalePrefix.value.trim(),
+        productDigits: Number(scaleProductDigits.value || 5),
+        valueDigits: Number(scaleValueDigits.value || 5),
+        valueType: scaleValueType.value,
+        active: scaleActive.checked
+      });
+      toast('Scale barcode rule saved');
+      scalePrefix.value = '';
+      await loadScaleRules();
     });
 
     document.getElementById('voidBillBtn').addEventListener('click', async () => {
@@ -231,6 +486,81 @@
       await loadSummary();
     });
 
+    document.getElementById('previewShiftBtn').addEventListener('click', async () => {
+      shiftPreviewData = await window.api.getShiftClosePreview({
+        cashierName: shiftCashier.value.trim(),
+        shiftStart: shiftStart.value ? new Date(shiftStart.value).toISOString() : null
+      });
+      renderShiftPreview(shiftPreviewData);
+    });
+
+    document.getElementById('closeShiftBtn').addEventListener('click', async () => {
+      if (!shiftPreviewData) {
+        shiftPreviewData = await window.api.getShiftClosePreview({
+          cashierName: shiftCashier.value.trim(),
+          shiftStart: shiftStart.value ? new Date(shiftStart.value).toISOString() : null
+        });
+      }
+      const opening = Number(openingFloat.value || 0);
+      const expectedDrawer = opening + Number(shiftPreviewData.cashTotal || 0) + Number(shiftPreviewData.cashIn || 0) - Number(shiftPreviewData.cashOut || 0);
+      const actual = Number(actualDrawer.value || expectedDrawer);
+      const result = await window.api.recordShiftReconciliation({
+        cashierName: shiftCashier.value.trim() || shiftPreviewData.cashierName || userName(),
+        shiftStart: shiftPreviewData.shiftStart,
+        openingFloat: opening,
+        cashTotal: Number(shiftPreviewData.cashTotal || 0),
+        cardTotal: Number(shiftPreviewData.cardTotal || 0),
+        creditTotal: Number(shiftPreviewData.creditTotal || 0),
+        revenueTotal: Number(shiftPreviewData.revenueTotal || 0),
+        expectedDrawer,
+        actualDrawer: actual,
+        variance: actual - expectedDrawer,
+        itemsSold: Number(shiftPreviewData.itemsSold || 0),
+        notes: shiftNotes.value.trim()
+      });
+      toast(`Shift closed #${result.id}`);
+      shiftPreviewData = null;
+      renderShiftPreview(null);
+      await loadSummary();
+    });
+
+    document.getElementById('backupDbBtn').addEventListener('click', async () => {
+      const result = await window.api.backupDatabase();
+      if (!result.cancelled) toast('Backup saved');
+      await loadSummary();
+    });
+
+    document.getElementById('driveBackupBtn').addEventListener('click', async () => {
+      const result = await window.api.runGoogleDriveBackupNow();
+      toast(result.skipped ? result.message : 'Google Drive backup completed');
+      await loadSummary();
+    });
+
+    document.getElementById('restoreDbBtn').addEventListener('click', async () => {
+      if (!window.confirm('Restore will replace the current database and restart QuickPOS. Continue?')) return;
+      await window.api.restoreDatabase();
+    });
+
+    document.getElementById('paySupplier').addEventListener('change', fillInvoiceSelect);
+
+    document.getElementById('recordSupplierPaymentBtn').addEventListener('click', async () => {
+      await window.api.recordSupplierPayment({
+        supplierId: Number(paySupplier.value || 0),
+        purchaseInvoiceId: Number(payInvoice.value || 0) || null,
+        amount: Number(payAmount.value || 0),
+        refNo: payRef.value.trim(),
+        note: payNote.value.trim(),
+        userName: userName()
+      });
+      toast('Supplier payment recorded');
+      payAmount.value = '';
+      payRef.value = '';
+      payNote.value = '';
+      suppliers = await window.api.getSuppliers();
+      purchaseInvoices = await window.api.getPurchaseInvoices();
+      await loadSummary();
+    });
+
     document.getElementById('saveTaxBtn').addEventListener('click', async () => {
       await window.api.saveTaxCategory({ name: taxName.value.trim(), rate: Number(taxRate.value || 0) });
       toast('Tax category saved');
@@ -261,6 +591,7 @@
       toast(transferStatus.value === 'completed' ? 'Transfer completed and stock reduced' : 'Transfer recorded');
       dataChanged();
       products = await window.api.getProducts();
+      await loadReorderRows();
       await loadSummary();
     });
 
@@ -292,6 +623,7 @@
       toast('Stock count snapshot created');
       dataChanged();
       await loadSummary();
+      await loadReorderRows();
     });
 
     document.getElementById('finalizeStockCountBtn').addEventListener('click', async () => {

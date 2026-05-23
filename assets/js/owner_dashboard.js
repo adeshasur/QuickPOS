@@ -10,6 +10,17 @@
   let products = [];
   let customers = [];
   let expiredItems = [];
+  let opsData = {
+    suppliers: [],
+    purchases: [],
+    till: [],
+    held: [],
+    voids: [],
+    returnsRows: [],
+    audit: [],
+    deadStock: [],
+    backup: {}
+  };
 
   function inRange(date, range) {
     const d = new Date(date);
@@ -42,10 +53,12 @@
   }
 
   function getMetrics(list) {
-    const m = { revenue: 0, profit: 0, items: 0, tx: list.length, cash: 0, card: 0, hourSales: new Array(24).fill(0), catSales: {} };
+    const m = { revenue: 0, profit: 0, items: 0, tx: list.length, cash: 0, card: 0, credit: 0, hourSales: new Array(24).fill(0), catSales: {} };
     list.forEach((s) => {
       m.revenue += Number(s.total_amount || 0);
-      if ((s.payment_method || '').toLowerCase() === 'cash') m.cash += Number(s.total_amount || 0);
+      const method = (s.payment_method || '').toLowerCase();
+      if (method === 'cash') m.cash += Number(s.total_amount || 0);
+      else if (method === 'credit') m.credit += Number(s.total_amount || 0);
       else m.card += Number(s.total_amount || 0);
       const hour = new Date(s.timestamp).getHours();
       m.hourSales[hour] += Number(s.total_amount || 0);
@@ -217,6 +230,7 @@
     document.getElementById('cardPct').textContent = m.revenue ? `${Math.round((m.card / m.revenue) * 100)}%` : '0%';
     document.getElementById('cashRev').textContent = fmtK(m.cash);
     document.getElementById('cardRev').textContent = fmtK(m.card);
+    renderControlRoom(t);
     
     // Update payment progress bars
     const cashFill = document.getElementById('cashFill');
@@ -357,6 +371,151 @@
     }
   }
 
+  function renderControlRoom(todayMetrics) {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const isToday = (value) => {
+      const date = new Date(value);
+      return !Number.isNaN(date.getTime()) && date >= todayStart;
+    };
+
+    const tillToday = (opsData.till || []).filter((row) => isToday(row.created_at));
+    const tillIn = tillToday
+      .filter((row) => row.movement_type === 'cash_in')
+      .reduce((sum, row) => sum + Number(row.amount || 0), 0);
+    const tillOut = tillToday
+      .filter((row) => row.movement_type === 'cash_out' || row.movement_type === 'petty_cash')
+      .reduce((sum, row) => sum + Number(row.amount || 0), 0);
+    const expectedCash = Number(todayMetrics.cash || 0) + tillIn - tillOut;
+
+    const todayVoids = (opsData.voids || []).filter((row) => isToday(row.created_at)).length;
+    const todayReturns = (opsData.returnsRows || []).filter((row) => isToday(row.created_at)).length;
+    const todayOverrides = (opsData.audit || [])
+      .filter((row) => isToday(row.created_at) && /override|void|return|price_change/i.test(`${row.action || ''} ${row.entity_type || ''}`))
+      .length;
+    const supplierDue = (opsData.suppliers || []).reduce((sum, supplier) => sum + Number(supplier.balance || 0), 0);
+    const todayGrns = (opsData.purchases || []).filter((row) => isToday(row.created_at)).length;
+    const lowStockCount = products.filter((p) => Number(p.current_stock || 0) <= Number(p.alert_level || 0)).length;
+    const expiryCount = expiredItems.length;
+    const deadStockCount = (opsData.deadStock || []).length;
+    const totalRisk = lowStockCount + expiryCount + todayVoids + todayReturns + todayOverrides;
+    const healthScore = Math.max(0, Math.min(100, 100 - (expiryCount * 8) - (lowStockCount * 4) - (todayVoids * 5) - (todayReturns * 3) - (todayOverrides * 4) - (supplierDue > 0 ? 5 : 0)));
+
+    const setText = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    };
+
+    setText('dashBills', Number(todayMetrics.tx || 0).toLocaleString());
+    setText('dashAvgBill', fmtCurrency(todayMetrics.avg || 0));
+    setText('dashCreditSales', fmtCurrency(todayMetrics.credit || 0));
+    setText('dashCashSales', fmtCurrency(todayMetrics.cash || 0));
+    setText('dashTillMove', `${fmtCurrency(tillIn)} / ${fmtCurrency(tillOut)}`);
+    setText('dashExpectedCash', fmtCurrency(expectedCash));
+    setText('dashHeldBills', String((opsData.held || []).length));
+    setText('dashVoidReturns', `${todayVoids} / ${todayReturns}`);
+    setText('dashOverrides', String(todayOverrides));
+    setText('dashSupplierDue', fmtCurrency(supplierDue));
+    setText('dashGrns', String(todayGrns));
+    setText('dashBackup', opsData.backup?.lastAt ? new Date(opsData.backup.lastAt).toLocaleDateString() : (opsData.backup?.lastResult || 'Not set'));
+    setText('healthScore', String(healthScore));
+    renderExecutiveInsights(todayMetrics, {
+      totalRisk,
+      lowStockCount,
+      expiryCount,
+      supplierDue,
+      expectedCash
+    });
+    renderActionQueue({
+      lowStockCount,
+      expiryCount,
+      deadStockCount,
+      todayVoids,
+      todayReturns,
+      todayOverrides,
+      supplierDue,
+      backupMissing: !opsData.backup?.lastAt
+    });
+  }
+
+  function renderExecutiveInsights(todayMetrics, context) {
+    const setText = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    };
+
+    const bestHourIndex = (todayMetrics.hourSales || []).reduce((best, value, index, rows) => (
+      Number(value || 0) > Number(rows[best] || 0) ? index : best
+    ), 0);
+    const bestHourValue = Number((todayMetrics.hourSales || [])[bestHourIndex] || 0);
+    setText('execPeakHour', bestHourValue > 0 ? `${String(bestHourIndex).padStart(2, '0')}:00` : '--');
+    setText('execPeakHourMeta', bestHourValue > 0 ? fmtCurrency(bestHourValue) : 'Waiting for sales');
+
+    const todaySales = sales.filter((sale) => inRange(sale.timestamp, 'today'));
+    const cashierMap = new Map();
+    const productMap = new Map();
+    todaySales.forEach((sale) => {
+      const cashier = sale.cashier_name || 'System';
+      const existing = cashierMap.get(cashier) || { revenue: 0, bills: 0 };
+      existing.revenue += Number(sale.total_amount || 0);
+      existing.bills += 1;
+      cashierMap.set(cashier, existing);
+
+      (saleItemsMap.get(sale.id) || []).forEach((item) => {
+        const key = item.product_name || `Item ${item.product_id}`;
+        productMap.set(key, (productMap.get(key) || 0) + Number(item.quantity || 0));
+      });
+    });
+
+    const bestCashier = [...cashierMap.entries()].sort((a, b) => b[1].revenue - a[1].revenue)[0];
+    setText('execBestCashier', bestCashier ? bestCashier[0] : '--');
+    setText('execBestCashierMeta', bestCashier ? `${bestCashier[1].bills} bills · ${fmtCurrency(bestCashier[1].revenue)}` : 'No bills yet');
+
+    const bestProduct = [...productMap.entries()].sort((a, b) => b[1] - a[1])[0];
+    setText('execBestProduct', bestProduct ? bestProduct[0] : '--');
+    setText('execBestProductMeta', bestProduct ? `${Number(bestProduct[1]).toLocaleString()} sold today` : 'No items yet');
+
+    let focus = 'Keep selling';
+    let focusMeta = 'No urgent action';
+    if (context.expiryCount > 0) {
+      focus = 'Expiry review';
+      focusMeta = `${context.expiryCount} items need checking`;
+    } else if (context.lowStockCount > 0) {
+      focus = 'Reorder stock';
+      focusMeta = `${context.lowStockCount} low-stock items`;
+    } else if (context.supplierDue > 0) {
+      focus = 'Supplier due';
+      focusMeta = fmtCurrency(context.supplierDue);
+    } else if (context.expectedCash > 0) {
+      focus = 'Cash close ready';
+      focusMeta = fmtCurrency(context.expectedCash);
+    }
+    setText('execOwnerFocus', focus);
+    setText('execOwnerFocusMeta', focusMeta);
+  }
+
+  function renderActionQueue(metrics) {
+    const queue = document.getElementById('actionQueue');
+    if (!queue) return;
+    const items = [];
+    if (metrics.expiryCount > 0) items.push({ level: 'danger', label: `${metrics.expiryCount} products are expired or expiring soon`, hint: 'Review expiry alerts' });
+    if (metrics.lowStockCount > 0) items.push({ level: 'warn', label: `${metrics.lowStockCount} products need reorder`, hint: 'Prepare purchase order' });
+    if (metrics.todayOverrides > 0) items.push({ level: 'warn', label: `${metrics.todayOverrides} sensitive actions today`, hint: 'Check audit trail' });
+    if (metrics.todayVoids || metrics.todayReturns) items.push({ level: 'danger', label: `${metrics.todayVoids} voids and ${metrics.todayReturns} returns today`, hint: 'Verify cashier approvals' });
+    if (metrics.supplierDue > 0) items.push({ level: 'neutral', label: `${fmtCurrency(metrics.supplierDue)} supplier due`, hint: 'Plan supplier payments' });
+    if (metrics.deadStockCount > 0) items.push({ level: 'neutral', label: `${metrics.deadStockCount} dead-stock items`, hint: 'Consider discount/promotion' });
+    if (metrics.backupMissing) items.push({ level: 'warn', label: 'No successful backup recorded', hint: 'Run backup today' });
+
+    queue.innerHTML = items.length
+      ? items.slice(0, 6).map((item) => `
+          <div class="action-item ${item.level}">
+            <span>${item.label}</span>
+            <small>${item.hint}</small>
+          </div>
+        `).join('')
+      : '<div class="action-item good"><span>Everything looks controlled</span><small>No urgent owner action right now</small></div>';
+  }
+
 
   function renderSlowItems() {
     const el = document.getElementById('slowList');
@@ -391,13 +550,53 @@
   let categoryMap = new Map();
 
   async function loadData() {
-    [sales, products, categories, customers, expiredItems] = await Promise.all([
+    const [
+      salesRows,
+      productRows,
+      categoryRows,
+      customerRows,
+      expiryRows,
+      supplierRows,
+      purchaseRows,
+      tillRows,
+      heldRows,
+      voidRows,
+      returnRows,
+      auditRows,
+      deadStockRows,
+      backupStatus
+    ] = await Promise.all([
       window.api.getSalesHistory(),
       window.api.getProducts(),
       window.api.getCategories(),
       window.api.getCustomers(),
-      window.api.getExpiredItems()
+      window.api.getExpiredItems(),
+      window.api.getSuppliers ? window.api.getSuppliers() : Promise.resolve([]),
+      window.api.getPurchaseInvoices ? window.api.getPurchaseInvoices() : Promise.resolve([]),
+      window.api.getTillMovements ? window.api.getTillMovements() : Promise.resolve([]),
+      window.api.getHeldBills ? window.api.getHeldBills() : Promise.resolve([]),
+      window.api.getVoidBills ? window.api.getVoidBills() : Promise.resolve([]),
+      window.api.getReturns ? window.api.getReturns() : Promise.resolve([]),
+      window.api.getAuditLog ? window.api.getAuditLog() : Promise.resolve([]),
+      window.api.getDeadStockReport ? window.api.getDeadStockReport() : Promise.resolve([]),
+      window.api.getGoogleDriveBackupStatus ? window.api.getGoogleDriveBackupStatus() : Promise.resolve({})
     ]);
+    sales = salesRows || [];
+    products = productRows || [];
+    categories = categoryRows || [];
+    customers = customerRows || [];
+    expiredItems = expiryRows || [];
+    opsData = {
+      suppliers: supplierRows || [],
+      purchases: purchaseRows || [],
+      till: tillRows || [],
+      held: heldRows || [],
+      voids: voidRows || [],
+      returnsRows: returnRows || [],
+      audit: auditRows || [],
+      deadStock: deadStockRows || [],
+      backup: backupStatus || {}
+    };
     categoryMap = new Map(categories.map(c => [c.id, c.name]));
     const details = await Promise.all(sales.map((s) => window.api.getSaleDetails(s.id)));
     saleItemsMap = new Map(sales.map((s, idx) => [s.id, details[idx] || []]));

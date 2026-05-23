@@ -617,6 +617,164 @@ ipcMain.handle('save-supplier', async (event, supplier) => {
     return { success: true, id: result.lastID };
 });
 
+ipcMain.handle('save-purchase-invoice', async (event, payload) => withTransaction(async () => {
+    const supplierId = Number(payload.supplierId || 0) || null;
+    const items = Array.isArray(payload.items) ? payload.items : [];
+    if (!items.length) throw new Error('At least one GRN item is required.');
+
+    const invoiceNo = String(payload.invoiceNo || '').trim();
+    const grnNo = String(payload.grnNo || `GRN-${Date.now()}`).trim();
+    const paidAmount = Math.max(0, Number(payload.paidAmount || 0));
+    let invoiceTotal = 0;
+    let receivedTotal = 0;
+
+    for (const item of items) {
+        const productId = Number(item.productId || 0);
+        const qty = Number(item.quantity || 0);
+        const cost = Number(item.costPrice || 0);
+        if (!productId || qty <= 0) throw new Error('Each GRN line needs a valid product and quantity.');
+        if (cost < 0) throw new Error('Cost price cannot be negative.');
+        invoiceTotal += qty * cost;
+        receivedTotal += qty;
+    }
+
+    const dueAmount = Math.max(0, invoiceTotal - paidAmount);
+    const invoiceInsert = await runAsync(
+        `INSERT INTO purchase_invoices (
+            supplier_id, invoice_no, grn_no, invoice_total, received_total, paid_amount,
+            due_amount, status, invoice_date, user_name
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+            supplierId,
+            invoiceNo,
+            grnNo,
+            invoiceTotal,
+            receivedTotal,
+            paidAmount,
+            dueAmount,
+            dueAmount > 0 ? 'credit' : 'paid',
+            payload.invoiceDate || null,
+            payload.userName || 'System'
+        ]
+    );
+
+    for (const item of items) {
+        const productId = Number(item.productId || 0);
+        const qty = Number(item.quantity || 0);
+        const cost = Number(item.costPrice || 0);
+        const selling = Number(item.sellingPrice || 0);
+        const expiryDate = item.expiryDate || null;
+
+        const batchInsert = await runAsync(
+            `INSERT INTO inventory_batches (
+                product_id, batch_code, received_qty, remaining_qty, cost_price, selling_price,
+                expiry_date, supplier_id, grn_no, purchase_invoice_no
+             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                productId,
+                item.batchCode || `${grnNo}-${productId}`,
+                qty,
+                qty,
+                cost,
+                selling,
+                expiryDate,
+                supplierId,
+                grnNo,
+                invoiceNo
+            ]
+        );
+
+        await runAsync(
+            `INSERT INTO purchase_invoice_items (
+                purchase_invoice_id, product_id, batch_id, quantity, cost_price, selling_price,
+                expiry_date, line_total
+             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [invoiceInsert.lastID, productId, batchInsert.lastID, qty, cost, selling, expiryDate, qty * cost]
+        );
+
+        const oldProduct = await getAsync('SELECT cost_price, selling_price FROM products WHERE id = ?', [productId]);
+        await runAsync(
+            `UPDATE products
+             SET current_stock = COALESCE(current_stock, 0) + ?,
+                 cost_price = ?,
+                 selling_price = CASE WHEN ? > 0 THEN ? ELSE selling_price END,
+                 expiry_date = COALESCE(?, expiry_date)
+             WHERE id = ?`,
+            [qty, cost, selling, selling, expiryDate, productId]
+        );
+
+        if (oldProduct && (Number(oldProduct.cost_price || 0) !== cost || (selling > 0 && Number(oldProduct.selling_price || 0) !== selling))) {
+            await runAsync(
+                `INSERT INTO price_history (product_id, old_cost_price, new_cost_price, old_selling_price, new_selling_price, changed_by)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                [productId, oldProduct.cost_price, cost, oldProduct.selling_price, selling || oldProduct.selling_price, payload.userName || 'System']
+            );
+        }
+    }
+
+    if (supplierId && dueAmount > 0) {
+        await runAsync('UPDATE suppliers SET balance = COALESCE(balance, 0) + ? WHERE id = ?', [dueAmount, supplierId]);
+    }
+    if (supplierId && paidAmount > 0) {
+        await runAsync(
+            `INSERT INTO supplier_payments (supplier_id, purchase_invoice_id, amount, payment_method, ref_no, note, user_name)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [supplierId, invoiceInsert.lastID, paidAmount, payload.paymentMethod || 'cash', payload.refNo || '', 'Paid at GRN', payload.userName || 'System']
+        );
+    }
+
+    await logAudit('purchase_invoice', invoiceInsert.lastID, 'create_grn', payload, payload.userName);
+    return { success: true, id: invoiceInsert.lastID, grnNo, invoiceTotal, dueAmount };
+}));
+
+ipcMain.handle('get-purchase-invoices', async () => allAsync(`
+    SELECT pi.*, s.name AS supplier_name, s.phone AS supplier_phone,
+           COUNT(pii.id) AS line_count
+    FROM purchase_invoices pi
+    LEFT JOIN suppliers s ON s.id = pi.supplier_id
+    LEFT JOIN purchase_invoice_items pii ON pii.purchase_invoice_id = pi.id
+    GROUP BY pi.id
+    ORDER BY pi.created_at DESC
+    LIMIT 500
+`));
+
+ipcMain.handle('record-supplier-payment', async (event, payload) => withTransaction(async () => {
+    const supplierId = Number(payload.supplierId || 0);
+    const invoiceId = Number(payload.purchaseInvoiceId || 0) || null;
+    const amount = Number(payload.amount || 0);
+    if (!supplierId || amount <= 0) throw new Error('Supplier and payment amount are required.');
+
+    const result = await runAsync(
+        `INSERT INTO supplier_payments (supplier_id, purchase_invoice_id, amount, payment_method, ref_no, note, user_name)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [supplierId, invoiceId, amount, payload.paymentMethod || 'cash', payload.refNo || '', payload.note || '', payload.userName || 'System']
+    );
+
+    await runAsync('UPDATE suppliers SET balance = MAX(0, COALESCE(balance, 0) - ?) WHERE id = ?', [amount, supplierId]);
+    if (invoiceId) {
+        await runAsync(
+            `UPDATE purchase_invoices
+             SET paid_amount = COALESCE(paid_amount, 0) + ?,
+                 due_amount = MAX(0, COALESCE(due_amount, 0) - ?),
+                 status = CASE WHEN MAX(0, COALESCE(due_amount, 0) - ?) <= 0 THEN 'paid' ELSE status END
+             WHERE id = ?`,
+            [amount, amount, amount, invoiceId]
+        );
+    }
+
+    await logAudit('supplier_payment', result.lastID, 'create', payload, payload.userName);
+    return { success: true, id: result.lastID };
+}));
+
+ipcMain.handle('get-supplier-payments', async () => allAsync(`
+    SELECT sp.*, s.name AS supplier_name, pi.invoice_no, pi.grn_no
+    FROM supplier_payments sp
+    LEFT JOIN suppliers s ON s.id = sp.supplier_id
+    LEFT JOIN purchase_invoices pi ON pi.id = sp.purchase_invoice_id
+    ORDER BY sp.created_at DESC
+    LIMIT 500
+`));
+
 ipcMain.handle('get-product-discounts', async () => allAsync(`
     SELECT d.*, p.name AS product_name
     FROM product_discounts d
@@ -749,7 +907,15 @@ ipcMain.handle('get-price-history', async (event, productId = null) => allAsync(
 `, productId ? [productId] : []));
 
 ipcMain.handle('get-reorder-list', async () => allAsync(`
-    SELECT p.*, c.name AS category_name
+    SELECT p.*, c.name AS category_name,
+           (SELECT s.name FROM inventory_batches ib
+            JOIN suppliers s ON s.id = ib.supplier_id
+            WHERE ib.product_id = p.id AND ib.supplier_id IS NOT NULL
+            ORDER BY ib.created_at DESC LIMIT 1) AS last_supplier_name,
+           (SELECT s.phone FROM inventory_batches ib
+            JOIN suppliers s ON s.id = ib.supplier_id
+            WHERE ib.product_id = p.id AND ib.supplier_id IS NOT NULL
+            ORDER BY ib.created_at DESC LIMIT 1) AS last_supplier_phone
     FROM products p
     LEFT JOIN categories c ON c.id = p.category_id
     WHERE COALESCE(p.current_stock, 0) <= COALESCE(p.alert_level, 0)
@@ -957,6 +1123,10 @@ ipcMain.handle('save-scale-barcode-rule', async (event, payload) => {
     return { success: true, id: result.lastID };
 });
 ipcMain.handle('get-scale-barcode-rules', async () => allAsync('SELECT * FROM scale_barcode_rules ORDER BY active DESC, prefix ASC'));
+ipcMain.handle('delete-scale-barcode-rule', async (event, id) => {
+    await runAsync('DELETE FROM scale_barcode_rules WHERE id = ?', [id]);
+    return { success: true };
+});
 
 ipcMain.handle('record-supplier-return', async (event, payload) => {
     return withTransaction(async () => {
@@ -1079,7 +1249,64 @@ ipcMain.handle('discard-stock', async (event, { productId, quantity }) => {
     });
 });
 
-ipcMain.handle('search-barcode', async (event, barcode) => getAsync('SELECT * FROM products WHERE barcode = ?', [barcode]));
+ipcMain.handle('search-barcode', async (event, barcode) => {
+    try {
+        const rules = await allAsync('SELECT * FROM scale_barcode_rules WHERE active = 1');
+        for (const rule of rules) {
+            const prefix = rule.prefix;
+            if (barcode.startsWith(prefix)) {
+                const productDigits = Number(rule.product_digits || 5);
+                const valueDigits = Number(rule.value_digits || 5);
+
+                if (barcode.length >= prefix.length + productDigits + valueDigits) {
+                    const productCode = barcode.substring(prefix.length, prefix.length + productDigits);
+                    const valueStr = barcode.substring(prefix.length + productDigits, prefix.length + productDigits + valueDigits);
+
+                    // 1. Search for a weighted product exactly matching this code
+                    let product = await getAsync('SELECT * FROM products WHERE barcode = ? AND is_weighted = 1', [productCode]);
+
+                    // 2. If not found, try to search numeric equivalent (e.g. barcode stored as "005" or "5", code is "00005")
+                    if (!product) {
+                        const numericCode = parseInt(productCode, 10);
+                        if (!isNaN(numericCode)) {
+                            product = await getAsync('SELECT * FROM products WHERE (barcode = ? OR CAST(barcode AS INTEGER) = ?) AND is_weighted = 1', [String(numericCode), numericCode]);
+                        }
+                    }
+
+                    if (product) {
+                        const parsedValue = parseFloat(valueStr);
+                        let quantity = 0;
+
+                        if (rule.value_type === 'weight') {
+                            // Scale outputs weight in grams (e.g. 01250 = 1.250 kg)
+                            quantity = parsedValue / 1000;
+                        } else if (rule.value_type === 'price') {
+                            // Scale outputs total price. Assuming cents, divide by 100.
+                            const totalPrice = parsedValue / 100;
+                            const sellingPrice = Number(product.selling_price || 0);
+                            if (sellingPrice > 0) {
+                                quantity = Number((totalPrice / sellingPrice).toFixed(3));
+                            }
+                        }
+
+                        if (quantity > 0) {
+                            return {
+                                ...product,
+                                isScale: true,
+                                parsedQuantity: quantity
+                            };
+                        }
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.error('Scale barcode parsing error:', err);
+    }
+
+    // Normal barcode lookup
+    return getAsync('SELECT * FROM products WHERE barcode = ?', [barcode]);
+});
 ipcMain.handle('get-expired-items', async () => allAsync("SELECT * FROM products WHERE expiry_date <= date('now', '+30 days')"));
 ipcMain.handle('get-categories', async () => allAsync('SELECT * FROM categories'));
 ipcMain.handle('get-top-selling-category', async () => {
@@ -1698,6 +1925,58 @@ ipcMain.handle('record-shift-reconciliation', async (event, payload) => withTran
     );
     return { success: true, id: result.lastID };
 }));
+
+ipcMain.handle('get-shift-close-preview', async (event, payload = {}) => {
+    const cashierName = String(payload.cashierName || '').trim();
+    const shiftStart = payload.shiftStart || new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+    const params = [shiftStart];
+    let cashierFilter = '';
+    if (cashierName) {
+        cashierFilter = 'AND cashier_name = ?';
+        params.push(cashierName);
+    }
+
+    const totals = await getAsync(`
+        SELECT
+            COALESCE(SUM(total_amount), 0) AS revenue_total,
+            COALESCE(SUM(CASE WHEN payment_method = 'Cash' THEN total_amount ELSE 0 END), 0) AS cash_total,
+            COALESCE(SUM(CASE WHEN payment_method = 'Card' THEN total_amount ELSE 0 END), 0) AS card_total,
+            COALESCE(SUM(CASE WHEN payment_method = 'Credit' THEN total_amount ELSE 0 END), 0) AS credit_total,
+            COALESCE(SUM(gross_profit), 0) AS gross_profit,
+            COUNT(*) AS bill_count
+        FROM sales
+        WHERE COALESCE(voided, 0) = 0 AND timestamp >= ? ${cashierFilter}
+    `, params);
+
+    const itemTotals = await getAsync(`
+        SELECT COALESCE(SUM(si.quantity), 0) AS items_sold
+        FROM sale_items si
+        JOIN sales s ON s.id = si.sale_id
+        WHERE COALESCE(s.voided, 0) = 0 AND s.timestamp >= ? ${cashierFilter ? 'AND s.cashier_name = ?' : ''}
+    `, params);
+
+    const till = await getAsync(`
+        SELECT
+            COALESCE(SUM(CASE WHEN movement_type = 'cash_in' THEN amount ELSE 0 END), 0) AS cash_in,
+            COALESCE(SUM(CASE WHEN movement_type IN ('cash_out', 'petty_cash') THEN amount ELSE 0 END), 0) AS cash_out
+        FROM till_movements
+        WHERE created_at >= ? ${cashierName ? 'AND cashier_name = ?' : ''}
+    `, params);
+
+    return {
+        shiftStart,
+        cashierName,
+        revenueTotal: Number(totals?.revenue_total || 0),
+        cashTotal: Number(totals?.cash_total || 0),
+        cardTotal: Number(totals?.card_total || 0),
+        creditTotal: Number(totals?.credit_total || 0),
+        grossProfit: Number(totals?.gross_profit || 0),
+        billCount: Number(totals?.bill_count || 0),
+        itemsSold: Number(itemTotals?.items_sold || 0),
+        cashIn: Number(till?.cash_in || 0),
+        cashOut: Number(till?.cash_out || 0)
+    };
+});
 
 ipcMain.handle('record-credit-payment', async (event, paymentData) => withTransaction(async () => {
     const sale = await getAsync('SELECT * FROM sales WHERE id = ? AND payment_method = ?', [paymentData.saleId, 'Credit']);

@@ -5,7 +5,6 @@
     storeName: 'My QuickPOS Store',
     storeAddress: '',
     storePhone: '',
-    systemVersion: 'pro',
     currencySymbol: 'LKR',
     taxPercentage: '0',
     shiftHours: '08:00 - 16:00',
@@ -69,7 +68,6 @@
     document.getElementById('requireAdminForRefund').checked = settings.requireAdminForRefund !== 'false';
     document.getElementById('receiptFooter').value = settings.receiptFooter || 'Thank you for shopping with us!';
     document.getElementById('googleDriveBackupEmail').value = settings.googleDriveBackupEmail || '';
-    document.querySelectorAll('.ver-card').forEach((c) => c.classList.toggle('selected', c.dataset.version === settings.systemVersion));
     // Restore saved printer selection
     const sel = document.getElementById('thermalPrinterName');
     if (sel && settings.thermalPrinterName) {
@@ -316,7 +314,6 @@
       currencySymbol: 'LKR',
       dateFormat: document.getElementById('dateFormat').value,
       timeFormat: document.getElementById('timeFormat').value,
-      systemVersion: document.querySelector('.ver-card.selected')?.dataset.version || 'pro',
       thermalPrinterName: document.getElementById('thermalPrinterName').value.trim(),
       autoPrint: String(document.getElementById('autoPrint').checked),
       showLogo: String(document.getElementById('showLogo').checked),
@@ -400,13 +397,6 @@
         btn.classList.add('active');
         document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
         document.getElementById(`panel-${btn.dataset.tab}`).classList.add('active');
-      });
-    });
-
-    document.querySelectorAll('.ver-card').forEach((card) => {
-      card.addEventListener('click', () => {
-        document.querySelectorAll('.ver-card').forEach((c) => c.classList.remove('selected'));
-        card.classList.add('selected');
       });
     });
 

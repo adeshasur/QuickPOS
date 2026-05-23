@@ -39,6 +39,34 @@
       </div>
     </div>
 
+    <section class="exec-cockpit">
+      <div class="exec-main">
+        <div class="exec-eyebrow">Live Business Control</div>
+        <div class="exec-title-row">
+          <div>
+            <h1>Owner Dashboard</h1>
+            <p>Sales, cash, stock risk, suppliers, and cashier activity in one command view.</p>
+          </div>
+          <div class="health-score">
+            <span id="healthScore">--</span>
+            <small>Health</small>
+          </div>
+        </div>
+        <div class="exec-stats">
+          <div><span>Peak Hour</span><strong id="execPeakHour">--</strong><small id="execPeakHourMeta">Waiting for sales</small></div>
+          <div><span>Best Cashier</span><strong id="execBestCashier">--</strong><small id="execBestCashierMeta">No bills yet</small></div>
+          <div><span>Best Product</span><strong id="execBestProduct">--</strong><small id="execBestProductMeta">No items yet</small></div>
+          <div><span>Owner Focus</span><strong id="execOwnerFocus">Review alerts</strong><small id="execOwnerFocusMeta">Action queue below</small></div>
+        </div>
+      </div>
+      <div class="exec-side">
+        <div class="exec-side-title"><i class="fa-solid fa-list-check"></i> Action Queue</div>
+        <div id="actionQueue" class="action-queue">
+          <div class="action-item neutral"><span>Loading dashboard signals...</span></div>
+        </div>
+      </div>
+    </section>
+
     <div class="kpi-grid">
       <div class="kpi-card blue">
         <div class="kpi-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H7"/></svg></div>
@@ -74,6 +102,41 @@
         <div class="kpi-label"><i class="fa-solid fa-cart-arrow-down"></i> Items Sold Today</div>
         <div class="kpi-val" id="kpiItems">0</div>
         <div class="kpi-meta"><span class="kpi-sub">Total quantity sold</span></div>
+      </div>
+    </div>
+
+    <div class="control-grid">
+      <div class="control-card">
+        <div class="control-title"><i class="fa-solid fa-receipt"></i> Bill Health</div>
+        <div class="control-metrics">
+          <div><span>Today Bills</span><strong id="dashBills">0</strong></div>
+          <div><span>Avg Bill</span><strong id="dashAvgBill">LKR 0.00</strong></div>
+          <div><span>Credit Sales</span><strong id="dashCreditSales">LKR 0.00</strong></div>
+        </div>
+      </div>
+      <div class="control-card">
+        <div class="control-title"><i class="fa-solid fa-cash-register"></i> Cash Drawer</div>
+        <div class="control-metrics">
+          <div><span>Cash Sales</span><strong id="dashCashSales">LKR 0.00</strong></div>
+          <div><span>Till In / Out</span><strong id="dashTillMove">LKR 0.00</strong></div>
+          <div><span>Expected Cash</span><strong id="dashExpectedCash">LKR 0.00</strong></div>
+        </div>
+      </div>
+      <div class="control-card">
+        <div class="control-title"><i class="fa-solid fa-triangle-exclamation"></i> Operational Risk</div>
+        <div class="control-metrics">
+          <div><span>Held Bills</span><strong id="dashHeldBills">0</strong></div>
+          <div><span>Voids / Returns</span><strong id="dashVoidReturns">0 / 0</strong></div>
+          <div><span>Overrides</span><strong id="dashOverrides">0</strong></div>
+        </div>
+      </div>
+      <div class="control-card">
+        <div class="control-title"><i class="fa-solid fa-truck-field"></i> Supplier & Backup</div>
+        <div class="control-metrics">
+          <div><span>Supplier Due</span><strong id="dashSupplierDue">LKR 0.00</strong></div>
+          <div><span>GRNs</span><strong id="dashGrns">0</strong></div>
+          <div><span>Backup</span><strong id="dashBackup">Not set</strong></div>
+        </div>
       </div>
     </div>
 

@@ -133,6 +133,7 @@ db.serialize(() => {
         email TEXT,
         address TEXT,
         contact_person TEXT,
+        balance REAL DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
@@ -244,11 +245,42 @@ db.serialize(() => {
         grn_no TEXT,
         invoice_total REAL DEFAULT 0,
         received_total REAL DEFAULT 0,
+        paid_amount REAL DEFAULT 0,
+        due_amount REAL DEFAULT 0,
         status TEXT DEFAULT 'draft',
         invoice_date DATE,
         user_name TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (supplier_id) REFERENCES suppliers (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS purchase_invoice_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        purchase_invoice_id INTEGER NOT NULL,
+        product_id INTEGER NOT NULL,
+        batch_id INTEGER,
+        quantity REAL NOT NULL,
+        cost_price REAL NOT NULL DEFAULT 0,
+        selling_price REAL NOT NULL DEFAULT 0,
+        expiry_date DATE,
+        line_total REAL NOT NULL DEFAULT 0,
+        FOREIGN KEY (purchase_invoice_id) REFERENCES purchase_invoices (id) ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products (id),
+        FOREIGN KEY (batch_id) REFERENCES inventory_batches (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS supplier_payments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        supplier_id INTEGER,
+        purchase_invoice_id INTEGER,
+        amount REAL NOT NULL DEFAULT 0,
+        payment_method TEXT DEFAULT 'cash',
+        ref_no TEXT,
+        note TEXT,
+        user_name TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (supplier_id) REFERENCES suppliers (id),
+        FOREIGN KEY (purchase_invoice_id) REFERENCES purchase_invoices (id) ON DELETE SET NULL
     )`);
 
     db.run(`CREATE TABLE IF NOT EXISTS promotions (
@@ -441,6 +473,9 @@ db.serialize(() => {
     db.run("ALTER TABLE inventory_batches ADD COLUMN supplier_id INTEGER", () => {});
     db.run("ALTER TABLE inventory_batches ADD COLUMN grn_no TEXT", () => {});
     db.run("ALTER TABLE inventory_batches ADD COLUMN purchase_invoice_no TEXT", () => {});
+    db.run("ALTER TABLE suppliers ADD COLUMN balance REAL DEFAULT 0", () => {});
+    db.run("ALTER TABLE purchase_invoices ADD COLUMN paid_amount REAL DEFAULT 0", () => {});
+    db.run("ALTER TABLE purchase_invoices ADD COLUMN due_amount REAL DEFAULT 0", () => {});
     db.run("ALTER TABLE customers ADD COLUMN credit_limit REAL DEFAULT 0", () => {});
     db.run("ALTER TABLE customers ADD COLUMN credit_due_days INTEGER DEFAULT 30", () => {});
     db.run("ALTER TABLE products ADD COLUMN reorder_qty REAL DEFAULT 0", () => {});
@@ -449,6 +484,13 @@ db.serialize(() => {
     db.run("ALTER TABLE products ADD COLUMN age_limit INTEGER DEFAULT 0", () => {});
     db.run("ALTER TABLE stock_counts ADD COLUMN completed_at DATETIME", () => {});
     db.run("ALTER TABLE stock_transfers ADD COLUMN completed_at DATETIME", () => {});
+
+    // Seed default scale rule if table is empty
+    db.get("SELECT COUNT(*) as count FROM scale_barcode_rules", (err, row) => {
+        if (!err && row && row.count === 0) {
+            db.run("INSERT INTO scale_barcode_rules (prefix, product_digits, value_digits, value_type, active) VALUES ('20', 5, 5, 'weight', 1)");
+        }
+    });
 }); // end outer db.serialize
 
 
