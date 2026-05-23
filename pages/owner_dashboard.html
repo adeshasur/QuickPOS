@@ -214,7 +214,7 @@
           </div>
           <span class="section-badge badge-red" id="expiryBadge">0 items</span>
         </div>
-        <div class="card-body overflow-scroll" id="expiryList" style="display:flex;flex-direction:column;max-height:360px">
+        <div class="card-body" id="expiryList" style="display:flex;flex-direction:column">
           <div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">Checking expiration dates...</div>
         </div>
       </div>
@@ -251,6 +251,10 @@
               <div class="pay-pct" id="cardPct">0%</div>
               <div class="pay-label">Card</div>
             </div>
+            <div class="pay-item">
+              <div class="pay-pct" id="creditPct">0%</div>
+              <div class="pay-label">Credit</div>
+            </div>
           </div>
           <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
             <div class="stat-row" style="padding-top:0">
@@ -260,6 +264,10 @@
             <div class="stat-row" style="padding-bottom:0">
               <span class="stat-label" style="font-size:12px">Card Revenue</span>
               <span class="stat-val" id="cardRev" style="font-size:12px">LKR 0</span>
+            </div>
+            <div class="stat-row" style="padding-bottom:0">
+              <span class="stat-label" style="font-size:12px">Credit Revenue</span>
+              <span class="stat-val" id="creditRev" style="font-size:12px">LKR 0</span>
             </div>
           </div>
         </div>
@@ -273,7 +281,7 @@
           </div>
           <span class="section-badge badge-red" id="reorderBadge">0 items</span>
         </div>
-        <div class="card-body overflow-scroll" id="reorderList" style="display:flex;flex-direction:column">
+        <div class="card-body" id="reorderList" style="display:flex;flex-direction:column">
           <div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">Checking stock levels...</div>
         </div>
       </div>
@@ -288,7 +296,7 @@
         </div>
         <span class="section-badge badge-amber">No sales 3+ days</span>
       </div>
-      <div class="card-body overflow-scroll" style="max-height:360px">
+      <div class="card-body">
         <div id="slowList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px"></div>
       </div>
     </div>
@@ -301,7 +309,7 @@
         </div>
         <span class="section-badge badge-blue">Sales Breakdown</span>
       </div>
-      <div class="card-body" id="cashierPerformanceList" style="overflow-x:auto">
+      <div class="card-body" id="cashierPerformanceList">
         <div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">Loading cashier performance metrics...</div>
       </div>
     </div>

@@ -1304,3 +1304,514 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Executive dashboard polish: quieter hierarchy, denser owner scan view. */
+.dashboard-body {
+  background: #f4f7fb;
+}
+
+.content {
+  padding: 14px 18px 18px;
+  gap: 10px;
+  background:
+    linear-gradient(180deg, #f7f9fc 0%, #eef3f8 100%);
+}
+
+.exec-cockpit {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(320px, .95fr);
+  gap: 10px;
+}
+
+.exec-main,
+.exec-side,
+.control-card,
+.card {
+  border: 1px solid #dce4ee;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.055);
+}
+
+.exec-main {
+  padding: 18px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 58%, #eef7f1 100%);
+}
+
+.exec-main::after {
+  display: none;
+}
+
+.exec-eyebrow {
+  margin-bottom: 7px;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.exec-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.exec-title-row h1 {
+  margin: 0 0 5px;
+  color: #0f172a;
+  font-size: 30px;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.exec-title-row p {
+  max-width: 720px;
+  margin: 0;
+  color: #526173;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.health-score {
+  width: 76px;
+  height: 76px;
+  flex: 0 0 76px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  position: relative;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .08);
+}
+
+.health-score::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, .08);
+}
+
+.health-score span,
+.health-score small {
+  position: relative;
+  z-index: 1;
+}
+
+.health-score span {
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.health-score small {
+  margin-top: 27px;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.exec-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.exec-stats div,
+.action-item,
+.control-metrics div,
+.pay-item,
+.slow-item,
+.alert-item {
+  border-radius: 8px;
+  border: 1px solid #e1e8f0;
+  background: #ffffff;
+}
+
+.exec-stats div {
+  padding: 11px 12px;
+}
+
+.exec-stats span,
+.control-metrics span {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.exec-stats strong {
+  display: block;
+  margin-top: 5px;
+  overflow: hidden;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exec-stats small {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exec-side {
+  padding: 14px;
+}
+
+.exec-side-title,
+.control-title,
+.card-title {
+  color: #0f172a !important;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.action-queue {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.action-item {
+  position: relative;
+  padding: 10px 11px 10px 14px;
+  overflow: hidden;
+}
+
+.action-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #64748b;
+}
+
+.action-item.good::before { background: #16a34a; }
+.action-item.warn::before { background: #f59e0b; }
+.action-item.danger::before { background: #dc2626; }
+.action-item.neutral::before { background: #2563eb; }
+
+.action-item span {
+  color: #111827;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.action-item small {
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.kpi-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.kpi-card,
+.kpi-card.blue,
+.kpi-card.green,
+.kpi-card.pink,
+.kpi-card.teal,
+.kpi-card.amber {
+  min-height: 86px;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, .08);
+}
+
+.kpi-card.blue { --kpi-accent: #2563eb; --kpi-accent-2: #1e40af; }
+.kpi-card.green { --kpi-accent: #16a34a; --kpi-accent-2: #166534; }
+.kpi-card.pink { --kpi-accent: #db2777; --kpi-accent-2: #9d174d; }
+.kpi-card.teal { --kpi-accent: #0891b2; --kpi-accent-2: #155e75; }
+.kpi-card.amber { --kpi-accent: #d97706; --kpi-accent-2: #92400e; }
+
+.kpi-label {
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.kpi-val {
+  font-size: clamp(19px, 1.25vw, 25px);
+}
+
+.kpi-icon {
+  border-radius: 8px;
+}
+
+.kpi-trend-badge {
+  top: 8px;
+  right: 46px;
+  border-radius: 999px;
+}
+
+.control-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.control-card {
+  min-height: 126px;
+  padding: 13px;
+}
+
+.control-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.control-metrics {
+  display: grid;
+  gap: 7px;
+}
+
+.control-metrics div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 30px;
+  padding: 7px 9px;
+}
+
+.control-metrics strong {
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.card-header {
+  min-height: 44px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5edf5;
+}
+
+.card-body {
+  padding: 14px;
+}
+
+.sales-chart-card {
+  min-height: 258px;
+}
+
+.hour-chart.large-chart {
+  height: 170px;
+}
+
+.hbar.today {
+  background: #2563eb;
+}
+
+.hbar.yesterday {
+  background: #cbd5e1;
+}
+
+.grid-2 {
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, .9fr);
+  gap: 10px;
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.grid-3 > .card {
+  height: 318px;
+}
+
+.pay-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pay-pct {
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.section-badge {
+  border-radius: 999px;
+  font-weight: 900;
+}
+
+@media(max-width:1280px) {
+  .exec-cockpit,
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .kpi-grid,
+  .control-grid,
+  .grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .exec-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media(max-width:760px) {
+  .content {
+    padding: 10px;
+  }
+
+  .exec-title-row {
+    flex-direction: column;
+  }
+
+  .kpi-grid,
+  .control-grid,
+  .grid-2,
+  .grid-3,
+  .exec-stats,
+  .pay-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-3 > .card {
+    height: auto;
+    min-height: 280px;
+  }
+}
+
+/* Executive cockpit final visual pass */
+.exec-cockpit {
+  align-items: stretch;
+}
+
+.exec-main {
+  min-height: 218px;
+  padding: 20px 18px 18px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.98) 0%, rgba(248,251,255,.96) 58%, rgba(239,248,242,.95) 100%),
+    #ffffff;
+}
+
+.exec-title-row {
+  align-items: center;
+}
+
+.exec-title-row h1 {
+  font-size: 31px;
+  font-weight: 900;
+}
+
+.exec-title-row p {
+  color: #48566a;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.health-score {
+  width: 82px;
+  height: 82px;
+  flex-basis: 82px;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 9px;
+}
+
+.health-score::before {
+  inset: 9px;
+}
+
+.health-score span {
+  margin-top: -2px;
+  font-size: 23px;
+}
+
+.health-score small {
+  margin-top: 0;
+  color: #64748b;
+  font-size: 8.5px;
+  line-height: 1;
+}
+
+.exec-stats {
+  gap: 8px;
+  margin-top: 38px;
+}
+
+.exec-stats div {
+  min-height: 86px;
+  padding: 14px 13px;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.85);
+}
+
+.exec-stats span {
+  color: #64748b;
+  font-size: 10px;
+}
+
+.exec-stats strong {
+  margin-top: 9px;
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.exec-stats small {
+  margin-top: 7px;
+  color: #667085;
+  font-size: 11px;
+}
+
+.exec-side {
+  min-height: 218px;
+}
+
+/* Let the dashboard page scroll as one surface instead of nested table/card scrolls. */
+.content {
+  overflow-y: auto;
+}
+
+.grid-3 > .card,
+.grid-3 > .card > .card-body,
+.card,
+.card-body,
+.overflow-scroll,
+#expiryList,
+#reorderList,
+#cashierPerformanceList {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.grid-3 > .card {
+  min-height: 0 !important;
+}
+
+#slowList {
+  overflow: visible !important;
+}

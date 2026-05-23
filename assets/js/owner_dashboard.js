@@ -228,8 +228,12 @@
 
     document.getElementById('cashPct').textContent = m.revenue ? `${Math.round((m.cash / m.revenue) * 100)}%` : '0%';
     document.getElementById('cardPct').textContent = m.revenue ? `${Math.round((m.card / m.revenue) * 100)}%` : '0%';
+    const creditPctEl = document.getElementById('creditPct');
+    if (creditPctEl) creditPctEl.textContent = m.revenue ? `${Math.round((m.credit / m.revenue) * 100)}%` : '0%';
     document.getElementById('cashRev').textContent = fmtK(m.cash);
     document.getElementById('cardRev').textContent = fmtK(m.card);
+    const creditRevEl = document.getElementById('creditRev');
+    if (creditRevEl) creditRevEl.textContent = fmtK(m.credit);
     renderControlRoom(t);
     
     // Update payment progress bars
@@ -419,6 +423,15 @@
     setText('dashGrns', String(todayGrns));
     setText('dashBackup', opsData.backup?.lastAt ? new Date(opsData.backup.lastAt).toLocaleDateString() : (opsData.backup?.lastResult || 'Not set'));
     setText('healthScore', String(healthScore));
+    const healthEl = document.getElementById('healthScore');
+    const healthRing = healthEl ? healthEl.closest('.health-score') : null;
+    if (healthRing) {
+      const score = Math.max(0, Math.min(100, healthScore));
+      const color = score >= 80 ? '#16a34a' : score >= 60 ? '#f59e0b' : '#dc2626';
+      healthRing.style.background = `conic-gradient(${color} 0 ${score}%, #e2e8f0 ${score}% 100%)`;
+      healthRing.classList.toggle('is-warning', score < 80 && score >= 60);
+      healthRing.classList.toggle('is-danger', score < 60);
+    }
     renderExecutiveInsights(todayMetrics, {
       totalRisk,
       lowStockCount,

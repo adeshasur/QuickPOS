@@ -350,6 +350,7 @@
     const topbarContainer = document.getElementById('topbar-container');
     if (topbarContainer && !topbarContainer.children.length) {
       const pageTitles = {
+        owner_dashboard: 'Executive Dashboard',
         sales: 'Make a Sale',
         categories: 'Categories',
         products: 'Products',
@@ -380,20 +381,35 @@
           <h2><span class="blue">Quick</span><span class="orange">POS</span></h2>
         </div>
         <div class="menu">
-          <a href="owner_dashboard.html" class="menu-item owner-only" data-page="owner_dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-          <a href="cashier_hub.html" class="menu-item cashier-only" data-page="cashier_hub"><i class="fa-solid fa-border-all"></i> Cashier Hub</a>
-          <a href="sales.html" class="menu-item cashier-only" data-page="sales"><i class="fa-solid fa-cash-register"></i> POS Terminal</a>
-          <a href="sales.html" class="menu-item owner-sale-link" data-page="sales"><i class="fa-solid fa-cart-plus"></i> Make a Sale</a>
-          <a href="categories.html" class="menu-item cashier-hide" data-page="categories"><i class="fa-solid fa-tags"></i> Categories</a>
-          <a href="products.html" class="menu-item cashier-hide" data-page="products"><i class="fa-solid fa-box-open"></i> Products</a>
-          <a href="inventory.html" class="menu-item" data-page="inventory" title="Inventory and low-stock alerts"><i class="fa-solid fa-warehouse"></i> Inventory <span id="lowStockBadge" style="display:none;margin-left:auto;padding:2px 8px;border-radius:999px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;"></span></a>
-          <a href="customers.html" class="menu-item" data-page="customers"><i class="fa-solid fa-users"></i> Customers</a>
-          <a href="ledger.html" class="menu-item" data-page="ledger"><i class="fa-solid fa-book"></i> Credit Ledger</a>
-          <a href="sales_reports.html" class="menu-item" data-page="sales_reports"><i class="fa-solid fa-history"></i> Invoice History</a>
-          <a href="reports.html" class="menu-item reports-allowed" data-page="reports"><i class="fa-solid fa-chart-pie"></i> Reports & Analytics</a>
-          <a href="supermarket.html" class="menu-item owner-only" data-page="supermarket"><i class="fa-solid fa-store"></i> Supermarket Ops</a>
-          <a href="users.html" class="menu-item owner-only" data-page="users"><i class="fa-solid fa-user-gear"></i> Users</a>
-          <a href="settings.html" class="menu-item owner-only" data-page="settings"><i class="fa-solid fa-cog"></i> Settings</a>
+          <div class="menu-section">
+            <div class="menu-section-title">Main</div>
+            <a href="owner_dashboard.html" class="menu-item owner-only" data-page="owner_dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+            <a href="cashier_hub.html" class="menu-item cashier-only" data-page="cashier_hub"><i class="fa-solid fa-border-all"></i> Cashier Hub</a>
+            <a href="sales.html" class="menu-item cashier-only" data-page="sales"><i class="fa-solid fa-cash-register"></i> POS Terminal</a>
+            <a href="sales.html" class="menu-item owner-sale-link" data-page="sales"><i class="fa-solid fa-cart-plus"></i> Make a Sale</a>
+            <a href="categories.html" class="menu-item cashier-hide" data-page="categories"><i class="fa-solid fa-tags"></i> Categories</a>
+            <a href="products.html" class="menu-item cashier-hide" data-page="products"><i class="fa-solid fa-box-open"></i> Products</a>
+          </div>
+          
+          <div class="menu-section">
+            <div class="menu-section-title">Operations</div>
+            <a href="inventory.html" class="menu-item" data-page="inventory" title="Inventory and low-stock alerts"><i class="fa-solid fa-warehouse"></i> Inventory <span id="lowStockBadge" style="display:none;margin-left:auto;padding:2px 8px;border-radius:999px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;"></span></a>
+            <a href="customers.html" class="menu-item" data-page="customers"><i class="fa-solid fa-users"></i> Customers</a>
+            <a href="ledger.html" class="menu-item" data-page="ledger"><i class="fa-solid fa-book"></i> Credit Ledger</a>
+            <a href="sales_reports.html" class="menu-item" data-page="sales_reports"><i class="fa-solid fa-history"></i> Invoice History</a>
+          </div>
+          
+          <div class="menu-section">
+            <div class="menu-section-title">Analytics</div>
+            <a href="reports.html" class="menu-item reports-allowed" data-page="reports"><i class="fa-solid fa-chart-pie"></i> Reports & Analytics</a>
+            <a href="supermarket.html" class="menu-item owner-only" data-page="supermarket"><i class="fa-solid fa-store"></i> Supermarket Ops</a>
+          </div>
+          
+          <div class="menu-section">
+            <div class="menu-section-title">Admin</div>
+            <a href="users.html" class="menu-item owner-only" data-page="users"><i class="fa-solid fa-user-gear"></i> Users</a>
+            <a href="settings.html" class="menu-item owner-only" data-page="settings"><i class="fa-solid fa-cog"></i> Settings</a>
+          </div>
         </div>
         <div style="padding: 20px 0;">
           <button class="logout-btn" id="sidebarLogoutBtn">
@@ -413,6 +429,16 @@
     } else {
       document.querySelectorAll('.cashier-only').forEach((el) => el.style.display = 'none');
     }
+
+    // Hide empty menu sections (e.g. Admin section for cashiers)
+    document.querySelectorAll('.menu-section').forEach((section) => {
+      const visibleItems = Array.from(section.querySelectorAll('.menu-item')).filter(
+        (item) => item.style.display !== 'none'
+      );
+      if (visibleItems.length === 0) {
+        section.style.display = 'none';
+      }
+    });
 
     const menuItems = document.querySelectorAll('.menu-item');
     menuItems.forEach(item => {
