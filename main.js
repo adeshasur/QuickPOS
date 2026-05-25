@@ -303,8 +303,14 @@ ipcMain.handle('login-auth', async (event, { username, password, role }) => {
         await runAsync('UPDATE users SET password = ? WHERE id = ?', [hashPassword(password), row.id]);
     }
 
+    const requiresPasswordChange = (
+        (row.username === 'owner' && password === 'owner@123') ||
+        (row.username === 'cashier1' && password === 'cashier@123')
+    );
+
     return {
         success: true,
+        requiresPasswordChange,
         user: {
             name: row.name,
             role: row.role,
@@ -963,19 +969,47 @@ ipcMain.handle('save-sale-payments', async (event, payload) => {
 });
 ipcMain.handle('get-sale-payments', async (event, saleId) => allAsync('SELECT * FROM sale_payments WHERE sale_id = ? ORDER BY id ASC', [saleId]));
 
-ipcMain.handle('void-bill', async (event, payload) => {
+ipcMain.handle('void-bill', async (event, payload) => withTransaction(async () => {
     const sale = payload.saleId
         ? await getAsync('SELECT * FROM sales WHERE id = ?', [payload.saleId])
         : await getAsync('SELECT * FROM sales WHERE bill_id = ?', [payload.billId]);
     if (!sale) throw new Error('Sale not found.');
+    if (Number(sale.voided || 0) === 1) throw new Error('Sale is already voided.');
+
+    const items = await allAsync('SELECT * FROM sale_items WHERE sale_id = ?', [sale.id]);
+    const allocations = await allAsync('SELECT * FROM sale_item_batches WHERE sale_id = ?', [sale.id]);
+
+    for (const item of items) {
+        await runAsync(
+            'UPDATE products SET current_stock = current_stock + ? WHERE id = ?',
+            [Number(item.quantity || 0), item.product_id]
+        );
+    }
+
+    for (const allocation of allocations) {
+        if (!allocation.batch_id) continue;
+        await runAsync(
+            'UPDATE inventory_batches SET remaining_qty = remaining_qty + ? WHERE id = ?',
+            [Number(allocation.qty || 0), allocation.batch_id]
+        );
+    }
+
+    if (sale.payment_method === 'Credit' && sale.customer_id && Number(sale.balance_amount || 0) > 0) {
+        await runAsync(
+            'UPDATE customers SET balance = MAX(0, COALESCE(balance, 0) - ?) WHERE id = ?',
+            [Number(sale.balance_amount || 0), sale.customer_id]
+        );
+        await runAsync('UPDATE sales SET balance_amount = 0 WHERE id = ?', [sale.id]);
+    }
+
     await runAsync('UPDATE sales SET voided = 1 WHERE id = ?', [sale.id]);
     const result = await runAsync(
         'INSERT INTO void_bills (sale_id, bill_id, reason, approved_by, user_name) VALUES (?, ?, ?, ?, ?)',
         [sale.id, sale.bill_id, payload.reason || '', payload.approvedBy || '', payload.userName || 'System']
     );
-    await logAudit('sale', sale.id, 'void', payload, payload.userName);
-    return { success: true, id: result.lastID };
-});
+    await logAudit('sale', sale.id, 'void_reverse', { ...payload, restoredItems: items.length }, payload.userName);
+    return { success: true, id: result.lastID, restoredItems: items.length };
+}));
 ipcMain.handle('get-void-bills', async () => allAsync('SELECT * FROM void_bills ORDER BY created_at DESC LIMIT 500'));
 
 ipcMain.handle('hold-bill', async (event, payload) => {
@@ -987,7 +1021,7 @@ ipcMain.handle('hold-bill', async (event, payload) => {
     return { success: true, id: result.lastID, holdCode: code };
 });
 ipcMain.handle('get-held-bills', async () => allAsync(`
-    SELECT h.*, c.name AS customer_name, c.phone AS customer_phone, c.balance AS customer_balance, c.loyalty_points AS customer_loyalty_points
+    SELECT h.*, c.name AS customer_name, c.phone AS customer_phone, c.balance AS customer_balance, c.credit_limit AS customer_credit_limit, c.loyalty_points AS customer_loyalty_points
     FROM held_bills h
     LEFT JOIN customers c ON c.id = h.customer_id
     ORDER BY h.created_at DESC
@@ -1443,6 +1477,17 @@ ipcMain.handle('save-setting', async (event, key, value) => {
 
 ipcMain.handle('save-sale', async (event, saleData) => withTransaction(async () => {
     if (!Array.isArray(saleData.items) || saleData.items.length === 0) throw new Error('Cannot save an empty sale.');
+
+    if (saleData.method === 'Credit') {
+        if (!saleData.customerId) throw new Error('Credit sale requires a customer.');
+        const customer = await getAsync('SELECT id, name, balance, credit_limit FROM customers WHERE id = ?', [saleData.customerId]);
+        if (!customer) throw new Error('Credit customer not found.');
+        const creditLimit = Number(customer.credit_limit || 0);
+        const projectedBalance = Number(customer.balance || 0) + Number(saleData.balanceDue || saleData.total || 0);
+        if (creditLimit > 0 && projectedBalance > creditLimit) {
+            throw new Error(`CREDIT_LIMIT: ${customer.name || 'Customer'} limit ${creditLimit.toFixed(2)} exceeded. Current ${Number(customer.balance || 0).toFixed(2)}, sale ${Number(saleData.balanceDue || saleData.total || 0).toFixed(2)}.`);
+        }
+    }
 
     const insufficient = [];
     for (const item of saleData.items) {
@@ -2000,7 +2045,8 @@ ipcMain.handle('record-credit-payment', async (event, paymentData) => withTransa
 ipcMain.handle('get-sales-history', async (event, options = {}) => {
     const limit = Math.min(Math.max(Number(options.limit || 500), 1), 5000);
     const offset = Math.max(Number(options.offset || 0), 0);
-    const sales = await allAsync('SELECT * FROM sales ORDER BY timestamp DESC, id DESC LIMIT ? OFFSET ?', [limit, offset]);
+    const whereSql = options.includeVoided ? '' : 'WHERE COALESCE(voided, 0) = 0';
+    const sales = await allAsync(`SELECT * FROM sales ${whereSql} ORDER BY timestamp DESC, id DESC LIMIT ? OFFSET ?`, [limit, offset]);
     const saleIds = sales.map((sale) => sale.id);
     if (!saleIds.length) return [];
 
@@ -2033,6 +2079,9 @@ ipcMain.handle('get-sales-page', async (event, options = {}) => {
     const where = [];
     const params = [];
 
+    if (!options.includeVoided) {
+        where.push('COALESCE(voided, 0) = 0');
+    }
     if (from) {
         where.push('date(timestamp) >= date(?)');
         params.push(from);

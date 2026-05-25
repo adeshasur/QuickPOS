@@ -25,14 +25,16 @@ document.addEventListener('DOMContentLoaded', () => {
         ownerBtn.classList.add("active");
         cashierBtn.classList.remove("active");
         username.value = "owner";
-        password.value = "owner@123";
+        password.value = "";
+        password.focus();
     });
 
     cashierBtn.addEventListener("click", () => {
         cashierBtn.classList.add("active");
         ownerBtn.classList.remove("active");
         username.value = "cashier1";
-        password.value = "cashier@123";
+        password.value = "";
+        password.focus();
     });
 
     /* =========================
@@ -82,17 +84,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 role: response.user.role,
                 name: response.user.name,
                 canViewReports: response.user.canViewReports,
+                requiresPasswordChange: !!response.requiresPasswordChange,
                 loginTime: new Date().toISOString(),
                 lastActivityAt: Date.now(),
                 expiresAt: Date.now() + (12 * 60 * 60 * 1000)
             };
 
             localStorage.setItem("quickpos-user", JSON.stringify(userData));
-            console.log("LOGIN SUCCESS", userData);
 
             /* REDIRECT */
             if (response.user.role === "owner") {
-                window.location.href = "owner_dashboard.html";
+                window.location.href = response.requiresPasswordChange ? "settings.html" : "owner_dashboard.html";
             } else {
                 window.location.href = "cashier_hub.html";
             }

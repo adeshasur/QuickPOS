@@ -128,6 +128,7 @@
         name: bill.customer_name || 'Customer',
         phone: bill.customer_phone || '',
         balance: Number(bill.customer_balance || 0),
+        credit_limit: Number(bill.customer_credit_limit || 0),
         loyalty_points: Number(bill.customer_loyalty_points || 0)
       } : null;
       return {
@@ -439,12 +440,15 @@
       return;
     }
 
+    const balance = Number(state.selectedCustomer.balance || 0);
+    const creditLimit = Number(state.selectedCustomer.credit_limit || 0);
+    const creditMeta = creditLimit > 0 ? ` | Limit: ${fmt(creditLimit)}` : '';
     display.innerHTML = `
       <div class="selected-cust">
         <div class="sc-avatar">${escapeHtml(String(state.selectedCustomer.name || 'C').slice(0, 1).toUpperCase())}</div>
         <div class="sc-info">
           <div class="sc-name">${escapeHtml(state.selectedCustomer.name)}</div>
-          <div class="sc-bal">Balance: ${fmt(state.selectedCustomer.balance || 0)} | Loyalty: ${Number(state.selectedCustomer.loyalty_points || 0)}</div>
+          <div class="sc-bal">Balance: ${fmt(balance)}${creditMeta} | Loyalty: ${Number(state.selectedCustomer.loyalty_points || 0)}</div>
         </div>
         <button class="sc-clear" id="clearCustomerBtn">x</button>
       </div>
@@ -769,6 +773,19 @@
     const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
     const total = cartTotal();
     const balanceDue = method === 'Credit' ? total : 0;
+
+    if (method === 'Credit') {
+      if (!state.selectedCustomer) {
+        notify('Attach a customer for credit sale', 'warning');
+        return;
+      }
+      const creditLimit = Number(state.selectedCustomer.credit_limit || 0);
+      const currentBalance = Number(state.selectedCustomer.balance || 0);
+      if (creditLimit > 0 && currentBalance + balanceDue > creditLimit) {
+        notify(`Credit limit exceeded. Available: ${fmt(Math.max(0, creditLimit - currentBalance))}`, 'warning');
+        return;
+      }
+    }
 
     const payload = {
       billId: null,

@@ -375,6 +375,12 @@
     document.getElementById('cashierPassword').value = '';
     document.getElementById('cashierPasswordConfirm').value = '';
 
+    const sessionUser = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
+    if (adminPassword && sessionUser.requiresPasswordChange) {
+      sessionUser.requiresPasswordChange = false;
+      localStorage.setItem('quickpos-user', JSON.stringify(sessionUser));
+    }
+
     localStorage.setItem('quickpos-shift-time', next.shiftHours);
     await refreshSystemStats();
     showToast('Settings saved successfully');
@@ -508,6 +514,11 @@
     Components.init({
       title: 'System Settings'
     });
+
+    if (user.requiresPasswordChange) {
+      showToast('Default owner password is active. Set a new owner password before daily use.', 'warning');
+      setTimeout(() => document.getElementById('adminPassword')?.focus(), 300);
+    }
 
     bindEvents();
     try {
