@@ -7,6 +7,38 @@
     "start": "electron .",
     "dist": "electron-builder"
   },
+  "build": {
+    "appId": "com.quickpos.desktop",
+    "productName": "QuickPOS Pro",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "database.js",
+      "pages/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "quickpos.db",
+        "to": "quickpos.db"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/adeshasur/QuickPOS.git"
@@ -20,7 +52,8 @@
   },
   "homepage": "https://github.com/adeshasur/QuickPOS#readme",
   "devDependencies": {
-    "electron": "^41.5.0"
+    "electron": "^41.5.0",
+    "electron-builder": "^26.0.12"
   },
   "dependencies": {
     "sqlite3": "^6.0.1"

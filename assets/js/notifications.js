@@ -61,7 +61,7 @@
         const sidebarBadge = document.getElementById('lowStockBadge');
         if (sidebarBadge) {
           sidebarBadge.textContent = totalCount > 0 ? String(totalCount) : '';
-          sidebarBadge.style.display = totalCount > 0 ? 'inline-block' : 'none';
+          sidebarBadge.style.display = totalCount > 0 ? 'inline-flex' : 'none';
           sidebarBadge.title = totalCount > 0 ? title : '';
         }
 

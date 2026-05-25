@@ -20,6 +20,10 @@
   let products = [];
   let customers = [];
   let expiredItems = [];
+  let currentDashboardState = {
+    expectedCash: 0,
+    todayMetrics: null
+  };
   let opsData = {
     suppliers: [],
     purchases: [],
@@ -62,6 +66,22 @@
     return true;
   }
 
+  function getItemProfit(item) {
+    const explicitProfit = Number(item.profit_total);
+    if (Number.isFinite(explicitProfit) && explicitProfit !== 0) return explicitProfit;
+    const costTotal = Number(item.cost_total);
+    if (Number.isFinite(costTotal) && costTotal > 0) return Number(item.subtotal || 0) - costTotal;
+    const p = products.find(x => x.id === item.product_id);
+    if (!p) return 0;
+    return (Number(item.unit_price || 0) - Number(p.cost_price || 0)) * Number(item.quantity || 0);
+  }
+
+  function getSaleProfit(sale, items) {
+    const storedProfit = Number(sale.gross_profit);
+    if (Number.isFinite(storedProfit) && storedProfit !== 0) return storedProfit;
+    return items.reduce((sum, item) => sum + getItemProfit(item), 0);
+  }
+
   function getMetrics(list) {
     const m = { revenue: 0, profit: 0, items: 0, tx: list.length, cash: 0, card: 0, credit: 0, hourSales: new Array(24).fill(0), catSales: new Map() };
     list.forEach((s) => {
@@ -74,15 +94,10 @@
       m.hourSales[hour] += Number(s.total_amount || 0);
   
       const items = saleItemsMap.get(s.id) || [];
+      m.profit += getSaleProfit(s, items);
       items.forEach((i) => {
         m.items += Number(i.quantity || 0);
         const p = products.find(x => x.id === i.product_id);
-        
-        if (p) {
-          const cost = Number(p.cost_price || 0);
-          const salePrice = Number(i.unit_price || 0);
-          m.profit += (salePrice - cost) * Number(i.quantity || 0);
-        }
 
         const catName = p ? categoryMap.get(p.category_id) : 'General';
         m.catSales.set(catName, (m.catSales.get(catName) || 0) + Number(i.subtotal || 0));
@@ -402,6 +417,8 @@
       .filter((row) => row.movement_type === 'cash_out' || row.movement_type === 'petty_cash')
       .reduce((sum, row) => sum + Number(row.amount || 0), 0);
     const expectedCash = Number(todayMetrics.cash || 0) + tillIn - tillOut;
+    currentDashboardState.expectedCash = expectedCash;
+    currentDashboardState.todayMetrics = todayMetrics;
 
     const todayVoids = (opsData.voids || []).filter((row) => isToday(row.created_at)).length;
     const todayReturns = (opsData.returnsRows || []).filter((row) => isToday(row.created_at)).length;
@@ -434,6 +451,16 @@
     setText('dashGrns', String(todayGrns));
     setText('dashBackup', opsData.backup?.lastAt ? new Date(opsData.backup.lastAt).toLocaleDateString() : (opsData.backup?.lastResult || 'Not set'));
     setText('healthScore', String(healthScore));
+    renderCashVariance();
+    renderHealthBreakdown({
+      expiryCount,
+      lowStockCount,
+      todayVoids,
+      todayReturns,
+      todayOverrides,
+      supplierDue,
+      backupMissing: !opsData.backup?.lastAt
+    });
     const healthEl = document.getElementById('healthScore');
     const healthRing = healthEl ? healthEl.closest('.health-score') : null;
     if (healthRing) {
@@ -460,6 +487,82 @@
       supplierDue,
       backupMissing: !opsData.backup?.lastAt
     });
+  }
+
+  function renderHealthBreakdown(metrics) {
+    const el = document.getElementById('healthBreakdown');
+    if (!el) return;
+    const chips = [
+      { label: `${metrics.expiryCount} expiry`, bad: metrics.expiryCount > 0 },
+      { label: `${metrics.lowStockCount} low stock`, bad: metrics.lowStockCount > 0 },
+      { label: `${metrics.todayVoids + metrics.todayReturns} void/return`, bad: (metrics.todayVoids + metrics.todayReturns) > 0 },
+      { label: `${metrics.todayOverrides} overrides`, bad: metrics.todayOverrides > 0 },
+      { label: metrics.supplierDue > 0 ? `${fmtCurrency(metrics.supplierDue)} supplier due` : 'supplier clear', bad: metrics.supplierDue > 0 },
+      { label: metrics.backupMissing ? 'backup missing' : 'backup ok', bad: metrics.backupMissing }
+    ];
+    el.innerHTML = chips.map((chip) => `<span class="${chip.bad ? 'needs-attention' : 'ok'}">${escapeHTML(chip.label)}</span>`).join('');
+  }
+
+  function renderCashVariance() {
+    const input = document.getElementById('actualCashInput');
+    const varianceEl = document.getElementById('cashVariance');
+    if (!input || !varianceEl) return;
+    const actual = Number(input.value || 0);
+    const expected = Number(currentDashboardState.expectedCash || 0);
+    const hasValue = input.value.trim() !== '';
+    const variance = hasValue ? actual - expected : 0;
+    varianceEl.textContent = `Variance: ${fmtCurrency(variance)}`;
+    varianceEl.classList.toggle('is-short', hasValue && variance < 0);
+    varianceEl.classList.toggle('is-over', hasValue && variance > 0);
+  }
+
+  function goToPage(page, hash) {
+    window.location.href = hash ? `${page}${hash}` : page;
+  }
+
+  async function closeCashDrawer() {
+    const input = document.getElementById('actualCashInput');
+    if (!input || !window.api?.recordShiftReconciliation) return;
+    if (input.value.trim() === '') {
+      alert('Enter the actual counted cash before closing.');
+      input.focus();
+      return;
+    }
+    const actual = Number(input.value || 0);
+    const expected = Number(currentDashboardState.expectedCash || 0);
+    const todayMetrics = currentDashboardState.todayMetrics || {};
+    const user = JSON.parse(localStorage.getItem('quickpos-user') || '{}');
+    const btn = document.getElementById('closeCashBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Closing...';
+    }
+    try {
+      const result = await window.api.recordShiftReconciliation({
+        cashierName: user.name || user.username || 'Owner',
+        shiftStart: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
+        openingFloat: 0,
+        cashTotal: Number(todayMetrics.cash || 0),
+        cardTotal: Number(todayMetrics.card || 0),
+        creditTotal: Number(todayMetrics.credit || 0),
+        revenueTotal: Number(todayMetrics.revenue || 0),
+        expectedDrawer: expected,
+        actualDrawer: actual,
+        variance: actual - expected,
+        itemsSold: Number(todayMetrics.items || 0),
+        notes: 'Closed from Owner Dashboard'
+      });
+      alert(`Cash drawer closed #${result.id}. Variance: ${fmtCurrency(actual - expected)}`);
+      await loadData();
+      updateDashboard(document.querySelector('.filter-btn.active')?.dataset.range || 'today');
+    } catch (err) {
+      alert(`Failed to close cash drawer: ${err.message}`);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Close';
+      }
+    }
   }
 
   function renderExecutiveInsights(todayMetrics, context) {
@@ -522,19 +625,22 @@
     const queue = document.getElementById('actionQueue');
     if (!queue) return;
     const items = [];
-    if (metrics.expiryCount > 0) items.push({ level: 'danger', label: `${metrics.expiryCount} products are expired or expiring soon`, hint: 'Review expiry alerts' });
-    if (metrics.lowStockCount > 0) items.push({ level: 'warn', label: `${metrics.lowStockCount} products need reorder`, hint: 'Prepare purchase order' });
-    if (metrics.todayOverrides > 0) items.push({ level: 'warn', label: `${metrics.todayOverrides} sensitive actions today`, hint: 'Check audit trail' });
-    if (metrics.todayVoids || metrics.todayReturns) items.push({ level: 'danger', label: `${metrics.todayVoids} voids and ${metrics.todayReturns} returns today`, hint: 'Verify cashier approvals' });
-    if (metrics.supplierDue > 0) items.push({ level: 'neutral', label: `${fmtCurrency(metrics.supplierDue)} supplier due`, hint: 'Plan supplier payments' });
-    if (metrics.deadStockCount > 0) items.push({ level: 'neutral', label: `${metrics.deadStockCount} dead-stock items`, hint: 'Consider discount/promotion' });
-    if (metrics.backupMissing) items.push({ level: 'warn', label: 'No successful backup recorded', hint: 'Run backup today' });
+    if (metrics.expiryCount > 0) items.push({ level: 'danger', label: `${metrics.expiryCount} products are expired or expiring soon`, hint: 'Review expiry alerts', action: 'Review', target: 'expiry' });
+    if (metrics.lowStockCount > 0) items.push({ level: 'warn', label: `${metrics.lowStockCount} products need reorder`, hint: 'Prepare purchase order', action: 'Reorder', target: 'reorder' });
+    if (metrics.todayOverrides > 0) items.push({ level: 'warn', label: `${metrics.todayOverrides} sensitive actions today`, hint: 'Check audit trail', action: 'Audit', target: 'audit' });
+    if (metrics.todayVoids || metrics.todayReturns) items.push({ level: 'danger', label: `${metrics.todayVoids} voids and ${metrics.todayReturns} returns today`, hint: 'Verify cashier approvals', action: 'Check', target: 'reports' });
+    if (metrics.supplierDue > 0) items.push({ level: 'neutral', label: `${fmtCurrency(metrics.supplierDue)} supplier due`, hint: 'Plan supplier payments', action: 'Pay', target: 'suppliers' });
+    if (metrics.deadStockCount > 0) items.push({ level: 'neutral', label: `${metrics.deadStockCount} dead-stock items`, hint: 'Consider discount/promotion', action: 'Promo', target: 'promotions' });
+    if (metrics.backupMissing) items.push({ level: 'warn', label: 'No successful backup recorded', hint: 'Run backup today', action: 'Backup', target: 'settings' });
 
     queue.innerHTML = items.length
       ? items.slice(0, 6).map((item) => `
-          <div class="action-item ${escapeHTML(item.level)}">
-            <span>${escapeHTML(item.label)}</span>
-            <small>${escapeHTML(item.hint)}</small>
+          <div class="action-item ${escapeHTML(item.level)}" data-target="${escapeHTML(item.target)}">
+            <div>
+              <span>${escapeHTML(item.label)}</span>
+              <small>${escapeHTML(item.hint)}</small>
+            </div>
+            <button type="button" class="action-link" data-target="${escapeHTML(item.target)}">${escapeHTML(item.action)}</button>
           </div>
         `).join('')
       : '<div class="action-item good"><span>Everything looks controlled</span><small>No urgent owner action right now</small></div>';
@@ -640,7 +746,7 @@
 
     // Dashboard-only topbar actions
     Components.init({
-      title: 'Executive Dashboard',
+      title: 'Owner Dashboard',
       actions: `
         <div class="tb-filters" id="topbarFilters">
           <button class="filter-btn active" data-range="today">Today</button>
@@ -661,6 +767,20 @@
         updateDashboard(btn.dataset.range);
       });
     });
+
+    document.addEventListener('click', (event) => {
+      const actionBtn = event.target.closest('.action-link');
+      if (!actionBtn) return;
+      const target = actionBtn.dataset.target;
+      if (target === 'expiry') document.getElementById('expiryList')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (target === 'reorder') document.getElementById('reorderList')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (target === 'audit' || target === 'suppliers' || target === 'promotions') goToPage('supermarket.html');
+      if (target === 'reports') goToPage('reports.html');
+      if (target === 'settings') goToPage('settings.html');
+    });
+
+    document.getElementById('actualCashInput')?.addEventListener('input', renderCashVariance);
+    document.getElementById('closeCashBtn')?.addEventListener('click', closeCashDrawer);
 
     document.addEventListener('quickpos:refresh', async () => {
       console.log('Dashboard refreshing data...');

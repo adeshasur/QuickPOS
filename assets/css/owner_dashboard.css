@@ -1815,3 +1815,148 @@
 #slowList {
   overflow: visible !important;
 }
+
+/* Daily owner workflow upgrade */
+.exec-title-row {
+  gap: 16px;
+}
+
+.exec-title-row h1 {
+  letter-spacing: 0;
+}
+
+.health-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.health-breakdown span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid #dce5ef;
+  background: #ffffff;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.health-breakdown span.ok {
+  border-color: rgba(22, 163, 74, .24);
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.health-breakdown span.needs-attention {
+  border-color: rgba(245, 158, 11, .28);
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.action-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.action-link {
+  height: 30px;
+  min-width: 68px;
+  border: 1px solid rgba(15, 23, 42, .1);
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.action-link:hover {
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+.cash-close-panel {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(226, 232, 240, .95);
+}
+
+.cash-close-panel label {
+  display: block;
+  margin-bottom: 7px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.cash-close-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px;
+  gap: 8px;
+}
+
+.cash-close-row input {
+  width: 100%;
+  height: 36px;
+  border: 1px solid #dbe3ed;
+  border-radius: 8px;
+  padding: 0 10px;
+  color: #0f172a;
+  font: 800 13px var(--font);
+  outline: none;
+}
+
+.cash-close-row input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+}
+
+.cash-close-row button {
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.cash-close-row button:disabled {
+  opacity: .7;
+  cursor: wait;
+}
+
+.cash-variance {
+  margin-top: 7px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.cash-variance.is-short {
+  color: #dc2626;
+}
+
+.cash-variance.is-over {
+  color: #166534;
+}
+
+@media(max-width:760px) {
+  .action-item {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .action-link {
+    width: 100%;
+  }
+}
