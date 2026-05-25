@@ -43,6 +43,27 @@
     });
   }
 
+  function openTab(tabName) {
+    const button = document.querySelector(`.ops-tab-btn[data-tab="${tabName}"]`);
+    if (button) button.click();
+  }
+
+  function handleQuickHash() {
+    const hash = String(window.location.hash || '').replace('#', '');
+    const map = {
+      returns: { tab: 'till-ops', id: 'returnQuickSection' },
+      return: { tab: 'till-ops', id: 'returnQuickSection' },
+      held: { tab: 'till-ops', id: 'heldQuickSection' },
+      reorder: { tab: 'replenishment', id: 'reorderQuickSection' }
+    };
+    const target = map[hash];
+    if (!target) return;
+    openTab(target.tab);
+    setTimeout(() => {
+      document.getElementById(target.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  }
+
   function fillProductSelect(id) {
     const select = document.getElementById(id);
     if (!select) return;
@@ -640,6 +661,7 @@
     });
 
     await loadSummary();
+    handleQuickHash();
   }
 
   document.addEventListener('DOMContentLoaded', init);

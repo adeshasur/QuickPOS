@@ -41,6 +41,29 @@
           <button class="toolbar-chip-btn" id="clearSearchBtn" type="button">Clear Search</button>
         </div>
 
+        <div class="sales-quick-tabs" aria-label="Quick operations">
+          <button class="sales-quick-tab danger" type="button" data-sales-link="supermarket.html#returns">
+            <i class="fa-solid fa-rotate-left"></i>
+            Return / Void
+          </button>
+          <button class="sales-quick-tab warn" type="button" data-sales-link="inventory.html#expiring">
+            <i class="fa-solid fa-calendar-xmark"></i>
+            Expiry
+          </button>
+          <button class="sales-quick-tab warn" type="button" data-sales-link="supermarket.html#reorder">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            Reorder
+          </button>
+          <button class="sales-quick-tab" type="button" data-sales-link="supermarket.html#held">
+            <i class="fa-solid fa-receipt"></i>
+            Held Bills
+          </button>
+          <button class="sales-quick-tab" type="button" data-sales-link="ledger.html">
+            <i class="fa-solid fa-book"></i>
+            Credit Ledger
+          </button>
+        </div>
+
         <div class="cat-pills" id="catPills">
           <button class="cat-pill active" data-cat="all" style="--hue: 225">
             <div class="cat-icon-badge"><i class="fa-solid fa-border-all"></i></div>
@@ -104,7 +127,7 @@
             <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
             CASH
           </button>
-          <button class="pay-btn card" id="cardBtn">
+          <button class="pay-btn card-pay" id="cardBtn">
             <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
             CARD
           </button>

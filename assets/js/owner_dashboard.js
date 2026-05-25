@@ -116,6 +116,15 @@
     const businessHours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
     const todayHourSales = businessHours.map(h => t.hourSales.at(h) || 0);
     const yesterdayHourSales = businessHours.map(h => y.hourSales.at(h) || 0);
+    const chartCard = document.getElementById('salesChartCard');
+    const hasSales = todayHourSales.some(Boolean) || yesterdayHourSales.some(Boolean);
+    if (!hasSales) {
+      if (chartCard) chartCard.classList.add('is-empty-chart');
+      el.innerHTML = '<div class="empty-hour-state"><strong>No hourly sales yet</strong><span>Sales bars will appear after the first bill today.</span></div>';
+      labelsEl.innerHTML = '';
+      return;
+    }
+    if (chartCard) chartCard.classList.remove('is-empty-chart');
     const max = Math.max(...todayHourSales, ...yesterdayHourSales, 1);
     const hoursToRender = [8, 11, 14, 17, 20];
     
@@ -781,6 +790,14 @@
 
     document.getElementById('actualCashInput')?.addEventListener('input', renderCashVariance);
     document.getElementById('closeCashBtn')?.addEventListener('click', closeCashDrawer);
+
+    document.querySelectorAll('[data-collapse-toggle]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('.collapsible-card');
+        if (!card) return;
+        card.classList.toggle('is-collapsed');
+      });
+    });
 
     document.addEventListener('quickpos:refresh', async () => {
       console.log('Dashboard refreshing data...');

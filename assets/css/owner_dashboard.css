@@ -1,5 +1,5 @@
 :root {
-  --font: 'Manrope', 'Plus Jakarta Sans', 'Inter', sans-serif;
+  --font: 'Manrope', 'Noto Sans Sinhala', 'Iskoola Pota', 'Nirmala UI', 'Plus Jakarta Sans', 'Inter', sans-serif;
 }
 
 /* ─── DASHBOARD TOPBAR FILTERS ─── */
@@ -1892,6 +1892,139 @@
   filter: saturate(1.08);
 }
 
+/* Compact executive scan area */
+.exec-cockpit {
+  grid-template-columns: minmax(0, 1.8fr) minmax(360px, .9fr);
+}
+
+.exec-main,
+.exec-side {
+  min-height: 0;
+}
+
+.exec-title-row h1 {
+  font-size: 28px;
+}
+
+.exec-title-row p {
+  max-width: 720px;
+}
+
+.exec-stats {
+  margin-top: 14px;
+}
+
+.exec-stats > div {
+  min-height: 78px;
+  padding: 13px 14px;
+}
+
+.action-queue {
+  gap: 7px;
+}
+
+.action-item {
+  min-height: 48px;
+  padding: 10px 12px;
+}
+
+/* Make the owner health gauge readable at dashboard scale */
+.health-score {
+  width: 104px;
+  height: 104px;
+  flex: 0 0 104px;
+  padding: 11px;
+}
+
+.health-score::before {
+  inset: 11px;
+}
+
+.health-score::after {
+  inset: 11px;
+}
+
+.health-score span {
+  font-size: 30px;
+}
+
+.health-score small {
+  font-size: 9.5px;
+  letter-spacing: 0;
+}
+
+/* No-sales chart state */
+.sales-chart-card.is-empty-chart {
+  min-height: 132px;
+}
+
+.sales-chart-card.is-empty-chart .card-body {
+  padding: 14px;
+}
+
+.sales-chart-card.is-empty-chart .hour-chart {
+  height: 62px;
+  margin: 0;
+}
+
+.sales-chart-card.is-empty-chart .bar-chart-legend,
+.sales-chart-card.is-empty-chart #hourLabels {
+  display: none !important;
+}
+
+.empty-hour-state {
+  height: 100%;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.empty-hour-state strong {
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.empty-hour-state span {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Collapsible lower-priority sections */
+.collapse-toggle {
+  cursor: pointer;
+  border: 1px solid currentColor;
+  font-family: var(--font);
+}
+
+.collapse-toggle::after {
+  content: "  hide";
+  font-weight: 900;
+}
+
+.collapsible-card.is-collapsed .collapse-toggle::after {
+  content: "  show";
+}
+
+.collapsible-card.is-collapsed > .card-body {
+  display: none !important;
+}
+
+.grid-3 > .collapsible-card.is-collapsed {
+  min-height: 58px !important;
+}
+
+.collapsible-card.is-collapsed {
+  height: auto !important;
+}
+
 /* Daily owner workflow upgrade */
 .exec-title-row {
   gap: 16px;
@@ -2027,6 +2160,16 @@
 }
 
 @media(max-width:760px) {
+  .health-score {
+    width: 88px;
+    height: 88px;
+    flex-basis: 88px;
+  }
+
+  .health-score span {
+    font-size: 25px;
+  }
+
   .expiry-gradient-body {
     align-items: stretch;
     flex-direction: column;

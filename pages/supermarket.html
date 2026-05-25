@@ -42,7 +42,7 @@
       <div id="tab-replenishment" class="ops-tab-content active">
         <div class="ops-grid">
           <!-- Low Stock Reorder Alerts Card -->
-          <section class="ops-card accent-danger reorder-alert-card">
+          <section class="ops-card accent-danger reorder-alert-card" id="reorderQuickSection">
             <div class="ops-title">
               <i class="fa-solid fa-triangle-exclamation"></i> Reorder Alerts
               <span class="badge-red" id="reorderCountBadge">0 items</span>
@@ -271,13 +271,13 @@
           </section>
 
           <!-- Held Bills Card -->
-          <section class="ops-card accent-slate span-4">
+          <section class="ops-card accent-slate span-4" id="heldQuickSection">
             <div class="ops-title"><i class="fa-solid fa-receipt"></i> Held Bills</div>
             <div id="heldBillsList" class="ops-list">Loading...</div>
           </section>
 
           <!-- Return / Void Card -->
-          <section class="ops-card accent-danger span-4">
+          <section class="ops-card accent-danger span-4" id="returnQuickSection">
             <div class="ops-title"><i class="fa-solid fa-rotate-left"></i> Return / Void</div>
             <div class="ops-fields">
               <input id="voidBillId" class="field-input" placeholder="Bill ID to void">

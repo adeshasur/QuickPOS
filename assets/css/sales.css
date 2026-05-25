@@ -11,6 +11,16 @@
 .search-meta-chip{margin-right:auto;padding:8px 12px;border-radius:999px;border:1px solid var(--border2);background:var(--surface);font-size:12px;font-weight:700;color:var(--text2)}
 .toolbar-chip-btn{border:1px solid var(--border2);background:var(--surface);color:var(--text2);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
 .toolbar-chip-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-glow)}
+.sales-quick-tabs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:-6px}
+.sales-quick-tab{height:34px;border:1px solid #dbe4ef;background:#fff;color:#334155;border-radius:999px;padding:0 12px;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:800;font-family:var(--font);cursor:pointer;transition:all .18s ease}
+.sales-quick-tab i{font-size:12px;color:#2563eb}
+.sales-quick-tab:hover{border-color:#2563eb;color:#1d4ed8;background:#eff6ff}
+.sales-quick-tab.warn{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
+.sales-quick-tab.warn i{color:#f59e0b}
+.sales-quick-tab.warn:hover{background:#ffedd5;border-color:#fb923c}
+.sales-quick-tab.danger{border-color:#fecaca;background:#fff1f2;color:#991b1b}
+.sales-quick-tab.danger i{color:#ef4444}
+.sales-quick-tab.danger:hover{background:#ffe4e6;border-color:#f87171}
 .search-wrap{position:relative;flex:1}
 .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3)}
 .search-icon svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -325,12 +335,12 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
 }
-.pay-btn.card {
+.pay-btn.card-pay {
   background: #3b82f6;
   color: white;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
 }
-.pay-btn.card:hover:not(:disabled) {
+.pay-btn.card-pay:hover:not(:disabled) {
   background: #2563eb;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);

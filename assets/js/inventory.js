@@ -387,6 +387,13 @@
                 renderStockTable();
             });
         });
+
+        const hashFilter = String(window.location.hash || '').replace('#', '');
+        if (['expired', 'expiring', 'good', 'all'].includes(hashFilter)) {
+            const targetBadge = document.querySelector(`.filter-badge[data-filter="${hashFilter}"]`);
+            if (targetBadge) targetBadge.click();
+            document.getElementById('inventoryStockSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     document.addEventListener('DOMContentLoaded', init);

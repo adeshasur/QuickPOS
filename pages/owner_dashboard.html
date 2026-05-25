@@ -39,37 +39,6 @@
       </div>
     </div>
 
-    <section class="exec-cockpit">
-      <div class="exec-main">
-        <div class="exec-eyebrow">Daily Business Control</div>
-        <div class="exec-title-row">
-          <div>
-            <h1>Owner Dashboard</h1>
-            <p>Today sales, cash drawer, stock risk, credit dues, and cashier activity in one clear control view.</p>
-          </div>
-          <div class="health-score">
-            <span id="healthScore">--</span>
-            <small>Health</small>
-          </div>
-        </div>
-        <div class="health-breakdown" id="healthBreakdown">
-          <span>Waiting for live signals</span>
-        </div>
-        <div class="exec-stats">
-          <div><span>Peak Hour</span><strong id="execPeakHour">--</strong><small id="execPeakHourMeta">Waiting for sales</small></div>
-          <div><span>Best Cashier</span><strong id="execBestCashier">--</strong><small id="execBestCashierMeta">No bills yet</small></div>
-          <div><span>Best Product</span><strong id="execBestProduct">--</strong><small id="execBestProductMeta">No items yet</small></div>
-          <div><span>Owner Focus</span><strong id="execOwnerFocus">Review alerts</strong><small id="execOwnerFocusMeta">Action queue below</small></div>
-        </div>
-      </div>
-      <div class="exec-side">
-        <div class="exec-side-title"><i class="fa-solid fa-list-check"></i> Action Queue</div>
-        <div id="actionQueue" class="action-queue">
-          <div class="action-item neutral"><span>Loading dashboard signals...</span></div>
-        </div>
-      </div>
-    </section>
-
     <div class="kpi-grid">
       <div class="kpi-card blue">
         <div class="kpi-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H7"/></svg></div>
@@ -107,6 +76,37 @@
         <div class="kpi-meta"><span class="kpi-sub">Total quantity sold</span></div>
       </div>
     </div>
+
+    <section class="exec-cockpit">
+      <div class="exec-main">
+        <div class="exec-eyebrow">Daily Business Control</div>
+        <div class="exec-title-row">
+          <div>
+            <h1>Daily Control Center</h1>
+            <p>Today sales, cash drawer, stock risk, credit dues, and cashier activity in one clear control view.</p>
+          </div>
+          <div class="health-score">
+            <span id="healthScore">--</span>
+            <small>Health</small>
+          </div>
+        </div>
+        <div class="health-breakdown" id="healthBreakdown">
+          <span>Waiting for live signals</span>
+        </div>
+        <div class="exec-stats">
+          <div><span>Peak Hour</span><strong id="execPeakHour">--</strong><small id="execPeakHourMeta">Waiting for sales</small></div>
+          <div><span>Best Cashier</span><strong id="execBestCashier">--</strong><small id="execBestCashierMeta">No bills yet</small></div>
+          <div><span>Best Product</span><strong id="execBestProduct">--</strong><small id="execBestProductMeta">No items yet</small></div>
+          <div><span>Owner Focus</span><strong id="execOwnerFocus">Review alerts</strong><small id="execOwnerFocusMeta">Action queue below</small></div>
+        </div>
+      </div>
+      <div class="exec-side">
+        <div class="exec-side-title"><i class="fa-solid fa-list-check"></i> Action Queue</div>
+        <div id="actionQueue" class="action-queue">
+          <div class="action-item neutral"><span>Loading dashboard signals...</span></div>
+        </div>
+      </div>
+    </section>
 
     <div class="control-grid">
       <div class="control-card">
@@ -152,7 +152,7 @@
     </div>
 
     <!-- Dedicated Full-Width Sales Graph Container -->
-    <div class="card sales-chart-card">
+    <div class="card sales-chart-card" id="salesChartCard">
       <div class="card-header">
         <div class="card-title" style="color:var(--primary)">
           <i class="fa-solid fa-chart-column"></i>
@@ -232,25 +232,26 @@
     </div>
 
     <div class="grid-3" style="margin-bottom: 20px;">
-      <div class="card">
+      <div class="card collapsible-card is-collapsed">
         <div class="card-header">
           <div class="card-title" style="color:var(--success)">
             <i class="fa-solid fa-crown"></i>
             Top Products
           </div>
-          <span class="section-badge badge-green">by qty</span>
+          <button class="section-badge badge-green collapse-toggle" type="button" data-collapse-toggle>by qty</button>
         </div>
         <div class="card-body" id="topItemsList">
           <div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">No sales data</div>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card collapsible-card is-collapsed">
         <div class="card-header">
           <div class="card-title" style="color:var(--purple)">
             <i class="fa-solid fa-credit-card"></i>
             Payment Mix
           </div>
+          <button class="section-badge badge-blue collapse-toggle" type="button" data-collapse-toggle>details</button>
         </div>
         <div class="card-body">
           <div class="pay-grid" id="payMix">
@@ -284,13 +285,13 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card collapsible-card">
         <div class="card-header">
           <div class="card-title" style="color:var(--red)">
             <i class="fa-solid fa-triangle-exclamation"></i>
             Reorder Alerts
           </div>
-          <span class="section-badge badge-red" id="reorderBadge">0 items</span>
+          <button class="section-badge badge-red collapse-toggle" type="button" id="reorderBadge" data-collapse-toggle>0 items</button>
         </div>
         <div class="card-body" id="reorderList" style="display:flex;flex-direction:column">
           <div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">Checking stock levels...</div>
@@ -299,26 +300,26 @@
     </div>
 
     <!-- Slow Moving Items (Full width for gorgeous multi-column layout) -->
-    <div class="card" style="margin-bottom: 20px;">
+    <div class="card collapsible-card is-collapsed" style="margin-bottom: 20px;">
       <div class="card-header">
         <div class="card-title" style="color:var(--amber)">
           <i class="fa-solid fa-hourglass-half"></i>
           Slow Moving Items
         </div>
-        <span class="section-badge badge-amber">No sales 3+ days</span>
+        <button class="section-badge badge-amber collapse-toggle" type="button" data-collapse-toggle>No sales 3+ days</button>
       </div>
       <div class="card-body">
         <div id="slowList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px"></div>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card collapsible-card is-collapsed">
       <div class="card-header">
         <div class="card-title" style="color:var(--primary)">
           <i class="fa-solid fa-users-viewfinder"></i>
           Today's Cashier Performance
         </div>
-        <span class="section-badge badge-blue">Sales Breakdown</span>
+        <button class="section-badge badge-blue collapse-toggle" type="button" data-collapse-toggle>Sales Breakdown</button>
       </div>
       <div class="card-body" id="cashierPerformanceList">
         <div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">Loading cashier performance metrics...</div>

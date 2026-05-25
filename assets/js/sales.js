@@ -963,6 +963,13 @@
       stockSearch.focus();
     });
 
+    document.querySelectorAll('[data-sales-link]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const target = button.dataset.salesLink;
+        if (target) window.location.href = target;
+      });
+    });
+
     barcodeInput.addEventListener('keydown', async (event) => {
       if (event.key !== 'Enter') return;
       event.preventDefault();
