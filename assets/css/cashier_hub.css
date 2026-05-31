@@ -1337,3 +1337,57 @@
 .secondary-action {
   border-radius: 11px;
 }
+
+/* Cashier hub readability pass */
+.shift-eyebrow,
+.kpi-label,
+.kpi-meta,
+.hour-label,
+.donut-center small,
+.action-tile em {
+  font-size: 11px;
+}
+
+#shiftStatusText,
+.shift-toggle-btn,
+.hub-role,
+.panel-head p,
+.panel-pill,
+.chart-legend span,
+.terminal-table th,
+.terminal-sub,
+.terminal-action,
+.donut-center span,
+.legend-name,
+.legend-amount,
+.legend-pct,
+.hold-desc,
+.hold-resume,
+.action-tile span,
+.ops-row span,
+.glance-tile span,
+.mini-btn,
+.modal-row small,
+.hub-table th {
+  font-size: 12px;
+}
+
+.terminal-name,
+.terminal-qty,
+.terminal-price,
+.hold-name,
+.action-tile strong,
+.ops-row strong,
+.hub-toast,
+.async-modal-body label,
+.async-btn,
+.hub-table td {
+  font-size: 14px;
+}
+
+.panel-head h3,
+.modal-input,
+.modal-search,
+.modal-row strong {
+  font-size: 15px;
+}

@@ -1037,3 +1037,28 @@ body.sales-dense .cart-item { padding: 9px 0; }
     grid-template-columns: 1fr;
   }
 }
+
+/* Sales screen readability pass */
+.search-meta-chip,
+.toolbar-chip-btn,
+.sales-quick-tab,
+.ssi-price,
+.stock-badge,
+.out-label,
+.cust-result-phone,
+.sc-bal,
+.ci-unit,
+.hold-empty {
+  font-size: 13px;
+}
+
+.ssi-name,
+.cust-result-name,
+.cust-result-bal,
+.sc-name,
+.ci-name,
+.ci-total,
+.total-label,
+.field-label {
+  font-size: 15px;
+}

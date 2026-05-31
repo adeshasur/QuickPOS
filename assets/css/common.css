@@ -1,5 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
+@font-face {
+    font-family: 'QuickPOS Sinhala';
+    src: local('Noto Sans Sinhala'), local('Nirmala UI'), local('Iskoola Pota');
+    unicode-range: U+0D80-0DFF;
+    size-adjust: 116%;
+}
+
 /* === Unified Design System === */
 :root {
     /* Base colors - Brand Blue/Orange Theme */
@@ -38,9 +45,9 @@
     --radius-lg: 16px;
     --radius-xl: 24px;
     
-    --font: 'Manrope', 'Noto Sans Sinhala', 'Iskoola Pota', 'Nirmala UI', system-ui, sans-serif;
-    --mono: 'Manrope', 'Noto Sans Sinhala', 'Iskoola Pota', 'Nirmala UI', system-ui, sans-serif;
-    --font-mono: 'Manrope', 'Noto Sans Sinhala', 'Iskoola Pota', 'Nirmala UI', system-ui, sans-serif;
+    --font: 'QuickPOS Sinhala', 'Manrope', 'Noto Sans Sinhala', 'Iskoola Pota', 'Nirmala UI', system-ui, sans-serif;
+    --mono: 'QuickPOS Sinhala', 'Manrope', 'Noto Sans Sinhala', 'Iskoola Pota', 'Nirmala UI', system-ui, sans-serif;
+    --font-mono: 'QuickPOS Sinhala', 'Manrope', 'Noto Sans Sinhala', 'Iskoola Pota', 'Nirmala UI', system-ui, sans-serif;
 }
 
 * {
@@ -1406,4 +1413,59 @@ tbody tr:hover td,
     scroll-behavior: auto !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* App-wide readability pass */
+body {
+  font-size: 15px;
+}
+
+button,
+input,
+select,
+textarea {
+  font-size: 15px;
+}
+
+.page-sub,
+.field-hint,
+.form-hint,
+.card-subtitle,
+.card-details,
+.empty-state small {
+  font-size: 14px !important;
+}
+
+.field-label,
+.form-label,
+.filter-input,
+.filter-select,
+.search-input,
+.field-input,
+.field-select,
+.form-input,
+.form-select {
+  font-size: 15px !important;
+}
+
+thead th,
+.table-head .th,
+.stock-table th,
+.staff-table th {
+  font-size: 13px !important;
+}
+
+tbody td,
+.cust-row .td {
+  font-size: 14px;
+}
+
+.add-btn,
+.tbl-btn,
+.row-btn,
+.report-btn,
+.footer-btn,
+.modal-btn,
+.danger-action-btn {
+  font-size: 14px !important;
 }

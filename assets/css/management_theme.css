@@ -365,3 +365,38 @@ textarea {
     animation: none !important;
   }
 }
+
+/* Management screens readability pass */
+.page-sub,
+.field-hint,
+.form-hint,
+.card-subtitle,
+.card-details,
+.ver-desc,
+.danger-card-desc {
+  font-size: 14px !important;
+}
+
+.badge,
+.role-badge,
+.status-badge,
+.section-badge,
+.count-badge,
+.measure-tag,
+.settings-tab-btn,
+.price-disc,
+.hi-method {
+  font-size: 12px !important;
+}
+
+tbody td,
+.cust-row .td,
+.staff-table td {
+  font-size: 14px !important;
+}
+
+.sys-info-label,
+.sys-info-val,
+.history-summary-card span {
+  font-size: 14px !important;
+}

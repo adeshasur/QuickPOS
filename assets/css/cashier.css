@@ -1101,3 +1101,36 @@ body.ui-compact .hotkey-btn { padding: 9px 6px; }
     max-width: unset;
   }
 }
+
+/* Cashier terminal readability pass */
+.nav-mode-tag,
+.shift-timer-wrap,
+.ui-preset-btn,
+.cust-points,
+.cart-table th,
+.summary-label,
+.quick-card-stock,
+.pay-amount-label,
+.pay-method-tag {
+  font-size: 12px;
+}
+
+.cashier-name,
+.customer-bar-left,
+.quick-panel-title,
+.quick-card-name,
+.quick-card-price,
+.pay-method-label,
+.pay-input-label,
+.cust-result-balance {
+  font-size: 14px;
+}
+
+.cart-table td,
+.summary-val,
+.hotkey-btn-content,
+.quick-search-input,
+.pay-input,
+.cust-result-name {
+  font-size: 15px;
+}

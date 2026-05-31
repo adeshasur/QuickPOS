@@ -398,3 +398,15 @@ body{
         font-size:24px;
     }
 }
+
+/* Login readability pass */
+.role-btn,
+.label,
+.remember,
+.forgot {
+    font-size:15px;
+}
+
+.footer {
+    font-size:13px;
+}
