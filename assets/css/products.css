@@ -284,8 +284,8 @@ td {
 }
 
 .p-name-main {
-  font-size: 14.5px;
-  line-height: 1.35;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 .p-barcode-sub,
@@ -321,15 +321,18 @@ td {
 
 /* Advanced catalog management polish */
 .filter-toolbar {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .search-box {
+  max-width: none;
   min-width: 260px;
 }
 
 .cat-filter-box {
+  flex: 0 0 220px;
   min-width: 210px;
+  margin-left: 0;
 }
 
 .table-wrap {
@@ -383,6 +386,7 @@ tbody tr:hover td {
 @media (max-width: 760px) {
   .filter-toolbar {
     align-items: stretch;
+    flex-wrap: wrap;
   }
 
   .search-box,
