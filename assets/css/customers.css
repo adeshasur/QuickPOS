@@ -248,6 +248,11 @@
   gap: 12px;
 }
 
+body.dashboard-body .content {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable;
+}
+
 .toolbar .search-wrap {
   width: auto;
   max-width: none;
