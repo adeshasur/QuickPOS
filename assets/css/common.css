@@ -475,11 +475,11 @@ body.sidebar-collapsible.sidebar-hidden #sidebar-container {
 }
 
 .toast.expiry {
-    border-left-color: #d97706;
+    border-left-color: #f43f5e;
 }
 
 .toast.expiry i {
-    color: #d97706;
+    color: #fb7185;
 }
 
 .nd-item-tag {
@@ -575,10 +575,10 @@ body.sidebar-collapsible.sidebar-hidden #sidebar-container {
     color: var(--warning);
 }
 .toast.expiry .toast-icon {
-    background: rgba(217, 119, 6, 0.16);
+    background: rgba(244, 63, 94, 0.16);
 }
 .toast.expiry {
-    --toast-accent: #d97706;
+    --toast-accent: #f43f5e;
 }
 .toast-close {
     width: 24px;
