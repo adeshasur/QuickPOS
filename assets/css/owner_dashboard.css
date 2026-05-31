@@ -2188,3 +2188,52 @@
     width: 100%;
   }
 }
+
+/* Dashboard readability pass */
+.kpi-label {
+  font-size: 11px;
+}
+
+.kpi-meta,
+.kpi-sub,
+.kpi-trend-badge {
+  font-size: 11px;
+}
+
+.exec-eyebrow {
+  font-size: 11px;
+}
+
+.exec-title-row p {
+  font-size: 14px;
+}
+
+.exec-stats span,
+.control-metrics span {
+  font-size: 11px;
+}
+
+.exec-stats small,
+.action-item small {
+  font-size: 12px;
+}
+
+.action-item span,
+.control-metrics strong {
+  font-size: 13px;
+}
+
+.health-breakdown span,
+.cash-close-panel label,
+.section-badge {
+  font-size: 12px;
+}
+
+.expiry-alert-copy p {
+  font-size: 14px;
+}
+
+.action-link,
+.cash-close-row button {
+  font-size: 13px;
+}
