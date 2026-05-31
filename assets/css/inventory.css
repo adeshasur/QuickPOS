@@ -358,7 +358,18 @@
     width: 100%;
     border-collapse: collapse;
     min-width: 980px;
+    table-layout: fixed;
 }
+
+.stock-table .col-product { width: 18%; }
+.stock-table .col-category { width: 13%; }
+.stock-table .col-quantity { width: 9%; }
+.stock-table .col-cost-price { width: 10%; }
+.stock-table .col-selling-price { width: 11%; }
+.stock-table .col-expiry-date { width: 10%; }
+.stock-table .col-status { width: 12%; }
+.stock-table .col-days-left { width: 11%; }
+.stock-table .col-actions { width: 6%; }
 
 .stock-table th {
     text-align: left;
@@ -380,6 +391,8 @@
     color: var(--text);
     white-space: nowrap;
     font-family: var(--font);
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .inventory-product-name {
