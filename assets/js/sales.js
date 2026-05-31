@@ -16,8 +16,6 @@
     discounts: [],
     promotions: [],
     taxCategories: [],
-    productToCustomize: null,
-    priceEdited: false,
     lastSale: null,
     overrideResolver: null
   };
@@ -286,11 +284,7 @@
         const productId = Number(card.dataset.productId);
         const product = state.products.find((p) => p.id === productId);
         if (!product || Number(product.current_stock || 0) <= 0) return;
-        if (Number(product.is_weighted || 0) === 1) {
-          openCustomize(product.id);
-        } else {
-          addToCart(product.id, 1, Number(product.selling_price || 0), 'manual');
-        }
+        addToCart(product.id, 1, Number(product.selling_price || 0), 'manual');
       });
     });
   }
@@ -578,19 +572,6 @@
     if (!resumeId) return;
     localStorage.removeItem('quickpos-resume-hold-id');
     await resumeHeldBill(resumeId);
-  }
-
-  function openCustomize(productId) {
-    const product = state.products.find((p) => p.id === productId);
-    if (!product) return;
-    state.productToCustomize = product;
-    state.priceEdited = false;
-
-    document.getElementById('custModalTitle').textContent = displayName(product);
-    document.getElementById('unitPriceShow').textContent = fmt(product.selling_price || 0);
-    document.getElementById('custQty').value = '1.00';
-    document.getElementById('custPrice').value = Number(product.selling_price || 0).toFixed(2);
-    openModal('custModal');
   }
 
   function openModal(id) {
@@ -982,8 +963,6 @@
           const cached = upsertProduct(product);
           if (product.isScale) {
             addToCart(cached.id, product.parsedQuantity, Number(cached.selling_price || 0), 'scan');
-          } else if (Number(cached.is_weighted || 0) === 1) {
-            openCustomize(cached.id);
           } else {
             addToCart(cached.id, 1, Number(cached.selling_price || 0), 'scan');
           }
@@ -991,11 +970,7 @@
           const matches = await window.api.searchProducts({ query: code, limit: 1 });
           const fallback = matches?.length ? upsertProduct(matches[0]) : null;
           if (fallback) {
-            if (Number(fallback.is_weighted || 0) === 1) {
-              openCustomize(fallback.id);
-            } else {
-              addToCart(fallback.id, 1, Number(fallback.selling_price || 0), 'scan');
-            }
+            addToCart(fallback.id, 1, Number(fallback.selling_price || 0), 'scan');
           } else {
             notify(`Barcode "${code}" not found`, 'warning');
           }
@@ -1085,29 +1060,6 @@
           renderCustomer();
         });
       });
-    });
-
-    document.getElementById('closeCustModal').addEventListener('click', () => closeModal('custModal'));
-    document.getElementById('cancelCustModal').addEventListener('click', () => closeModal('custModal'));
-    document.getElementById('custQty').addEventListener('input', () => {
-      if (state.priceEdited || !state.productToCustomize) return;
-      const qty = Number(parseFloat(document.getElementById('custQty').value) || 0);
-      document.getElementById('custPrice').value = (qty * Number(state.productToCustomize.selling_price || 0)).toFixed(2);
-    });
-    document.getElementById('custPrice').addEventListener('input', () => {
-      state.priceEdited = true;
-    });
-    document.getElementById('addCustToCart').addEventListener('click', () => {
-      if (!state.productToCustomize) return;
-      const qty = Number(parseFloat(document.getElementById('custQty').value) || 0);
-      const totalPrice = Number(parseFloat(document.getElementById('custPrice').value) || 0);
-      if (qty <= 0 || totalPrice <= 0) {
-        notify('Enter a valid quantity/price', 'warning');
-        return;
-      }
-      const unitPrice = totalPrice / qty;
-      addToCart(state.productToCustomize.id, qty, unitPrice, 'manual');
-      closeModal('custModal');
     });
 
     document.getElementById('cashBtn').addEventListener('click', () => {
