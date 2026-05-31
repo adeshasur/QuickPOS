@@ -401,13 +401,13 @@
             <div class="ci-name">${escapeHtml(item.name)}</div>
             <div class="ci-unit">${formatQty(item.quantity)} ${escapeHtml(item.unit)} x ${fmt(item.price)}${Number(item.discount || 0) > 0 ? ` <span class="ci-discount">saved ${fmt(Number(item.discount) * Number(item.quantity))}</span>` : ''}</div>
           </div>
-          <div class="ci-total">${fmt(sub)}</div>
           <div class="ci-controls">
             <button class="qty-btn" data-action="dec" data-index="${i}">-</button>
             <span class="qty-num">${formatQty(item.quantity)}</span>
             <button class="qty-btn" data-action="inc" data-index="${i}">+</button>
             <button class="remove-btn" data-index="${i}" title="Remove"><i class="fa-solid fa-trash"></i></button>
           </div>
+          <div class="ci-total">${fmt(sub)}</div>
         </div>
       `;
     }).join('');
