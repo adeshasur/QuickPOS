@@ -169,7 +169,7 @@
             
             return `
                 <tr class="${isExpired ? 'expired-row' : ''}">
-                    <td><strong>${item.name}</strong><div class="batch-code">${batchCode}</div></td>
+                    <td><strong class="inventory-product-name">${item.name}</strong><div class="batch-code">${batchCode}</div></td>
                     <td>${categoryName}</td>
                     <td>${qty} ${displayUnit(item.unit_type)}</td>
                     <td>${formatCurrency(item.cost_price || 0)}</td>
