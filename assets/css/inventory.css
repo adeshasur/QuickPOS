@@ -1,12 +1,3 @@
-/* Variables and Font Overrides */
-:root {
-    --font: 'Manrope', 'Inter', sans-serif;
-}
-
-body, html, .inventory-container, input, select, button {
-    font-family: 'Noto Sans Sinhala', 'Iskoola Pota', var(--font) !important;
-}
-
 /* Inventory page redesign - aligned with Category/Product system */
 .inventory-container {
     flex: 1;
@@ -388,7 +379,7 @@ body, html, .inventory-container, input, select, button {
     font-size: 13px;
     color: var(--text);
     white-space: nowrap;
-    font-family: 'Noto Sans Sinhala', 'Iskoola Pota', var(--font);
+    font-family: var(--font);
 }
 
 .inventory-product-name {
