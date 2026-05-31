@@ -3,6 +3,9 @@
 
   const Notifications = {
     readKey: 'quickpos-read-notifications',
+    maxVisibleToasts: 3,
+    toastIntervalMs: 2800,
+    toastDurationMs: 9000,
 
     getReadSet() {
       try {
@@ -120,10 +123,10 @@
         if (isDashboard && totalCount > 0 && !sessionToastsShown) {
           sessionStorage.setItem('quickpos-toasts-shown', 'true');
           lowAlerts.forEach(({ item }, i) => {
-            setTimeout(() => this.showToast(`Low Stock: ${item.name} (${item.current_stock} left)`, 'warning'), i * 800);
+            setTimeout(() => this.showToast(`${item.name} (${item.current_stock} left)`, 'warning'), i * this.toastIntervalMs);
           });
           expiryAlerts.forEach(({ item }, i) => {
-            setTimeout(() => this.showToast(`Expiring Soon: ${item.name} (${item.days_left} days left)`, 'expiry'), (lowAlerts.length + i) * 800);
+            setTimeout(() => this.showToast(`${item.name} (${item.days_left} days left)`, 'expiry'), (lowAlerts.length + i) * this.toastIntervalMs);
           });
         }
       } catch (err) {
@@ -137,13 +140,35 @@
       const t = document.createElement('div');
       t.className = `toast ${type}`;
       const icon = type === 'warning' ? 'fa-layer-group' : type === 'expiry' ? 'fa-hourglass-half' : 'fa-circle-info';
-      t.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${msg}</span>`;
+      const title = type === 'warning' ? 'Low Stock Alert' : type === 'expiry' ? 'Expiring Soon' : 'Notification';
+      t.style.setProperty('--toast-duration', `${this.toastDurationMs}ms`);
+      t.innerHTML = `
+        <div class="toast-icon"><i class="fa-solid ${icon}"></i></div>
+        <div class="toast-content">
+          <div class="toast-title">${title}</div>
+        </div>
+        <button class="toast-close" type="button" aria-label="Dismiss notification"><i class="fa-solid fa-xmark"></i></button>
+        <div class="toast-progress"></div>
+      `;
+      const message = document.createElement('span');
+      message.className = 'toast-message';
+      message.textContent = msg;
+      t.querySelector('.toast-content').appendChild(message);
+      t.querySelector('.toast-close').addEventListener('click', () => this.dismissToast(t));
       container.appendChild(t);
+
+      const visibleToasts = Array.from(container.querySelectorAll('.toast:not(.is-dismissing)'));
+      visibleToasts.slice(0, -this.maxVisibleToasts).forEach((toast) => this.dismissToast(toast));
+
       setTimeout(() => t.classList.add('show'), 10);
-      setTimeout(() => {
-        t.classList.remove('show');
-        setTimeout(() => t.remove(), 500);
-      }, 5000);
+      setTimeout(() => this.dismissToast(t), this.toastDurationMs);
+    },
+
+    dismissToast(toast) {
+      if (!toast || toast.classList.contains('is-dismissing')) return;
+      toast.classList.add('is-dismissing');
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 500);
     },
 
     async refreshApp() {

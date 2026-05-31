@@ -91,10 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             localStorage.setItem("quickpos-user", JSON.stringify(userData));
+            sessionStorage.removeItem("quickpos-toasts-shown");
 
             /* REDIRECT */
             if (response.user.role === "owner") {
-                window.location.href = response.requiresPasswordChange ? "settings.html" : "owner_dashboard.html";
+                window.location.href = "owner_dashboard.html";
             } else {
                 window.location.href = "cashier_hub.html";
             }

@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (confirmed) {
                 localStorage.removeItem('quickpos-user');
+                sessionStorage.removeItem('quickpos-toasts-shown');
                 window.location.href = 'login.html';
             }
         });

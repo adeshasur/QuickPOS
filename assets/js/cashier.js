@@ -548,6 +548,7 @@
       }
       clearInterval(shiftInterval);
       localStorage.removeItem('quickpos-user');
+      sessionStorage.removeItem('quickpos-toasts-shown');
       localStorage.removeItem('quickpos-shift-start');
       window.location.href = 'login.html';
     });
@@ -1159,6 +1160,7 @@
     if (confirm) {
       closeAllActionModals();
       localStorage.removeItem('quickpos-user');
+      sessionStorage.removeItem('quickpos-toasts-shown');
       window.location.href = 'login.html';
     }
   });

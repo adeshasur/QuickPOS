@@ -39,6 +39,7 @@
   function clearSessionAndRedirect() {
     localStorage.removeItem('quickpos-user');
     localStorage.removeItem('quickposUser');
+    sessionStorage.removeItem('quickpos-toasts-shown');
     if (!window.location.pathname.endsWith('/login.html') && !window.location.pathname.endsWith('login.html')) {
       window.location.href = 'login.html';
     }
@@ -463,6 +464,7 @@
         if (confirmed) {
           localStorage.removeItem('quickpos-user');
           localStorage.removeItem('quickposUser');
+          sessionStorage.removeItem('quickpos-toasts-shown');
           smoothNavigate('login.html');
         }
       });
