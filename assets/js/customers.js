@@ -41,8 +41,6 @@
       list = list.filter((c) => (c.balance || 0) > 0);
     }
 
-    document.getElementById('countDisplay').textContent = list.length;
-
     const body = document.getElementById('tableBody');
     if (!list.length) {
       body.innerHTML = '<div class="empty-state"><p>No customers found</p></div>';

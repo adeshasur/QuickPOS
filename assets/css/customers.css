@@ -240,6 +240,28 @@
   max-width: min(560px, 100%);
 }
 
+/* Keep the customer lookup tools in one balanced row. */
+.content .toolbar {
+  height: auto !important;
+  min-height: 66px !important;
+  padding: 10px 12px !important;
+  gap: 12px;
+}
+
+.toolbar .search-wrap {
+  width: auto;
+  max-width: none;
+  min-width: 240px;
+}
+
+.toolbar .filter-box {
+  flex: 0 0 180px;
+}
+
+.toolbar .filter-select {
+  width: 100%;
+}
+
 @media (max-width: 1024px) {
   .table-head,
   .cust-row {

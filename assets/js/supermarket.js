@@ -226,7 +226,7 @@
   }
 
   async function loadSummary() {
-    const [supplierRows, promotions, adjustments, heldBills, voids, taxes, branchRows, counts, deadStock, till, purchases, payments, backup] = await Promise.all([
+    const [supplierRows, promotions, adjustments, heldBills, voids, taxes, branchRows, counts, deadStock, till, purchases, payments, backup, customers] = await Promise.all([
       window.api.getSuppliers(),
       window.api.getPromotions(),
       window.api.getStockAdjustments(),
@@ -239,7 +239,8 @@
       window.api.getTillMovements(),
       window.api.getPurchaseInvoices ? window.api.getPurchaseInvoices() : Promise.resolve([]),
       window.api.getSupplierPayments ? window.api.getSupplierPayments() : Promise.resolve([]),
-      window.api.getGoogleDriveBackupStatus ? window.api.getGoogleDriveBackupStatus() : Promise.resolve({})
+      window.api.getGoogleDriveBackupStatus ? window.api.getGoogleDriveBackupStatus() : Promise.resolve({}),
+      window.api.getCustomers()
     ]);
 
     suppliers = supplierRows || [];
@@ -263,6 +264,7 @@
 
     document.getElementById('opsSummary').innerHTML = [
       ['Suppliers', suppliers.length],
+      ['Customers', customers.length],
       ['Supplier Due', fmt(suppliers.reduce((sum, s) => sum + Number(s.balance || 0), 0))],
       ['GRNs', purchases.length],
       ['Supplier Payments', payments.length],
