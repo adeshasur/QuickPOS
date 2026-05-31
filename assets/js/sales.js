@@ -1330,7 +1330,6 @@
   function getQuickActionsMarkup() {
     return `
       <div class="sales-quick-tabs" aria-label="Quick operations">
-        <span class="sales-quick-label"><i class="fa-solid fa-bolt"></i> Quick</span>
         <button class="sales-quick-tab danger" type="button" data-sales-link="supermarket.html#returns"><i class="fa-solid fa-rotate-left"></i> Return / Void</button>
         <button class="sales-quick-tab warn" type="button" data-sales-link="inventory.html#expiring"><i class="fa-solid fa-calendar-xmark"></i> Expiry</button>
         <button class="sales-quick-tab warn" type="button" data-sales-link="supermarket.html#reorder"><i class="fa-solid fa-triangle-exclamation"></i> Reorder</button>
