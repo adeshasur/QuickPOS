@@ -916,14 +916,15 @@ body.sales-dense .cart-item { padding: 9px 0; }
 
 .ci-name {
   white-space: nowrap;
-  line-height: 1.2;
-  margin-bottom: 2px;
+  line-height: 1.55;
+  margin-bottom: 0;
+  padding-top: 2px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .ci-unit {
-  line-height: 1.2;
+  line-height: 1.35;
 }
 
 .ci-total {
