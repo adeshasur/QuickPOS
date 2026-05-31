@@ -891,9 +891,8 @@ body.sales-dense .cart-item { padding: 9px 0; }
 }
 
 .cat-pills {
-  max-height: 86px;
-  overflow-y: auto;
-  scrollbar-width: thin;
+  max-height: none;
+  overflow: visible;
 }
 
 .products-grid {
@@ -1012,9 +1011,8 @@ body.sales-dense .cart-item { padding: 9px 0; }
   }
 
   .cat-pills {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
+    flex-wrap: wrap;
+    overflow: visible;
     max-height: none;
   }
 
