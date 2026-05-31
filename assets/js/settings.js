@@ -24,6 +24,8 @@
     keyboardShortcuts: 'true',
     barcodeScanSound: 'false',
     lowStockAlertLevel: '10',
+    loyaltySpendPerPoint: '100',
+    loyalCustomerBillThreshold: '20000',
     requireAdminForRefund: 'true',
     receiptFooter: 'Thank you for shopping with us!',
     googleDriveBackupEmail: ''
@@ -65,6 +67,8 @@
     document.getElementById('keyboardShortcuts').checked = settings.keyboardShortcuts !== 'false';
     document.getElementById('barcodeScanSound').checked = settings.barcodeScanSound === 'true';
     document.getElementById('lowStockAlertLevel').value = settings.lowStockAlertLevel || '10';
+    document.getElementById('loyaltySpendPerPoint').value = settings.loyaltySpendPerPoint || '100';
+    document.getElementById('loyalCustomerBillThreshold').value = settings.loyalCustomerBillThreshold ?? '20000';
     document.getElementById('requireAdminForRefund').checked = settings.requireAdminForRefund !== 'false';
     document.getElementById('receiptFooter').value = settings.receiptFooter || 'Thank you for shopping with us!';
     document.getElementById('googleDriveBackupEmail').value = settings.googleDriveBackupEmail || '';
@@ -328,6 +332,8 @@
       keyboardShortcuts: String(document.getElementById('keyboardShortcuts').checked),
       barcodeScanSound: String(document.getElementById('barcodeScanSound').checked),
       lowStockAlertLevel: String(Math.max(0, parseInt(document.getElementById('lowStockAlertLevel').value || '10', 10) || 10)),
+      loyaltySpendPerPoint: String(Math.max(1, parseFloat(document.getElementById('loyaltySpendPerPoint').value || '100') || 100)),
+      loyalCustomerBillThreshold: String(Math.max(0, parseFloat(document.getElementById('loyalCustomerBillThreshold').value || '0') || 0)),
       requireAdminForRefund: String(document.getElementById('requireAdminForRefund').checked),
       receiptFooter: document.getElementById('receiptFooter').value.trim() || 'Thank you for shopping with us!',
       googleDriveBackupEmail: document.getElementById('googleDriveBackupEmail').value.trim()

@@ -51,7 +51,7 @@
 
     body.innerHTML = list
       .map((c) => `<div class="cust-row" data-id="${c.id}">
-      <div class="td"><div class="cust-name-cell"><div class="cust-avatar ${AVATAR_COLORS[c.id % AVATAR_COLORS.length]}">${initials(c.name)}</div><div><div class="cust-fullname">${c.name}</div><div class="cust-id">#${String(c.id).padStart(4, '0')}</div></div></div></div>
+      <div class="td"><div class="cust-name-cell"><div class="cust-avatar ${AVATAR_COLORS[c.id % AVATAR_COLORS.length]}">${initials(c.name)}</div><div><div class="cust-fullname">${c.name}</div><div class="cust-meta-row"><span class="cust-id">#${String(c.id).padStart(4, '0')}</span>${Number(c.is_loyal_customer || 0) === 1 ? '<span class="loyal-customer-badge"><i class="fa-solid fa-star"></i> Loyal Customer</span>' : ''}</div></div></div></div>
       <div class="td"><span class="phone-val">${formatPhone(c.phone)}</span></div>
       <div class="td"><span class="addr-val">${c.address || '-'}</span></div>
       <div class="td"><span class="loyalty-val">${c.loyalty_points || 0}</span></div>

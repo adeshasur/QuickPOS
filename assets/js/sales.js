@@ -445,9 +445,9 @@
     const creditMeta = creditLimit > 0 ? ` | Limit: ${fmt(creditLimit)}` : '';
     display.innerHTML = `
       <div class="selected-cust">
-        <div class="sc-avatar">${escapeHtml(String(state.selectedCustomer.name || 'C').slice(0, 1).toUpperCase())}</div>
-        <div class="sc-info">
-          <div class="sc-name">${escapeHtml(state.selectedCustomer.name)}</div>
+          <div class="sc-avatar">${escapeHtml(String(state.selectedCustomer.name || 'C').slice(0, 1).toUpperCase())}</div>
+          <div class="sc-info">
+          <div class="sc-name">${escapeHtml(state.selectedCustomer.name)}${Number(state.selectedCustomer.is_loyal_customer || 0) === 1 ? ' <span class="loyal-customer-badge"><i class="fa-solid fa-star"></i> Loyal</span>' : ''}</div>
           <div class="sc-bal">Balance: ${fmt(balance)}${creditMeta} | Loyalty: ${Number(state.selectedCustomer.loyalty_points || 0)}</div>
         </div>
         <button class="sc-clear" id="clearCustomerBtn">x</button>

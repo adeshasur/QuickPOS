@@ -1398,7 +1398,21 @@ ipcMain.handle('delete-category', async (event, id) => {
     }
 });
 
-ipcMain.handle('get-customers', async () => allAsync('SELECT * FROM customers'));
+ipcMain.handle('get-customers', async () => {
+    const loyalBillThreshold = Math.max(0, Number(await getSettingValue('loyalCustomerBillThreshold', '20000')) || 0);
+    return allAsync(`
+        SELECT
+            c.*,
+            CASE WHEN ? > 0 AND EXISTS (
+                SELECT 1
+                FROM sales s
+                WHERE s.customer_id = c.id
+                  AND COALESCE(s.voided, 0) = 0
+                  AND COALESCE(s.total_amount, 0) >= ?
+            ) THEN 1 ELSE 0 END AS is_loyal_customer
+        FROM customers c
+    `, [loyalBillThreshold, loyalBillThreshold]);
+});
 
 ipcMain.handle('save-customer', async (event, c) => {
     if (c.id) {
@@ -1579,7 +1593,8 @@ ipcMain.handle('save-sale', async (event, saleData) => withTransaction(async () 
 
     let loyaltyPointsEarned = 0;
     if (saleData.customerId && saleData.method !== 'Credit') {
-        loyaltyPointsEarned = Math.floor(Number(saleData.total || 0) / 100);
+        const spendPerPoint = Math.max(1, Number(await getSettingValue('loyaltySpendPerPoint', '100')) || 100);
+        loyaltyPointsEarned = Math.floor(Number(saleData.total || 0) / spendPerPoint);
         if (loyaltyPointsEarned > 0) {
             await runAsync('UPDATE customers SET loyalty_points = COALESCE(loyalty_points, 0) + ? WHERE id = ?', [loyaltyPointsEarned, saleData.customerId]);
             await runAsync(
