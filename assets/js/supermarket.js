@@ -263,20 +263,12 @@
       : '<div class="ops-list-row"><span>No held bills</span></div>';
 
     document.getElementById('opsSummary').innerHTML = [
-      ['Suppliers', suppliers.length],
-      ['Customers', customers.length],
+      ['Reorder Alerts', reorderRows.length],
       ['Supplier Due', fmt(suppliers.reduce((sum, s) => sum + Number(s.balance || 0), 0))],
       ['GRNs', purchases.length],
-      ['Supplier Payments', payments.length],
-      ['Promotions', promotions.length],
       ['Stock Adjustments', adjustments.length],
       ['Held Bills', heldBills.length],
-      ['Void Bills', voids.length],
-      ['Tax Categories', taxes.length],
-      ['Branches', branches.length],
-      ['Stock Counts', counts.length],
-      ['Dead Stock', deadStock.length],
-      ['Till Movements', till.length]
+      ['Void Bills', voids.length]
     ].map(([label, value]) => `<div class="ops-summary-row"><span>${label}</span><strong>${value}</strong></div>`).join('');
 
     document.querySelectorAll('[data-delete-hold]').forEach((btn) => {

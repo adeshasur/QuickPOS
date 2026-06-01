@@ -25,16 +25,27 @@
         </div>
       </div>
 
+      <section class="ops-card wide ops-summary-card">
+        <div class="ops-title"><i class="fa-solid fa-chart-simple"></i> Operations Snapshot</div>
+        <div id="opsSummary" class="ops-summary">Loading...</div>
+      </section>
+
       <!-- Tabs Navigation -->
       <div class="ops-tabs">
         <button class="ops-tab-btn active" data-tab="replenishment">
-          <i class="fa-solid fa-boxes-packing"></i> Stock & Replenishment
-        </button>
-        <button class="ops-tab-btn" data-tab="pos-rules">
-          <i class="fa-solid fa-gears"></i> POS Rules & Settings
+          <i class="fa-solid fa-boxes-packing"></i> Inventory Ops
         </button>
         <button class="ops-tab-btn" data-tab="till-ops">
-          <i class="fa-solid fa-cash-register"></i> Till & Cashier Operations
+          <i class="fa-solid fa-cash-register"></i> POS Ops
+        </button>
+        <button class="ops-tab-btn" data-tab="supplier-ops">
+          <i class="fa-solid fa-truck-field"></i> Supplier Ops
+        </button>
+        <button class="ops-tab-btn" data-tab="pos-rules">
+          <i class="fa-solid fa-gears"></i> Configuration
+        </button>
+        <button class="ops-tab-btn" data-tab="backup-admin">
+          <i class="fa-solid fa-shield-halved"></i> Backup & Admin
         </button>
       </div>
 
@@ -71,20 +82,8 @@
             </div>
           </section>
 
-          <!-- Supplier / GRN Card -->
-          <section class="ops-card accent-blue span-4">
-            <div class="ops-title"><i class="fa-solid fa-truck-field"></i> Supplier</div>
-            <div class="ops-fields">
-              <div class="ops-row">
-                <input id="supplierName" class="field-input" placeholder="Supplier name">
-                <input id="supplierPhone" class="field-input" placeholder="Phone">
-              </div>
-              <button id="saveSupplierBtn" class="ops-btn">Save Supplier</button>
-            </div>
-          </section>
-
           <!-- GRN Receiving Card -->
-          <section class="ops-card accent-blue span-8">
+          <section class="ops-card accent-blue span-4">
             <div class="ops-title"><i class="fa-solid fa-file-invoice"></i> GRN / Stock Receiving</div>
             <div class="ops-fields">
               <select id="grnSupplier" class="field-input"></select>
@@ -161,7 +160,96 @@
         </div>
       </div>
 
-      <!-- Tab 2: POS Rules & Settings -->
+      <!-- Tab 2: POS Operations -->
+      <div id="tab-till-ops" class="ops-tab-content">
+        <div class="ops-grid">
+          <!-- Till Cash In / Out Card -->
+          <section class="ops-card accent-success span-4">
+            <div class="ops-title"><i class="fa-solid fa-cash-register"></i> Till Cash In / Out</div>
+            <div class="ops-fields">
+              <div class="ops-row">
+                <select id="tillType" class="field-input"><option value="cash_in">Cash In</option><option value="cash_out">Cash Out</option><option value="petty_cash">Petty Cash</option></select>
+                <input id="tillAmount" class="field-input" type="number" min="0" step="0.01" placeholder="Amount">
+              </div>
+              <input id="tillReason" class="field-input" placeholder="Reason">
+              <button id="recordTillBtn" class="ops-btn">Record Till Movement</button>
+            </div>
+          </section>
+
+          <!-- Shift Close Card -->
+          <section class="ops-card accent-indigo span-4">
+            <div class="ops-title"><i class="fa-solid fa-clipboard-list"></i> Day End / Shift Close</div>
+            <div class="ops-fields">
+              <div class="ops-row">
+                <input id="shiftCashier" class="field-input" placeholder="Cashier name">
+                <input id="shiftStart" class="field-input" type="datetime-local">
+              </div>
+              <div class="ops-row">
+                <input id="openingFloat" class="field-input" type="number" min="0" step="0.01" placeholder="Opening float">
+                <input id="actualDrawer" class="field-input" type="number" min="0" step="0.01" placeholder="Actual drawer cash">
+              </div>
+              <button id="previewShiftBtn" class="ops-btn">Preview Totals</button>
+              <div id="shiftPreview" class="ops-list compact">No shift preview</div>
+              <input id="shiftNotes" class="field-input" placeholder="Close note">
+              <button id="closeShiftBtn" class="ops-btn danger">Close Shift</button>
+            </div>
+          </section>
+
+          <!-- Held Bills Card -->
+          <section class="ops-card accent-slate span-4" id="heldQuickSection">
+            <div class="ops-title"><i class="fa-solid fa-receipt"></i> Held Bills</div>
+            <div id="heldBillsList" class="ops-list">Loading...</div>
+          </section>
+
+          <!-- Return / Void Card -->
+          <section class="ops-card accent-danger span-4" id="returnQuickSection">
+            <div class="ops-title"><i class="fa-solid fa-rotate-left"></i> Return / Void</div>
+            <div class="ops-fields">
+              <input id="voidBillId" class="field-input" placeholder="Bill ID to void">
+              <input id="voidReason" class="field-input" placeholder="Reason">
+              <button id="voidBillBtn" class="ops-btn danger">Void Bill</button>
+              <div class="ops-divider"></div>
+              <input id="returnBillId" class="field-input" placeholder="Bill ID to return/restock">
+              <input id="returnReason" class="field-input" placeholder="Return reason">
+              <button id="loadReturnBillBtn" class="ops-btn">Load Bill Items</button>
+              <div id="returnItemsList" class="ops-list compact">No bill loaded</div>
+              <button id="returnBillBtn" class="ops-btn">Record Selected Return</button>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Tab 3: Supplier Operations -->
+      <div id="tab-supplier-ops" class="ops-tab-content">
+        <div class="ops-grid">
+          <section class="ops-card accent-blue span-4">
+            <div class="ops-title"><i class="fa-solid fa-truck-field"></i> Add Supplier</div>
+            <div class="ops-fields">
+              <div class="ops-row">
+                <input id="supplierName" class="field-input" placeholder="Supplier name">
+                <input id="supplierPhone" class="field-input" placeholder="Phone">
+              </div>
+              <button id="saveSupplierBtn" class="ops-btn">Save Supplier</button>
+            </div>
+          </section>
+
+          <section class="ops-card accent-amber span-4">
+            <div class="ops-title"><i class="fa-solid fa-money-check-dollar"></i> Supplier Payment</div>
+            <div class="ops-fields">
+              <select id="paySupplier" class="field-input"></select>
+              <select id="payInvoice" class="field-input"></select>
+              <div class="ops-row">
+                <input id="payAmount" class="field-input" type="number" min="0" step="0.01" placeholder="Amount">
+                <input id="payRef" class="field-input" placeholder="Ref no">
+              </div>
+              <input id="payNote" class="field-input" placeholder="Payment note">
+              <button id="recordSupplierPaymentBtn" class="ops-btn">Record Payment</button>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Tab 4: Configuration -->
       <div id="tab-pos-rules" class="ops-tab-content">
         <div class="ops-grid">
           <!-- Weighing Scale Barcode Rules Card -->
@@ -224,41 +312,9 @@
         </div>
       </div>
 
-      <!-- Tab 3: Till & Cashier Operations -->
-      <div id="tab-till-ops" class="ops-tab-content">
+      <!-- Tab 5: Backup & Admin -->
+      <div id="tab-backup-admin" class="ops-tab-content">
         <div class="ops-grid">
-          <!-- Till Cash In / Out Card -->
-          <section class="ops-card accent-success span-4">
-            <div class="ops-title"><i class="fa-solid fa-cash-register"></i> Till Cash In / Out</div>
-            <div class="ops-fields">
-              <div class="ops-row">
-                <select id="tillType" class="field-input"><option value="cash_in">Cash In</option><option value="cash_out">Cash Out</option><option value="petty_cash">Petty Cash</option></select>
-                <input id="tillAmount" class="field-input" type="number" min="0" step="0.01" placeholder="Amount">
-              </div>
-              <input id="tillReason" class="field-input" placeholder="Reason">
-              <button id="recordTillBtn" class="ops-btn">Record Till Movement</button>
-            </div>
-          </section>
-
-          <!-- Shift Close Card -->
-          <section class="ops-card accent-indigo span-4">
-            <div class="ops-title"><i class="fa-solid fa-clipboard-list"></i> Day End / Shift Close</div>
-            <div class="ops-fields">
-              <div class="ops-row">
-                <input id="shiftCashier" class="field-input" placeholder="Cashier name">
-                <input id="shiftStart" class="field-input" type="datetime-local">
-              </div>
-              <div class="ops-row">
-                <input id="openingFloat" class="field-input" type="number" min="0" step="0.01" placeholder="Opening float">
-                <input id="actualDrawer" class="field-input" type="number" min="0" step="0.01" placeholder="Actual drawer cash">
-              </div>
-              <button id="previewShiftBtn" class="ops-btn">Preview Totals</button>
-              <div id="shiftPreview" class="ops-list compact">No shift preview</div>
-              <input id="shiftNotes" class="field-input" placeholder="Close note">
-              <button id="closeShiftBtn" class="ops-btn danger">Close Shift</button>
-            </div>
-          </section>
-
           <!-- Backup / Restore Card -->
           <section class="ops-card accent-teal span-4">
             <div class="ops-title"><i class="fa-solid fa-database"></i> Backup / Restore</div>
@@ -270,49 +326,8 @@
             </div>
           </section>
 
-          <!-- Held Bills Card -->
-          <section class="ops-card accent-slate span-4" id="heldQuickSection">
-            <div class="ops-title"><i class="fa-solid fa-receipt"></i> Held Bills</div>
-            <div id="heldBillsList" class="ops-list">Loading...</div>
-          </section>
-
-          <!-- Return / Void Card -->
-          <section class="ops-card accent-danger span-4" id="returnQuickSection">
-            <div class="ops-title"><i class="fa-solid fa-rotate-left"></i> Return / Void</div>
-            <div class="ops-fields">
-              <input id="voidBillId" class="field-input" placeholder="Bill ID to void">
-              <input id="voidReason" class="field-input" placeholder="Reason">
-              <button id="voidBillBtn" class="ops-btn danger">Void Bill</button>
-              <div class="ops-divider"></div>
-              <input id="returnBillId" class="field-input" placeholder="Bill ID to return/restock">
-              <input id="returnReason" class="field-input" placeholder="Return reason">
-              <button id="loadReturnBillBtn" class="ops-btn">Load Bill Items</button>
-              <div id="returnItemsList" class="ops-list compact">No bill loaded</div>
-              <button id="returnBillBtn" class="ops-btn">Record Selected Return</button>
-            </div>
-          </section>
-
-          <!-- Supplier Payment Card -->
-          <section class="ops-card accent-amber span-4">
-            <div class="ops-title"><i class="fa-solid fa-money-check-dollar"></i> Supplier Payment</div>
-            <div class="ops-fields">
-              <select id="paySupplier" class="field-input"></select>
-              <select id="payInvoice" class="field-input"></select>
-              <div class="ops-row">
-                <input id="payAmount" class="field-input" type="number" min="0" step="0.01" placeholder="Amount">
-                <input id="payRef" class="field-input" placeholder="Ref no">
-              </div>
-              <input id="payNote" class="field-input" placeholder="Payment note">
-              <button id="recordSupplierPaymentBtn" class="ops-btn">Record Payment</button>
-            </div>
-          </section>
         </div>
       </div>
-
-      <section class="ops-card wide" style="margin-top: 24px;">
-        <div class="ops-title"><i class="fa-solid fa-chart-simple"></i> Supermarket Summary</div>
-        <div id="opsSummary" class="ops-summary">Loading...</div>
-      </section>
     </div>
   </div>
 

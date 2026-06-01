@@ -10,6 +10,7 @@
 }
 
 .page-header {
+  min-height: 70px !important;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -50,7 +51,7 @@
 .ops-card {
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: var(--bg);
+  background: #ffffff;
   box-shadow: none;
   padding: 16px;
   display: flex;
@@ -186,12 +187,12 @@ select.field-input,
   justify-content: center;
   gap: 8px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 12px var(--primary-glow);
+  box-shadow: none;
 }
 
 .ops-btn:hover {
   background: var(--primary-dark);
-  box-shadow: 0 6px 16px rgba(29, 45, 191, 0.22);
+  box-shadow: none;
 }
 
 .ops-btn:active {
@@ -201,12 +202,12 @@ select.field-input,
 
 .ops-btn.danger {
   background: var(--danger);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+  box-shadow: none;
 }
 
 .ops-btn.danger:hover {
   background: #dc2626;
-  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.25);
+  box-shadow: none;
 }
 
 /* Lists styling */
@@ -298,13 +299,13 @@ select.field-input,
 /* Summary Grid Section */
 .ops-summary {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 14px;
   width: 100%;
 }
 
 .ops-summary-row {
-  min-height: 76px;
+  min-height: 68px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -316,6 +317,12 @@ select.field-input,
   background: var(--surface);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
+}
+
+.ops-summary-card {
+  padding: 13px 15px;
+  gap: 10px;
+  border-color: #dbe5ef;
 }
 
 .ops-summary-row:hover {
@@ -457,13 +464,13 @@ select.field-input,
 
 .ops-tab-content.active {
   display: block;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: transparent;
+  border: 0;
   border-radius: 12px;
-  padding: 16px;
+  padding: 0;
   overflow: visible;
   width: 100%;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+  box-shadow: none;
 }
 
 @keyframes tabFadeIn {
