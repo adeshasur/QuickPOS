@@ -1320,15 +1320,42 @@ body.dashboard-body .reports-split-grid .analysis-card {
 }
 
 body.dashboard-body .reports-split-grid.insights-grid .analysis-card {
-  height: 338px !important;
-  min-height: 338px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  border-color: #dbe5ef !important;
+  box-shadow: none !important;
+  transform: none !important;
+  overflow: hidden !important;
+}
+
+body.dashboard-body .reports-split-grid.insights-grid .analysis-card:hover {
+  border-color: #dbe5ef !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 body.dashboard-body .reports-split-grid.insights-grid .table-container,
 body.dashboard-body .reports-split-grid.insights-grid .table-wrapper,
 body.dashboard-body .reports-split-grid.insights-grid .stock-insight-list {
   height: auto !important;
-  overflow-y: visible !important;
+  overflow: visible !important;
+  scrollbar-width: none;
+}
+
+body.dashboard-body .reports-split-grid.insights-grid .table-container::-webkit-scrollbar,
+body.dashboard-body .reports-split-grid.insights-grid .table-wrapper::-webkit-scrollbar,
+body.dashboard-body .reports-split-grid.insights-grid .stock-insight-list::-webkit-scrollbar {
+  display: none !important;
+}
+
+body.dashboard-body .reports-split-grid.insights-grid .analysis-card,
+body.dashboard-body .reports-split-grid.insights-grid .analysis-card * {
+  scrollbar-width: none !important;
+}
+
+body.dashboard-body .reports-split-grid.insights-grid .analysis-card::-webkit-scrollbar,
+body.dashboard-body .reports-split-grid.insights-grid .analysis-card *::-webkit-scrollbar {
+  display: none !important;
 }
 
 body.dashboard-body .reports-split-grid.insights-grid .analysis-card.insight-expanded {
