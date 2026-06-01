@@ -127,7 +127,10 @@
   background: linear-gradient(135deg, hsla(var(--hue, 225), 85%, 40%, 1), hsla(var(--hue, 225), 85%, 32%, 1));
   border-color: hsla(var(--hue, 225), 85%, 35%, 0.4);
   box-shadow: 0 2px 8px hsla(var(--hue, 225), 85%, 40%, 0.15);
-  transform: translateY(-1px);
+}
+
+.cat-pill.active::before {
+  display: none;
 }
 
 .cat-pill.active .cat-icon-badge {
