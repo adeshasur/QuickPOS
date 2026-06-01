@@ -28,9 +28,22 @@
                 </div>
                 <div class="reports-hero-actions">
                     <button class="report-btn generate-btn" id="generateReportBtn"><span class="material-symbols-rounded s18">refresh</span> Generate</button>
-                    <button class="report-btn view-pdf-btn" id="viewReportPdfBtn"><span class="material-symbols-rounded s18">picture_as_pdf</span> View PDF</button>
-                    <button class="report-btn download-pdf-btn" id="downloadReportPdfBtn"><span class="material-symbols-rounded s18">download</span> Download PDF</button>
-                    <button class="report-btn print-btn" id="printReportBtn"><span class="material-symbols-rounded s18">print</span> Print</button>
+                    <details class="export-menu">
+                        <summary class="report-btn export-menu-btn"><span class="material-symbols-rounded s18">ios_share</span> Export</summary>
+                        <div class="export-menu-popover">
+                            <button class="export-option" id="viewReportPdfBtn"><span class="material-symbols-rounded s18">picture_as_pdf</span> View Full Report</button>
+                            <button class="export-option" id="downloadReportPdfBtn"><span class="material-symbols-rounded s18">download</span> Full Analytics PDF</button>
+                            <div class="export-separator"></div>
+                            <button class="export-option" data-focused-report="summary"><span class="material-symbols-rounded s18">monitoring</span> Sales Summary PDF</button>
+                            <button class="export-option" data-focused-report="cashier"><span class="material-symbols-rounded s18">badge</span> Cashier / Shift PDF</button>
+                            <button class="export-option" data-focused-report="products"><span class="material-symbols-rounded s18">shopping_basket</span> Top Products PDF</button>
+                            <button class="export-option" data-focused-report="stock"><span class="material-symbols-rounded s18">inventory</span> Stock Insights PDF</button>
+                            <button class="export-option" data-focused-report="invoices"><span class="material-symbols-rounded s18">receipt_long</span> Invoice Report PDF</button>
+                            <button class="export-option" data-focused-report="category"><span class="material-symbols-rounded s18">category</span> Category Report PDF</button>
+                            <div class="export-separator"></div>
+                            <button class="export-option" id="printReportBtn"><span class="material-symbols-rounded s18">print</span> Print</button>
+                        </div>
+                    </details>
                 </div>
             </div>
 
@@ -41,6 +54,38 @@
                     <div class="print-subtitle" id="printShift"></div>
                 </div>
 
+                <section class="report-filter-card" aria-label="Report filters">
+                    <div class="date-range-tabs" id="dateRangeTabs">
+                        <button class="range-btn active" data-range="today">Today</button>
+                        <button class="range-btn" data-range="yesterday">Yesterday</button>
+                        <button class="range-btn" data-range="week">This Week</button>
+                        <button class="range-btn" data-range="month">This Month</button>
+                        <button class="range-btn" data-range="custom">Custom Range</button>
+                    </div>
+                    <div class="report-filter-fields">
+                        <label class="report-filter-field custom-date-field" id="customStartWrap">
+                            <span>From</span>
+                            <input type="date" id="reportStartDate">
+                        </label>
+                        <label class="report-filter-field custom-date-field" id="customEndWrap">
+                            <span>To</span>
+                            <input type="date" id="reportEndDate">
+                        </label>
+                        <label class="report-filter-field">
+                            <span>Cashier</span>
+                            <select id="reportCashierFilter"><option value="">All Cashiers</option></select>
+                        </label>
+                        <label class="report-filter-field">
+                            <span>Shift</span>
+                            <select id="reportShiftFilter">
+                                <option value="">All Shifts</option>
+                                <option value="morning">Morning (06:00 - 14:00)</option>
+                                <option value="evening">Evening (14:00 - 22:00)</option>
+                            </select>
+                        </label>
+                    </div>
+                </section>
+
                 <div class="summary-cards">
                     <div class="summary-card total-sales">
                         <div class="card-header">
@@ -50,6 +95,16 @@
                         <div class="card-amount" id="totalSalesAmount">LKR 0.00</div>
                         <div class="card-subtitle">Today's total revenue</div>
                         <div class="card-details" id="totalSalesDetails">No sales data available</div>
+                    </div>
+
+                    <div class="summary-card net-profit">
+                        <div class="card-header">
+                            <div class="card-title">Net Profit</div>
+                            <div class="card-icon"><span class="material-symbols-rounded">trending_up</span></div>
+                        </div>
+                        <div class="card-amount" id="netProfitAmount">LKR 0.00</div>
+                        <div class="card-subtitle">Estimated gross profit</div>
+                        <div class="card-details" id="netProfitDetails">No profit data available</div>
                     </div>
 
                     <div class="summary-card cash-collected">
@@ -71,9 +126,44 @@
                         <div class="card-subtitle">Total card transactions</div>
                         <div class="card-details" id="cardPaymentsDetails">No card transactions</div>
                     </div>
+
+                    <div class="summary-card items-sold">
+                        <div class="card-header">
+                            <div class="card-title">Items Sold</div>
+                            <div class="card-icon"><span class="material-symbols-rounded">shopping_basket</span></div>
+                        </div>
+                        <div class="card-amount" id="itemsSoldAmount">0</div>
+                        <div class="card-subtitle">Total quantity sold</div>
+                        <div class="card-details" id="itemsSoldDetails">No item sales</div>
+                    </div>
+
+                    <div class="summary-card invoice-count">
+                        <div class="card-header">
+                            <div class="card-title">Invoices</div>
+                            <div class="card-icon"><span class="material-symbols-rounded">receipt_long</span></div>
+                        </div>
+                        <div class="card-amount" id="invoiceCountAmount">0</div>
+                        <div class="card-subtitle">Completed bills</div>
+                        <div class="card-details" id="invoiceCountDetails">No invoices</div>
+                    </div>
                 </div>
 
-                <div class="reports-split-grid">
+                <div class="reports-chart-grid">
+                    <div class="analysis-card chart-card">
+                        <div class="section-header">
+                            <div class="section-title"><span class="material-symbols-rounded">show_chart</span> Hourly Sales Trend</div>
+                        </div>
+                        <div class="report-chart" id="salesTrendChart"></div>
+                    </div>
+                    <div class="analysis-card chart-card payment-chart-card">
+                        <div class="section-header">
+                            <div class="section-title"><span class="material-symbols-rounded">donut_large</span> Payment Split</div>
+                        </div>
+                        <div class="report-chart" id="paymentDonutChart"></div>
+                    </div>
+                </div>
+
+                <div class="reports-split-grid insights-grid">
                     <!-- Left Column: Top Selling Items -->
                     <div class="analysis-card top-selling-card">
                         <div class="section-header">
@@ -101,30 +191,36 @@
                         </div>
                     </div>
 
-                    <!-- Right Column: Sales Report -->
-                    <div class="analysis-card sales-report-card">
+                    <div class="analysis-card stock-insight-card">
                         <div class="section-header">
-                            <div class="section-title"><span class="material-symbols-rounded">shopping_cart</span> Sales Report</div>
+                            <div class="section-title"><span class="material-symbols-rounded">inventory</span> Low Stock / Fast Moving</div>
                         </div>
-                        <div class="table-container">
-                            <div class="table-wrapper">
-                                <table class="sales-table" id="salesTable">
-                                    <thead>
-                                        <tr><th>Date</th><th>Bill ID</th><th>Items Sold</th><th>Total Amount</th></tr>
-                                    </thead>
-                                    <tbody id="salesTableBody">
-                                        <tr id="emptySalesRow">
-                                            <td colspan="4">
-                                                <div class="empty-state">
-                                                    <div class="empty-icon"><span class="material-symbols-rounded">bar_chart</span></div>
-                                                    <p>No sales data available</p>
-                                                    <p>Click "Generate" to load sales data</p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="stock-insight-list" id="stockInsightList"></div>
+                    </div>
+                </div>
+
+                <div class="analysis-card sales-report-card">
+                    <div class="section-header">
+                        <div class="section-title"><span class="material-symbols-rounded">receipt_long</span> Recent Invoices</div>
+                        <a class="view-all-link" href="sales_reports.html">View All Invoices</a>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-wrapper">
+                            <table class="sales-table" id="salesTable">
+                                <thead>
+                                    <tr><th>Date</th><th>Bill ID</th><th>Cashier</th><th>Items Sold</th><th>Total Amount</th></tr>
+                                </thead>
+                                <tbody id="salesTableBody">
+                                    <tr id="emptySalesRow">
+                                        <td colspan="5">
+                                            <div class="empty-state">
+                                                <div class="empty-icon"><span class="material-symbols-rounded">bar_chart</span></div>
+                                                <p>No sales data available for this filter</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
