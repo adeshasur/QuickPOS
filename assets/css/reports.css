@@ -546,6 +546,12 @@
   font-weight: 900;
 }
 
+.percent-cell {
+  color: #475569;
+  font-weight: 900;
+  text-align: right;
+}
+
 .category-report-card {
   margin-top: 0;
 }
@@ -857,8 +863,8 @@
 }
 
 body.dashboard-body .reports-dashboard .summary-card {
-  height: 122px !important;
-  min-height: 122px !important;
+  height: 108px !important;
+  min-height: 108px !important;
   padding: 12px 13px !important;
 }
 
@@ -874,8 +880,12 @@ body.dashboard-body .reports-dashboard .summary-card.card-payments {
   background: linear-gradient(135deg, #0891b2 0%, #155e75 100%) !important;
 }
 
-body.dashboard-body .reports-dashboard .summary-card.items-sold {
+body.dashboard-body .reports-dashboard .summary-card.credit-sales {
   background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%) !important;
+}
+
+body.dashboard-body .reports-dashboard .summary-card.items-sold {
+  background: linear-gradient(135deg, #db2777 0%, #9d174d 100%) !important;
 }
 
 body.dashboard-body .reports-dashboard .summary-card.invoice-count {
@@ -900,6 +910,10 @@ body.dashboard-body .reports-dashboard .summary-card .card-details {
   font-size: 10.5px !important;
 }
 
+body.dashboard-body .reports-dashboard .summary-card .card-subtitle {
+  display: none !important;
+}
+
 .reports-chart-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(300px, .8fr);
@@ -919,7 +933,7 @@ body.dashboard-body .reports-dashboard .summary-card .card-details {
 .trend-chart {
   height: 165px;
   display: grid;
-  grid-template-columns: repeat(16, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
   gap: 6px;
   align-items: end;
 }
@@ -953,6 +967,16 @@ body.dashboard-body .reports-dashboard .summary-card .card-details {
   overflow: hidden;
   border-radius: 7px 7px 3px 3px;
   background: #eef2ff;
+}
+
+.chart-empty-state {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
 }
 
 .trend-bar {
@@ -1090,7 +1114,7 @@ body.dashboard-body .insights-grid .analysis-card {
 .stock-insight-row span {
   margin-top: 2px;
   color: #64748b;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -1310,8 +1334,31 @@ body.dashboard-body .reports-split-grid .table-wrapper {
 
 /* Final report dashboard overrides: keep precedence over legacy refinements. */
 body.dashboard-body .reports-dashboard .summary-cards {
-  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
   gap: 12px !important;
+}
+
+body.dashboard-body .reports-dashboard .summary-card {
+  height: 108px !important;
+  min-height: 108px !important;
+  padding: 11px 13px !important;
+}
+
+body.dashboard-body .reports-dashboard .summary-card .card-icon {
+  width: 30px !important;
+  height: 30px !important;
+}
+
+body.dashboard-body .reports-dashboard .summary-card .card-amount {
+  margin: 1px 0 3px !important;
+  font-size: clamp(17px, 1.35vw, 23px) !important;
+  line-height: 1.05 !important;
+}
+
+body.dashboard-body .reports-dashboard .summary-card .card-details {
+  margin-top: 4px !important;
+  padding-top: 4px !important;
+  font-size: 10.5px !important;
 }
 
 body.dashboard-body .reports-split-grid .analysis-card {

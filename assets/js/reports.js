@@ -24,6 +24,8 @@
     const cashCollectedDetails = document.getElementById('cashCollectedDetails');
     const cardPaymentsAmount = document.getElementById('cardPaymentsAmount');
     const cardPaymentsDetails = document.getElementById('cardPaymentsDetails');
+    const creditSalesAmount = document.getElementById('creditSalesAmount');
+    const creditSalesDetails = document.getElementById('creditSalesDetails');
     const netProfitAmount = document.getElementById('netProfitAmount');
     const netProfitDetails = document.getElementById('netProfitDetails');
     const itemsSoldAmount = document.getElementById('itemsSoldAmount');
@@ -95,7 +97,7 @@
     }
 
     function calculateTotals(sales) {
-        const totals = { totalSales: 0, netProfit: 0, cashCollected: 0, cardPayments: 0, creditSales: 0, itemsSold: 0, transactionCount: sales.length, cashTransactionCount: 0, cardTransactionCount: 0 };
+        const totals = { totalSales: 0, netProfit: 0, cashCollected: 0, cardPayments: 0, creditSales: 0, itemsSold: 0, transactionCount: sales.length, cashTransactionCount: 0, cardTransactionCount: 0, creditTransactionCount: 0 };
         sales.forEach(sale => {
             const items = saleDetailsMap.get(sale.id) || [];
             totals.totalSales += Number(sale.total_amount || 0);
@@ -106,6 +108,7 @@
                 totals.cashTransactionCount++; 
             } else if (sale.payment_method === 'Credit') {
                 totals.creditSales += Number(sale.total_amount || 0);
+                totals.creditTransactionCount++;
             } else {
                 totals.cardPayments += Number(sale.total_amount || 0);
                 totals.cardTransactionCount++; 
@@ -121,6 +124,8 @@
         if(cashCollectedDetails) cashCollectedDetails.textContent = `${totals.cashTransactionCount} cash transaction${totals.cashTransactionCount !== 1 ? 's' : ''}`;
         if(cardPaymentsAmount) cardPaymentsAmount.textContent = formatCurrency(totals.cardPayments);
         if(cardPaymentsDetails) cardPaymentsDetails.textContent = `${totals.cardTransactionCount} card transaction${totals.cardTransactionCount !== 1 ? 's' : ''}`;
+        if(creditSalesAmount) creditSalesAmount.textContent = formatCurrency(totals.creditSales);
+        if(creditSalesDetails) creditSalesDetails.textContent = `${totals.creditTransactionCount} credit transaction${totals.creditTransactionCount !== 1 ? 's' : ''}`;
         if(netProfitAmount) netProfitAmount.textContent = formatCurrency(totals.netProfit);
         if(netProfitDetails) netProfitDetails.textContent = totals.totalSales ? `${((totals.netProfit / totals.totalSales) * 100).toFixed(1)}% estimated margin` : 'No profit data available';
         if(itemsSoldAmount) itemsSoldAmount.textContent = Math.round(totals.itemsSold).toLocaleString();
@@ -236,12 +241,17 @@
 
     function renderSalesTrend(sales) {
         if (!salesTrendChart) return;
-        const hourly = Array.from({ length: 16 }, (_, index) => ({ hour: index + 6, total: 0 }));
+        const hourlyTotals = new Map();
         sales.forEach((sale) => {
             const hour = new Date(sale.timestamp).getHours();
-            const slot = hourly.find((item) => item.hour === hour);
-            if (slot) slot.total += Number(sale.total_amount || 0);
+            hourlyTotals.set(hour, (hourlyTotals.get(hour) || 0) + Number(sale.total_amount || 0));
         });
+        const hourly = Array.from(hourlyTotals, ([hour, total]) => ({ hour, total }))
+            .sort((a, b) => a.hour - b.hour);
+        if (!hourly.length) {
+            salesTrendChart.innerHTML = '<div class="chart-empty-state">No hourly sales data yet for selected period</div>';
+            return;
+        }
         const max = Math.max(...hourly.map((item) => item.total), 1);
         salesTrendChart.innerHTML = `
             <div class="trend-chart">
@@ -290,8 +300,9 @@
         const rows = showAllStockInsights ? allRows : allRows.slice(0, 5);
         stockInsightList.innerHTML = rows.length ? rows.map((product) => {
             const low = Number(product.current_stock || 0) <= Number(product.alert_level || 0);
+            const category = categoriesData.find((item) => Number(item.id) === Number(product.category_id))?.name || 'Uncategorized';
             return `<div class="stock-insight-row">
-                <div><strong>${escapeHtml(product.name)}</strong><span>${low ? 'Low stock alert' : 'Fast moving item'}</span></div>
+                <div><strong>${escapeHtml(product.name)}</strong><span>${low ? `Stock: ${Number(product.current_stock || 0)} left` : `${Math.round(product.velocity)} sold`} | ${escapeHtml(category)}</span></div>
                 <b class="${low ? 'low' : 'fast'}">${low ? `${Number(product.current_stock || 0)} left` : `${Math.round(product.velocity)} sold`}</b>
             </div>`;
         }).join('') : '<div class="empty-state"><p>No stock insights for this filter</p></div>';
@@ -340,13 +351,6 @@
     function getCategoryReport(sales) {
         const productMap = new Map(productsData.map((p) => [Number(p.id), p]));
         const categoryMap = new Map(categoriesData.map((c) => [Number(c.id), c.name]));
-        const productCounts = new Map();
-
-        productsData.forEach((p) => {
-            const key = Number(p.category_id || 0);
-            productCounts.set(key, (productCounts.get(key) || 0) + 1);
-        });
-
         const stats = new Map();
         sales.forEach((sale) => {
             const items = saleDetailsMap.get(sale.id) || [];
@@ -356,7 +360,6 @@
                 const name = categoryMap.get(categoryId) || 'Uncategorized';
                 const prev = stats.get(categoryId) || {
                     name,
-                    productCount: productCounts.get(categoryId) || 0,
                     qty: 0,
                     revenue: 0,
                     profit: 0
@@ -371,7 +374,14 @@
             });
         });
 
-        return Array.from(stats.values())
+        const rows = Array.from(stats.values());
+        const totalRevenue = rows.reduce((sum, row) => sum + Number(row.revenue || 0), 0);
+        return rows
+            .map((row) => ({
+                ...row,
+                margin: row.revenue ? (row.profit / row.revenue) * 100 : 0,
+                contribution: totalRevenue ? (row.revenue / totalRevenue) * 100 : 0
+            }))
             .sort((a, b) => b.revenue - a.revenue || a.name.localeCompare(b.name));
     }
 
@@ -380,17 +390,18 @@
         const rows = getCategoryReport(sales);
 
         if (!rows.length) {
-            categoryReportTableBody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><p>No category report data for this filter</p></div></td></tr>';
+            categoryReportTableBody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><p>No category report data for this filter</p></div></td></tr>';
             return;
         }
 
         categoryReportTableBody.innerHTML = rows.map((row) => `
             <tr>
                 <td class="product-name-cell">${escapeHtml(row.name)}</td>
-                <td class="quantity-cell">${row.productCount}</td>
                 <td class="quantity-cell">${Math.round(row.qty)}</td>
                 <td class="revenue-cell">${escapeHtml(formatCurrency(row.revenue))}</td>
                 <td class="amount-cell">${escapeHtml(formatCurrency(row.profit))}</td>
+                <td class="percent-cell">${row.margin.toFixed(1)}%</td>
+                <td class="percent-cell">${row.contribution.toFixed(1)}%</td>
             </tr>
         `).join('');
     }
@@ -434,13 +445,14 @@
             ? categoryRows.map((row) => `
                 <tr>
                     <td>${escapeHtml(row.name)}</td>
-                    <td class="num">${row.productCount}</td>
                     <td class="num">${Math.round(row.qty)}</td>
                     <td class="num">${escapeHtml(formatCurrency(row.revenue))}</td>
                     <td class="num">${escapeHtml(formatCurrency(row.profit))}</td>
+                    <td class="num">${row.margin.toFixed(1)}%</td>
+                    <td class="num">${row.contribution.toFixed(1)}%</td>
                 </tr>
             `).join('')
-            : '<tr><td colspan="5" class="empty">No category report data available</td></tr>';
+            : '<tr><td colspan="6" class="empty">No category report data available</td></tr>';
 
         return `<!doctype html>
 <html>
@@ -481,8 +493,10 @@
   </div>
   <div class="cards">
     <div class="card"><div class="label">Total Sales</div><div class="value">${escapeHtml(formatCurrency(totals.totalSales))}</div><div class="muted">${totals.transactionCount} transactions</div></div>
+    <div class="card"><div class="label">Net Profit</div><div class="value">${escapeHtml(formatCurrency(totals.netProfit))}</div><div class="muted">${totals.totalSales ? `${((totals.netProfit / totals.totalSales) * 100).toFixed(1)}% margin` : 'No profit data'}</div></div>
     <div class="card"><div class="label">Cash Collected</div><div class="value">${escapeHtml(formatCurrency(totals.cashCollected))}</div><div class="muted">${totals.cashTransactionCount} cash transactions</div></div>
     <div class="card"><div class="label">Card/Bank Payments</div><div class="value">${escapeHtml(formatCurrency(totals.cardPayments))}</div><div class="muted">${totals.cardTransactionCount} card/bank transactions</div></div>
+    <div class="card"><div class="label">Credit Sales</div><div class="value">${escapeHtml(formatCurrency(totals.creditSales))}</div><div class="muted">${totals.creditTransactionCount} credit transactions</div></div>
   </div>
   <h2>Top Selling Items</h2>
   <table>
@@ -491,7 +505,7 @@
   </table>
   <h2>Category Report</h2>
   <table>
-    <thead><tr><th>Category</th><th class="num">Products</th><th class="num">Qty Sold</th><th class="num">Revenue</th><th class="num">Profit</th></tr></thead>
+    <thead><tr><th>Category</th><th class="num">Qty Sold</th><th class="num">Revenue</th><th class="num">Profit</th><th class="num">Margin</th><th class="num">Contribution</th></tr></thead>
     <tbody>${categoryReportRows}</tbody>
   </table>
   <h2>Sales Report</h2>
@@ -508,12 +522,11 @@
         const sales = currentReportSales;
         const categoryRows = getCategoryReport(sales);
         const totals = categoryRows.reduce((acc, row) => {
-            acc.products += Number(row.productCount || 0);
             acc.qty += Number(row.qty || 0);
             acc.revenue += Number(row.revenue || 0);
             acc.profit += Number(row.profit || 0);
             return acc;
-        }, { products: 0, qty: 0, revenue: 0, profit: 0 });
+        }, { qty: 0, revenue: 0, profit: 0 });
         const topCategory = categoryRows[0];
         const generatedAt = new Date();
         const reportDate = generatedAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -522,16 +535,15 @@
 
         const categoryReportRows = categoryRows.length
             ? categoryRows.map((row, index) => {
-                const revenueShare = totals.revenue ? (Number(row.revenue || 0) / totals.revenue) * 100 : 0;
                 return `
                     <tr>
                         <td class="rank">${index + 1}</td>
                         <td>${escapeHtml(row.name)}</td>
-                        <td class="num">${row.productCount}</td>
                         <td class="num">${Math.round(row.qty)}</td>
                         <td class="num">${escapeHtml(formatCurrency(row.revenue))}</td>
                         <td class="num">${escapeHtml(formatCurrency(row.profit))}</td>
-                        <td class="num">${revenueShare.toFixed(1)}%</td>
+                        <td class="num">${row.margin.toFixed(1)}%</td>
+                        <td class="num">${row.contribution.toFixed(1)}%</td>
                     </tr>
                 `;
             }).join('')
@@ -578,9 +590,9 @@
   </div>
   <div class="cards">
     <div class="card"><div class="label">Categories Sold</div><div class="value">${categoryRows.length}</div></div>
-    <div class="card"><div class="label">Products</div><div class="value">${totals.products}</div></div>
     <div class="card"><div class="label">Qty Sold</div><div class="value">${Math.round(totals.qty)}</div></div>
     <div class="card"><div class="label">Revenue</div><div class="value">${escapeHtml(formatCurrency(totals.revenue))}</div></div>
+    <div class="card"><div class="label">Profit</div><div class="value">${escapeHtml(formatCurrency(totals.profit))}</div></div>
   </div>
   <div class="insight">
     <strong>Top Category:</strong> ${topCategory ? escapeHtml(topCategory.name) : 'No category sales yet'}
@@ -588,7 +600,7 @@
   </div>
   <h2>Category Breakdown</h2>
   <table>
-    <thead><tr><th class="rank">#</th><th>Category</th><th class="num">Products</th><th class="num">Qty Sold</th><th class="num">Revenue</th><th class="num">Profit</th><th class="num">Revenue Share</th></tr></thead>
+    <thead><tr><th class="rank">#</th><th>Category</th><th class="num">Qty Sold</th><th class="num">Revenue</th><th class="num">Profit</th><th class="num">Margin</th><th class="num">Contribution</th></tr></thead>
     <tbody>${categoryReportRows}</tbody>
   </table>
   <div class="footer">Generated by QuickPOS Pro</div>

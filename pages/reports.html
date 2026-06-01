@@ -93,7 +93,7 @@
                             <div class="card-icon"><span class="material-symbols-rounded">payments</span></div>
                         </div>
                         <div class="card-amount" id="totalSalesAmount">LKR 0.00</div>
-                        <div class="card-subtitle">Today's total revenue</div>
+                        <div class="card-subtitle">Filtered period revenue</div>
                         <div class="card-details" id="totalSalesDetails">No sales data available</div>
                     </div>
 
@@ -125,6 +125,16 @@
                         <div class="card-amount" id="cardPaymentsAmount">LKR 0.00</div>
                         <div class="card-subtitle">Total card transactions</div>
                         <div class="card-details" id="cardPaymentsDetails">No card transactions</div>
+                    </div>
+
+                    <div class="summary-card credit-sales">
+                        <div class="card-header">
+                            <div class="card-title">Credit Sales</div>
+                            <div class="card-icon"><span class="material-symbols-rounded">credit_score</span></div>
+                        </div>
+                        <div class="card-amount" id="creditSalesAmount">LKR 0.00</div>
+                        <div class="card-subtitle">Customer credit bills</div>
+                        <div class="card-details" id="creditSalesDetails">No credit transactions</div>
                     </div>
 
                     <div class="summary-card items-sold">
@@ -236,11 +246,11 @@
                         <div class="table-wrapper">
                             <table class="category-report-table" id="categoryReportTable">
                                 <thead>
-                                    <tr><th>Category</th><th>Products</th><th>Qty Sold</th><th>Revenue</th><th>Profit</th></tr>
+                                    <tr><th>Category</th><th>Items Sold</th><th>Revenue</th><th>Profit</th><th>Margin</th><th>Contribution</th></tr>
                                 </thead>
                                 <tbody id="categoryReportTableBody">
                                     <tr id="emptyCategoryRow">
-                                        <td colspan="5">
+                                        <td colspan="6">
                                             <div class="empty-state">
                                                 <div class="empty-icon"><span class="material-symbols-rounded">category</span></div>
                                                 <p>No category report data</p>
