@@ -1,7 +1,3 @@
-:root {
-  --font: 'Manrope', 'Inter', sans-serif;
-}
-
 .content{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:24px 32px;gap:20px}
 .page-header{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;box-shadow:0 4px 14px rgba(15,23,42,.04)}
 .page-header-left{display:flex;flex-direction:column;gap:6px}
@@ -780,5 +776,98 @@
 .summary-card .card-details {
   color: rgba(255, 255, 255, .74);
   border-top-color: rgba(255, 255, 255, .25);
+}
+
+/* Keep the report dashboard compact and readable after shared management styles. */
+body.dashboard-body .reports-dashboard .summary-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+  height: 126px !important;
+  min-height: 126px !important;
+  padding: 14px 16px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, .1) !important;
+}
+
+body.dashboard-body .reports-dashboard .summary-card.total-sales {
+  background: linear-gradient(135deg, #2563eb 0%, #1d2dbf 100%) !important;
+}
+
+body.dashboard-body .reports-dashboard .summary-card.cash-collected {
+  background: linear-gradient(135deg, #16a34a 0%, #166534 100%) !important;
+}
+
+body.dashboard-body .reports-dashboard .summary-card.card-payments {
+  background: linear-gradient(135deg, #0891b2 0%, #155e75 100%) !important;
+}
+
+body.dashboard-body .reports-dashboard .summary-card .card-header {
+  min-height: auto;
+  padding: 0;
+  margin: 0 0 5px;
+  border: 0;
+  background: transparent !important;
+}
+
+body.dashboard-body .reports-dashboard .summary-card .card-icon {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  animation: none !important;
+}
+
+body.dashboard-body .reports-dashboard .summary-card .card-title,
+body.dashboard-body .reports-dashboard .summary-card .card-amount,
+body.dashboard-body .reports-dashboard .summary-card .card-subtitle,
+body.dashboard-body .reports-dashboard .summary-card .card-details {
+  color: #ffffff !important;
+}
+
+body.dashboard-body .reports-dashboard .summary-card .card-title {
+  font-size: 11px !important;
+}
+
+body.dashboard-body .reports-dashboard .summary-card .card-amount {
+  margin: 2px 0 4px !important;
+  font-size: clamp(24px, 2vw, 32px) !important;
+}
+
+body.dashboard-body .reports-dashboard .summary-card .card-subtitle,
+body.dashboard-body .reports-dashboard .summary-card .card-details {
+  font-size: 12px !important;
+}
+
+body.dashboard-body .reports-dashboard .summary-card .card-details {
+  margin-top: 6px;
+  padding-top: 6px;
+}
+
+body.dashboard-body .reports-split-grid .analysis-card {
+  height: 360px;
+  min-height: 360px;
+}
+
+body.dashboard-body .reports-split-grid .table-container,
+body.dashboard-body .reports-split-grid .table-wrapper {
+  min-height: 0;
+  height: 100% !important;
+  overflow-y: auto !important;
+}
+
+@media (max-width: 1100px) {
+  body.dashboard-body .reports-split-grid .analysis-card {
+    height: auto;
+    min-height: 0;
+  }
+
+  body.dashboard-body .reports-split-grid .table-container,
+  body.dashboard-body .reports-split-grid .table-wrapper {
+    height: auto !important;
+    overflow-y: visible !important;
+  }
 }
 
