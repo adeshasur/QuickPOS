@@ -1034,6 +1034,7 @@ body.dashboard-body .reports-dashboard .summary-card .card-details {
 
 .insights-grid {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
 }
 
 body.dashboard-body .insights-grid .analysis-card {
@@ -1042,7 +1043,25 @@ body.dashboard-body .insights-grid .analysis-card {
 }
 
 .stock-insight-list {
-  overflow-y: auto;
+  overflow-y: visible;
+}
+
+.see-more-btn {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: var(--primary);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.see-more-btn:hover {
+  border-color: var(--primary);
+  background: #eef2ff;
 }
 
 .stock-insight-row {
@@ -1303,6 +1322,17 @@ body.dashboard-body .reports-split-grid .analysis-card {
 body.dashboard-body .reports-split-grid.insights-grid .analysis-card {
   height: 338px !important;
   min-height: 338px !important;
+}
+
+body.dashboard-body .reports-split-grid.insights-grid .table-container,
+body.dashboard-body .reports-split-grid.insights-grid .table-wrapper,
+body.dashboard-body .reports-split-grid.insights-grid .stock-insight-list {
+  height: auto !important;
+  overflow-y: visible !important;
+}
+
+body.dashboard-body .reports-split-grid.insights-grid .analysis-card.insight-expanded {
+  height: auto !important;
 }
 
 @media (max-width: 1450px) {

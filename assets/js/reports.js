@@ -7,6 +7,8 @@
     let productsData = [];
     let categoriesData = [];
     let activeDateRange = 'today';
+    let showAllTopItems = false;
+    let showAllStockInsights = false;
 
     // DOM elements
     const generateReportBtn = document.getElementById('generateReportBtn');
@@ -35,6 +37,8 @@
     const salesTrendChart = document.getElementById('salesTrendChart');
     const paymentDonutChart = document.getElementById('paymentDonutChart');
     const stockInsightList = document.getElementById('stockInsightList');
+    const topItemsSeeMoreBtn = document.getElementById('topItemsSeeMoreBtn');
+    const stockInsightsSeeMoreBtn = document.getElementById('stockInsightsSeeMoreBtn');
     
     // Tables
     const salesTableBody = document.getElementById('salesTableBody');
@@ -152,25 +156,12 @@
 
     function renderTopItems(sales) {
         if (!topItemsTableBody) return;
-
-        const stats = new Map();
-        sales.forEach((sale) => {
-            const items = saleDetailsMap.get(sale.id) || [];
-            items.forEach((it) => {
-                const key = it.product_name || `Item #${it.product_id}`;
-                const prev = stats.get(key) || { qty: 0, revenue: 0 };
-                prev.qty += Number(it.quantity || 0);
-                prev.revenue += Number(it.subtotal || 0);
-                stats.set(key, prev);
-            });
-        });
-
-        const top = Array.from(stats.entries())
-            .sort((a, b) => b[1].revenue - a[1].revenue)
-            .slice(0, 10);
+        const allItems = getTopItems(sales, Infinity);
+        const top = showAllTopItems ? allItems : allItems.slice(0, 5);
 
         if (!top.length) {
             topItemsTableBody.innerHTML = '<tr><td colspan="3"><div class="empty-state"><p>No top items data for this filter</p></div></td></tr>';
+            updateSeeMoreButton(topItemsSeeMoreBtn, false, false);
             return;
         }
 
@@ -181,6 +172,7 @@
                 <td class="revenue-cell">${formatCurrency(s.revenue)}</td>
             </tr>
         `).join('');
+        updateSeeMoreButton(topItemsSeeMoreBtn, allItems.length > 5, showAllTopItems);
     }
 
     function startOfDay(date) {
@@ -294,7 +286,8 @@
 
     function renderStockInsights(sales) {
         if (!stockInsightList) return;
-        const rows = getStockInsightRows(sales).slice(0, 8);
+        const allRows = getStockInsightRows(sales);
+        const rows = showAllStockInsights ? allRows : allRows.slice(0, 5);
         stockInsightList.innerHTML = rows.length ? rows.map((product) => {
             const low = Number(product.current_stock || 0) <= Number(product.alert_level || 0);
             return `<div class="stock-insight-row">
@@ -302,6 +295,14 @@
                 <b class="${low ? 'low' : 'fast'}">${low ? `${Number(product.current_stock || 0)} left` : `${Math.round(product.velocity)} sold`}</b>
             </div>`;
         }).join('') : '<div class="empty-state"><p>No stock insights for this filter</p></div>';
+        updateSeeMoreButton(stockInsightsSeeMoreBtn, allRows.length > 5, showAllStockInsights);
+    }
+
+    function updateSeeMoreButton(button, hasMore, expanded) {
+        if (!button) return;
+        button.hidden = !hasMore;
+        button.textContent = expanded ? 'See Less' : 'See More';
+        button.closest('.analysis-card')?.classList.toggle('insight-expanded', hasMore && expanded);
     }
 
     function generateReport() {
@@ -318,7 +319,7 @@
         renderStockInsights(baseSales);
     }
 
-    function getTopItems(sales) {
+    function getTopItems(sales, limit = 10) {
         const stats = new Map();
         sales.forEach((sale) => {
             const items = saleDetailsMap.get(sale.id) || [];
@@ -333,7 +334,7 @@
 
         return Array.from(stats.entries())
             .sort((a, b) => b[1].revenue - a[1].revenue)
-            .slice(0, 10);
+            .slice(0, limit);
     }
 
     function getCategoryReport(sales) {
@@ -843,6 +844,14 @@
         if(printReportBtn) printReportBtn.addEventListener('click', () => window.print());
         document.querySelectorAll('[data-focused-report]').forEach((button) => {
             button.addEventListener('click', () => exportFocusedReportPdf(button.dataset.focusedReport, button));
+        });
+        if(topItemsSeeMoreBtn) topItemsSeeMoreBtn.addEventListener('click', () => {
+            showAllTopItems = !showAllTopItems;
+            renderTopItems(currentReportSales);
+        });
+        if(stockInsightsSeeMoreBtn) stockInsightsSeeMoreBtn.addEventListener('click', () => {
+            showAllStockInsights = !showAllStockInsights;
+            renderStockInsights(currentReportSales);
         });
         document.querySelectorAll('.range-btn').forEach((button) => {
             button.addEventListener('click', () => setActiveDateRange(button.dataset.range || 'today'));
