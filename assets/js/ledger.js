@@ -230,7 +230,7 @@
                     <div class="receipt-footer">
                         <div class="footer-msg">Stays Fresh! Shop Daily.</div>
                         <div class="footer-msg">Thank You! Come Again.</div>
-                        <div class="footer-sub">Software by Antigravity Pro</div>
+                        <div class="footer-sub">Software by FIDES.M</div>
                         <div class="barcode-placeholder">*${bill.bill_id}*</div>
                     </div>
                 </div>

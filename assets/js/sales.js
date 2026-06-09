@@ -870,7 +870,7 @@
         ${!saleData.isDraft ? `<div class="payment-info"><div class="total-row"><span>Paid via ${escapeHtml(saleData.method || '-')}</span><span>${Number(saleData.received || saleData.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></div>${saleData.method === 'Cash' ? `<div class="total-row"><span>Change</span><span>${change.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></div>` : ''}</div>` : ''}
         <div class="receipt-footer">
           <div class="footer-msg">Thank You! Come Again.</div>
-          <div class="footer-sub">${saleData.isDraft ? 'Draft Receipt - Not a Tax Invoice' : 'Software by Antigravity Pro'}</div>
+          <div class="footer-sub">${saleData.isDraft ? 'Draft Receipt - Not a Tax Invoice' : 'Software by FIDES.M'}</div>
           <div class="barcode-placeholder">${saleData.billId === 'DRAFT' ? 'DRAFT' : '*' + saleData.billId + '*'}</div>
         </div>
       </div>
@@ -896,27 +896,27 @@
       }
 
       const receiptCss = `
-        .receipt { width: 58mm; margin: 0 auto; padding: 5px 2px; color: #000; font-family: 'Courier New', Courier, monospace; line-height: 1.2; font-size: 12px; }
-        .receipt-header { text-align: center; margin-bottom: 6px; }
-        .receipt-logo { font-size: 16px; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
-        .receipt-info { font-size: 11px; color: #000; line-height: 1.2; }
-        .receipt-meta { text-align: center; font-size: 10px; margin-bottom: 6px; line-height: 1.4; }
-        .receipt-divider { border-top: 1px dashed #000; margin: 6px 0; }
+        .receipt { width: 100%; max-width: 80mm; margin: 0 auto; padding: 0; color: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.3; font-size: 13px; }
+        .receipt-header { text-align: center; margin-bottom: 8px; }
+        .receipt-logo { font-size: 20px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
+        .receipt-info { font-size: 12px; color: #000; line-height: 1.3; margin-bottom: 8px; }
+        .receipt-meta { text-align: center; font-size: 11px; margin-bottom: 8px; line-height: 1.4; }
+        .receipt-divider { border-top: 1px dashed #000; margin: 8px 0; }
         .receipt-divider.double { border-top: 1px solid #000; border-bottom: 1px solid #000; height: 2px; margin: 8px 0; }
-        .receipt-table { width: 100%; border-collapse: collapse; margin: 5px 0; }
-        .rt-item-row td { padding-top: 4px; font-weight: 700; font-size: 12px; }
-        .rt-detail-row td { padding-bottom: 4px; font-size: 10px; color: #333; }
-        .rt-qty { width: 15%; text-align: left; }
-        .rt-desc { width: 55%; font-weight: 500; word-break: break-word; }
-        .rt-price { text-align: right; font-weight: 700; }
-        .receipt-totals { margin-top: 5px; display: flex; flex-direction: column; gap: 2px; }
-        .total-row { display: flex; justify-content: space-between; font-size: 11px; }
-        .total-row.grand-total { font-size: 16px; font-weight: 800; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 6px 0; margin: 4px 0; }
-        .payment-info { margin-top: 6px; font-size: 10px; border-top: 1px dashed #eee; padding-top: 5px; }
-        .receipt-footer { text-align: center; margin-top: 12px; font-size: 10px; }
-        .footer-msg { font-weight: 800; font-size: 12px; margin-bottom: 3px; }
-        .footer-sub { color: #333; font-size: 9px; }
-        .barcode-placeholder { margin-top: 8px; text-align: center; font-size: 10px; font-weight: 600; }
+        .receipt-table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+        .rt-item-row td { padding-top: 4px; font-weight: 700; font-size: 13px; }
+        .rt-detail-row td { padding-bottom: 4px; font-size: 11px; color: #333; }
+        .rt-qty { width: 20%; text-align: left; font-weight: 600; }
+        .rt-desc { width: 50%; font-weight: 600; word-break: break-word; }
+        .rt-price { width: 30%; text-align: right; font-weight: 800; }
+        .receipt-totals { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+        .total-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; }
+        .total-row.grand-total { font-size: 18px; font-weight: 800; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 6px 0; margin: 6px 0; }
+        .payment-info { margin-top: 8px; font-size: 11px; font-weight: 600; border-top: 1px dashed #000; padding-top: 6px; }
+        .receipt-footer { text-align: center; margin-top: 16px; font-size: 11px; }
+        .footer-msg { font-weight: 800; font-size: 14px; margin-bottom: 4px; letter-spacing: 0.5px; }
+        .footer-sub { color: #555; font-size: 10px; font-weight: 600; }
+        .barcode-placeholder { margin-top: 10px; text-align: center; font-size: 11px; font-weight: 600; font-family: monospace; }
       `;
 
       const options = printerName ? { deviceName: printerName, html, css: receiptCss } : { html, css: receiptCss, silent: false };
