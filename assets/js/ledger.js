@@ -202,6 +202,11 @@
                     <div class="receipt-divider"></div>
 
                     <table class="receipt-table">
+                        <colgroup>
+                            <col style="width: 15%;">
+                            <col style="width: 50%;">
+                            <col style="width: 35%;">
+                        </colgroup>
                         <tbody>
                             ${itemsHtml}
                         </tbody>

@@ -926,43 +926,100 @@
       const sales = await window.api.getSalesHistory();
       const sale = sales.find(s => s.bill_id === billId);
       if (!sale) throw new Error('Transaction not found');
-      // Render simple receipt HTML similar to sales history prints
-      const timestamp = new Date(sale.timestamp).toLocaleString();
-      let itemsHtml = sale.items.map(item => `
-        <tr>
-          <td>${item.product_name}</td>
-          <td>${item.quantity}</td>
-          <td style="text-align:right">${item.subtotal.toFixed(2)}</td>
-        </tr>
-      `).join('');
-      
+      const itemsHtml = sale.items.map(i => {
+        const qty = Number(i.quantity);
+        const formattedQty = qty % 1 === 0 ? qty : qty.toFixed(2);
+        const itemTotal = (Number(i.unit_price) * qty).toLocaleString('en-US', { minimumFractionDigits: 2 });
+        return `
+          <tr class="rt-item-row">
+            <td colspan="2">${i.product_name}</td>
+            <td class="rt-price">${itemTotal}</td>
+          </tr>
+          <tr class="rt-detail-row">
+            <td colspan="3">${formattedQty} x ${Number(i.unit_price).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+          </tr>
+        `;
+      }).join('');
+
       const html = `
-        <div style="font-family: 'Noto Sans Sinhala','Iskoola Pota','Manrope',sans-serif; width: 300px; padding: 10px; font-size: 12px;">
-          <h3 style="text-align:center; margin: 0 0 5px 0;">QuickPOS</h3>
-          <p style="text-align:center; margin: 0 0 10px 0;">DUPLICATE RECEIPT</p>
-          <hr/>
-          <p>Bill ID: ${sale.bill_id}</p>
-          <p>Date: ${timestamp}</p>
-          <p>Cashier: ${sale.cashier_name || 'POS Operator'}</p>
-          <hr/>
-          <table style="width:100%; font-size:12px;">
-            <thead>
-              <tr style="border-bottom: 1px dashed #000;">
-                <th style="text-align:left;">Item</th>
-                <th style="text-align:left;">Qty</th>
-                <th style="text-align:right;">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${itemsHtml}
-            </tbody>
+        <div class="receipt">
+          <div class="receipt-header">
+            <div class="receipt-logo">QuickPOS Supermarket</div>
+            <div class="receipt-info">No. 45/A, Galle Road, Colombo 03<br>Tel: 011 234 5678</div>
+          </div>
+          <div class="receipt-divider"></div>
+          <div class="receipt-meta">
+            <div><strong>TAX INVOICE (COPY)</strong></div>
+            <div>Date: ${new Date(sale.timestamp).toLocaleDateString()} | Time: ${new Date(sale.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+            <div>No: <strong>${sale.bill_id}</strong> | Staff: ${sale.cashier_name || 'Cashier'}</div>
+          </div>
+          <div class="receipt-divider"></div>
+          <table class="receipt-table">
+            <colgroup>
+              <col style="width: 15%;">
+              <col style="width: 50%;">
+              <col style="width: 35%;">
+            </colgroup>
+            <tbody>${itemsHtml}</tbody>
           </table>
-          <hr/>
-          <p style="text-align:right; font-weight:bold; font-size:14px;">TOTAL: LKR ${sale.total_amount.toFixed(2)}</p>
-          <p style="text-align:center; margin-top:20px;">Thank you for shopping with us!</p>
+          <div class="receipt-divider double"></div>
+          <div class="receipt-totals">
+            <div class="total-row grand-total"><span>NET TOTAL</span><span>LKR ${sale.total_amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></div>
+          </div>
+          <div class="payment-info">
+            <div class="total-row"><span>Paid via ${sale.payment_method}</span><span>${(sale.received_amount || sale.total_amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></div>
+          </div>
+          <div class="receipt-footer">
+            <div class="footer-msg">Thank You! Come Again.</div>
+            <div class="footer-sub">Software by FIDES.M</div>
+            <div class="barcode-placeholder">*${sale.bill_id}*</div>
+          </div>
         </div>
       `;
-      await window.api.printReceiptSilent({ html });
+
+      const receiptCss = `
+        * { box-sizing: border-box; }
+        @page { margin: 0; }
+        body { margin: 0; padding: 0; width: 100%; display: flex; justify-content: center; }
+        .receipt { width: 92%; max-width: 74mm; margin: 0 auto; padding: 5px 0; color: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.3; font-size: 12px; }
+        .receipt-header { text-align: center; margin-bottom: 6px; }
+        .receipt-logo { font-size: 16px; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px; }
+        .receipt-info { font-size: 11px; color: #000; line-height: 1.3; margin-bottom: 6px; }
+        .receipt-meta { text-align: center; font-size: 11px; margin-bottom: 8px; line-height: 1.4; }
+        .receipt-divider { border-top: 1px dashed #000; margin: 8px 0; }
+        .receipt-divider.double { border-top: 1px solid #000; border-bottom: 1px solid #000; height: 2px; margin: 8px 0; }
+        .receipt-table { width: 100%; border-collapse: collapse; margin: 8px 0; table-layout: fixed; }
+        .rt-item-row td { padding-top: 4px; font-weight: 700; font-size: 12px; }
+        .rt-detail-row td { padding-bottom: 4px; font-size: 11px; color: #333; }
+        .rt-price { text-align: right; font-weight: 800; }
+        .receipt-totals { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+        .total-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; }
+        .total-row.grand-total { font-size: 18px; font-weight: 800; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 6px 0; margin: 6px 0; }
+        .payment-info { margin-top: 8px; font-size: 11px; font-weight: 600; border-top: 1px dashed #000; padding-top: 6px; }
+        .receipt-footer { text-align: center; margin-top: 16px; font-size: 11px; }
+        .footer-msg { font-weight: 800; font-size: 14px; margin-bottom: 4px; letter-spacing: 0.5px; }
+        .footer-sub { color: #555; font-size: 10px; font-weight: 600; }
+        .barcode-placeholder { margin-top: 10px; text-align: center; font-size: 11px; font-weight: 600; font-family: monospace; }
+      `;
+
+      const dbSettings = await window.api.getSettings();
+      let printerName = dbSettings.thermalPrinterName || '';
+
+      if (!printerName) {
+        const printers = await window.api.getPrinters();
+        const keywords = ['pos', 'receipt', 'thermal', '80mm', '58mm', 'xp-', 'epson tm', 'xprinter', 'rongta', 'bixolon', 'star '];
+        const virtual = ['microsoft print to pdf', 'fax', 'microsoft xps document writer', 'send to onenote', 'onenote'];
+        let detected = printers.find(p => keywords.some(kw => p.name.toLowerCase().includes(kw)));
+        if (!detected) detected = printers.find(p => p.isDefault && !virtual.some(vp => p.name.toLowerCase().includes(vp)));
+        if (!detected) detected = printers.find(p => !virtual.some(vp => p.name.toLowerCase().includes(vp)));
+        if (detected) {
+          printerName = detected.name;
+          await window.api.saveSetting('thermalPrinterName', printerName);
+        }
+      }
+
+      const options = printerName ? { deviceName: printerName, html, css: receiptCss } : { html, css: receiptCss, silent: false };
+      await window.api.printReceiptSilent(options);
       toast('Receipt reprinted successfully!');
     } catch (err) {
       toast(err.message || 'Reprint failed', 'error');

@@ -860,7 +860,14 @@
           <div>No: <strong>${escapeHtml(saleData.billId || '-')}</strong> | Staff: ${escapeHtml(saleData.cashier || 'Cashier')}</div>
         </div>
         <div class="receipt-divider"></div>
-        <table class="receipt-table"><tbody>${itemsHtml}</tbody></table>
+        <table class="receipt-table">
+          <colgroup>
+            <col style="width: 15%;">
+            <col style="width: 50%;">
+            <col style="width: 35%;">
+          </colgroup>
+          <tbody>${itemsHtml}</tbody>
+        </table>
         <div class="receipt-divider double"></div>
         <div class="receipt-totals">
           ${Number(saleData.discountTotal || 0) > 0 ? `<div class="total-row"><span>Discount</span><span>-LKR ${Number(saleData.discountTotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></div>` : ''}
@@ -909,9 +916,7 @@
         .receipt-table { width: 100%; border-collapse: collapse; margin: 8px 0; table-layout: fixed; }
         .rt-item-row td { padding-top: 4px; font-weight: 700; font-size: 12px; }
         .rt-detail-row td { padding-bottom: 4px; font-size: 11px; color: #333; }
-        .rt-qty { width: 22%; text-align: left; font-weight: 600; }
-        .rt-desc { width: 48%; font-weight: 600; word-break: break-word; }
-        .rt-price { width: 30%; text-align: right; font-weight: 800; }
+        .rt-price { text-align: right; font-weight: 800; }
         .receipt-totals { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
         .total-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; }
         .total-row.grand-total { font-size: 18px; font-weight: 800; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 6px 0; margin: 6px 0; }
