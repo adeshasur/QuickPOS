@@ -898,19 +898,19 @@
       const receiptCss = `
         * { box-sizing: border-box; }
         @page { margin: 0; }
-        body { margin: 0; padding: 0; display: flex; justify-content: center; width: 100%; }
-        .receipt { width: 100%; max-width: 100%; padding: 5px 2mm; color: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.3; font-size: 12px; }
+        body { margin: 0; padding: 0; width: 100%; display: flex; justify-content: center; }
+        .receipt { width: 92%; max-width: 74mm; margin: 0 auto; padding: 5px 0; color: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.3; font-size: 12px; }
         .receipt-header { text-align: center; margin-bottom: 6px; }
         .receipt-logo { font-size: 16px; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px; }
         .receipt-info { font-size: 11px; color: #000; line-height: 1.3; margin-bottom: 6px; }
         .receipt-meta { text-align: center; font-size: 11px; margin-bottom: 8px; line-height: 1.4; }
         .receipt-divider { border-top: 1px dashed #000; margin: 8px 0; }
         .receipt-divider.double { border-top: 1px solid #000; border-bottom: 1px solid #000; height: 2px; margin: 8px 0; }
-        .receipt-table { width: 100%; border-collapse: collapse; margin: 8px 0; }
-        .rt-item-row td { padding-top: 4px; font-weight: 700; font-size: 13px; }
+        .receipt-table { width: 100%; border-collapse: collapse; margin: 8px 0; table-layout: fixed; }
+        .rt-item-row td { padding-top: 4px; font-weight: 700; font-size: 12px; }
         .rt-detail-row td { padding-bottom: 4px; font-size: 11px; color: #333; }
-        .rt-qty { width: 20%; text-align: left; font-weight: 600; }
-        .rt-desc { width: 50%; font-weight: 600; word-break: break-word; }
+        .rt-qty { width: 22%; text-align: left; font-weight: 600; }
+        .rt-desc { width: 48%; font-weight: 600; word-break: break-word; }
         .rt-price { width: 30%; text-align: right; font-weight: 800; }
         .receipt-totals { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
         .total-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; }
