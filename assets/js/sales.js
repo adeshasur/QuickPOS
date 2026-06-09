@@ -896,7 +896,9 @@
       }
 
       const receiptCss = `
-        .receipt { width: 100%; max-width: 80mm; margin: 0 auto; padding: 0; color: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.3; font-size: 13px; }
+        @page { margin: 0; }
+        body { margin: 0; padding: 0; display: flex; justify-content: center; }
+        .receipt { width: 100%; max-width: 76mm; padding: 10px 5px; color: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.3; font-size: 13px; }
         .receipt-header { text-align: center; margin-bottom: 8px; }
         .receipt-logo { font-size: 20px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
         .receipt-info { font-size: 12px; color: #000; line-height: 1.3; margin-bottom: 8px; }
