@@ -895,7 +895,31 @@
         }
       }
 
-      const options = printerName ? { deviceName: printerName, html } : { html, silent: false };
+      const receiptCss = `
+        .receipt { width: 58mm; margin: 0 auto; padding: 5px 2px; color: #000; font-family: 'Courier New', Courier, monospace; line-height: 1.2; font-size: 12px; }
+        .receipt-header { text-align: center; margin-bottom: 6px; }
+        .receipt-logo { font-size: 16px; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
+        .receipt-info { font-size: 11px; color: #000; line-height: 1.2; }
+        .receipt-meta { text-align: center; font-size: 10px; margin-bottom: 6px; line-height: 1.4; }
+        .receipt-divider { border-top: 1px dashed #000; margin: 6px 0; }
+        .receipt-divider.double { border-top: 1px solid #000; border-bottom: 1px solid #000; height: 2px; margin: 8px 0; }
+        .receipt-table { width: 100%; border-collapse: collapse; margin: 5px 0; }
+        .rt-item-row td { padding-top: 4px; font-weight: 700; font-size: 12px; }
+        .rt-detail-row td { padding-bottom: 4px; font-size: 10px; color: #333; }
+        .rt-qty { width: 15%; text-align: left; }
+        .rt-desc { width: 55%; font-weight: 500; word-break: break-word; }
+        .rt-price { text-align: right; font-weight: 700; }
+        .receipt-totals { margin-top: 5px; display: flex; flex-direction: column; gap: 2px; }
+        .total-row { display: flex; justify-content: space-between; font-size: 11px; }
+        .total-row.grand-total { font-size: 16px; font-weight: 800; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 6px 0; margin: 4px 0; }
+        .payment-info { margin-top: 6px; font-size: 10px; border-top: 1px dashed #eee; padding-top: 5px; }
+        .receipt-footer { text-align: center; margin-top: 12px; font-size: 10px; }
+        .footer-msg { font-weight: 800; font-size: 12px; margin-bottom: 3px; }
+        .footer-sub { color: #333; font-size: 9px; }
+        .barcode-placeholder { margin-top: 8px; text-align: center; font-size: 10px; font-weight: 600; }
+      `;
+
+      const options = printerName ? { deviceName: printerName, html, css: receiptCss } : { html, css: receiptCss, silent: false };
       await window.api.printReceiptSilent(options);
     } catch (err) {
       console.error('Print error:', err.message);
