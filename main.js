@@ -1852,12 +1852,17 @@ ipcMain.handle('generate-thermal-receipt-pdf-auto', async (event, payload) => {
     });
     win.close();
 
-    const outDir = path.join(os.homedir(), 'Documents', 'QuickPOS', 'ThermalReceipts');
-    fs.mkdirSync(outDir, { recursive: true });
-    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const outPath = path.join(outDir, `receipt-${payload.billId || stamp}.pdf`);
-    fs.writeFileSync(outPath, pdfData);
-    return { success: true, path: outPath };
+    try {
+        const outDir = path.join(app.getPath('documents'), 'QuickPOS', 'ThermalReceipts');
+        fs.mkdirSync(outDir, { recursive: true });
+        const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const outPath = path.join(outDir, `receipt-${payload.billId || stamp}.pdf`);
+        fs.writeFileSync(outPath, pdfData);
+        return { success: true, path: outPath };
+    } catch (err) {
+        console.error('Failed to save auto-pdf receipt:', err);
+        return { success: false, error: err.message };
+    }
 });
 
 ipcMain.handle('print-thermal-receipt', async (event, payload) => {
