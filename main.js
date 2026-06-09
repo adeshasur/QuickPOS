@@ -2184,7 +2184,7 @@ ipcMain.handle('print-receipt-silent', async (event, options = {}) => {
             
             console.log('[PRINT DEBUG] Hidden print window loaded HTML. Triggering print...');
             const printOptions = {
-                silent: true,
+                silent: options.silent !== false,
                 printBackground: true,
                 margins: { marginType: 'none' },
                 pageSize: { width: 80000, height: 297000 } // 80mm width, 297mm height in microns
@@ -2202,7 +2202,7 @@ ipcMain.handle('print-receipt-silent', async (event, options = {}) => {
 
     const win = BrowserWindow.fromWebContents(event.sender);
     return new Promise((resolve) => {
-        const printOptions = { silent: true, printBackground: true, margins: { marginType: 'none' } };
+        const printOptions = { silent: options.silent !== false, printBackground: true, margins: { marginType: 'none' } };
         if (options.deviceName) printOptions.deviceName = options.deviceName;
         
         win.webContents.print(printOptions, (success, failureReason) => {

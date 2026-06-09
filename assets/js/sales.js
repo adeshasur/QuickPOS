@@ -879,7 +879,11 @@
     try {
       const dbSettings = await window.api.getSettings();
       const printerName = dbSettings.thermalPrinterName || '';
-      const options = printerName ? { deviceName: printerName, html } : { html };
+      if (!printerName) {
+        alert('Receipt Printer is not configured! Please go to Settings > System Details & Printing and select your connected printer.');
+        return;
+      }
+      const options = { deviceName: printerName, html };
       await window.api.printReceiptSilent(options);
     } catch (err) {
       console.error('Print error:', err.message);
@@ -1071,6 +1075,7 @@
       document.getElementById('amtReceived').value = '';
       document.getElementById('changeAmt').textContent = fmt(0);
       openModal('cashModal');
+      setTimeout(() => document.getElementById('amtReceived').focus(), 150);
     });
 
     document.getElementById('cardBtn').addEventListener('click', () => {
@@ -1096,6 +1101,7 @@
       document.getElementById('splitCardRef').value = '';
       updateSplitBalance();
       openModal('splitModal');
+      setTimeout(() => document.getElementById('splitCashAmount').focus(), 150);
     });
 
     document.getElementById('holdSaleBtn').addEventListener('click', holdCurrentBill);
@@ -1110,6 +1116,22 @@
     document.getElementById('amtReceived').addEventListener('input', updateChangeDue);
     document.getElementById('splitCashAmount').addEventListener('input', updateSplitBalance);
     document.getElementById('splitCardAmount').addEventListener('input', updateSplitBalance);
+
+    document.getElementById('amtReceived').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('finalizeCash').click();
+    });
+    document.getElementById('cardRefNo').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('finalizeCard').click();
+    });
+    document.getElementById('splitCashAmount').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('splitCardAmount').focus();
+    });
+    document.getElementById('splitCardAmount').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('splitCardRef').focus();
+    });
+    document.getElementById('splitCardRef').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('finalizeSplit').click();
+    });
 
     document.querySelectorAll('.quick-btn[data-set]').forEach((btn) => {
       btn.addEventListener('click', () => {

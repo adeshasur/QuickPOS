@@ -183,7 +183,7 @@
                     </td>
                     ${showActionColumn ? `<td>
                         ${canEditInventory
-                          ? `<div style="display:flex;gap:6px;align-items:center;">
+                          ? `<div style="display:flex;gap:6px;align-items:center;justify-content:flex-end;">
                                ${canEditProducts ? `<button class="tbl-btn edit" onclick="location.href='products.html'" title="Edit Product">
                                    <i class="fa-solid fa-pen"></i>
                                </button>` : ''}

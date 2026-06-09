@@ -1,4 +1,4 @@
-﻿(function() {
+(function() {
     'use strict';
 
     const formatCurrency = window.fmtLKR;
@@ -245,8 +245,16 @@
                 console.log('[PRINT DEBUG] Available printers:', printers);
                 const defaultPrinter = printers.find(p => p.isDefault);
                 console.log('[PRINT DEBUG] Default printer:', defaultPrinter ? defaultPrinter.name : 'NONE');
+                
+                const dbSettings = await window.api.getSettings();
+                const printerName = dbSettings.thermalPrinterName || '';
+                if (!printerName) {
+                    alert('Receipt Printer is not configured! Please go to Settings > System Details & Printing and select your connected printer.');
+                    return;
+                }
+                const options = { deviceName: printerName };
 
-                const res = await window.api.printReceiptSilent();
+                const res = await window.api.printReceiptSilent(options);
                 console.log('[PRINT DEBUG] Print result in ledger:', res);
 
                 if (res && !res.success) {
