@@ -878,9 +878,24 @@
 
     try {
       const dbSettings = await window.api.getSettings();
-      const printerName = dbSettings.thermalPrinterName || '';
+      let printerName = dbSettings.thermalPrinterName || '';
+
       if (!printerName) {
-        alert('Receipt Printer is not configured! Please go to Settings > System Details & Printing and select your connected printer.');
+        const printers = await window.api.getPrinters();
+        const keywords = ['pos', 'receipt', 'thermal', '80mm', '58mm', 'xp-', 'epson tm', 'xprinter', 'rongta', 'bixolon', 'star '];
+        const virtual = ['microsoft print to pdf', 'fax', 'microsoft xps document writer', 'send to onenote', 'onenote'];
+        
+        let detected = printers.find(p => keywords.some(kw => p.name.toLowerCase().includes(kw)));
+        if (!detected) detected = printers.find(p => p.isDefault && !virtual.some(vp => p.name.toLowerCase().includes(vp)));
+        
+        if (detected) {
+          printerName = detected.name;
+          await window.api.saveSetting('thermalPrinterName', printerName);
+        }
+      }
+
+      if (!printerName) {
+        alert('Receipt Printer could not be detected! Please go to Settings > System Details & Printing and select your connected printer.');
         return;
       }
       const options = { deviceName: printerName, html };
