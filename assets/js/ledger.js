@@ -256,6 +256,7 @@
                     
                     let detected = printers.find(p => keywords.some(kw => p.name.toLowerCase().includes(kw)));
                     if (!detected) detected = printers.find(p => p.isDefault && !virtual.some(vp => p.name.toLowerCase().includes(vp)));
+                    if (!detected) detected = printers.find(p => !virtual.some(vp => p.name.toLowerCase().includes(vp)));
                     
                     if (detected) {
                         printerName = detected.name;
@@ -263,12 +264,7 @@
                     }
                 }
 
-                if (!printerName) {
-                    alert('Receipt Printer could not be detected! Please go to Settings > System Details & Printing and select your connected printer.');
-                    return;
-                }
-                const options = { deviceName: printerName };
-
+                const options = printerName ? { deviceName: printerName } : { silent: false };
                 const res = await window.api.printReceiptSilent(options);
                 console.log('[PRINT DEBUG] Print result in ledger:', res);
 
